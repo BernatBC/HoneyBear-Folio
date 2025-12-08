@@ -23,7 +23,7 @@ Portfolio Tracking: Track investment portfolio holdings and prices using Yahoo F
 
 FIRE Calculator: Include a calculator to estimate Financial Independence / Retire Early metrics (e.g., target number, safe withdrawal rate, time-to-FI) based on savings rate, expected returns, and expenses.
 
-Import & Export: Users can import and export data in common formatslike CSV, JSON, and Excel (XLSX). The scope is transactions, categories, budgets, and portfolio holdings.
+Import & Export: Users can import and export data in common formats like CSV, JSON, and Excel (XLSX). The scope is transactions, categories, budgets, and portfolio holdings.
 
 ## 3. Non-Functional Requirements
 
