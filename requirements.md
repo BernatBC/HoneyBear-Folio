@@ -1,7 +1,7 @@
 # Requirements Document for HoneyBear Folio
 ## 1. Overview
 
-This document outlines the technology stack and dependencies for the Personal Finance Desktop Application being built with Tauri (Rust backend), Vue.js (frontend), and SQLite (local database). The app will provide features such as a dashboard with data visualization, managing transactions, and displaying financial reports.
+This document outlines the technology stack and dependencies for the Personal Finance Desktop Application being built with Tauri (Rust backend), React (frontend), and SQLite (local database). The app will provide features such as a dashboard with data visualization, managing transactions, and displaying financial reports.
 
 ## 2. Functional Requirements
 
@@ -42,13 +42,13 @@ Security: Validate and sanitize imported files; restrict disk access to user-sel
 ## 4. Technology Stack
 ### 4.1 Frontend (User Interface)
 
-#### Vue.js:
+#### React:
 
-A progressive JavaScript framework used for building the user interface of the app.
+A JavaScript library for building user interfaces.
 
-Offers simplicity, flexibility, and excellent state management capabilities (via Pinia or Vuex).
+Offers a component-based architecture and excellent state management capabilities (via Redux Toolkit, Zustand, or Context API).
 
-Vue 3: The latest version of Vue for improved performance and better developer experience with the Composition API.
+React 18+: The latest version of React for improved performance and features like concurrent rendering.
 
 #### Tailwind CSS:
 
@@ -60,7 +60,7 @@ Allows fast and flexible styling, enabling custom UI components without writing 
 
 A lightweight charting library to create visualizations like bar charts, line charts, and pie charts for displaying financial data.
 
-Vue wrapper for Chart.js (vue-chartjs) will be used to integrate charting easily into Vue components.
+React wrapper for Chart.js (react-chartjs-2) will be used to integrate charting easily into React components.
 
 ### 4.2 Backend (Rust + SQLite)
 
@@ -83,17 +83,17 @@ A self-contained, serverless SQL database engine used to store user data locally
 rusqlite will be the Rust crate used to interact with SQLite, enabling efficient storage and querying of financial data like transactions, budgets, and categories.
 
 ## 5. Dependencies
-### 5.1 Frontend (Vue + Tauri)
+### 5.1 Frontend (React + Tauri)
 
-- Vue.js: JavaScript framework for building the user interface.
+- React: JavaScript library for building the user interface.
 
-- Pinia (or Vuex): State management library.
+- Redux Toolkit (or Zustand): State management library.
 
 - Tailwind CSS: For styling the app using utility-first CSS.
 
 - Chart.js: JavaScript library for creating interactive charts and data visualizations.
 
-- vue-chartjs: Vue wrapper for Chart.js, used to integrate charts in Vue components.
+- react-chartjs-2: React wrapper for Chart.js, used to integrate charts in React components.
 
 - @tauri-apps/api: Tauri's API for integrating with the Rust backend.
 
@@ -105,7 +105,7 @@ rusqlite will be the Rust crate used to interact with SQLite, enabling efficient
 
 ### 5.2 Backend (Rust + Tauri)
 
-- Tauri: Framework for bundling and running the Vue frontend as a native desktop app.
+- Tauri: Framework for bundling and running the React frontend as a native desktop app.
 
 - rusqlite: SQLite binding for Rust, to interact with the SQLite database.
 
@@ -164,7 +164,7 @@ The app will work on Windows, macOS, and Linux, ensuring a broad user base.
 
 ### Unit Testing:
 
-Test Vue components using Jest.
+Test React components using Jest and React Testing Library.
 
 Test Rust functions using Rust's built-in test framework.
 
