@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { Line } from 'react-chartjs-2';
-import { Calculator, TrendingUp, DollarSign, Percent, Calendar } from 'lucide-react';
+import { Calculator, TrendingUp, Euro, Percent, Calendar } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -143,7 +143,7 @@ export default function FireCalculator() {
   }, [currentNetWorth, annualExpenses, expectedReturn, withdrawalRate, annualSavings]);
 
   const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
   };
 
   return (
@@ -167,7 +167,7 @@ export default function FireCalculator() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Current Net Worth</label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={currentNetWorth} 
@@ -180,7 +180,7 @@ export default function FireCalculator() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Annual Expenses</label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualExpenses} 
@@ -193,7 +193,7 @@ export default function FireCalculator() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Annual Savings</label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualSavings} 
@@ -277,7 +277,7 @@ export default function FireCalculator() {
                             label += ': ';
                           }
                           if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
+                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(context.parsed.y);
                           }
                           return label;
                         }
@@ -289,7 +289,7 @@ export default function FireCalculator() {
                       beginAtZero: true,
                       ticks: {
                         callback: function(value) {
-                          return '$' + value / 1000 + 'k';
+                          return '€' + value / 1000 + 'k';
                         }
                       }
                     }

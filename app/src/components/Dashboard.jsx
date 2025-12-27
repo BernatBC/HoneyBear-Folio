@@ -156,6 +156,21 @@ export default function Dashboard() {
   const doughnutData = useMemo(() => {
     if (accounts.length === 0) return null;
 
+    const assetTypes = {};
+    accounts.forEach(acc => {
+        let kind = acc.kind || 'cash';
+        kind = kind.toLowerCase();
+        
+        if (kind === 'brokerage') kind = 'Stock';
+        else if (kind === 'cash') kind = 'Cash';
+        else kind = kind.charAt(0).toUpperCase() + kind.slice(1);
+        
+        assetTypes[kind] = (assetTypes[kind] || 0) + acc.balance;
+    });
+
+    const labels = Object.keys(assetTypes);
+    const data = Object.values(assetTypes);
+
     const colors = [
       'rgb(59, 130, 246)', // blue
       'rgb(16, 185, 129)', // green
@@ -168,11 +183,11 @@ export default function Dashboard() {
     ];
 
     return {
-      labels: accounts.map(a => a.name),
+      labels: labels,
       datasets: [
         {
-          data: accounts.map(a => a.balance),
-          backgroundColor: accounts.map((_, i) => colors[i % colors.length]),
+          data: data,
+          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
           borderColor: '#ffffff',
           borderWidth: 2,
         },

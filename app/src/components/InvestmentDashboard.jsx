@@ -1,6 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { RefreshCw } from 'lucide-react';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function InvestmentDashboard() {
   const [holdings, setHoldings] = useState([]);
@@ -93,6 +102,47 @@ export default function InvestmentDashboard() {
 
   const totalValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
 
+  const allocationData = useMemo(() => {
+    if (holdings.length === 0) return null;
+
+    const colors = [
+      'rgb(59, 130, 246)', // blue
+      'rgb(16, 185, 129)', // green
+      'rgb(245, 158, 11)', // amber
+      'rgb(239, 68, 68)',  // red
+      'rgb(139, 92, 246)', // violet
+      'rgb(236, 72, 153)', // pink
+      'rgb(14, 165, 233)', // sky
+      'rgb(249, 115, 22)', // orange
+    ];
+
+    return {
+      labels: holdings.map(h => h.ticker),
+      datasets: [
+        {
+          data: holdings.map(h => h.currentValue),
+          backgroundColor: holdings.map((_, i) => colors[i % colors.length]),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        },
+      ],
+    };
+  }, [holdings]);
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+      },
+      title: {
+        display: true,
+        text: 'Portfolio Allocation',
+      },
+    },
+  };
+
   return (
     <div className="h-full flex flex-col space-y-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
@@ -149,17 +199,29 @@ export default function InvestmentDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Portfolio Allocation */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[400px]">
+                {allocationData ? (
+                    <Doughnut options={chartOptions} data={allocationData} />
+                ) : (
+                    <div className="h-full flex items-center justify-center text-slate-400">
+                        Loading data...
+                    </div>
+                )}
+            </div>
+
             {/* TreeMap */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col min-h-[400px]">
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col h-[400px]">
                <h3 className="text-lg font-semibold text-slate-800 mb-4">Portfolio Heatmap</h3>
                <div className="flex-1 min-h-0 border border-slate-100 rounded-lg overflow-hidden relative">
                  <TreeMap items={holdings} totalValue={totalValue} />
                </div>
             </div>
+          </div>
 
-            {/* Holdings Table */}
-            <div className="bg-white p-0 rounded-xl shadow-sm border border-slate-100 flex flex-col overflow-hidden h-full max-h-[600px]">
+          {/* Holdings Table */}
+          <div className="bg-white p-0 rounded-xl shadow-sm border border-slate-100 flex flex-col overflow-hidden h-full max-h-[600px]">
               <div className="p-6 border-b border-slate-100">
                 <h3 className="text-lg font-semibold text-slate-800">Holdings</h3>
               </div>
@@ -191,7 +253,6 @@ export default function InvestmentDashboard() {
                 </table>
               </div>
             </div>
-          </div>
         </>
       )}
     </div>
