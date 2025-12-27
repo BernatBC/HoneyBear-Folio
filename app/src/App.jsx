@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import AccountDetails from "./components/AccountDetails";
 import Dashboard from "./components/Dashboard";
 import InvestmentDashboard from "./components/InvestmentDashboard";
+import FireCalculator from "./components/FireCalculator";
 import { Wallet } from "lucide-react";
 import "./App.css";
 
@@ -26,6 +27,8 @@ function App() {
           <Dashboard />
         ) : selectedAccount?.id === 'investment-dashboard' ? (
           <InvestmentDashboard />
+        ) : selectedAccount?.id === 'fire-calculator' ? (
+          <FireCalculator />
         ) : selectedAccount ? (
           <AccountDetails 
             key={selectedAccount.id} 

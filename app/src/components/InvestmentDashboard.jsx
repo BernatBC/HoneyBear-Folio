@@ -20,6 +20,9 @@ export default function InvestmentDashboard() {
       // 2. Calculate holdings
       const holdingMap = {};
       
+      // Sort transactions by date to ensure correct order for average cost calculation
+      transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+
       transactions.forEach(tx => {
         if (tx.ticker && tx.shares) {
           if (!holdingMap[tx.ticker]) {
@@ -29,28 +32,22 @@ export default function InvestmentDashboard() {
               costBasis: 0,
             };
           }
-          holdingMap[tx.ticker].shares += tx.shares;
-          // Simplified cost basis: Add amount if it's a buy (positive shares in brokerage logic usually means buy, but let's check logic)
-          // In the rust code: Buy -> brokerage_shares = shares. Sell -> brokerage_shares = -shares.
-          // Amount: Buy -> +Value. Sell -> -Value.
-          // This amount logic in Rust seems to track "Account Balance" not "Cost Basis".
-          // For Cost Basis, we should track the money spent to acquire the CURRENT shares.
-          // This is complex with partial sells.
-          // Let's use a simplified Average Cost approach if possible, or just Total Cost for now.
-          // If we assume FIFO or Average Cost, we need more logic.
-          // For this dashboard, let's just track "Net Invested" (Sum of Buys - Sum of Sells) for simplicity, 
-          // or just focus on Current Value if Cost Basis is too hard.
-          // User asked for "colored with the return on investment". So we need ROI.
-          // ROI = (Current Value - Cost Basis) / Cost Basis.
-          // Let's try to estimate Cost Basis: Sum of (Buy Price * Shares) - Sum of (Sell Price * Shares).
-          // This is "Net Cost". If I sold for profit, my net cost goes down.
           
           if (tx.shares > 0) { // Buy
+             holdingMap[tx.ticker].shares += tx.shares;
              holdingMap[tx.ticker].costBasis += (tx.price_per_share || 0) * tx.shares + (tx.commission || 0);
           } else { // Sell
-             // Reduce cost basis proportionally? Or just subtract proceeds?
-             // Subtracting proceeds is "Net Invested".
-             holdingMap[tx.ticker].costBasis -= (tx.price_per_share || 0) * Math.abs(tx.shares) - (tx.commission || 0);
+             const currentShares = holdingMap[tx.ticker].shares;
+             const currentCost = holdingMap[tx.ticker].costBasis;
+             const avgCost = currentShares > 0 ? currentCost / currentShares : 0;
+             
+             const sharesSold = Math.abs(tx.shares);
+             
+             // Update shares
+             holdingMap[tx.ticker].shares -= sharesSold;
+             
+             // Reduce cost basis by the average cost of sold shares
+             holdingMap[tx.ticker].costBasis -= sharesSold * avgCost;
           }
         }
       });
