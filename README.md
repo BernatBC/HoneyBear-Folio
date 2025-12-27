@@ -1,6 +1,8 @@
 # HoneyBear Folio
 
-![HoneyBear Folio icon](img/icon.png)
+<p align="center">
+  <img src="img/icon.png" alt="HoneyBear Folio icon" width="160" />
+</p>
 
 HoneyBear Folio is a cross-platform personal finance desktop application built with Tauri (Rust backend), React (frontend), and SQLite (local database). It focuses on fast local data management (transactions, categories, budgets), clear dashboards and charts, portfolio tracking via Yahoo Finance market data, and import/export to common formats.
 
