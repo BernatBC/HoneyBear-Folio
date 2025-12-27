@@ -1,11 +1,12 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import AccountDetails from "./components/AccountDetails";
+import Dashboard from "./components/Dashboard";
 import { Wallet } from "lucide-react";
 import "./App.css";
 
 function App() {
-  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState({ id: 'dashboard', name: 'Dashboard' });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleAccountUpdate = () => {
@@ -20,7 +21,9 @@ function App() {
       />
       
       <main className="flex-1 p-8 overflow-y-auto">
-        {selectedAccount ? (
+        {selectedAccount?.id === 'dashboard' ? (
+          <Dashboard />
+        ) : selectedAccount ? (
           <AccountDetails 
             key={selectedAccount.id} 
             account={selectedAccount} 

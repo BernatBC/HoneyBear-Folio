@@ -7,7 +7,8 @@ import {
   TrendingUp, 
   LayoutDashboard,
   X,
-  Check
+  Check,
+  List
 } from 'lucide-react';
 
 export default function Sidebar({ onSelectAccount, refreshTrigger }) {
@@ -16,7 +17,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
   const [newAccountName, setNewAccountName] = useState('');
   const [newAccountBalance, setNewAccountBalance] = useState('');
   const [newAccountType, setNewAccountType] = useState('cash');
-  const [selectedId, setSelectedId] = useState('all');
+  const [selectedId, setSelectedId] = useState('dashboard'); // Default to dashboard
 
   useEffect(() => {
     fetchAccounts();
@@ -85,15 +86,27 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
         <div>
           <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">Overview</h2>
           <button 
-            onClick={() => handleSelect('all', { id: 'all', name: 'All Accounts', balance: totalBalance })}
+            onClick={() => handleSelect('dashboard', { id: 'dashboard', name: 'Dashboard' })}
+            className={`w-full text-left py-2.5 px-3 rounded-lg transition-all duration-200 flex items-center gap-3 group mb-1 ${
+              selectedId === 'dashboard' 
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20' 
+                : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <LayoutDashboard className={`w-5 h-5 ${selectedId === 'dashboard' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+            <span className="font-medium">Dashboard</span>
+          </button>
+
+          <button 
+            onClick={() => handleSelect('all', { id: 'all', name: 'All Transactions', balance: totalBalance })}
             className={`w-full text-left py-2.5 px-3 rounded-lg transition-all duration-200 flex items-center gap-3 group ${
               selectedId === 'all' 
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20' 
                 : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <LayoutDashboard className={`w-5 h-5 ${selectedId === 'all' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
-            <span className="font-medium">Dashboard</span>
+            <List className={`w-5 h-5 ${selectedId === 'all' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+            <span className="font-medium">All Transactions</span>
           </button>
         </div>
 
