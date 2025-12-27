@@ -278,72 +278,92 @@ export default function FireCalculator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Inputs */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6 h-fit">
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-6 h-fit hover:shadow-lg transition-shadow duration-300">
           <h2 className="text-xl font-bold text-slate-900 mb-4">Parameters</h2>
           
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Current Net Worth</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500" />
+                Current Net Worth
+              </label>
               <div className="relative">
-                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={currentNetWorth} 
                   onChange={(e) => setCurrentNetWorth(Number(e.target.value))}
-                  className="w-full pl-4 pr-9 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-medium text-slate-900"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">€</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Annual Expenses</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500" />
+                Annual Expenses
+              </label>
               <div className="relative">
-                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualExpenses} 
                   onChange={(e) => setAnnualExpenses(Number(e.target.value))}
-                  className="w-full pl-4 pr-9 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-medium text-slate-900"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">€</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Annual Savings</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500" />
+                Annual Savings
+              </label>
               <div className="relative">
-                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualSavings} 
                   onChange={(e) => setAnnualSavings(Number(e.target.value))}
-                  className="w-full pl-4 pr-9 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-medium text-slate-900"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">€</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Expected Annual Return (%)</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Percent className="w-4 h-4 text-brand-500" />
+                Expected Annual Return
+              </label>
               <div className="relative">
-                <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={expectedReturn} 
                   onChange={(e) => setExpectedReturn(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-medium text-slate-900"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Safe Withdrawal Rate (%)</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Percent className="w-4 h-4 text-brand-500" />
+                Safe Withdrawal Rate
+              </label>
               <div className="relative">
-                <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={withdrawalRate} 
                   onChange={(e) => setWithdrawalRate(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-medium text-slate-900"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
               </div>
             </div>
           </div>
@@ -353,30 +373,31 @@ export default function FireCalculator() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div className="bg-gradient-to-br from-blue-50 to-brand-50 p-6 rounded-2xl shadow-md border-2 border-blue-200 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-slate-500">FIRE Number</p>
-                <p className="text-2xl font-bold text-slate-800">{formatCurrency(fireNumber)}</p>
+                <p className="text-sm font-bold text-blue-700 uppercase tracking-wider mb-1">FIRE Number</p>
+                <p className="text-3xl font-bold text-blue-900">{formatCurrency(fireNumber)}</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
+              <div className="bg-blue-500 p-4 rounded-2xl shadow-lg">
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-6 rounded-2xl shadow-md border-2 border-emerald-200 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-slate-500">Time to FIRE</p>
-                <p className="text-2xl font-bold text-slate-800">{yearsToFire} Years</p>
+                <p className="text-sm font-bold text-emerald-700 uppercase tracking-wider mb-1">Time to FIRE</p>
+                <p className="text-3xl font-bold text-emerald-900">{yearsToFire} Years</p>
               </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <Calendar className="w-6 h-6 text-green-600" />
+              <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg">
+                <Calendar className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
 
           {/* Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex-1 min-h-[400px]">
-            <h3 className="text-lg font-semibold text-slate-700 mb-4">Projection</h3>
+          <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex-1 min-h-[400px] hover:shadow-lg transition-shadow duration-300">
+            <h3 className="text-lg font-semibold text-slate-700 mb-2">Projection</h3>
+            <p className="text-sm text-slate-500 mb-4">Path to financial independence</p>
             <div className="h-[350px]">
               <Line 
                 data={chartData} 

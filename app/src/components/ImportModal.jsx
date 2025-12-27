@@ -6,7 +6,6 @@ import * as XLSX from 'xlsx';
 
 export default function ImportModal({ onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState([]);
   const [columns, setColumns] = useState([]);
   const [mapping, setMapping] = useState({
     date: '',
@@ -36,14 +35,12 @@ export default function ImportModal({ onClose, onImportComplete }) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
-      let parsedData = [];
       
       if (file.name.endsWith('.csv')) {
         Papa.parse(data, {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
-            setPreview(results.data.slice(0, 5));
             setColumns(results.meta.fields || []);
             autoMapColumns(results.meta.fields || []);
           }
@@ -56,15 +53,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
         
         if (json.length > 0) {
           const headers = json[0];
-          const rows = json.slice(1).map(row => {
-            const obj = {};
-            headers.forEach((header, index) => {
-              obj[header] = row[index];
-            });
-            return obj;
-          });
           
-          setPreview(rows.slice(0, 5));
           setColumns(headers);
           autoMapColumns(headers);
         }
@@ -296,7 +285,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
             disabled={!file || !targetAccountId || importing}
             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {importing ? 'Importing...' : 'Start Import'}
+            <span className="text-white">{importing ? 'Importing...' : 'Start Import'}</span>
           </button>
         </div>
       </div>

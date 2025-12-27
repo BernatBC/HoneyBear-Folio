@@ -297,50 +297,88 @@ export default function AccountDetails({ account, onUpdate }) {
   return (
     <div className="max-w-6xl mx-auto pb-8">
       {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{account.name}</h1>
-          <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-slate-500 font-medium">Balance:</span>
-            <span className={`text-2xl font-bold tracking-tight ${account.balance >= 0 ? 'text-slate-900' : 'text-rose-600'}`}>
-              {account.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Balance:</span>
+            <span className={`text-3xl font-bold tracking-tight ${
+              account.balance >= 0 ? 'text-emerald-600' : 'text-rose-600'
+            }`}>
+              {account.balance >= 0 ? '+' : ''}{account.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
             </span>
           </div>
         </div>
         
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search transactions..." 
-              className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-white border-2 border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm transition-all hover:border-slate-300"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
           {account.id !== 'all' && (
-            <button 
-              onClick={() => setIsAdding(!isAdding)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-sm font-medium text-sm transition-all ${
-                isAdding 
-                  ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200' 
-                  : 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-md shadow-brand-900/20'
-              }`}
-            >
-              {isAdding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-              {isAdding ? 'Cancel' : 'Add Transaction'}
-            </button>
+            !isAdding ? (
+              <button 
+                onClick={() => setIsAdding(true)}
+                style={{ 
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1.25rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: '600',
+                  fontSize: '0.875rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+              >
+                <Plus className="w-5 h-5" style={{ color: '#ffffff' }} />
+                <span style={{ color: '#ffffff' }}>Add Transaction</span>
+              </button>
+            ) : (
+              <button 
+                onClick={() => setIsAdding(false)}
+                style={{ 
+                  backgroundColor: '#f1f5f9',
+                  color: '#334155',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1.25rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: '600',
+                  fontSize: '0.875rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              >
+                <X className="w-5 h-5" style={{ color: '#334155' }} />
+                <span style={{ color: '#334155' }}>Cancel</span>
+              </button>
+            )
           )}
         </div>
       </header>
 
       {/* Add Transaction Form */}
       {isAdding && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-lg mb-8 animate-in slide-in-from-top-4 duration-300">
-          <h3 className="text-lg font-bold mb-6 text-slate-900 flex items-center gap-2">
-            <div className="bg-brand-100 p-2 rounded-lg">
-              <Plus className="w-4 h-4 text-brand-600" />
+        <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in">
+          <h3 className="text-lg font-bold mb-6 text-slate-900 flex items-center gap-3">
+            <div className="bg-brand-100 p-2.5 rounded-xl">
+              <Plus className="w-5 h-5 text-brand-600" />
             </div>
             New Transaction
           </h3>
@@ -507,13 +545,13 @@ export default function AccountDetails({ account, onUpdate }) {
           ) : (
             <form onSubmit={handleAddTransaction} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Date</label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="date" 
                   required
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
                   value={date}
                   onChange={e => setDate(e.target.value)}
                 />
@@ -521,13 +559,13 @@ export default function AccountDetails({ account, onUpdate }) {
             </div>
             
             <div className="md:col-span-3">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Payee</label>
+              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Payee</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
                 <AutocompleteInput 
                   suggestions={payeeSuggestions}
                   placeholder="Who got paid?"
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
                   value={payee}
                   onChange={setPayee}
                 />
@@ -535,14 +573,16 @@ export default function AccountDetails({ account, onUpdate }) {
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Category</label>
+              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Category</label>
               <div className="relative">
                 <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="text" 
                   list="category-suggestions"
                   placeholder="Category"
-                  className={`w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${availableAccounts.includes(payee) ? 'bg-slate-50 text-slate-500' : ''}`}
+                  className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${
+                    availableAccounts.includes(payee) ? 'bg-slate-100 text-slate-500' : ''
+                  }`}
                   value={category}
                   onChange={e => setCategory(e.target.value)}
                   disabled={availableAccounts.includes(payee)}
@@ -551,13 +591,13 @@ export default function AccountDetails({ account, onUpdate }) {
             </div>
             
             <div className="md:col-span-3">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Notes</label>
+              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Notes</label>
               <div className="relative">
                 <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="text" 
                   placeholder="What was this for?"
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                 />
@@ -565,7 +605,7 @@ export default function AccountDetails({ account, onUpdate }) {
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount</label>
+              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Amount</label>
               <div className="relative">
                 <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
@@ -573,7 +613,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   required
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full pl-3 pr-10 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
                 />
@@ -583,10 +623,10 @@ export default function AccountDetails({ account, onUpdate }) {
             <div className="md:col-span-12 flex justify-end mt-2">
               <button 
                 type="submit" 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
               >
                 <Check className="w-4 h-4" />
-                Save Transaction
+                <span className="text-white">Save Transaction</span>
               </button>
             </div>
           </form>
@@ -595,28 +635,27 @@ export default function AccountDetails({ account, onUpdate }) {
       )}
       
       {/* Transactions Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50/50">
+            <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Date</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Payee</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-48">Category</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Notes</th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider w-36">Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">Date</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Payee</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">Category</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Notes</th>
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">Amount</th>
                 <th className="w-16"></th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-slate-100">
-              {filteredTransactions.length === 0 ? (
+            <tbody className="bg-white divide-y divide-slate-100">{filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-16 text-center text-slate-400">
+                  <td colSpan="6" className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 p-4 rounded-full">
                         <Search className="w-8 h-8 text-slate-300" />
                       </div>
-                      <p className="text-lg font-medium text-slate-600">No transactions found</p>
+                      <p className="text-lg font-semibold text-slate-600 mb-1">No transactions found</p>
                       <p className="text-sm text-slate-400">
                         {searchQuery ? 'Try adjusting your search terms.' : 'Add a new transaction to get started.'}
                       </p>
@@ -625,13 +664,13 @@ export default function AccountDetails({ account, onUpdate }) {
                 </tr>
               ) : (
                 filteredTransactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-slate-50 group transition-colors">
+                  <tr key={tx.id} className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-transparent group transition-all duration-200">
                     {editingId === tx.id ? (
                       <>
                         <td className="px-4 py-3">
                           <input 
                             type="date" 
-                            className="w-full p-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                             value={editForm.date}
                             onChange={e => setEditForm({...editForm, date: e.target.value})}
                           />
@@ -639,7 +678,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         <td className="px-4 py-3">
                           <AutocompleteInput 
                             suggestions={payeeSuggestions}
-                            className="w-full p-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                             value={editForm.payee}
                             onChange={val => setEditForm({...editForm, payee: val})}
                           />
@@ -648,7 +687,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           <input 
                             type="text" 
                             list="category-suggestions"
-                            className={`w-full p-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none ${availableAccounts.includes(editForm.payee) ? 'bg-slate-100 text-slate-500' : ''}`}
+                            className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? 'bg-slate-100 text-slate-500' : ''}`}
                             value={editForm.category || ''}
                             onChange={e => setEditForm({...editForm, category: e.target.value})}
                             disabled={availableAccounts.includes(editForm.payee)}
@@ -657,7 +696,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         <td className="px-4 py-3">
                           <input 
                             type="text" 
-                            className="w-full p-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                             value={editForm.notes || ''}
                             onChange={e => setEditForm({...editForm, notes: e.target.value})}
                           />
@@ -666,29 +705,29 @@ export default function AccountDetails({ account, onUpdate }) {
                           <input 
                             type="number" 
                             step="0.01"
-                            className="w-full p-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none text-right"
+                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                             value={editForm.amount}
                             onChange={e => setEditForm({...editForm, amount: e.target.value})}
                           />
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
-                            <button onClick={saveEdit} className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"><Check className="w-4 h-4" /></button>
-                            <button onClick={() => setEditingId(null)} className="p-1 text-rose-600 hover:bg-rose-50 rounded"><X className="w-4 h-4" /></button>
+                            <button onClick={saveEdit} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingId(null)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
                           </div>
                         </td>
                       </>
                     ) : (
                       <>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 cursor-pointer" onClick={() => startEditing(tx)}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium cursor-pointer" onClick={() => startEditing(tx)}>
                           {new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer" onClick={() => startEditing(tx)}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 cursor-pointer" onClick={() => startEditing(tx)}>
                           {tx.payee}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer" onClick={() => startEditing(tx)}>
                           {tx.category ? (
-                            <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-md border ${
+                            <span className={`px-3 py-1.5 inline-flex text-xs font-bold rounded-xl border ${
                               tx.category === 'Transfer' 
                                 ? 'bg-purple-50 text-purple-700 border-purple-200' 
                                 : 'bg-slate-100 text-slate-700 border-slate-200'
@@ -711,23 +750,23 @@ export default function AccountDetails({ account, onUpdate }) {
                               e.stopPropagation();
                               setMenuOpenId(menuOpenId === tx.id ? null : tx.id);
                             }}
-                            className={`p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all ${menuOpenId === tx.id ? 'opacity-100 bg-slate-100' : 'opacity-0 group-hover:opacity-100'}`}
+                            className={`p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200 ${menuOpenId === tx.id ? 'opacity-100 bg-slate-100' : 'opacity-0 group-hover:opacity-100'}`}
                           >
                             <MoreVertical className="w-4 h-4" />
                           </button>
                           
                           {menuOpenId === tx.id && (
-                            <div className="absolute right-8 top-8 w-40 bg-white rounded-lg shadow-xl z-20 border border-slate-100 py-1 animate-in fade-in zoom-in-95 duration-100">
+                            <div className="absolute right-8 top-8 w-44 bg-white rounded-xl shadow-2xl z-20 border-2 border-slate-200 py-1.5 animate-fade-in">
                               <button 
                                 onClick={() => duplicateTransaction(tx)}
-                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 font-medium transition-colors"
                               >
                                 <Copy className="w-4 h-4 text-slate-400" />
                                 Duplicate
                               </button>
                               <button 
                                 onClick={() => deleteTransaction(tx.id)}
-                                className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                                className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-3 font-medium transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                                 Delete

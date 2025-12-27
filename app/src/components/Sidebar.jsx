@@ -14,9 +14,7 @@ import {
   PieChart,
   Calculator,
   Download,
-  Upload,
-  Loader2,
-  AlertCircle
+  Upload
 } from 'lucide-react';
 
 export default function Sidebar({ onSelectAccount, refreshTrigger }) {
@@ -320,7 +318,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
                 className="w-full bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-900/20"
               >
                 <Check className="w-4 h-4" />
-                Create Account
+                <span className="text-white">Create Account</span>
               </button>
             </form>
           </div>

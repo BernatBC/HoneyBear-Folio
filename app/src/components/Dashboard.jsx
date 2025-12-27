@@ -397,32 +397,36 @@ export default function Dashboard() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center transition-all duration-200 hover:shadow-md hover:border-brand-100 group">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 group-hover:text-brand-500 transition-colors">Current Net Worth</h3>
+          <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Current Net Worth</h3>
               <p className="text-3xl font-bold text-slate-900 tracking-tight">
                   {accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
               </p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center transition-all duration-200 hover:shadow-md hover:border-brand-100 group">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 group-hover:text-brand-500 transition-colors">Total Accounts</h3>
+          <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Total Accounts</h3>
               <p className="text-3xl font-bold text-slate-900 tracking-tight">{accounts.length}</p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center transition-all duration-200 hover:shadow-md hover:border-brand-100 group">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 group-hover:text-brand-500 transition-colors">Total Transactions</h3>
+          <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Total Transactions</h3>
               <p className="text-3xl font-bold text-slate-900 tracking-tight">{transactions.length}</p>
           </div>
       </div>
 
-      <div className="flex-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 min-h-[400px]">
+      <div className="flex-1 bg-white p-6 rounded-2xl shadow-md border border-slate-200 min-h-[400px] hover:shadow-lg transition-shadow duration-300">
         <div className="mb-6">
             <h3 className="text-lg font-bold text-slate-900">Net Worth Evolution</h3>
+            <p className="text-sm text-slate-500 mt-1">Track your financial growth over time</p>
         </div>
         <div className="h-[350px]">
             {chartData ? (
                 <Line options={options} data={chartData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400 font-medium">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>
@@ -430,34 +434,43 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expenses */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-[400px] lg:col-span-2">
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] lg:col-span-2 hover:shadow-lg transition-shadow duration-300">
             {incomeVsExpensesData ? (
                 <Bar options={barOptions} data={incomeVsExpensesData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400 font-medium">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>
 
         {/* Asset Allocation */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-[400px]">
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300">
             {doughnutData ? (
                 <Doughnut options={doughnutOptions} data={doughnutData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400 font-medium">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>
 
         {/* Expenses by Category */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-[400px]">
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300">
             {expensesByCategoryData ? (
                 <Doughnut options={expensesOptions} data={expensesByCategoryData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400 font-medium">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>

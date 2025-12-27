@@ -174,7 +174,7 @@ export default function ExportModal({ onClose }) {
             disabled={exporting}
             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {exporting ? 'Exporting...' : 'Select Location & Export'}
+            <span className="text-white">{exporting ? 'Exporting...' : 'Select Location & Export'}</span>
           </button>
         </div>
       </div>
