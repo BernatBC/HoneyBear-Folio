@@ -6,6 +6,8 @@ export default function AccountDetails({ account, onUpdate }) {
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
+  const [categorySuggestions, setCategorySuggestions] = useState([]);
+  const [availableAccounts, setAvailableAccounts] = useState([]);
   
   // Editing state
   const [editingId, setEditingId] = useState(null);
@@ -22,7 +24,7 @@ export default function AccountDetails({ account, onUpdate }) {
   useEffect(() => {
     if (account) {
       fetchTransactions();
-      fetchPayeeSuggestions();
+      fetchSuggestions();
     }
   }, [account]);
 
@@ -37,18 +39,65 @@ export default function AccountDetails({ account, onUpdate }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpenId]);
 
-  async function fetchPayeeSuggestions() {
+  // Auto-set category to Transfer if payee is an account
+  useEffect(() => {
+    if (availableAccounts.includes(payee)) {
+      setCategory('Transfer');
+    }
+  }, [payee, availableAccounts]);
+
+  useEffect(() => {
+    if (editForm.payee && availableAccounts.includes(editForm.payee)) {
+      setEditForm(prev => ({ ...prev, category: 'Transfer' }));
+    }
+  }, [editForm.payee, availableAccounts]);
+
+  async function fetchSuggestions() {
     try {
-      const [payees, accounts] = await Promise.all([
+      const [payees, accounts, categories] = await Promise.all([
         invoke('get_payees'),
-        invoke('get_accounts')
+        invoke('get_accounts'),
+        invoke('get_categories')
       ]);
       
-      const accountNames = accounts.map(a => a.name);
-      const uniqueSuggestions = [...new Set([...accountNames, ...payees])].sort();
-      setPayeeSuggestions(uniqueSuggestions);
+      // Filter out current account from accounts list
+      const otherAccounts = accounts
+        .filter(a => a.id !== account.id)
+        .map(a => a.name);
+      
+      setAvailableAccounts(otherAccounts);
+
+      // Build payee suggestions
+      // We want to show accounts clearly. 
+      // Note: datalist options are simple. We can use 'value' for the actual value and 'label' for display.
+      const accountOptions = otherAccounts.map(name => ({ value: name, label: 'Account', type: 'account' }));
+      const payeeOptions = payees.map(name => ({ value: name, label: 'Payee', type: 'payee' }));
+      
+      // Merge and sort. If a name is both (unlikely but possible), account takes precedence for transfer logic,
+      // but for suggestions we might want to show it's an account.
+      // Actually, if it's in 'payees' it means we used it before.
+      // Let's just combine them.
+      
+      const combined = [...accountOptions, ...payeeOptions].sort((a, b) => a.value.localeCompare(b.value));
+      
+      // Remove duplicates (prefer account if duplicate)
+      const unique = [];
+      const seen = new Set();
+      for (const item of combined) {
+        if (!seen.has(item.value)) {
+          seen.add(item.value);
+          unique.push(item);
+        } else if (item.type === 'account') {
+          // If we saw it as payee but it's also an account, replace it with account to show the label
+          const index = unique.findIndex(u => u.value === item.value);
+          if (index !== -1) unique[index] = item;
+        }
+      }
+      
+      setPayeeSuggestions(unique);
+      setCategorySuggestions(categories);
     } catch (e) {
-      console.error("Failed to fetch payee suggestions:", e);
+      console.error("Failed to fetch suggestions:", e);
     }
   }
 
@@ -87,7 +136,7 @@ export default function AccountDetails({ account, onUpdate }) {
       
       // Refresh data
       fetchTransactions();
-      fetchPayeeSuggestions();
+      fetchSuggestions();
       if (onUpdate) onUpdate(); 
     } catch (e) {
       console.error("Failed to create transaction:", e);
@@ -219,10 +268,12 @@ export default function AccountDetails({ account, onUpdate }) {
               <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
               <input 
                 type="text" 
+                list="category-suggestions"
                 placeholder="Category"
-                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 ${availableAccounts.includes(payee) ? 'bg-gray-100 text-gray-500' : ''}`}
                 value={category}
                 onChange={e => setCategory(e.target.value)}
+                disabled={availableAccounts.includes(payee)}
               />
             </div>
             <div className="flex-1 min-w-[140px]">
@@ -303,9 +354,11 @@ export default function AccountDetails({ account, onUpdate }) {
                       <td className="px-2 py-2">
                         <input 
                           type="text" 
-                          className="w-full p-1 text-sm border rounded"
+                          list="category-suggestions"
+                          className={`w-full p-1 text-sm border rounded ${availableAccounts.includes(editForm.payee) ? 'bg-gray-100 text-gray-500' : ''}`}
                           value={editForm.category || ''}
                           onChange={e => setEditForm({...editForm, category: e.target.value})}
+                          disabled={availableAccounts.includes(editForm.payee)}
                         />
                       </td>
                       <td className="px-2 py-2">
@@ -384,7 +437,17 @@ export default function AccountDetails({ account, onUpdate }) {
 
       <datalist id="payee-suggestions">
         {payeeSuggestions.map((suggestion, index) => (
-          <option key={index} value={suggestion} />
+          <option 
+            key={index} 
+            value={suggestion.value} 
+            label={suggestion.type === 'account' ? 'Account' : undefined} 
+          />
+        ))}
+      </datalist>
+      
+      <datalist id="category-suggestions">
+        {categorySuggestions.map((cat, index) => (
+          <option key={index} value={cat} />
         ))}
       </datalist>
     </div>

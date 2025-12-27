@@ -322,6 +322,22 @@ fn get_payees(app_handle: AppHandle) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+    
+    let mut stmt = conn.prepare("SELECT DISTINCT category FROM transactions WHERE category IS NOT NULL AND category != 'Transfer' ORDER BY category").map_err(|e| e.to_string())?;
+    let cat_iter = stmt.query_map([], |row| row.get(0)).map_err(|e| e.to_string())?;
+    
+    let mut categories = Vec::new();
+    for cat in cat_iter {
+        categories.push(cat.map_err(|e| e.to_string())?);
+    }
+    
+    Ok(categories)
+}
+
+#[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
@@ -343,7 +359,8 @@ pub fn run() {
             get_all_transactions,
             update_transaction,
             delete_transaction,
-            get_payees
+            get_payees,
+            get_categories
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
