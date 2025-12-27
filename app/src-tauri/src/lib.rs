@@ -40,6 +40,21 @@ struct YahooChartResponse {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+struct YahooSearchQuote {
+    symbol: String,
+    shortname: Option<String>,
+    longname: Option<String>,
+    exchange: Option<String>,
+    #[serde(rename = "typeDisp")]
+    type_disp: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct YahooSearchResponse {
+    quotes: Vec<YahooSearchQuote>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 struct Account {
     id: i32,
     name: String,
@@ -528,6 +543,22 @@ fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+async fn search_ticker(query: String) -> Result<Vec<YahooSearchQuote>, String> {
+    let url = format!("https://query1.finance.yahoo.com/v1/finance/search?q={}", query);
+    let client = reqwest::Client::new();
+    let res = client.get(&url)
+        .header("User-Agent", "Mozilla/5.0")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    let text = res.text().await.map_err(|e| e.to_string())?;
+    let response: YahooSearchResponse = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+    
+    Ok(response.quotes)
+}
+
+#[tauri::command]
 async fn get_stock_quotes(app_handle: AppHandle, tickers: Vec<String>) -> Result<Vec<YahooQuote>, String> {
     if tickers.is_empty() {
         return Ok(Vec::new());
@@ -669,7 +700,8 @@ pub fn run() {
             get_payees,
             get_categories,
             create_brokerage_transaction,
-            get_stock_quotes
+            get_stock_quotes,
+            search_ticker
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -331,9 +331,10 @@ export default function Dashboard() {
     plugins: {
       legend: {
         position: 'top',
+        display: false, // Hide default title since we added a custom one
       },
       title: {
-        display: true,
+        display: false, // Hide default title since we added a custom one
         text: 'Net Worth Evolution',
       },
     },
@@ -353,42 +354,66 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
+    <div className="h-full flex flex-col space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
+          <p className="text-slate-500 text-sm">Overview of your financial performance</p>
+        </div>
         
-        <div className="flex space-x-4">
-            <div className="flex bg-slate-100 rounded-md p-1">
-                {['1M', '3M', '6M', '1Y', 'ALL'].map(range => (
-                    <button
-                        key={range}
-                        onClick={() => setTimeRange(range)}
-                        className={`px-3 py-1 text-xs rounded-sm transition-colors ${
-                            timeRange === range 
-                            ? 'bg-white shadow-sm text-blue-600 font-medium' 
-                            : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                    >
-                        {range}
-                    </button>
-                ))}
-            </div>
+        <div className="bg-white p-1 rounded-lg border border-slate-200 shadow-sm flex">
+            {['1M', '3M', '6M', '1Y', 'ALL'].map(range => (
+                <button
+                    key={range}
+                    onClick={() => setTimeRange(range)}
+                    className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
+                        timeRange === range 
+                        ? 'bg-slate-900 text-white shadow-md' 
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                >
+                    {range}
+                </button>
+            ))}
         </div>
       </div>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Current Net Worth</h3>
+              <p className="text-3xl font-bold text-slate-900">
+                  €{accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Accounts</h3>
+              <p className="text-3xl font-bold text-slate-900">{accounts.length}</p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Transactions</h3>
+              <p className="text-3xl font-bold text-slate-900">{transactions.length}</p>
+          </div>
+      </div>
+
       <div className="flex-1 bg-white p-6 rounded-xl shadow-sm border border-slate-100 min-h-[400px]">
-        {chartData ? (
-            <Line options={options} data={chartData} />
-        ) : (
-            <div className="h-full flex items-center justify-center text-slate-400">
-                Loading data...
-            </div>
-        )}
+        <div className="mb-4">
+            <h3 className="text-lg font-semibold text-slate-800">Net Worth Evolution</h3>
+        </div>
+        <div className="h-[350px]">
+            {chartData ? (
+                <Line options={options} data={chartData} />
+            ) : (
+                <div className="h-full flex items-center justify-center text-slate-400">
+                    Loading data...
+                </div>
+            )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expenses */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[300px] lg:col-span-2">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[350px] lg:col-span-2">
             {incomeVsExpensesData ? (
                 <Bar options={barOptions} data={incomeVsExpensesData} />
             ) : (
@@ -399,7 +424,7 @@ export default function Dashboard() {
         </div>
 
         {/* Asset Allocation */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[300px]">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[350px]">
             {doughnutData ? (
                 <Doughnut options={doughnutOptions} data={doughnutData} />
             ) : (
@@ -410,7 +435,7 @@ export default function Dashboard() {
         </div>
 
         {/* Expenses by Category */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[300px]">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[350px]">
             {expensesByCategoryData ? (
                 <Doughnut options={expensesOptions} data={expensesByCategoryData} />
             ) : (
@@ -418,24 +443,6 @@ export default function Dashboard() {
                     Loading data...
                 </div>
             )}
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:col-span-2">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <h3 className="text-sm font-medium text-slate-500 mb-2">Current Net Worth</h3>
-                <p className="text-2xl font-bold text-slate-800">
-                    €{accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <h3 className="text-sm font-medium text-slate-500 mb-2">Total Accounts</h3>
-                <p className="text-2xl font-bold text-slate-800">{accounts.length}</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <h3 className="text-sm font-medium text-slate-500 mb-2">Total Transactions</h3>
-                <p className="text-2xl font-bold text-slate-800">{transactions.length}</p>
-            </div>
         </div>
       </div>
     </div>

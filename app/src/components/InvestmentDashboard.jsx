@@ -97,57 +97,105 @@ export default function InvestmentDashboard() {
   const totalValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
 
   return (
-    <div className="p-6 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Investment Dashboard</h2>
-        <button onClick={fetchData} className="p-2 hover:bg-gray-100 rounded-full">
-          <RefreshCw size={20} />
+    <div className="h-full flex flex-col space-y-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Investment Dashboard</h2>
+          <p className="text-slate-500 text-sm">Track your portfolio performance</p>
+        </div>
+        <button 
+          onClick={fetchData} 
+          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+          title="Refresh Data"
+        >
+          <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
 
       {loading ? (
-        <div className="flex-1 flex items-center justify-center">Loading...</div>
-      ) : error ? (
-        <div className="text-red-500">Error: {error}</div>
-      ) : holdings.length === 0 ? (
-        <div className="text-gray-500">No investments found.</div>
-      ) : (
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="text-xl font-semibold">
-            Total Value: €{totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-          
-          <div className="flex-1 min-h-0 border rounded-lg overflow-hidden relative">
-             <TreeMap items={holdings} totalValue={totalValue} />
-          </div>
-          
-          <div className="overflow-auto max-h-60">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="p-2">Ticker</th>
-                  <th className="p-2">Shares</th>
-                  <th className="p-2">Price</th>
-                  <th className="p-2">Value</th>
-                  <th className="p-2">ROI</th>
-                </tr>
-              </thead>
-              <tbody>
-                {holdings.map(h => (
-                  <tr key={h.ticker} className="border-t">
-                    <td className="p-2 font-medium">{h.ticker}</td>
-                    <td className="p-2">{h.shares.toFixed(4)}</td>
-                    <td className="p-2">€{h.price.toFixed(2)}</td>
-                    <td className="p-2">€{h.currentValue.toLocaleString()}</td>
-                    <td className={`p-2 ${h.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {h.roi.toFixed(2)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="flex-1 flex items-center justify-center text-slate-400">
+          <div className="flex flex-col items-center gap-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+            <span>Loading investment data...</span>
           </div>
         </div>
+      ) : error ? (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-100">
+          Error: {error}
+        </div>
+      ) : holdings.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
+          <p>No investments found.</p>
+        </div>
+      ) : (
+        <>
+          {/* Summary Card */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Portfolio Value</h3>
+                <p className="text-3xl font-bold text-slate-900">
+                    €{totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Top Performer</h3>
+                <p className="text-xl font-bold text-green-600 truncate">
+                    {holdings.reduce((prev, current) => (prev.roi > current.roi) ? prev : current).ticker}
+                    <span className="text-sm font-medium ml-2 text-slate-500">
+                      ({holdings.reduce((prev, current) => (prev.roi > current.roi) ? prev : current).roi.toFixed(2)}%)
+                    </span>
+                </p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Holdings</h3>
+                <p className="text-3xl font-bold text-slate-900">{holdings.length}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+            {/* TreeMap */}
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col min-h-[400px]">
+               <h3 className="text-lg font-semibold text-slate-800 mb-4">Portfolio Heatmap</h3>
+               <div className="flex-1 min-h-0 border border-slate-100 rounded-lg overflow-hidden relative">
+                 <TreeMap items={holdings} totalValue={totalValue} />
+               </div>
+            </div>
+
+            {/* Holdings Table */}
+            <div className="bg-white p-0 rounded-xl shadow-sm border border-slate-100 flex flex-col overflow-hidden h-full max-h-[600px]">
+              <div className="p-6 border-b border-slate-100">
+                <h3 className="text-lg font-semibold text-slate-800">Holdings</h3>
+              </div>
+              <div className="overflow-auto flex-1">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 sticky top-0 z-10">
+                    <tr>
+                      <th className="p-3 font-semibold text-slate-600">Ticker</th>
+                      <th className="p-3 font-semibold text-slate-600 text-right">Value</th>
+                      <th className="p-3 font-semibold text-slate-600 text-right">ROI</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {holdings.map(h => (
+                      <tr key={h.ticker} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-3">
+                          <div className="font-medium text-slate-900">{h.ticker}</div>
+                          <div className="text-xs text-slate-500">{h.shares.toFixed(2)} shares</div>
+                        </td>
+                        <td className="p-3 text-right font-medium text-slate-700">
+                          €{h.currentValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        </td>
+                        <td className={`p-3 text-right font-medium ${h.roi >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {h.roi > 0 ? '+' : ''}{h.roi.toFixed(2)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

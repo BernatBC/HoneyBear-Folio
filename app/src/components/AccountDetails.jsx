@@ -23,6 +23,8 @@ export default function AccountDetails({ account, onUpdate }) {
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
   const [availableAccounts, setAvailableAccounts] = useState([]);
+  const [tickerSuggestions, setTickerSuggestions] = useState([]);
+  const [showTickerSuggestions, setShowTickerSuggestions] = useState(false);
   
   // Editing state
   const [editingId, setEditingId] = useState(null);
@@ -75,6 +77,26 @@ export default function AccountDetails({ account, onUpdate }) {
       setEditForm(prev => ({ ...prev, category: 'Transfer' }));
     }
   }, [editForm.payee, availableAccounts]);
+
+  useEffect(() => {
+    const fetchTickerSuggestions = async () => {
+      if (!ticker || ticker.length < 2) {
+        setTickerSuggestions([]);
+        return;
+      }
+      
+      try {
+        const suggestions = await invoke('search_ticker', { query: ticker });
+        setTickerSuggestions(suggestions);
+        setShowTickerSuggestions(true);
+      } catch (error) {
+        console.error('Error fetching ticker suggestions:', error);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchTickerSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [ticker]);
 
   // Auto-calculate total price or price per share
   const handleSharesChange = (e) => {
@@ -377,7 +399,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </select>
               </div>
 
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 relative">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Ticker</label>
                 <input 
                   type="text" 
@@ -385,8 +407,31 @@ export default function AccountDetails({ account, onUpdate }) {
                   placeholder="AAPL"
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all uppercase"
                   value={ticker}
-                  onChange={e => setTicker(e.target.value.toUpperCase())}
+                  onChange={e => {
+                    setTicker(e.target.value.toUpperCase());
+                    setShowTickerSuggestions(true);
+                  }}
+                  onBlur={() => setTimeout(() => setShowTickerSuggestions(false), 200)}
+                  onFocus={() => ticker.length >= 2 && setShowTickerSuggestions(true)}
                 />
+                {showTickerSuggestions && tickerSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full bg-white rounded-lg shadow-lg border border-slate-200 mt-1 max-h-60 overflow-y-auto">
+                    {tickerSuggestions.map((suggestion, index) => (
+                      <div
+                        key={index}
+                        className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-sm"
+                        onClick={() => {
+                          setTicker(suggestion.symbol);
+                          setShowTickerSuggestions(false);
+                        }}
+                      >
+                        <div className="font-medium text-slate-900">{suggestion.symbol}</div>
+                        <div className="text-xs text-slate-500 truncate">{suggestion.shortname || suggestion.longname}</div>
+                        <div className="text-xs text-slate-400">{suggestion.exchange} - {suggestion.typeDisp}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="md:col-span-2">
