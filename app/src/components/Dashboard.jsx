@@ -400,7 +400,7 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
               <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Current Net Worth</h3>
               <p className="text-3xl font-bold text-slate-900">
-                  €{accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
               </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">

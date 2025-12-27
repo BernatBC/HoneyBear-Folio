@@ -143,7 +143,7 @@ export default function FireCalculator() {
   }, [currentNetWorth, annualExpenses, expectedReturn, withdrawalRate, annualSavings]);
 
   const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(val) + ' €';
   };
 
   return (
@@ -167,12 +167,12 @@ export default function FireCalculator() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Current Net Worth</label>
               <div className="relative">
-                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={currentNetWorth} 
                   onChange={(e) => setCurrentNetWorth(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full pl-4 pr-9 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
             </div>
@@ -180,12 +180,12 @@ export default function FireCalculator() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Annual Expenses</label>
               <div className="relative">
-                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualExpenses} 
                   onChange={(e) => setAnnualExpenses(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full pl-4 pr-9 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
             </div>
@@ -193,12 +193,12 @@ export default function FireCalculator() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Annual Savings</label>
               <div className="relative">
-                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualSavings} 
                   onChange={(e) => setAnnualSavings(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full pl-4 pr-9 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
             </div>
@@ -277,7 +277,7 @@ export default function FireCalculator() {
                             label += ': ';
                           }
                           if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(context.parsed.y);
+                            label += new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(context.parsed.y) + ' €';
                           }
                           return label;
                         }
@@ -289,7 +289,7 @@ export default function FireCalculator() {
                       beginAtZero: true,
                       ticks: {
                         callback: function(value) {
-                          return '€' + value / 1000 + 'k';
+                          return value / 1000 + 'k €';
                         }
                       }
                     }

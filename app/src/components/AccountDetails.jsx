@@ -303,7 +303,7 @@ export default function AccountDetails({ account, onUpdate }) {
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-slate-500 font-medium">Balance:</span>
             <span className={`text-2xl font-bold tracking-tight ${account.balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-              €{account.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {account.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
             </span>
           </div>
         </div>
@@ -450,13 +450,13 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-3">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Price / Share</label>
                 <div className="relative">
-                  <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="number" 
                     required
                     step="any"
                     placeholder="0.00"
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={pricePerShare}
                     onChange={handlePricePerShareChange}
                   />
@@ -466,13 +466,13 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-3">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Total Price</label>
                 <div className="relative">
-                  <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="number" 
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={totalPrice}
                     onChange={handleTotalPriceChange}
                   />
@@ -482,12 +482,12 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-3">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fee</label>
                 <div className="relative">
-                  <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="number" 
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={fee}
                     onChange={e => setFee(e.target.value)}
                   />
@@ -567,13 +567,13 @@ export default function AccountDetails({ account, onUpdate }) {
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount</label>
               <div className="relative">
-                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   required
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
                 />
@@ -703,7 +703,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           {tx.notes || <span className="text-slate-300 italic">No notes</span>}
                         </td>
                         <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? 'text-emerald-600' : 'text-rose-600'}`} onClick={() => startEditing(tx)}>
-                          {tx.amount >= 0 ? '+' : ''}€{Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {tx.amount >= 0 ? '+' : ''}{Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button 

@@ -151,7 +151,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
             Net Worth
           </div>
           <div className="text-2xl font-bold text-white tracking-tight">
-            €{totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
           </div>
         </div>
       </div>
@@ -237,7 +237,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
                   <span className="font-medium truncate max-w-[120px]">{account.name}</span>
                 </div>
                 <span className={`text-sm font-medium ${selectedId === account.id ? 'text-blue-100' : 'text-slate-500 group-hover:text-slate-300'}`}>
-                  €{account.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {account.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                 </span>
               </button>
             ))}
@@ -275,7 +275,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
                   <span className="font-medium truncate max-w-[120px]">{account.name}</span>
                 </div>
                 <span className={`text-sm font-medium ${selectedId === account.id ? 'text-blue-100' : 'text-slate-500 group-hover:text-slate-300'}`}>
-                  €{(marketValues[account.id] !== undefined ? marketValues[account.id] : account.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {(marketValues[account.id] !== undefined ? marketValues[account.id] : account.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                 </span>
               </button>
             ))}

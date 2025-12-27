@@ -181,7 +181,7 @@ export default function InvestmentDashboard() {
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
                 <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Portfolio Value</h3>
                 <p className="text-3xl font-bold text-slate-900">
-                    €{totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                 </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
@@ -242,7 +242,7 @@ export default function InvestmentDashboard() {
                           <div className="text-xs text-slate-500">{h.shares.toFixed(2)} shares</div>
                         </td>
                         <td className="p-3 text-right font-medium text-slate-700">
-                          €{h.currentValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          {h.currentValue.toLocaleString(undefined, { maximumFractionDigits: 0 })} €
                         </td>
                         <td className={`p-3 text-right font-medium ${h.roi >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                           {h.roi > 0 ? '+' : ''}{h.roi.toFixed(2)}%
@@ -311,7 +311,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
           overflow: 'hidden'
         }}
         className="flex flex-col items-center justify-center p-1 text-xs text-center transition-all hover:opacity-90 hover:z-10 hover:scale-[1.02] cursor-pointer"
-        title={`${item.ticker}: €${item.currentValue.toLocaleString()} (${item.roi.toFixed(2)}%)`}
+        title={`${item.ticker}: ${item.currentValue.toLocaleString()} € (${item.roi.toFixed(2)}%)`}
       >
         <span className="font-bold text-gray-800">{item.ticker}</span>
         <span className="text-gray-700 hidden sm:inline">{item.roi.toFixed(1)}%</span>
