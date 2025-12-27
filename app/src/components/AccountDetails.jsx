@@ -76,66 +76,66 @@ export default function AccountDetails({ account, onUpdate }) {
       {isAdding && (
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 shadow-sm">
           <h3 className="text-lg font-semibold mb-4 text-gray-700">New Transaction</h3>
-          <form onSubmit={handleAddTransaction} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+          <form onSubmit={handleAddTransaction} className="flex flex-wrap items-end gap-3">
+            <div className="w-36">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
               <input 
                 type="date" 
                 required
-                className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 value={date}
                 onChange={e => setDate(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Payee</label>
+            <div className="flex-1 min-w-[140px]">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Payee</label>
               <input 
                 type="text" 
                 required
-                placeholder="Store, Person, etc."
-                className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Payee"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 value={payee}
                 onChange={e => setPayee(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <div className="w-40">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
               <input 
                 type="text" 
-                placeholder="Groceries, Rent, etc."
-                className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Category"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 value={category}
                 onChange={e => setCategory(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+            <div className="flex-1 min-w-[140px]">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+              <input 
+                type="text" 
+                placeholder="Notes"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+              />
+            </div>
+            <div className="w-32">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
               <input 
                 type="number" 
                 required
                 step="0.01"
                 placeholder="0.00"
-                className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-              <input 
-                type="text" 
-                placeholder="Optional details"
-                className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-              />
-            </div>
-            <div className="md:col-span-2 flex justify-end">
+            <div>
               <button 
                 type="submit" 
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow transition-colors"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm rounded shadow transition-colors h-[38px]"
               >
-                Save Transaction
+                Save
               </button>
             </div>
           </form>
