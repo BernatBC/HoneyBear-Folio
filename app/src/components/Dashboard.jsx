@@ -9,9 +9,10 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  ArcElement
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line, Doughnut } from 'react-chartjs-2';
 
 ChartJS.register(
   CategoryScale,
@@ -21,7 +22,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  ArcElement
 );
 
 export default function Dashboard() {
@@ -149,6 +151,47 @@ export default function Dashboard() {
     };
   }, [accounts, transactions, timeRange]);
 
+  const doughnutData = useMemo(() => {
+    if (accounts.length === 0) return null;
+
+    const colors = [
+      'rgb(59, 130, 246)', // blue
+      'rgb(16, 185, 129)', // green
+      'rgb(245, 158, 11)', // amber
+      'rgb(239, 68, 68)',  // red
+      'rgb(139, 92, 246)', // violet
+      'rgb(236, 72, 153)', // pink
+      'rgb(14, 165, 233)', // sky
+      'rgb(249, 115, 22)', // orange
+    ];
+
+    return {
+      labels: accounts.map(a => a.name),
+      datasets: [
+        {
+          data: accounts.map(a => a.balance),
+          backgroundColor: accounts.map((_, i) => colors[i % colors.length]),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        },
+      ],
+    };
+  }, [accounts]);
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+      },
+      title: {
+        display: true,
+        text: 'Asset Allocation',
+      },
+    },
+  };
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -210,21 +253,34 @@ export default function Dashboard() {
         )}
       </div>
       
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Current Net Worth</h3>
-            <p className="text-2xl font-bold text-slate-800">
-                ${accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Asset Allocation */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[300px]">
+            {doughnutData ? (
+                <Doughnut options={doughnutOptions} data={doughnutData} />
+            ) : (
+                <div className="h-full flex items-center justify-center text-slate-400">
+                    Loading data...
+                </div>
+            )}
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Total Accounts</h3>
-            <p className="text-2xl font-bold text-slate-800">{accounts.length}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Total Transactions</h3>
-            <p className="text-2xl font-bold text-slate-800">{transactions.length}</p>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                <h3 className="text-sm font-medium text-slate-500 mb-2">Current Net Worth</h3>
+                <p className="text-2xl font-bold text-slate-800">
+                    ${accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                <h3 className="text-sm font-medium text-slate-500 mb-2">Total Accounts</h3>
+                <p className="text-2xl font-bold text-slate-800">{accounts.length}</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center sm:col-span-2">
+                <h3 className="text-sm font-medium text-slate-500 mb-2">Total Transactions</h3>
+                <p className="text-2xl font-bold text-slate-800">{transactions.length}</p>
+            </div>
         </div>
       </div>
     </div>
