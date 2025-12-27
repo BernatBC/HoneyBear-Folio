@@ -11,6 +11,17 @@ struct Account {
     balance: f64,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Transaction {
+    id: i32,
+    account_id: i32,
+    date: String,
+    payee: String,
+    notes: Option<String>,
+    category: Option<String>,
+    amount: f64,
+}
+
 fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     let app_dir = app_handle.path().app_data_dir().map_err(|e| e.to_string())?;
     if !app_dir.exists() {
@@ -28,6 +39,20 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             balance REAL NOT NULL
+        )",
+        [],
+    ).map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY,
+            account_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            payee TEXT NOT NULL,
+            notes TEXT,
+            category TEXT,
+            amount REAL NOT NULL,
+            FOREIGN KEY(account_id) REFERENCES accounts(id)
         )",
         [],
     ).map_err(|e| e.to_string())?;
@@ -77,6 +102,72 @@ fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
 }
 
 #[tauri::command]
+fn create_transaction(
+    app_handle: AppHandle, 
+    account_id: i32, 
+    date: String, 
+    payee: String, 
+    notes: Option<String>, 
+    category: Option<String>, 
+    amount: f64
+) -> Result<Transaction, String> {
+    let db_path = get_db_path(&app_handle)?;
+    let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+    
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    tx.execute(
+        "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        params![account_id, date, payee, notes, category, amount],
+    ).map_err(|e| e.to_string())?;
+    
+    let id = tx.last_insert_rowid() as i32;
+
+    tx.execute(
+        "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+        params![amount, account_id],
+    ).map_err(|e| e.to_string())?;
+
+    tx.commit().map_err(|e| e.to_string())?;
+    
+    Ok(Transaction {
+        id,
+        account_id,
+        date,
+        payee,
+        notes,
+        category,
+        amount,
+    })
+}
+
+#[tauri::command]
+fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transaction>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+    
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let transaction_iter = stmt.query_map(params![account_id], |row| {
+        Ok(Transaction {
+            id: row.get(0)?,
+            account_id: row.get(1)?,
+            date: row.get(2)?,
+            payee: row.get(3)?,
+            notes: row.get(4)?,
+            category: row.get(5)?,
+            amount: row.get(6)?,
+        })
+    }).map_err(|e| e.to_string())?;
+    
+    let mut transactions = Vec::new();
+    for transaction in transaction_iter {
+        transactions.push(transaction.map_err(|e| e.to_string())?);
+    }
+    
+    Ok(transactions)
+}
+
+#[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
@@ -89,7 +180,7 @@ pub fn run() {
             init_db(app.handle())?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet, create_account, get_accounts])
+        .invoke_handler(tauri::generate_handler![greet, create_account, get_accounts, create_transaction, get_transactions])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

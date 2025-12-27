@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
-export default function Sidebar({ onSelectAccount }) {
+export default function Sidebar({ onSelectAccount, refreshTrigger }) {
   const [accounts, setAccounts] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [newAccountName, setNewAccountName] = useState('');
@@ -9,7 +9,7 @@ export default function Sidebar({ onSelectAccount }) {
 
   useEffect(() => {
     fetchAccounts();
-  }, []);
+  }, [refreshTrigger]);
 
   async function fetchAccounts() {
     try {
