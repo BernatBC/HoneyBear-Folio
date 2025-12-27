@@ -48,6 +48,13 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
       </div>
       
       <div className="flex-1 overflow-y-auto">
+        <button 
+          onClick={() => onSelectAccount({ id: 'all', name: 'All Accounts', balance: totalBalance })}
+          className="w-full text-left py-2 px-3 rounded hover:bg-gray-800 transition-colors flex justify-between items-center group mb-4 bg-gray-800/50"
+        >
+          <span className="font-medium">All Accounts</span>
+        </button>
+
         <h2 className="text-gray-400 uppercase text-xs font-semibold mb-2 tracking-wider">Accounts</h2>
         <ul className="space-y-1">
           {accounts.map(account => (

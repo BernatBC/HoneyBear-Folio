@@ -168,6 +168,32 @@ fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transa
 }
 
 #[tauri::command]
+fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+    
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let transaction_iter = stmt.query_map([], |row| {
+        Ok(Transaction {
+            id: row.get(0)?,
+            account_id: row.get(1)?,
+            date: row.get(2)?,
+            payee: row.get(3)?,
+            notes: row.get(4)?,
+            category: row.get(5)?,
+            amount: row.get(6)?,
+        })
+    }).map_err(|e| e.to_string())?;
+    
+    let mut transactions = Vec::new();
+    for transaction in transaction_iter {
+        transactions.push(transaction.map_err(|e| e.to_string())?);
+    }
+    
+    Ok(transactions)
+}
+
+#[tauri::command]
 fn update_transaction(
     app_handle: AppHandle,
     id: i32,
@@ -264,6 +290,7 @@ pub fn run() {
             get_accounts, 
             create_transaction, 
             get_transactions,
+            get_all_transactions,
             update_transaction,
             delete_transaction
         ])

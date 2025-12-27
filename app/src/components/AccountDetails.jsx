@@ -37,7 +37,12 @@ export default function AccountDetails({ account, onUpdate }) {
 
   async function fetchTransactions() {
     try {
-      const txs = await invoke('get_transactions', { accountId: account.id });
+      let txs;
+      if (account.id === 'all') {
+        txs = await invoke('get_all_transactions');
+      } else {
+        txs = await invoke('get_transactions', { accountId: account.id });
+      }
       setTransactions(txs);
     } catch (e) {
       console.error("Failed to fetch transactions:", e);
@@ -81,7 +86,7 @@ export default function AccountDetails({ account, onUpdate }) {
     try {
       await invoke('update_transaction', {
         id: editForm.id,
-        accountId: account.id,
+        accountId: editForm.account_id,
         date: editForm.date,
         payee: editForm.payee,
         category: editForm.category || null,
@@ -111,7 +116,7 @@ export default function AccountDetails({ account, onUpdate }) {
   async function duplicateTransaction(tx) {
     try {
       await invoke('create_transaction', {
-        accountId: account.id,
+        accountId: tx.account_id,
         date: tx.date,
         payee: tx.payee,
         category: tx.category,
@@ -159,7 +164,7 @@ export default function AccountDetails({ account, onUpdate }) {
           />
           <button 
             onClick={() => setIsAdding(!isAdding)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition-colors"
+            className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition-colors ${account.id === 'all' ? 'hidden' : ''}`}
           >
             {isAdding ? 'Cancel' : 'Add Transaction'}
           </button>
