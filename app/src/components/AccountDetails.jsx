@@ -254,14 +254,12 @@ export default function AccountDetails({ account, onUpdate }) {
             </div>
             <div className="flex-1 min-w-[140px]">
               <label className="block text-xs font-medium text-gray-700 mb-1">Payee</label>
-              <input 
-                type="text" 
-                required
-                list="payee-suggestions"
+              <AutocompleteInput 
+                suggestions={payeeSuggestions}
                 placeholder="Payee"
                 className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 value={payee}
-                onChange={e => setPayee(e.target.value)}
+                onChange={setPayee}
               />
             </div>
             <div className="w-40">
@@ -343,12 +341,11 @@ export default function AccountDetails({ account, onUpdate }) {
                         />
                       </td>
                       <td className="px-2 py-2">
-                        <input 
-                          type="text" 
-                          list="payee-suggestions"
+                        <AutocompleteInput 
+                          suggestions={payeeSuggestions}
                           className="w-full p-1 text-sm border rounded"
                           value={editForm.payee}
-                          onChange={e => setEditForm({...editForm, payee: e.target.value})}
+                          onChange={val => setEditForm({...editForm, payee: val})}
                         />
                       </td>
                       <td className="px-2 py-2">
@@ -435,21 +432,56 @@ export default function AccountDetails({ account, onUpdate }) {
         </table>
       </div>
 
-      <datalist id="payee-suggestions">
-        {payeeSuggestions.map((suggestion, index) => (
-          <option 
-            key={index} 
-            value={suggestion.value} 
-            label={suggestion.type === 'account' ? 'Account' : undefined} 
-          />
-        ))}
-      </datalist>
-      
       <datalist id="category-suggestions">
         {categorySuggestions.map((cat, index) => (
           <option key={index} value={cat} />
         ))}
       </datalist>
+    </div>
+  );
+}
+
+function AutocompleteInput({ value, onChange, suggestions, placeholder, className, disabled }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filtered, setFiltered] = useState([]);
+
+  useEffect(() => {
+    if (!value) {
+      setFiltered(suggestions);
+    } else {
+      const query = value.toLowerCase();
+      setFiltered(suggestions.filter(s => s.value.toLowerCase().includes(query)));
+    }
+  }, [value, suggestions]);
+
+  return (
+    <div className="relative w-full">
+      <input 
+        type="text"
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setIsOpen(true); }}
+        onFocus={() => setIsOpen(true)}
+        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+        className={className}
+        placeholder={placeholder}
+        disabled={disabled}
+      />
+      {isOpen && filtered.length > 0 && (
+        <ul className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-auto text-left">
+          {filtered.map((s, i) => (
+            <li 
+              key={i}
+              className="px-3 py-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center text-sm text-gray-700"
+              onMouseDown={(e) => { e.preventDefault(); onChange(s.value); setIsOpen(false); }}
+            >
+              <span>{s.value}</span>
+              {s.type === 'account' && (
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full border border-blue-200">Account</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
