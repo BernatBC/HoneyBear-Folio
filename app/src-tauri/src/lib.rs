@@ -74,7 +74,7 @@ struct Transaction {
     ticker: Option<String>,
     shares: Option<f64>,
     price_per_share: Option<f64>,
-    commission: Option<f64>,
+    fee: Option<f64>,
 }
 
 fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
@@ -83,6 +83,28 @@ fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
         fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
     }
     Ok(app_dir.join("honeybear.db"))
+}
+
+fn rename_column_if_exists(conn: &Connection, table: &str, old_column: &str, new_column: &str) -> Result<(), String> {
+    let count_old: i32 = conn.query_row(
+        &format!("SELECT count(*) FROM pragma_table_info('{}') WHERE name = '{}'", table, old_column),
+        [],
+        |row| row.get(0),
+    ).map_err(|e| e.to_string())?;
+
+    let count_new: i32 = conn.query_row(
+        &format!("SELECT count(*) FROM pragma_table_info('{}') WHERE name = '{}'", table, new_column),
+        [],
+        |row| row.get(0),
+    ).map_err(|e| e.to_string())?;
+
+    if count_old > 0 && count_new == 0 {
+        conn.execute(
+            &format!("ALTER TABLE {} RENAME COLUMN {} TO {}", table, old_column, new_column),
+            [],
+        ).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 fn add_column_if_not_exists(conn: &Connection, table: &str, column: &str, definition: &str) -> Result<(), String> {
@@ -133,7 +155,8 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
     add_column_if_not_exists(&conn, "transactions", "ticker", "TEXT")?;
     add_column_if_not_exists(&conn, "transactions", "shares", "REAL")?;
     add_column_if_not_exists(&conn, "transactions", "price_per_share", "REAL")?;
-    add_column_if_not_exists(&conn, "transactions", "commission", "REAL")?;
+    rename_column_if_exists(&conn, "transactions", "commission", "fee")?;
+    add_column_if_not_exists(&conn, "transactions", "fee", "REAL")?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS stock_prices (
@@ -264,7 +287,7 @@ fn create_transaction(
         ticker: None,
         shares: None,
         price_per_share: None,
-        commission: None,
+        fee: None,
     })
 }
 
@@ -273,7 +296,7 @@ fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transa
     let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
     
-    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, commission FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
     let transaction_iter = stmt.query_map(params![account_id], |row| {
         Ok(Transaction {
             id: row.get(0)?,
@@ -286,7 +309,7 @@ fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transa
             ticker: row.get(7)?,
             shares: row.get(8)?,
             price_per_share: row.get(9)?,
-            commission: row.get(10)?,
+            fee: row.get(10)?,
         })
     }).map_err(|e| e.to_string())?;
     
@@ -303,7 +326,7 @@ fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, Strin
     let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
     
-    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, commission FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
     let transaction_iter = stmt.query_map([], |row| {
         Ok(Transaction {
             id: row.get(0)?,
@@ -316,7 +339,7 @@ fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, Strin
             ticker: row.get(7)?,
             shares: row.get(8)?,
             price_per_share: row.get(9)?,
-            commission: row.get(10)?,
+            fee: row.get(10)?,
         })
     }).map_err(|e| e.to_string())?;
     
@@ -337,7 +360,7 @@ fn create_brokerage_transaction(
     ticker: String,
     shares: f64,
     price_per_share: f64,
-    commission: f64,
+    fee: f64,
     is_buy: bool
 ) -> Result<Transaction, String> {
     let db_path = get_db_path(&app_handle)?;
@@ -356,7 +379,7 @@ fn create_brokerage_transaction(
     let brokerage_shares = if is_buy { shares } else { -shares };
     
     tx.execute(
-        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, commission) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
         params![
             brokerage_account_id, 
             date, 
@@ -367,7 +390,7 @@ fn create_brokerage_transaction(
             ticker,
             brokerage_shares,
             price_per_share,
-            commission
+            fee
         ],
     ).map_err(|e| e.to_string())?;
     
@@ -379,12 +402,12 @@ fn create_brokerage_transaction(
     ).map_err(|e| e.to_string())?;
 
     // Cash Account Transaction
-    // Buy: - (Total + Commission)
-    // Sell: + (Total - Commission)
+    // Buy: - (Total + Fee)
+    // Sell: + (Total - Fee)
     let cash_amount = if is_buy {
-        -(total_price + commission)
+        -(total_price + fee)
     } else {
-        total_price - commission
+        total_price - fee
     };
 
     // Get brokerage account name for payee
@@ -424,7 +447,7 @@ fn create_brokerage_transaction(
         ticker: Some(ticker),
         shares: Some(brokerage_shares),
         price_per_share: Some(price_per_share),
-        commission: Some(commission),
+        fee: Some(fee),
     })
 }
 
@@ -477,7 +500,7 @@ fn update_transaction(
         ticker: None,
         shares: None,
         price_per_share: None,
-        commission: None,
+        fee: None,
     })
 }
 
@@ -684,6 +707,8 @@ fn greet(name: &str) -> String {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             init_db(app.handle())?;
             Ok(())

@@ -43,7 +43,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const [shares, setShares] = useState('');
   const [pricePerShare, setPricePerShare] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
-  const [commission, setCommission] = useState('');
+  const [fee, setFee] = useState('');
   const [cashAccountId, setCashAccountId] = useState('');
   const [isBuy, setIsBuy] = useState(true);
 
@@ -192,7 +192,7 @@ export default function AccountDetails({ account, onUpdate }) {
           ticker,
           shares: parseFloat(shares),
           pricePerShare: parseFloat(pricePerShare),
-          commission: parseFloat(commission) || 0.0,
+          fee: parseFloat(fee) || 0.0,
           isBuy
         });
         
@@ -200,7 +200,7 @@ export default function AccountDetails({ account, onUpdate }) {
         setShares('');
         setPricePerShare('');
         setTotalPrice('');
-        setCommission('');
+        setFee('');
       } else {
         await invoke('create_transaction', {
           accountId: account.id,
@@ -480,7 +480,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Commission</label>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fee</label>
                 <div className="relative">
                   <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
@@ -488,8 +488,8 @@ export default function AccountDetails({ account, onUpdate }) {
                     step="0.01"
                     placeholder="0.00"
                     className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    value={commission}
-                    onChange={e => setCommission(e.target.value)}
+                    value={fee}
+                    onChange={e => setFee(e.target.value)}
                   />
                 </div>
               </div>

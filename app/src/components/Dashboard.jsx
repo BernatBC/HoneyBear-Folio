@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Download } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -354,51 +353,6 @@ export default function Dashboard() {
     },
   };
 
-  const exportToCsv = () => {
-    if (transactions.length === 0) return;
-
-    const headers = [
-      'ID', 'Account ID', 'Date', 'Payee', 'Notes', 'Category', 
-      'Amount', 'Ticker', 'Shares', 'Price Per Share', 'Commission'
-    ];
-
-    const escapeCsv = (str) => {
-      if (str === null || str === undefined) return '';
-      const stringValue = String(str);
-      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      }
-      return stringValue;
-    };
-
-    const csvContent = [
-      headers.join(','),
-      ...transactions.map(t => [
-        t.id,
-        t.account_id,
-        t.date,
-        escapeCsv(t.payee),
-        escapeCsv(t.notes),
-        escapeCsv(t.category),
-        t.amount,
-        t.ticker || '',
-        t.shares || '',
-        t.price_per_share || '',
-        t.commission || ''
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `transactions_export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="h-full flex flex-col space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -408,15 +362,6 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-3">
-          <button
-            onClick={exportToCsv}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
-            title="Export transactions to CSV"
-          >
-            <Download size={14} />
-            <span className="hidden sm:inline">Export CSV</span>
-          </button>
-
           <div className="bg-white p-1 rounded-lg border border-slate-200 shadow-sm flex">
               {['1M', '3M', '6M', '1Y', 'ALL'].map(range => (
                   <button

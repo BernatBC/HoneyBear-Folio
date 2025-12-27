@@ -11,12 +11,16 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.4.2",
+    "@tauri-apps/plugin-fs": "^2.4.4",
     "@tauri-apps/plugin-opener": "^2",
     "chart.js": "^4.5.1",
     "lucide-react": "^0.562.0",
+    "papaparse": "^5.5.3",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
