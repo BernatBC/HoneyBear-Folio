@@ -16,6 +16,7 @@ import {
   Download,
   Upload
 } from 'lucide-react';
+import packageJson from '../../package.json';
 
 export default function Sidebar({ onSelectAccount, refreshTrigger }) {
   const [accounts, setAccounts] = useState([]);
@@ -345,7 +346,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
           </button>
         </div>
         <div className="text-[10px] text-slate-600 text-center font-medium tracking-wide uppercase">
-          v0.1.0 • HoneyBear
+          v{packageJson.version} • HoneyBear
         </div>
       </div>
       

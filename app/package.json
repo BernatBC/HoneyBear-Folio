@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "version:sync": "node -e \"const fs=require('fs');const pkg=require('./package.json');const tauri=JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json','utf8'));tauri.version=pkg.version;fs.writeFileSync('src-tauri/tauri.conf.json',JSON.stringify(tauri,null,2));const cargo=fs.readFileSync('src-tauri/Cargo.toml','utf8');fs.writeFileSync('src-tauri/Cargo.toml',cargo.replace(/^version\\s*=\\s*\\\"[^\\\"]+\\\"/m,'version = \\\"'+pkg.version+'\\\"'));console.log('Version synced to',pkg.version)\"",
+    "version": "npm version"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
