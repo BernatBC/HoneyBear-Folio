@@ -1,6 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { RefreshCw } from 'lucide-react';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function InvestmentDashboard() {
   const [holdings, setHoldings] = useState([]);
@@ -93,16 +102,57 @@ export default function InvestmentDashboard() {
 
   const totalValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
 
+  const allocationData = useMemo(() => {
+    if (holdings.length === 0) return null;
+
+    const colors = [
+      'rgb(59, 130, 246)', // blue
+      'rgb(16, 185, 129)', // green
+      'rgb(245, 158, 11)', // amber
+      'rgb(239, 68, 68)',  // red
+      'rgb(139, 92, 246)', // violet
+      'rgb(236, 72, 153)', // pink
+      'rgb(14, 165, 233)', // sky
+      'rgb(249, 115, 22)', // orange
+    ];
+
+    return {
+      labels: holdings.map(h => h.ticker),
+      datasets: [
+        {
+          data: holdings.map(h => h.currentValue),
+          backgroundColor: holdings.map((_, i) => colors[i % colors.length]),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        },
+      ],
+    };
+  }, [holdings]);
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+      },
+      title: {
+        display: true,
+        text: 'Portfolio Allocation',
+      },
+    },
+  };
+
   return (
-    <div className="h-full flex flex-col space-y-6 max-w-7xl mx-auto">
+    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Investment Dashboard</h2>
-          <p className="text-slate-500 text-sm">Track your portfolio performance</p>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Investment Dashboard</h2>
+          <p className="text-slate-500 font-medium mt-1">Track your portfolio performance</p>
         </div>
         <button 
           onClick={fetchData} 
-          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+          className="p-2.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200 shadow-sm border border-transparent hover:border-brand-100"
           title="Refresh Data"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
@@ -110,80 +160,121 @@ export default function InvestmentDashboard() {
       </div>
 
       {loading ? (
-        <div className="flex-1 flex items-center justify-center text-slate-400">
-          <div className="flex flex-col items-center gap-3">
-            <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
-            <span>Loading investment data...</span>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+            <span className="text-slate-600 font-medium text-lg">Loading investment data...</span>
+            <span className="text-slate-400 text-sm">Fetching latest market prices</span>
           </div>
         </div>
       ) : error ? (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-100">
-          Error: {error}
+        <div className="bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 p-6 rounded-2xl border-2 border-rose-200 font-medium shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="bg-rose-200 p-2 rounded-full">
+              <svg className="w-6 h-6 text-rose-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <div className="font-bold">Error loading data</div>
+              <div className="text-sm text-rose-600">{error}</div>
+            </div>
+          </div>
         </div>
       ) : holdings.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-          <p>No investments found.</p>
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-16">
+          <div className="bg-slate-100 p-6 rounded-2xl mb-4">
+            <svg className="w-16 h-16 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <p className="text-lg font-semibold text-slate-600 mb-2">No investments found</p>
+          <p className="text-sm text-slate-400">Start adding stock transactions to track your portfolio</p>
         </div>
       ) : (
         <>
           {/* Summary Card */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
-                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Portfolio Value</h3>
-                <p className="text-3xl font-bold text-slate-900">
-                    €{totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Total Portfolio Value</h3>
+                <p className="text-3xl font-bold text-slate-900 tracking-tight">
+                    {totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                 </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
-                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Top Performer</h3>
-                <p className="text-xl font-bold text-green-600 truncate">
+            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1 group cursor-pointer">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-emerald-600 transition-colors">Top Performer</h3>
+                <p className="text-xl font-bold text-emerald-600 truncate tracking-tight">
                     {holdings.reduce((prev, current) => (prev.roi > current.roi) ? prev : current).ticker}
                     <span className="text-sm font-medium ml-2 text-slate-500">
                       ({holdings.reduce((prev, current) => (prev.roi > current.roi) ? prev : current).roi.toFixed(2)}%)
                     </span>
                 </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
-                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Holdings</h3>
-                <p className="text-3xl font-bold text-slate-900">{holdings.length}</p>
+            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Total Holdings</h3>
+                <p className="text-3xl font-bold text-slate-900 tracking-tight">{holdings.length}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Portfolio Allocation */}
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300">
+                {allocationData ? (
+                    <Doughnut options={chartOptions} data={allocationData} />
+                ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                        <span className="text-slate-400 font-medium">Loading data...</span>
+                      </div>
+                    </div>
+                )}
+            </div>
+
             {/* TreeMap */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col min-h-[400px]">
-               <h3 className="text-lg font-semibold text-slate-800 mb-4">Portfolio Heatmap</h3>
-               <div className="flex-1 min-h-0 border border-slate-100 rounded-lg overflow-hidden relative">
+            <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col h-[400px] hover:shadow-lg transition-shadow duration-300">
+               <h3 className="text-lg font-semibold text-slate-800 mb-2">Portfolio Heatmap</h3>
+               <p className="text-sm text-slate-500 mb-4">Visual representation of holdings by size and performance</p>
+               <div className="flex-1 min-h-0 border-2 border-slate-200 rounded-xl overflow-hidden relative shadow-inner">
                  <TreeMap items={holdings} totalValue={totalValue} />
                </div>
             </div>
+          </div>
 
-            {/* Holdings Table */}
-            <div className="bg-white p-0 rounded-xl shadow-sm border border-slate-100 flex flex-col overflow-hidden h-full max-h-[600px]">
-              <div className="p-6 border-b border-slate-100">
+          {/* Holdings Table */}
+          <div className="bg-white p-0 rounded-2xl shadow-md border border-slate-200 flex flex-col overflow-hidden h-full max-h-[600px] hover:shadow-lg transition-shadow duration-300">
+              <div className="p-6 border-b border-slate-200 bg-slate-50/50">
                 <h3 className="text-lg font-semibold text-slate-800">Holdings</h3>
+                <p className="text-sm text-slate-500 mt-1">Detailed breakdown of your positions</p>
               </div>
               <div className="overflow-auto flex-1">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 sticky top-0 z-10">
+                  <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                     <tr>
-                      <th className="p-3 font-semibold text-slate-600">Ticker</th>
-                      <th className="p-3 font-semibold text-slate-600 text-right">Value</th>
-                      <th className="p-3 font-semibold text-slate-600 text-right">ROI</th>
+                      <th className="p-4 font-bold text-slate-600 text-xs uppercase tracking-wider">Ticker</th>
+                      <th className="p-4 font-bold text-slate-600 text-right text-xs uppercase tracking-wider">Value</th>
+                      <th className="p-4 font-bold text-slate-600 text-right text-xs uppercase tracking-wider">ROI</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {holdings.map(h => (
-                      <tr key={h.ticker} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-3">
-                          <div className="font-medium text-slate-900">{h.ticker}</div>
-                          <div className="text-xs text-slate-500">{h.shares.toFixed(2)} shares</div>
+                      <tr key={h.ticker} className="hover:bg-slate-50 transition-colors duration-150">
+                        <td className="p-4">
+                          <div className="font-semibold text-slate-900">{h.ticker}</div>
+                          <div className="text-xs text-slate-500">{h.shares.toFixed(2)} shares @ {h.price.toFixed(2)} €</div>
                         </td>
-                        <td className="p-3 text-right font-medium text-slate-700">
-                          €{h.currentValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        <td className="p-4 text-right">
+                          <div className="font-semibold text-slate-700">{h.currentValue.toLocaleString(undefined, { maximumFractionDigits: 0 })} €</div>
+                          <div className="text-xs text-slate-500">Cost: {h.costBasis.toFixed(0)} €</div>
                         </td>
-                        <td className={`p-3 text-right font-medium ${h.roi >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          {h.roi > 0 ? '+' : ''}{h.roi.toFixed(2)}%
+                        <td className="p-4 text-right">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg font-semibold text-sm ${
+                            h.roi >= 0 
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                              : 'bg-rose-50 text-rose-700 border border-rose-200'
+                          }`}>
+                            {h.roi > 0 ? '+' : ''}{h.roi.toFixed(2)}%
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -191,7 +282,6 @@ export default function InvestmentDashboard() {
                 </table>
               </div>
             </div>
-          </div>
         </>
       )}
     </div>
@@ -250,7 +340,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
           overflow: 'hidden'
         }}
         className="flex flex-col items-center justify-center p-1 text-xs text-center transition-all hover:opacity-90 hover:z-10 hover:scale-[1.02] cursor-pointer"
-        title={`${item.ticker}: €${item.currentValue.toLocaleString()} (${item.roi.toFixed(2)}%)`}
+        title={`${item.ticker}: ${item.currentValue.toLocaleString()} € (${item.roi.toFixed(2)}%)`}
       >
         <span className="font-bold text-gray-800">{item.ticker}</span>
         <span className="text-gray-700 hidden sm:inline">{item.roi.toFixed(1)}%</span>

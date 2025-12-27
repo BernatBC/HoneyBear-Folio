@@ -156,6 +156,21 @@ export default function Dashboard() {
   const doughnutData = useMemo(() => {
     if (accounts.length === 0) return null;
 
+    const assetTypes = {};
+    accounts.forEach(acc => {
+        let kind = acc.kind || 'cash';
+        kind = kind.toLowerCase();
+        
+        if (kind === 'brokerage') kind = 'Stock';
+        else if (kind === 'cash') kind = 'Cash';
+        else kind = kind.charAt(0).toUpperCase() + kind.slice(1);
+        
+        assetTypes[kind] = (assetTypes[kind] || 0) + acc.balance;
+    });
+
+    const labels = Object.keys(assetTypes);
+    const data = Object.values(assetTypes);
+
     const colors = [
       'rgb(59, 130, 246)', // blue
       'rgb(16, 185, 129)', // green
@@ -168,11 +183,11 @@ export default function Dashboard() {
     ];
 
     return {
-      labels: accounts.map(a => a.name),
+      labels: labels,
       datasets: [
         {
-          data: accounts.map(a => a.balance),
-          backgroundColor: accounts.map((_, i) => colors[i % colors.length]),
+          data: data,
+          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
           borderColor: '#ffffff',
           borderWidth: 2,
         },
@@ -354,20 +369,20 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6 max-w-7xl mx-auto">
+    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 text-sm">Overview of your financial performance</p>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h2>
+          <p className="text-slate-500 font-medium mt-1">Overview of your financial performance</p>
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="bg-white p-1 rounded-lg border border-slate-200 shadow-sm flex">
+          <div className="bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm flex">
               {['1M', '3M', '6M', '1Y', 'ALL'].map(range => (
                   <button
                       key={range}
                       onClick={() => setTimeRange(range)}
-                      className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
+                      className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 ${
                           timeRange === range 
                           ? 'bg-slate-900 text-white shadow-md' 
                           : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -382,32 +397,36 @@ export default function Dashboard() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Current Net Worth</h3>
-              <p className="text-3xl font-bold text-slate-900">
-                  €{accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Current Net Worth</h3>
+              <p className="text-3xl font-bold text-slate-900 tracking-tight">
+                  {accounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
               </p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Accounts</h3>
-              <p className="text-3xl font-bold text-slate-900">{accounts.length}</p>
+          <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Total Accounts</h3>
+              <p className="text-3xl font-bold text-slate-900 tracking-tight">{accounts.length}</p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-center transition-transform hover:scale-[1.02] duration-200">
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Transactions</h3>
-              <p className="text-3xl font-bold text-slate-900">{transactions.length}</p>
+          <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">Total Transactions</h3>
+              <p className="text-3xl font-bold text-slate-900 tracking-tight">{transactions.length}</p>
           </div>
       </div>
 
-      <div className="flex-1 bg-white p-6 rounded-xl shadow-sm border border-slate-100 min-h-[400px]">
-        <div className="mb-4">
-            <h3 className="text-lg font-semibold text-slate-800">Net Worth Evolution</h3>
+      <div className="flex-1 bg-white p-6 rounded-2xl shadow-md border border-slate-200 min-h-[400px] hover:shadow-lg transition-shadow duration-300">
+        <div className="mb-6">
+            <h3 className="text-lg font-bold text-slate-900">Net Worth Evolution</h3>
+            <p className="text-sm text-slate-500 mt-1">Track your financial growth over time</p>
         </div>
         <div className="h-[350px]">
             {chartData ? (
                 <Line options={options} data={chartData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>
@@ -415,34 +434,43 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expenses */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[350px] lg:col-span-2">
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] lg:col-span-2 hover:shadow-lg transition-shadow duration-300">
             {incomeVsExpensesData ? (
                 <Bar options={barOptions} data={incomeVsExpensesData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>
 
         {/* Asset Allocation */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[350px]">
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300">
             {doughnutData ? (
                 <Doughnut options={doughnutOptions} data={doughnutData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>
 
         {/* Expenses by Category */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[350px]">
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300">
             {expensesByCategoryData ? (
                 <Doughnut options={expensesOptions} data={expensesByCategoryData} />
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-400">
-                    Loading data...
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-medium">Loading data...</span>
+                  </div>
                 </div>
             )}
         </div>

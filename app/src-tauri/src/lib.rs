@@ -85,44 +85,6 @@ fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     Ok(app_dir.join("honeybear.db"))
 }
 
-fn rename_column_if_exists(conn: &Connection, table: &str, old_column: &str, new_column: &str) -> Result<(), String> {
-    let count_old: i32 = conn.query_row(
-        &format!("SELECT count(*) FROM pragma_table_info('{}') WHERE name = '{}'", table, old_column),
-        [],
-        |row| row.get(0),
-    ).map_err(|e| e.to_string())?;
-
-    let count_new: i32 = conn.query_row(
-        &format!("SELECT count(*) FROM pragma_table_info('{}') WHERE name = '{}'", table, new_column),
-        [],
-        |row| row.get(0),
-    ).map_err(|e| e.to_string())?;
-
-    if count_old > 0 && count_new == 0 {
-        conn.execute(
-            &format!("ALTER TABLE {} RENAME COLUMN {} TO {}", table, old_column, new_column),
-            [],
-        ).map_err(|e| e.to_string())?;
-    }
-    Ok(())
-}
-
-fn add_column_if_not_exists(conn: &Connection, table: &str, column: &str, definition: &str) -> Result<(), String> {
-    let count: i32 = conn.query_row(
-        &format!("SELECT count(*) FROM pragma_table_info('{}') WHERE name = '{}'", table, column),
-        [],
-        |row| row.get(0),
-    ).map_err(|e| e.to_string())?;
-
-    if count == 0 {
-        conn.execute(
-            &format!("ALTER TABLE {} ADD COLUMN {} {}", table, column, definition),
-            [],
-        ).map_err(|e| e.to_string())?;
-    }
-    Ok(())
-}
-
 fn init_db(app_handle: &AppHandle) -> Result<(), String> {
     let db_path = get_db_path(app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -131,12 +93,11 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
         "CREATE TABLE IF NOT EXISTS accounts (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
-            balance REAL NOT NULL
+            balance REAL NOT NULL,
+            kind TEXT DEFAULT 'cash'
         )",
         [],
     ).map_err(|e| e.to_string())?;
-
-    add_column_if_not_exists(&conn, "accounts", "kind", "TEXT DEFAULT 'cash'")?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS transactions (
@@ -147,16 +108,14 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             notes TEXT,
             category TEXT,
             amount REAL NOT NULL,
+            ticker TEXT,
+            shares REAL,
+            price_per_share REAL,
+            fee REAL,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
         )",
         [],
     ).map_err(|e| e.to_string())?;
-
-    add_column_if_not_exists(&conn, "transactions", "ticker", "TEXT")?;
-    add_column_if_not_exists(&conn, "transactions", "shares", "REAL")?;
-    add_column_if_not_exists(&conn, "transactions", "price_per_share", "REAL")?;
-    rename_column_if_exists(&conn, "transactions", "commission", "fee")?;
-    add_column_if_not_exists(&conn, "transactions", "fee", "REAL")?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS stock_prices (
@@ -698,15 +657,9 @@ async fn get_stock_quotes(app_handle: AppHandle, tickers: Vec<String>) -> Result
     Ok(quotes)
 }
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
@@ -714,7 +667,6 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            greet, 
             create_account, 
             get_accounts, 
             create_transaction, 

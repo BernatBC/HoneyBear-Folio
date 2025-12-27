@@ -28,4 +28,22 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split React into its own chunk
+          'react-vendor': ['react', 'react-dom'],
+          // Split Chart.js into its own chunk
+          'chart-vendor': ['chart.js', 'react-chartjs-2'],
+          // Split file handling libraries into their own chunk
+          'file-vendor': ['xlsx', 'papaparse'],
+          // Split Tauri APIs into their own chunk
+          'tauri-vendor': ['@tauri-apps/api', '@tauri-apps/plugin-dialog', '@tauri-apps/plugin-fs'],
+          // Split UI icons into their own chunk
+          'ui-vendor': ['lucide-react'],
+        },
+      },
+    },
+  },
 }));

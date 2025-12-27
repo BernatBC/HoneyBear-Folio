@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { Line } from 'react-chartjs-2';
-import { Calculator, TrendingUp, DollarSign, Percent, Calendar } from 'lucide-react';
+import { Calculator, TrendingUp, Euro, Percent, Calendar } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -34,63 +34,179 @@ export default function FireCalculator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCurrentNetWorth();
+    fetchData();
   }, []);
 
-  async function fetchCurrentNetWorth() {
+  async function fetchData() {
     try {
       const accounts = await invoke('get_accounts');
       const transactions = await invoke('get_all_transactions');
       
-      // Calculate market values for brokerage accounts
-      const accountHoldings = {};
-      const allTickers = new Set();
+      // --- 1. Calculate Net Worth & Expected Return ---
+      
+      // Group holdings and calculate cost basis
+      const holdingMap = {};
+      let firstTradeDate = null;
+
+      // Sort transactions by date
+      transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
 
       transactions.forEach(tx => {
         if (tx.ticker && tx.shares) {
-          if (!accountHoldings[tx.account_id]) {
-            accountHoldings[tx.account_id] = {};
+          if (!firstTradeDate) firstTradeDate = new Date(tx.date);
+          
+          if (!holdingMap[tx.ticker]) {
+            holdingMap[tx.ticker] = {
+              shares: 0,
+              costBasis: 0,
+            };
           }
-          if (!accountHoldings[tx.account_id][tx.ticker]) {
-            accountHoldings[tx.account_id][tx.ticker] = 0;
+          
+          if (tx.shares > 0) { // Buy
+             holdingMap[tx.ticker].shares += tx.shares;
+             // Use total amount for cost basis (price * shares + fee)
+             // Note: tx.amount is negative for buys, so we take abs(amount) or calculate from price/fee
+             // In InvestmentDashboard it uses price_per_share * shares + fee. 
+             // Let's try to use tx.amount if available and negative, otherwise reconstruct.
+             // Actually InvestmentDashboard logic:
+             // holdingMap[tx.ticker].costBasis += (tx.price_per_share || 0) * tx.shares + (tx.fee || 0);
+             // Let's stick to that for consistency.
+             const cost = (tx.price_per_share || 0) * tx.shares + (tx.fee || 0);
+             holdingMap[tx.ticker].costBasis += cost;
+          } else { // Sell
+             const currentShares = holdingMap[tx.ticker].shares;
+             const currentCost = holdingMap[tx.ticker].costBasis;
+             const avgCost = currentShares > 0 ? currentCost / currentShares : 0;
+             const sharesSold = Math.abs(tx.shares);
+             
+             holdingMap[tx.ticker].shares -= sharesSold;
+             holdingMap[tx.ticker].costBasis -= sharesSold * avgCost;
           }
-          accountHoldings[tx.account_id][tx.ticker] += tx.shares;
-          allTickers.add(tx.ticker);
         }
       });
 
+      const allTickers = Object.keys(holdingMap).filter(t => holdingMap[t].shares > 0.0001);
       let marketValues = {};
-      if (allTickers.size > 0) {
-        const quotes = await invoke('get_stock_quotes', { tickers: Array.from(allTickers) });
+      let totalPortfolioValue = 0;
+      let totalPortfolioCostBasis = 0;
+
+      if (allTickers.length > 0) {
+        const quotes = await invoke('get_stock_quotes', { tickers: allTickers });
         const quoteMap = {};
         quotes.forEach(q => {
           quoteMap[q.symbol] = q.regularMarketPrice;
         });
 
+        allTickers.forEach(ticker => {
+          const h = holdingMap[ticker];
+          const price = quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
+          const value = h.shares * price;
+          
+          totalPortfolioValue += value;
+          totalPortfolioCostBasis += h.costBasis;
+          
+          // For net worth calculation (per account)
+          // We need to map this back to accounts, but we already have totalPortfolioValue.
+          // The previous net worth logic summed up account balances + market values.
+          // Let's keep the previous logic for Net Worth to be safe about account mapping.
+        });
+      }
+
+      // Re-calculate Net Worth using the previous logic for account mapping
+      // (Or just use totalPortfolioValue + cash balances)
+      // Let's stick to the previous logic for Net Worth to ensure we handle multiple accounts correctly
+      const accountHoldings = {};
+      const tickersForNetWorth = new Set();
+      transactions.forEach(tx => {
+        if (tx.ticker && tx.shares) {
+          if (!accountHoldings[tx.account_id]) accountHoldings[tx.account_id] = {};
+          if (!accountHoldings[tx.account_id][tx.ticker]) accountHoldings[tx.account_id][tx.ticker] = 0;
+          accountHoldings[tx.account_id][tx.ticker] += tx.shares;
+          tickersForNetWorth.add(tx.ticker);
+        }
+      });
+      
+      let netWorthMarketValues = {};
+      if (tickersForNetWorth.size > 0) {
+        const quotes = await invoke('get_stock_quotes', { tickers: Array.from(tickersForNetWorth) });
+        const quoteMap = {};
+        quotes.forEach(q => { quoteMap[q.symbol] = q.regularMarketPrice; });
+        
         for (const [accountId, holdings] of Object.entries(accountHoldings)) {
-          let totalValue = 0;
+          let val = 0;
           for (const [ticker, shares] of Object.entries(holdings)) {
             if (shares > 0.0001) {
-               const price = quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
-               totalValue += shares * price;
+               val += shares * (quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0);
             }
           }
-          marketValues[accountId] = totalValue;
+          netWorthMarketValues[accountId] = val;
         }
       }
 
       const totalBalance = accounts.reduce((sum, acc) => {
         if (acc.kind === 'brokerage') {
-          return sum + (marketValues[acc.id] !== undefined ? marketValues[acc.id] : acc.balance);
+          return sum + (netWorthMarketValues[acc.id] !== undefined ? netWorthMarketValues[acc.id] : acc.balance);
         }
         return sum + acc.balance;
       }, 0);
 
       setCurrentNetWorth(Math.round(totalBalance));
+
+      // Calculate Expected Return (CAGR)
+      if (totalPortfolioCostBasis > 0 && firstTradeDate) {
+        const totalReturnRate = (totalPortfolioValue - totalPortfolioCostBasis) / totalPortfolioCostBasis;
+        const now = new Date();
+        const yearsInvested = Math.max((now - firstTradeDate) / (1000 * 60 * 60 * 24 * 365.25), 0.1); // Min 0.1 years to avoid infinity
+        
+        // CAGR = (End Value / Start Value)^(1/n) - 1
+        // Here Start Value is Cost Basis (approximation)
+        // A better approximation for irregular cashflows is IRR, but CAGR on total cost basis is a simple proxy.
+        // Or just annualized simple return? 
+        // Let's use CAGR of the aggregate: (CurrentValue / CostBasis)^(1/years) - 1
+        // This assumes all capital was invested at the beginning, which is wrong.
+        // A better simple metric might be just the current ROI? 
+        // "Expected Annual Return" usually implies long term average.
+        // Let's use the simple ROI annualized: (1 + ROI)^(1/years) - 1
+        
+        let annualizedReturn = (Math.pow(1 + totalReturnRate, 1 / yearsInvested) - 1) * 100;
+        
+        // Sanity check: if years < 1, the exponent is > 1, amplifying short term gains/losses.
+        // If years < 1, maybe just show the simple return? Or cap it?
+        // Let's just set it.
+        if (isFinite(annualizedReturn)) {
+            setExpectedReturn(parseFloat(annualizedReturn.toFixed(2)));
+        }
+      }
+
+      // --- 2. Calculate Annual Expenses & Savings ---
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      
+      const lastYearTransactions = transactions.filter(tx => new Date(tx.date) >= oneYearAgo);
+      
+      let expenses = 0;
+      let income = 0;
+
+      lastYearTransactions.forEach(tx => {
+        const isTrade = tx.ticker && tx.shares;
+        const isTransfer = tx.category === 'Transfer';
+        
+        if (!isTrade && !isTransfer) {
+          if (tx.amount < 0) {
+            expenses += Math.abs(tx.amount);
+          } else {
+            income += tx.amount;
+          }
+        }
+      });
+
+      setAnnualExpenses(Math.round(expenses));
+      setAnnualSavings(Math.round(income - expenses));
+
       setLoading(false);
 
     } catch (e) {
-      console.error("Failed to fetch net worth:", e);
+      console.error("Failed to fetch data:", e);
       setLoading(false);
     }
   }
@@ -143,89 +259,111 @@ export default function FireCalculator() {
   }, [currentNetWorth, annualExpenses, expectedReturn, withdrawalRate, annualSavings]);
 
   const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(val) + ' €';
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6 max-w-7xl mx-auto">
+    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
-            <Calculator className="w-8 h-8 text-blue-600" />
+          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3 tracking-tight">
+            <div className="bg-brand-100 p-2 rounded-xl">
+              <Calculator className="w-8 h-8 text-brand-600" />
+            </div>
             FIRE Calculator
           </h1>
-          <p className="text-slate-500 mt-1">Financial Independence, Retire Early</p>
+          <p className="text-slate-500 font-medium mt-1 ml-14">Financial Independence, Retire Early</p>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Inputs */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
-          <h2 className="text-xl font-semibold text-slate-700 mb-4">Parameters</h2>
+        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-6 h-fit hover:shadow-lg transition-shadow duration-300">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Parameters</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Current Net Worth</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500" />
+                Current Net Worth
+              </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={currentNetWorth} 
                   onChange={(e) => setCurrentNetWorth(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">€</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Annual Expenses</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500" />
+                Annual Expenses
+              </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualExpenses} 
                   onChange={(e) => setAnnualExpenses(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">€</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Annual Savings</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500" />
+                Annual Savings
+              </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={annualSavings} 
                   onChange={(e) => setAnnualSavings(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">€</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Expected Annual Return (%)</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Percent className="w-4 h-4 text-brand-500" />
+                Expected Annual Return
+              </label>
               <div className="relative">
-                <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={expectedReturn} 
                   onChange={(e) => setExpectedReturn(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Safe Withdrawal Rate (%)</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <Percent className="w-4 h-4 text-brand-500" />
+                Safe Withdrawal Rate
+              </label>
               <div className="relative">
-                <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="number" 
                   value={withdrawalRate} 
                   onChange={(e) => setWithdrawalRate(Number(e.target.value))}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  placeholder="0"
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
               </div>
             </div>
           </div>
@@ -235,30 +373,31 @@ export default function FireCalculator() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div className="bg-gradient-to-br from-blue-50 to-brand-50 p-6 rounded-2xl shadow-md border-2 border-blue-200 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-slate-500">FIRE Number</p>
-                <p className="text-2xl font-bold text-slate-800">{formatCurrency(fireNumber)}</p>
+                <p className="text-sm font-bold text-blue-700 uppercase tracking-wider mb-1">FIRE Number</p>
+                <p className="text-3xl font-bold text-blue-900">{formatCurrency(fireNumber)}</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
+              <div className="bg-blue-500 p-4 rounded-2xl shadow-lg">
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-6 rounded-2xl shadow-md border-2 border-emerald-200 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-slate-500">Time to FIRE</p>
-                <p className="text-2xl font-bold text-slate-800">{yearsToFire} Years</p>
+                <p className="text-sm font-bold text-emerald-700 uppercase tracking-wider mb-1">Time to FIRE</p>
+                <p className="text-3xl font-bold text-emerald-900">{yearsToFire} Years</p>
               </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <Calendar className="w-6 h-6 text-green-600" />
+              <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg">
+                <Calendar className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
 
           {/* Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex-1 min-h-[400px]">
-            <h3 className="text-lg font-semibold text-slate-700 mb-4">Projection</h3>
+          <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex-1 min-h-[400px] hover:shadow-lg transition-shadow duration-300">
+            <h3 className="text-lg font-semibold text-slate-700 mb-2">Projection</h3>
+            <p className="text-sm text-slate-500 mb-4">Path to financial independence</p>
             <div className="h-[350px]">
               <Line 
                 data={chartData} 
@@ -277,7 +416,7 @@ export default function FireCalculator() {
                             label += ': ';
                           }
                           if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
+                            label += new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(context.parsed.y) + ' €';
                           }
                           return label;
                         }
@@ -289,7 +428,7 @@ export default function FireCalculator() {
                       beginAtZero: true,
                       ticks: {
                         callback: function(value) {
-                          return '$' + value / 1000 + 'k';
+                          return value / 1000 + 'k €';
                         }
                       }
                     }
