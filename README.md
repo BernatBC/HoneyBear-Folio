@@ -15,7 +15,12 @@ To run the application in development mode:
    npm install
    ```
 
-3. Run the Tauri development server:
+3. Build client:
+   ```bash
+   npm run build
+   ```
+
+4. Run the Tauri development server:
    ```bash
    npm run tauri dev
    ```
