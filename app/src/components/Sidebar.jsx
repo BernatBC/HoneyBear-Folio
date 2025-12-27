@@ -239,7 +239,10 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
             {accounts.filter(acc => acc.kind === 'brokerage').map(account => (
               <button
                 key={account.id}
-                onClick={() => handleSelect(account.id, account)}
+                onClick={() => handleSelect(account.id, {
+                  ...account,
+                  balance: marketValues[account.id] !== undefined ? marketValues[account.id] : account.balance
+                })}
                 className={`w-full text-left py-2.5 px-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
                   selectedId === account.id 
                     ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20' 
