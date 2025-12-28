@@ -1,0 +1,60 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@layer components {
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm;
+  }
+
+  .modal-container {
+    @apply bg-slate-900 w-full max-w-md rounded-xl border border-slate-700 shadow-2xl p-6;
+  }
+
+  .modal-header {
+    @apply flex justify-between items-center mb-6;
+  }
+
+  .modal-title {
+    @apply text-xl font-bold text-white flex items-center gap-2;
+  }
+
+  .modal-close-button {
+    @apply text-slate-400 hover:text-white;
+  }
+
+  .modal-body {
+    @apply space-y-4 mb-8;
+  }
+
+  .modal-label {
+    @apply block text-sm font-medium text-slate-400 mb-2;
+  }
+
+  .format-grid {
+    @apply grid grid-cols-3 gap-3;
+  }
+
+  .format-button {
+    @apply flex flex-col items-center justify-center p-4 rounded-lg border transition-all;
+  }
+
+  .format-button-active {
+    @apply bg-blue-600/20 border-blue-500 text-white;
+  }
+
+  .format-button-inactive {
+    @apply bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700;
+  }
+
+  .modal-footer {
+    @apply flex justify-end gap-3;
+  }
+
+  .modal-cancel-button {
+    @apply px-4 py-2 text-slate-400 hover:text-white transition-colors;
+  }
+
+  .modal-export-button {
+    @apply bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2;
+  }
+}

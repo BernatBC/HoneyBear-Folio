@@ -6,7 +6,7 @@ import Dashboard from "./components/Dashboard";
 import InvestmentDashboard from "./components/InvestmentDashboard";
 import FireCalculator from "./components/FireCalculator";
 import { Wallet } from "lucide-react";
-import "./App.css";
+import "./styles/App.css";
 
 function App() {
   const [selectedAccountId, setSelectedAccountId] = useState('dashboard');

@@ -17,6 +17,7 @@ import {
   Upload
 } from 'lucide-react';
 import packageJson from '../../package.json';
+import '../styles/Sidebar.css';
 
 export default function Sidebar({ accounts, marketValues, selectedId, onSelectAccount, onUpdate }) {
   const [isAdding, setIsAdding] = useState(false);
@@ -56,81 +57,81 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
   };
 
   return (
-    <div className="w-72 bg-slate-900 text-slate-300 h-screen flex flex-col border-r border-slate-800 shadow-2xl z-10">
+    <div className="sidebar-container">
       {/* Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-center gap-3 mb-8 text-white">
-          <div className="bg-brand-600 p-2.5 rounded-xl shadow-lg shadow-brand-900/20 ring-1 ring-white/10">
+      <div className="sidebar-header">
+        <div className="sidebar-logo-container">
+          <div className="sidebar-logo-icon">
             <Wallet className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">HoneyBear Folio</h1>
-            <p className="text-xs text-slate-500 font-medium">Portfolio Tracker</p>
+            <h1 className="sidebar-title">HoneyBear Folio</h1>
+            <p className="sidebar-subtitle">Portfolio Tracker</p>
           </div>
         </div>
 
         {/* Net Worth Card */}
-        <div className="bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50 shadow-inner mb-2 backdrop-blur-sm">
-          <div className="flex items-center gap-2 text-xs font-semibold text-brand-400 uppercase tracking-wider mb-2">
+        <div className="net-worth-card">
+          <div className="net-worth-label">
             <TrendingUp className="w-3.5 h-3.5" />
             Net Worth
           </div>
-          <div className="text-2xl font-bold text-white tracking-tight">
+          <div className="net-worth-value">
             {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
           </div>
         </div>
       </div>
       
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-8 py-2 custom-scrollbar">
+      <div className="sidebar-nav">
         <div>
-          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Overview</h2>
+          <h2 className="sidebar-section-title">Overview</h2>
           <div className="space-y-1">
             <button 
               onClick={() => handleSelect('dashboard')}
-              className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
+              className={`sidebar-nav-item group ${
                 selectedId === 'dashboard' 
-                  ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
-                  : 'hover:bg-slate-800/80 text-slate-400 hover:text-slate-200'
+                  ? 'sidebar-nav-item-active' 
+                  : 'sidebar-nav-item-inactive'
               }`}
             >
-              <LayoutDashboard className={`w-5 h-5 ${selectedId === 'dashboard' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+              <LayoutDashboard className={`sidebar-nav-icon ${selectedId === 'dashboard' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
               <span className="font-medium">Dashboard</span>
             </button>
 
             <button 
               onClick={() => handleSelect('investment-dashboard')}
-              className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
+              className={`sidebar-nav-item group ${
                 selectedId === 'investment-dashboard' 
-                  ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
-                  : 'hover:bg-slate-800/80 text-slate-400 hover:text-slate-200'
+                  ? 'sidebar-nav-item-active' 
+                  : 'sidebar-nav-item-inactive'
               }`}
             >
-              <PieChart className={`w-5 h-5 ${selectedId === 'investment-dashboard' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+              <PieChart className={`sidebar-nav-icon ${selectedId === 'investment-dashboard' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
               <span className="font-medium">Investments</span>
             </button>
 
             <button 
               onClick={() => handleSelect('fire-calculator')}
-              className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
+              className={`sidebar-nav-item group ${
                 selectedId === 'fire-calculator' 
-                  ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
-                  : 'hover:bg-slate-800/80 text-slate-400 hover:text-slate-200'
+                  ? 'sidebar-nav-item-active' 
+                  : 'sidebar-nav-item-inactive'
               }`}
             >
-              <Calculator className={`w-5 h-5 ${selectedId === 'fire-calculator' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+              <Calculator className={`sidebar-nav-icon ${selectedId === 'fire-calculator' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
               <span className="font-medium">FIRE Calculator</span>
             </button>
 
             <button 
               onClick={() => handleSelect('all')}
-              className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
+              className={`sidebar-nav-item group ${
                 selectedId === 'all' 
-                  ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
-                  : 'hover:bg-slate-800/80 text-slate-400 hover:text-slate-200'
+                  ? 'sidebar-nav-item-active' 
+                  : 'sidebar-nav-item-inactive'
               }`}
             >
-              <List className={`w-5 h-5 ${selectedId === 'all' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+              <List className={`sidebar-nav-icon ${selectedId === 'all' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
               <span className="font-medium">All Transactions</span>
             </button>
           </div>
@@ -138,11 +139,11 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
 
         {/* Cash Accounts */}
         <div>
-          <div className="flex items-center justify-between mb-3 px-3">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cash Accounts</h2>
+          <div className="sidebar-section-header">
+            <h2 className="sidebar-section-title !mb-0 !px-0">Cash Accounts</h2>
             <button 
               onClick={() => { setIsAdding(true); setNewAccountType('cash'); }}
-              className="text-slate-500 hover:text-brand-400 transition-colors p-1 hover:bg-slate-800 rounded-lg"
+              className="sidebar-add-button"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -153,14 +154,14 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
               <button
                 key={account.id}
                 onClick={() => handleSelect(account.id)}
-                className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-between group ${
+                className={`sidebar-nav-item justify-between group ${
                   selectedId === account.id 
-                    ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
-                    : 'hover:bg-slate-800/80 text-slate-400 hover:text-slate-200'
+                    ? 'sidebar-nav-item-active' 
+                    : 'sidebar-nav-item-inactive'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <CreditCard className={`w-5 h-5 ${selectedId === account.id ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                  <CreditCard className={`sidebar-nav-icon ${selectedId === account.id ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
                   <span className="font-medium truncate max-w-[120px]">{account.name}</span>
                 </div>
                 <span className={`text-sm font-medium ${selectedId === account.id ? 'text-blue-100' : 'text-slate-500 group-hover:text-slate-300'}`}>
@@ -173,11 +174,11 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
 
         {/* Brokerage Accounts */}
         <div>
-          <div className="flex items-center justify-between mb-3 px-3">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Brokerage Accounts</h2>
+          <div className="sidebar-section-header">
+            <h2 className="sidebar-section-title !mb-0 !px-0">Brokerage Accounts</h2>
             <button 
               onClick={() => { setIsAdding(true); setNewAccountType('brokerage'); }}
-              className="text-slate-500 hover:text-brand-400 transition-colors p-1 hover:bg-slate-800 rounded-lg"
+              className="sidebar-add-button"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -188,14 +189,14 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
               <button
                 key={account.id}
                 onClick={() => handleSelect(account.id)}
-                className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-between group ${
+                className={`sidebar-nav-item justify-between group ${
                   selectedId === account.id 
-                    ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
-                    : 'hover:bg-slate-800/80 text-slate-400 hover:text-slate-200'
+                    ? 'sidebar-nav-item-active' 
+                    : 'sidebar-nav-item-inactive'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <TrendingUp className={`w-5 h-5 ${selectedId === account.id ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                  <TrendingUp className={`sidebar-nav-icon ${selectedId === account.id ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
                   <span className="font-medium truncate max-w-[120px]">{account.name}</span>
                 </div>
                 <span className={`text-sm font-medium ${selectedId === account.id ? 'text-blue-100' : 'text-slate-500 group-hover:text-slate-300'}`}>
@@ -206,14 +207,14 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
           </div>
         </div>
         {isAdding && (
-          <div className="px-2">
-            <form onSubmit={handleAddAccount} className="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 space-y-3 backdrop-blur-sm">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">New {newAccountType === 'cash' ? 'Cash' : 'Brokerage'} Account</span>
+          <div className="sidebar-form-container">
+            <form onSubmit={handleAddAccount} className="sidebar-form">
+              <div className="sidebar-form-header">
+                <span className="sidebar-form-title">New {newAccountType === 'cash' ? 'Cash' : 'Brokerage'} Account</span>
                 <button 
                   type="button" 
                   onClick={() => setIsAdding(false)}
-                  className="text-slate-500 hover:text-slate-300 transition-colors"
+                  className="sidebar-form-close"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -223,7 +224,7 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
                 placeholder="Account Name"
                 value={newAccountName}
                 onChange={(e) => setNewAccountName(e.target.value)}
-                className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
+                className="sidebar-input"
                 autoFocus
               />
               <input
@@ -232,11 +233,11 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
                 placeholder="Initial Balance"
                 value={newAccountBalance}
                 onChange={(e) => setNewAccountBalance(e.target.value)}
-                className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
+                className="sidebar-input"
               />
               <button 
                 type="submit"
-                className="w-full bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-900/20"
+                className="sidebar-submit-button"
               >
                 <Check className="w-4 h-4" />
                 <span className="text-white">Create Account</span>
@@ -248,24 +249,24 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
 
       
       {/* Footer */}
-      <div className="p-4 border-t border-slate-800 bg-slate-900/50">
-        <div className="flex gap-2 mb-3">
+      <div className="sidebar-footer">
+        <div className="sidebar-footer-buttons">
           <button 
             onClick={() => setShowImportModal(true)}
-            className="flex-1 flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800 py-2.5 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-700"
+            className="sidebar-footer-button"
           >
             <Upload className="w-4 h-4" />
             <span className="text-xs font-medium">Import</span>
           </button>
           <button 
             onClick={() => setShowExportModal(true)}
-            className="flex-1 flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800 py-2.5 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-700"
+            className="sidebar-footer-button"
           >
             <Download className="w-4 h-4" />
             <span className="text-xs font-medium">Export</span>
           </button>
         </div>
-        <div className="text-[10px] text-slate-600 text-center font-medium tracking-wide uppercase">
+        <div className="sidebar-version">
           v{packageJson.version} • HoneyBear Folio
         </div>
       </div>

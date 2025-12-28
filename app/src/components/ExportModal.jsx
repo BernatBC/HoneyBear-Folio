@@ -4,6 +4,7 @@ import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile, writeFile } from '@tauri-apps/plugin-fs';
 import { X, Download, FileJson, FileSpreadsheet, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import '../styles/ExportModal.css';
 
 export default function ExportModal({ onClose }) {
   const [format, setFormat] = useState('json');
@@ -110,27 +111,27 @@ export default function ExportModal({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-slate-900 w-full max-w-md rounded-xl border border-slate-700 shadow-2xl p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+    <div className="modal-overlay">
+      <div className="modal-container">
+        <div className="modal-header">
+          <h2 className="modal-title">
             <Download className="w-5 h-5 text-blue-500" />
             Export Data
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="modal-close-button">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="space-y-4 mb-8">
-          <label className="block text-sm font-medium text-slate-400 mb-2">Select Format</label>
-          <div className="grid grid-cols-3 gap-3">
+        <div className="modal-body">
+          <label className="modal-label">Select Format</label>
+          <div className="format-grid">
             <button
               onClick={() => setFormat('json')}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+              className={`format-button ${
                 format === 'json' 
-                  ? 'bg-blue-600/20 border-blue-500 text-white' 
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
+                  ? 'format-button-active' 
+                  : 'format-button-inactive'
               }`}
             >
               <FileJson className="w-6 h-6 mb-2" />
@@ -138,10 +139,10 @@ export default function ExportModal({ onClose }) {
             </button>
             <button
               onClick={() => setFormat('csv')}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+              className={`format-button ${
                 format === 'csv' 
-                  ? 'bg-blue-600/20 border-blue-500 text-white' 
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
+                  ? 'format-button-active' 
+                  : 'format-button-inactive'
               }`}
             >
               <FileText className="w-6 h-6 mb-2" />
@@ -149,10 +150,10 @@ export default function ExportModal({ onClose }) {
             </button>
             <button
               onClick={() => setFormat('xlsx')}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+              className={`format-button ${
                 format === 'xlsx' 
-                  ? 'bg-blue-600/20 border-blue-500 text-white' 
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
+                  ? 'format-button-active' 
+                  : 'format-button-inactive'
               }`}
             >
               <FileSpreadsheet className="w-6 h-6 mb-2" />
@@ -161,10 +162,10 @@ export default function ExportModal({ onClose }) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="modal-footer">
           <button 
             onClick={onClose}
-            className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+            className="modal-cancel-button"
             disabled={exporting}
           >
             Cancel
@@ -172,7 +173,7 @@ export default function ExportModal({ onClose }) {
           <button 
             onClick={handleExport}
             disabled={exporting}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="modal-export-button"
           >
             <span className="text-white">{exporting ? 'Exporting...' : 'Select Location & Export'}</span>
           </button>

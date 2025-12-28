@@ -1,0 +1,124 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@layer components {
+  .sidebar-container {
+    @apply w-72 bg-slate-900 text-slate-300 h-screen flex flex-col border-r border-slate-800 shadow-2xl z-10;
+  }
+
+  .sidebar-header {
+    @apply p-6 pb-4;
+  }
+
+  .sidebar-logo-container {
+    @apply flex items-center gap-3 mb-8 text-white;
+  }
+
+  .sidebar-logo-icon {
+    @apply bg-brand-600 p-2.5 rounded-xl shadow-lg shadow-brand-900/20 ring-1 ring-white/10;
+  }
+
+  .sidebar-title {
+    @apply text-xl font-bold tracking-tight text-white;
+  }
+
+  .sidebar-subtitle {
+    @apply text-xs text-slate-500 font-medium;
+  }
+
+  .net-worth-card {
+    @apply bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50 shadow-inner mb-2 backdrop-blur-sm;
+  }
+
+  .net-worth-label {
+    @apply flex items-center gap-2 text-xs font-semibold text-brand-400 uppercase tracking-wider mb-2;
+  }
+
+  .net-worth-value {
+    @apply text-2xl font-bold text-white tracking-tight;
+  }
+
+  .sidebar-nav {
+    @apply flex-1 overflow-y-auto px-4 space-y-8 py-2;
+  }
+
+  .sidebar-section-title {
+    @apply text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3;
+  }
+
+  .sidebar-section-header {
+    @apply flex items-center justify-between mb-3 px-3;
+  }
+
+  .sidebar-nav-item {
+    @apply w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3;
+  }
+
+  .sidebar-nav-item-active {
+    @apply bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10;
+  }
+
+  .sidebar-nav-item-inactive {
+    @apply hover:bg-slate-800/80 text-slate-400 hover:text-slate-200;
+  }
+
+  .sidebar-nav-icon {
+    @apply w-5 h-5;
+  }
+
+  .sidebar-nav-icon-active {
+    @apply text-white;
+  }
+
+  .sidebar-nav-icon-inactive {
+    @apply text-slate-500 group-hover:text-slate-300;
+  }
+
+  .sidebar-add-button {
+    @apply text-slate-500 hover:text-brand-400 transition-colors p-1 hover:bg-slate-800 rounded-lg;
+  }
+
+  .sidebar-form-container {
+    @apply px-2;
+  }
+
+  .sidebar-form {
+    @apply bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 space-y-3 backdrop-blur-sm;
+  }
+
+  .sidebar-form-header {
+    @apply flex justify-between items-center mb-2;
+  }
+
+  .sidebar-form-title {
+    @apply text-xs font-bold text-slate-400 uppercase tracking-wider;
+  }
+
+  .sidebar-form-close {
+    @apply text-slate-500 hover:text-slate-300 transition-colors;
+  }
+
+  .sidebar-input {
+    @apply w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all;
+  }
+
+  .sidebar-submit-button {
+    @apply w-full bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-900/20;
+  }
+
+  .sidebar-footer {
+    @apply p-4 border-t border-slate-800 bg-slate-900/50;
+  }
+
+  .sidebar-footer-buttons {
+    @apply flex gap-2 mb-3;
+  }
+
+  .sidebar-footer-button {
+    @apply flex-1 flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800 py-2.5 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-700;
+  }
+
+  .sidebar-version {
+    @apply text-[10px] text-slate-600 text-center font-medium tracking-wide uppercase;
+  }
+}
