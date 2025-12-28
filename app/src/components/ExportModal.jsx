@@ -115,7 +115,7 @@ export default function ExportModal({ onClose }) {
       <div className="modal-container">
         <div className="modal-header">
           <h2 className="modal-title">
-            <Download className="w-5 h-5 text-blue-500" />
+            <Download className="w-5 h-5 text-brand-500" />
             Export Data
           </h2>
           <button onClick={onClose} className="modal-close-button">
