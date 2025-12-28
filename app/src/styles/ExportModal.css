@@ -39,7 +39,7 @@
   }
 
   .format-button-active {
-    @apply bg-blue-600/20 border-blue-500 text-white;
+    @apply bg-brand-600/20 border-brand-500 text-white;
   }
 
   .format-button-inactive {
@@ -55,6 +55,6 @@
   }
 
   .modal-export-button {
-    @apply bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2;
+    @apply bg-brand-600 hover:bg-brand-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2;
   }
 }

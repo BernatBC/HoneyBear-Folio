@@ -46,6 +46,10 @@
     @apply text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3;
   }
 
+  .sidebar-section-title-inline {
+    @apply text-xs font-bold text-slate-500 uppercase tracking-wider;
+  }
+
   .sidebar-section-header {
     @apply flex items-center justify-between mb-3 px-3;
   }

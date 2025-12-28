@@ -140,7 +140,7 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
         {/* Cash Accounts */}
         <div>
           <div className="sidebar-section-header">
-            <h2 className="sidebar-section-title !mb-0 !px-0">Cash Accounts</h2>
+            <h2 className="sidebar-section-title-inline">Cash Accounts</h2>
             <button 
               onClick={() => { setIsAdding(true); setNewAccountType('cash'); }}
               className="sidebar-add-button"
@@ -175,7 +175,7 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
         {/* Brokerage Accounts */}
         <div>
           <div className="sidebar-section-header">
-            <h2 className="sidebar-section-title !mb-0 !px-0">Brokerage Accounts</h2>
+            <h2 className="sidebar-section-title-inline">Brokerage Accounts</h2>
             <button 
               onClick={() => { setIsAdding(true); setNewAccountType('brokerage'); }}
               className="sidebar-add-button"
