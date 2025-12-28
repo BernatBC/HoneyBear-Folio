@@ -34,10 +34,40 @@ export default function FireCalculator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
+    const savedState = localStorage.getItem('fireCalculatorState');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        setCurrentNetWorth(parsed.currentNetWorth);
+        setAnnualExpenses(parsed.annualExpenses);
+        setExpectedReturn(parsed.expectedReturn);
+        setWithdrawalRate(parsed.withdrawalRate);
+        setAnnualSavings(parsed.annualSavings);
+        setLoading(false);
+      } catch (e) {
+        console.error("Failed to parse saved state:", e);
+        fetchData();
+      }
+    } else {
+      fetchData();
+    }
   }, []);
 
+  useEffect(() => {
+    if (!loading) {
+      const state = {
+        currentNetWorth,
+        annualExpenses,
+        expectedReturn,
+        withdrawalRate,
+        annualSavings
+      };
+      localStorage.setItem('fireCalculatorState', JSON.stringify(state));
+    }
+  }, [currentNetWorth, annualExpenses, expectedReturn, withdrawalRate, annualSavings, loading]);
+
   async function fetchData() {
+    setLoading(true);
     try {
       const accounts = await invoke('get_accounts');
       const transactions = await invoke('get_all_transactions');
