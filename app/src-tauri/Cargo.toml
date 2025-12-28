@@ -1,8 +1,8 @@
 [package]
-name = "app"
+name = "HoneyBear-Folio"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "HoneyBear Folio is a cross-platform personal finance desktop application built with Tauri (Rust backend), React (frontend), and SQLite (local database). It focuses on fast local data management (transactions, categories, budgets), clear dashboards and charts, portfolio tracking via Yahoo Finance market data, and import/export to common formats."
+authors = ["BernatBC"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
