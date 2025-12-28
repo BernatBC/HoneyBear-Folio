@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { invoke } from '@tauri-apps/api/core';
 import Sidebar from "./components/Sidebar";
 import AccountDetails from "./components/AccountDetails";
 import Dashboard from "./components/Dashboard";
@@ -8,27 +9,127 @@ import { Wallet } from "lucide-react";
 import "./App.css";
 
 function App() {
-  const [selectedAccount, setSelectedAccount] = useState({ id: 'dashboard', name: 'Dashboard' });
+  const [selectedAccountId, setSelectedAccountId] = useState('dashboard');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [accounts, setAccounts] = useState([]);
+  const [marketValues, setMarketValues] = useState({});
 
   const handleAccountUpdate = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  useEffect(() => {
+    fetchAccounts();
+    fetchMarketValues();
+  }, [refreshTrigger]);
+
+  async function fetchAccounts() {
+    try {
+      const accs = await invoke('get_accounts');
+      accs.sort((a, b) => b.balance - a.balance);
+      setAccounts(accs);
+    } catch (e) {
+      console.error("Failed to fetch accounts:", e);
+    }
+  }
+
+  async function fetchMarketValues() {
+    try {
+      const transactions = await invoke('get_all_transactions');
+      
+      // Group holdings by account
+      const accountHoldings = {};
+      const allTickers = new Set();
+
+      transactions.forEach(tx => {
+        if (tx.ticker && tx.shares) {
+          if (!accountHoldings[tx.account_id]) {
+            accountHoldings[tx.account_id] = {};
+          }
+          if (!accountHoldings[tx.account_id][tx.ticker]) {
+            accountHoldings[tx.account_id][tx.ticker] = 0;
+          }
+          accountHoldings[tx.account_id][tx.ticker] += tx.shares;
+          allTickers.add(tx.ticker);
+        }
+      });
+
+      if (allTickers.size === 0) {
+        setMarketValues({});
+        return;
+      }
+
+      const quotes = await invoke('get_stock_quotes', { tickers: Array.from(allTickers) });
+      
+      const quoteMap = {};
+      quotes.forEach(q => {
+        quoteMap[q.symbol] = q.regularMarketPrice;
+      });
+
+      const newMarketValues = {};
+      for (const [accountId, holdings] of Object.entries(accountHoldings)) {
+        let totalValue = 0;
+        for (const [ticker, shares] of Object.entries(holdings)) {
+          if (shares > 0.0001) {
+             // Try exact match or uppercase match
+             const price = quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
+             totalValue += shares * price;
+          }
+        }
+        newMarketValues[accountId] = totalValue;
+      }
+      setMarketValues(newMarketValues);
+
+    } catch (e) {
+      console.error("Failed to fetch market values:", e);
+    }
+  }
+
+  // Calculate total balance
+  const totalBalance = accounts.reduce((sum, acc) => {
+    if (acc.kind === 'brokerage') {
+      return sum + (marketValues[acc.id] !== undefined ? marketValues[acc.id] : acc.balance);
+    }
+    return sum + acc.balance;
+  }, 0);
+
+  // Derive selectedAccount
+  let selectedAccount = null;
+  if (selectedAccountId === 'dashboard') {
+    selectedAccount = { id: 'dashboard', name: 'Dashboard' };
+  } else if (selectedAccountId === 'investment-dashboard') {
+    selectedAccount = { id: 'investment-dashboard', name: 'Investments' };
+  } else if (selectedAccountId === 'fire-calculator') {
+    selectedAccount = { id: 'fire-calculator', name: 'FIRE Calculator' };
+  } else if (selectedAccountId === 'all') {
+    selectedAccount = { id: 'all', name: 'All Transactions', balance: totalBalance };
+  } else {
+    const acc = accounts.find(a => a.id === selectedAccountId);
+    if (acc) {
+      selectedAccount = {
+        ...acc,
+        balance: marketValues[acc.id] !== undefined ? marketValues[acc.id] : acc.balance
+      };
+    }
+  }
+
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
       <Sidebar 
-        onSelectAccount={setSelectedAccount} 
-        refreshTrigger={refreshTrigger}
+        accounts={accounts}
+        marketValues={marketValues}
+        selectedId={selectedAccountId}
+        onSelectAccount={setSelectedAccountId}
+        onUpdate={handleAccountUpdate}
       />
       
       <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50">
         <div className="max-w-7xl mx-auto">
-          {selectedAccount?.id === 'dashboard' ? (
+          {selectedAccountId === 'dashboard' ? (
             <Dashboard />
-          ) : selectedAccount?.id === 'investment-dashboard' ? (
+          ) : selectedAccountId === 'investment-dashboard' ? (
             <InvestmentDashboard />
-          ) : selectedAccount?.id === 'fire-calculator' ? (
+          ) : selectedAccountId === 'fire-calculator' ? (
             <FireCalculator />
           ) : selectedAccount ? (
             <AccountDetails 
@@ -54,4 +155,3 @@ function App() {
 }
 
 export default App;
-
