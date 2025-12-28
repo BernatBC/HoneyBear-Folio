@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import "../datepicker.css";
 import { invoke } from '@tauri-apps/api/core';
 import { 
   Search, 
