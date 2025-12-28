@@ -33,6 +33,17 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(203, 213, 225) rgb(241, 245, 249);
   }
+
+  /* Remove number input arrows */
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
 }
 
 /* Animations */
