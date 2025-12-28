@@ -418,6 +418,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     selected={date ? new Date(date) : null}
                     onChange={(date) => setDate(date ? date.toISOString().split('T')[0] : '')}
                     dateFormat="yyyy-MM-dd"
+                    shouldCloseOnSelect={false}
                     required
                     className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   />
@@ -554,6 +555,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   selected={date ? new Date(date) : null}
                   onChange={(date) => setDate(date ? date.toISOString().split('T')[0] : '')}
                   dateFormat="yyyy-MM-dd"
+                  shouldCloseOnSelect={false}
                   required
                   className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
                 />
@@ -674,6 +676,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             selected={editForm.date ? new Date(editForm.date) : null}
                             onChange={(date) => setEditForm({...editForm, date: date ? date.toISOString().split('T')[0] : ''})}
                             dateFormat="yyyy-MM-dd"
+                            shouldCloseOnSelect={false}
                             className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                           />
                         </td>
