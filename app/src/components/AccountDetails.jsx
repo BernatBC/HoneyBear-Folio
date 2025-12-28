@@ -52,7 +52,7 @@ export default function AccountDetails({ account, onUpdate }) {
       fetchTransactions();
       fetchSuggestions();
     }
-  }, [account]);
+  }, [account.id]);
 
   // Close menu when clicking outside
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import ImportModal from './ImportModal';
 import ExportModal from './ExportModal';
@@ -18,89 +18,13 @@ import {
 } from 'lucide-react';
 import packageJson from '../../package.json';
 
-export default function Sidebar({ onSelectAccount, refreshTrigger }) {
-  const [accounts, setAccounts] = useState([]);
-  const [marketValues, setMarketValues] = useState({});
+export default function Sidebar({ accounts, marketValues, selectedId, onSelectAccount, onUpdate }) {
   const [isAdding, setIsAdding] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [newAccountName, setNewAccountName] = useState('');
   const [newAccountBalance, setNewAccountBalance] = useState('');
   const [newAccountType, setNewAccountType] = useState('cash');
-  const [selectedId, setSelectedId] = useState('dashboard'); // Default to dashboard
-
-  useEffect(() => {
-    fetchAccounts();
-    fetchMarketValues();
-  }, [refreshTrigger]);
-
-  async function fetchAccounts() {
-    try {
-      const accs = await invoke('get_accounts');
-      accs.sort((a, b) => b.balance - a.balance);
-      setAccounts(accs);
-    } catch (e) {
-      console.error("Failed to fetch accounts:", e);
-    }
-  }
-
-  async function fetchMarketValues() {
-    try {
-      const transactions = await invoke('get_all_transactions');
-      console.log("Transactions:", transactions);
-      
-      // Group holdings by account
-      const accountHoldings = {};
-      const allTickers = new Set();
-
-      transactions.forEach(tx => {
-        if (tx.ticker && tx.shares) {
-          if (!accountHoldings[tx.account_id]) {
-            accountHoldings[tx.account_id] = {};
-          }
-          if (!accountHoldings[tx.account_id][tx.ticker]) {
-            accountHoldings[tx.account_id][tx.ticker] = 0;
-          }
-          accountHoldings[tx.account_id][tx.ticker] += tx.shares;
-          allTickers.add(tx.ticker);
-        }
-      });
-
-      console.log("Account Holdings:", accountHoldings);
-      console.log("All Tickers:", Array.from(allTickers));
-
-      if (allTickers.size === 0) {
-        setMarketValues({});
-        return;
-      }
-
-      const quotes = await invoke('get_stock_quotes', { tickers: Array.from(allTickers) });
-      console.log("Quotes:", quotes);
-      
-      const quoteMap = {};
-      quotes.forEach(q => {
-        quoteMap[q.symbol] = q.regularMarketPrice;
-      });
-
-      const newMarketValues = {};
-      for (const [accountId, holdings] of Object.entries(accountHoldings)) {
-        let totalValue = 0;
-        for (const [ticker, shares] of Object.entries(holdings)) {
-          if (shares > 0.0001) {
-             // Try exact match or uppercase match
-             const price = quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
-             totalValue += shares * price;
-          }
-        }
-        newMarketValues[accountId] = totalValue;
-      }
-      console.log("New Market Values:", newMarketValues);
-      setMarketValues(newMarketValues);
-
-    } catch (e) {
-      console.error("Failed to fetch market values:", e);
-    }
-  }
 
   const totalBalance = accounts.reduce((sum, acc) => {
     if (acc.kind === 'brokerage') {
@@ -121,15 +45,14 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
       setNewAccountBalance('');
       setNewAccountType('cash');
       setIsAdding(false);
-      fetchAccounts();
+      onUpdate();
     } catch (e) {
       console.error("Failed to create account:", e);
     }
   }
 
-  const handleSelect = (id, accountData) => {
-    setSelectedId(id);
-    onSelectAccount(accountData);
+  const handleSelect = (id) => {
+    onSelectAccount(id);
   };
 
   return (
@@ -164,7 +87,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
           <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Overview</h2>
           <div className="space-y-1">
             <button 
-              onClick={() => handleSelect('dashboard', { id: 'dashboard', name: 'Dashboard' })}
+              onClick={() => handleSelect('dashboard')}
               className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
                 selectedId === 'dashboard' 
                   ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
@@ -176,7 +99,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
             </button>
 
             <button 
-              onClick={() => handleSelect('investment-dashboard', { id: 'investment-dashboard', name: 'Investments' })}
+              onClick={() => handleSelect('investment-dashboard')}
               className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
                 selectedId === 'investment-dashboard' 
                   ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
@@ -188,7 +111,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
             </button>
 
             <button 
-              onClick={() => handleSelect('fire-calculator', { id: 'fire-calculator', name: 'FIRE Calculator' })}
+              onClick={() => handleSelect('fire-calculator')}
               className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
                 selectedId === 'fire-calculator' 
                   ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
@@ -200,7 +123,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
             </button>
 
             <button 
-              onClick={() => handleSelect('all', { id: 'all', name: 'All Transactions', balance: totalBalance })}
+              onClick={() => handleSelect('all')}
               className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center gap-3 group ${
                 selectedId === 'all' 
                   ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
@@ -229,7 +152,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
             {accounts.filter(acc => acc.kind === 'cash').map(account => (
               <button
                 key={account.id}
-                onClick={() => handleSelect(account.id, account)}
+                onClick={() => handleSelect(account.id)}
                 className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-between group ${
                   selectedId === account.id 
                     ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
@@ -264,10 +187,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
             {accounts.filter(acc => acc.kind === 'brokerage').map(account => (
               <button
                 key={account.id}
-                onClick={() => handleSelect(account.id, {
-                  ...account,
-                  balance: marketValues[account.id] !== undefined ? marketValues[account.id] : account.balance
-                })}
+                onClick={() => handleSelect(account.id)}
                 className={`w-full text-left py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-between group ${
                   selectedId === account.id 
                     ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20 ring-1 ring-white/10' 
@@ -354,8 +274,7 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
         <ImportModal 
           onClose={() => setShowImportModal(false)} 
           onImportComplete={() => {
-            fetchAccounts();
-            fetchMarketValues();
+            onUpdate();
           }} 
         />
       )}
@@ -368,4 +287,3 @@ export default function Sidebar({ onSelectAccount, refreshTrigger }) {
     </div>
   );
 }
-
