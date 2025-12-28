@@ -64,7 +64,7 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
             <Wallet className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">HoneyBear</h1>
+            <h1 className="text-xl font-bold tracking-tight text-white">HoneyBear Folio</h1>
             <p className="text-xs text-slate-500 font-medium">Portfolio Tracker</p>
           </div>
         </div>
@@ -266,7 +266,7 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
           </button>
         </div>
         <div className="text-[10px] text-slate-600 text-center font-medium tracking-wide uppercase">
-          v{packageJson.version} • HoneyBear
+          v{packageJson.version} • HoneyBear Folio
         </div>
       </div>
       
