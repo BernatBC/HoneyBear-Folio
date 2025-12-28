@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { invoke } from '@tauri-apps/api/core';
 import { 
   Search, 
@@ -411,13 +413,13 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input 
-                    type="date" 
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+                  <DatePicker 
+                    selected={date ? new Date(date) : null}
+                    onChange={(date) => setDate(date ? date.toISOString().split('T')[0] : '')}
+                    dateFormat="yyyy-MM-dd"
                     required
                     className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
                   />
                 </div>
               </div>
@@ -547,13 +549,13 @@ export default function AccountDetails({ account, onUpdate }) {
             <div className="md:col-span-2">
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Date</label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  type="date" 
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+                <DatePicker 
+                  selected={date ? new Date(date) : null}
+                  onChange={(date) => setDate(date ? date.toISOString().split('T')[0] : '')}
+                  dateFormat="yyyy-MM-dd"
                   required
                   className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
-                  value={date}
-                  onChange={e => setDate(e.target.value)}
                 />
               </div>
             </div>
@@ -668,11 +670,11 @@ export default function AccountDetails({ account, onUpdate }) {
                     {editingId === tx.id ? (
                       <>
                         <td className="px-4 py-3">
-                          <input 
-                            type="date" 
+                          <DatePicker 
+                            selected={editForm.date ? new Date(editForm.date) : null}
+                            onChange={(date) => setEditForm({...editForm, date: date ? date.toISOString().split('T')[0] : ''})}
+                            dateFormat="yyyy-MM-dd"
                             className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                            value={editForm.date}
-                            onChange={e => setEditForm({...editForm, date: e.target.value})}
                           />
                         </td>
                         <td className="px-4 py-3">
