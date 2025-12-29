@@ -1,22 +1,2 @@
-.treemap-node{
-  position: absolute;
-  border: 1px solid #ffffff;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem;
-  text-align: center;
-  font-size: 0.75rem;
-  transition: opacity 150ms ease, transform 150ms ease, z-index 150ms;
-  cursor: pointer;
-}
-.treemap-node{
-  background-color: var(--bg-color, transparent);
-}
-.treemap-node:hover{
-  opacity: 0.9;
-  transform: scale(1.02);
-  z-index: 10;
-}
+/* Treemap node styles moved to Shared.css (.treemap-node) */
+/* This file intentionally left minimal to avoid duplicate definitions. */

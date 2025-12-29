@@ -39,7 +39,8 @@
   }
 
   .summary-card {
-    @apply bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 cursor-pointer;
+    /* Visual summary card styles consolidated into Shared.css (.hb-summary-card / .summary-card) */
+    /* See app/src/styles/Shared.css for shared visual rules. */
   }
 
   .summary-card-title {
@@ -79,7 +80,7 @@
   }
 
   .loading-spinner {
-    @apply w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin;
+    /* Spinner visuals consolidated into Shared.css (.hb-spinner / .loading-spinner) */
   }
 
   .loading-text {
@@ -91,7 +92,7 @@
   }
 
   .chart-card {
-    @apply bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300;
+    /* Chart card visuals consolidated into Shared.css (.hb-chart-card / .chart-card) */
   }
 
   .chart-card-full {

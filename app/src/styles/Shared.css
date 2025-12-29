@@ -82,9 +82,9 @@
 }
 .hb-refresh-btn:hover{ color:#2563eb; background:#eff6ff; border-color:#e6f0ff; }
 
-.hb-loading-container{ display:flex; align-items:center; justify-content:center; flex:1; }
-.hb-loading-center{ display:flex; flex-direction:column; align-items:center; gap:1rem; }
-.hb-spinner{ width:4rem; height:4rem; border-width:4px; border-style:solid; border-radius:9999px; border-color: rgba(99,102,241,0.2); border-top-color: #2563eb; animation: spin 1s linear infinite; }
+.hb-loading-container, .loading-container { display:flex; align-items:center; justify-content:center; flex:1; }
+.hb-loading-center, .loading-content { display:flex; flex-direction:column; align-items:center; gap:1rem; }
+.hb-spinner, .loading-spinner { width:4rem; height:4rem; border-width:4px; border-style:solid; border-radius:9999px; border-color: rgba(99,102,241,0.2); border-top-color: #2563eb; animation: spin 1s linear infinite; }
 
 @keyframes spin{ to{ transform: rotate(360deg); } }
 
@@ -96,14 +96,113 @@
 .hb-summary-grid{ display:grid; grid-template-columns:1fr; gap:1.5rem; }
 @media(min-width:640px){ .hb-summary-grid{ grid-template-columns: repeat(3, 1fr); } }
 
-.hb-summary-card{ composes: hb-card; display:flex; flex-direction:column; justify-content:center; transition:all 300ms ease; cursor:pointer; }
-.hb-summary-card:hover{ box-shadow:0 24px 60px rgba(2,6,23,0.08); transform: translateY(-4px); }
-.hb-summary-sub{ font-size:0.625rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.75rem; }
+.hb-summary-card, .summary-card { composes: hb-card; display:flex; flex-direction:column; justify-content:center; transition:all 300ms ease; cursor:pointer; }
+.hb-summary-card:hover, .summary-card:hover { box-shadow:0 24px 60px rgba(2,6,23,0.08); transform: translateY(-4px); }
+.hb-summary-sub, .summary-card-title { font-size:0.625rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.75rem; }
 
-.hb-chart-card{ background:#ffffff; padding:1.5rem; border-radius:1rem; box-shadow:0 8px 24px rgba(2,6,23,0.04); border:1px solid #e6eef6; height:400px; }
-.hb-treemap-card{ composes: hb-chart-card; display:flex; flex-direction:column; }
-.hb-treemap-inner{ flex:1; min-height:0; border:1px solid #e6eef6; border-radius:0.75rem; overflow:hidden; box-shadow: inset 0 1px 0 rgba(2,6,23,0.02); }
+.hb-chart-card, .chart-container, .chart-card { background:#ffffff; padding:1.5rem; border-radius:1rem; box-shadow:0 8px 24px rgba(2,6,23,0.04); border:1px solid #e6eef6; height:400px; }
+.hb-treemap-card, .chart-card, .treemap-card { composes: hb-chart-card; display:flex; flex-direction:column; }
+.hb-treemap-inner, .treemap-inner { flex:1; min-height:0; border:1px solid #e6eef6; border-radius:0.75rem; overflow:hidden; box-shadow: inset 0 1px 0 rgba(2,6,23,0.02); }
 
 .hb-table-card{ background:#ffffff; border-radius:1rem; box-shadow:0 8px 24px rgba(2,6,23,0.04); border:1px solid #e6eef6; display:flex; flex-direction:column; overflow:hidden; }
 .hb-table-header{ padding:1.5rem; border-bottom:1px solid #e6eef6; background: rgba(248,250,252,0.5); }
+
+/* Shared button styles (moved from component-specific files) */
+.hb-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.hb-btn--primary{
+  background-color: #2563eb;
+  color: #ffffff;
+}
+.hb-btn--primary:hover{ background-color: #1d4ed8; }
+
+.hb-btn--secondary{
+  background-color: #f1f5f9;
+  color: #334155;
+}
+.hb-btn--secondary:hover{ background-color: #e2e8f0; }
+
+
+/* Modal footer and cancel/ghost button (moved from ImportModal.css) */
+.hb-modal-footer{
+  padding:1.5rem;
+  border-top:1px solid #374151; /* slate-700 */
+  display:flex;
+  justify-content:flex-end;
+  gap:0.75rem;
+}
+
+.hb-btn-cancel{
+  padding: 0.5rem 1rem;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+.hb-btn-cancel:disabled{ opacity: 0.6; cursor: not-allowed; }
+.hb-btn-cancel:hover{ color: #ffffff; }
+
+/* Generic modal styles used across modals (exports, imports, etc.) */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+  backdrop-filter: blur(4px);
+}
+
+.modal-container{
+  background: #0f1724;
+  width:100%;
+  max-width: 28rem; /* ~max-w-md */
+  border-radius: 0.75rem;
+  border:1px solid #374151;
+  box-shadow: 0 25px 50px -12px rgba(2,6,23,0.6);
+  padding: 1.5rem;
+}
+
+.modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.modal-title{ font-size:1.125rem; font-weight:700; color:#ffffff; display:flex; align-items:center; gap:0.5rem; }
+.modal-body{ padding-bottom:1rem; }
+.modal-label{ display:block; font-size:0.875rem; font-weight:600; color:#94a3b8; margin-bottom:0.5rem; }
+
+.modal-footer{ display:flex; justify-content:flex-end; gap:0.75rem; }
+.modal-cancel-button{ padding:0.5rem 1rem; color:#94a3b8; background:transparent; border:none; cursor:pointer; transition:color 150ms ease; }
+.modal-cancel-button:hover{ color:#ffffff; }
+.modal-export-button{ background:#2563eb; color:#ffffff; padding:0.5rem 1.25rem; border-radius:0.5rem; font-weight:600; }
+.modal-export-button:disabled{ opacity:0.6; cursor:not-allowed; }
+
+/* Treemap node (moved from TreeMap.css) */
+.treemap-node{
+  position: absolute;
+  border: 1px solid #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  text-align: center;
+  font-size: 0.75rem;
+  transition: opacity 150ms ease, transform 150ms ease, z-index 150ms;
+  cursor: pointer;
+  background-color: var(--bg-color, transparent);
+}
+.treemap-node:hover{ opacity: 0.9; transform: scale(1.02); z-index: 10; }
 

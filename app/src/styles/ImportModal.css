@@ -99,40 +99,9 @@
   border-color: #3b82f6;
 }
 
-.hb-dialog-footer{
-  padding: 1.5rem;
-  border-top: 1px solid #0f1724; /* slate-800 */
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
+/* Footer and cancel/ghost button now consolidated into Shared.css */
 
-.hb-btn-cancel{
-  padding: 0.5rem 1rem;
-  color: #94a3b8;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: color 150ms ease;
-}
-.hb-btn-cancel:hover{ color: #ffffff; }
-
-.hb-btn{
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  border: none;
-  cursor: pointer;
-}
-.hb-btn--primary{
-  background-color: #2563eb;
-  color: #ffffff;
-}
-.hb-btn--primary:hover{ background-color: #1d4ed8; }
+/* button styles moved to Shared.css */
 
 /* Modal body and form labels */
 .hb-modal-body{
@@ -174,13 +143,7 @@
   border:1px solid #374151; /* slate-700 */
 }
 
-.hb-modal-footer{
-  padding:1.5rem;
-  border-top:1px solid #374151; /* slate-800 */
-  display:flex;
-  justify-content:flex-end;
-  gap:0.75rem;
-}
+
 
 .hb-modal-title{
   font-size:1.125rem;
