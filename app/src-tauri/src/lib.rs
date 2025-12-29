@@ -162,6 +162,59 @@ fn create_account(
 }
 
 #[tauri::command]
+fn rename_account(
+    app_handle: AppHandle,
+    id: i32,
+    new_name: String,
+) -> Result<Account, String> {
+    let db_path = get_db_path(&app_handle)?;
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "UPDATE accounts SET name = ?1 WHERE id = ?2",
+        params![new_name, id],
+    )
+    .map_err(|e| e.to_string())?;
+
+    let mut stmt = conn
+        .prepare("SELECT id, name, balance, kind FROM accounts WHERE id = ?1")
+        .map_err(|e| e.to_string())?;
+    
+    let account = stmt
+        .query_row(params![id], |row| {
+            Ok(Account {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                balance: row.get(2)?,
+                kind: row.get(3).unwrap_or("cash".to_string()),
+            })
+        })
+        .map_err(|e| e.to_string())?;
+
+    Ok(account)
+}
+
+#[tauri::command]
+fn delete_account(app_handle: AppHandle, id: i32) -> Result<(), String> {
+    let db_path = get_db_path(&app_handle)?;
+    let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    // Delete all transactions for this account
+    tx.execute("DELETE FROM transactions WHERE account_id = ?1", params![id])
+        .map_err(|e| e.to_string())?;
+
+    // Delete the account
+    tx.execute("DELETE FROM accounts WHERE id = ?1", params![id])
+        .map_err(|e| e.to_string())?;
+
+    tx.commit().map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
 fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
     let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -771,7 +824,9 @@ pub fn run() {
             get_categories,
             create_brokerage_transaction,
             get_stock_quotes,
-            search_ticker
+            search_ticker,
+            rename_account,
+            delete_account
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
