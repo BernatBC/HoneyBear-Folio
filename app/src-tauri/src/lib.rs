@@ -163,6 +163,9 @@ fn create_account(
 
 #[tauri::command]
 fn rename_account(app_handle: AppHandle, id: i32, new_name: String) -> Result<Account, String> {
+    if new_name.trim().is_empty() {
+        return Err("Account name cannot be empty or whitespace-only".to_string());
+    }
     let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
