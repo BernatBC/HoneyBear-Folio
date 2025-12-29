@@ -1,0 +1,63 @@
+name: Lint and Format
+
+on:
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  lint-format:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: app/package-lock.json
+
+    - name: Install Frontend Dependencies
+      working-directory: ./app
+      run: npm install
+
+    - name: Format Frontend (Prettier)
+      working-directory: ./app
+      run: npm run format
+
+    - name: Lint Frontend (ESLint Fix)
+      working-directory: ./app
+      run: npm run lint -- --fix || true
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: app/src-tauri
+
+    - name: Format Backend (Rustfmt)
+      working-directory: ./app/src-tauri
+      run: cargo fmt
+
+    - name: Commit changes
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "style: apply automatic linting and formatting fixes"
+        branch: ${{ github.head_ref }}
+
+    - name: Lint Frontend (Check)
+      working-directory: ./app
+      run: npm run lint
+
+    - name: Lint Backend (Clippy)
+      working-directory: ./app/src-tauri
+      run: cargo clippy -- -D warnings
