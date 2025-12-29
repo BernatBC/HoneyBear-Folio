@@ -828,7 +828,7 @@ pub fn run() {
             get_stock_quotes,
             search_ticker,
             rename_account,
-            delete_account
+            delete_account,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
