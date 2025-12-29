@@ -162,11 +162,7 @@ fn create_account(
 }
 
 #[tauri::command]
-fn rename_account(
-    app_handle: AppHandle,
-    id: i32,
-    new_name: String,
-) -> Result<Account, String> {
+fn rename_account(app_handle: AppHandle, id: i32, new_name: String) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
@@ -179,7 +175,7 @@ fn rename_account(
     let mut stmt = conn
         .prepare("SELECT id, name, balance, kind FROM accounts WHERE id = ?1")
         .map_err(|e| e.to_string())?;
-    
+
     let account = stmt
         .query_row(params![id], |row| {
             Ok(Account {
@@ -202,8 +198,11 @@ fn delete_account(app_handle: AppHandle, id: i32) -> Result<(), String> {
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
     // Delete all transactions for this account
-    tx.execute("DELETE FROM transactions WHERE account_id = ?1", params![id])
-        .map_err(|e| e.to_string())?;
+    tx.execute(
+        "DELETE FROM transactions WHERE account_id = ?1",
+        params![id],
+    )
+    .map_err(|e| e.to_string())?;
 
     // Delete the account
     tx.execute("DELETE FROM accounts WHERE id = ?1", params![id])
