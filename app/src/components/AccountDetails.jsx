@@ -119,7 +119,11 @@ export default function AccountDetails({ account, onUpdate }) {
 
       setPayeeSuggestions(unique);
       setCategorySuggestions(
-        categories.map((c) => ({ value: c, label: "Category", type: "category" })),
+        categories.map((c) => ({
+          value: c,
+          label: "Category",
+          type: "category",
+        })),
       );
 
       // Set default cash account if available
@@ -452,8 +456,9 @@ export default function AccountDetails({ account, onUpdate }) {
               Balance:
             </span>
             <span
-              className={`text-3xl font-bold tracking-tight ${account.balance >= 0 ? "text-emerald-600" : "text-rose-600"
-                }`}
+              className={`text-3xl font-bold tracking-tight ${
+                account.balance >= 0 ? "text-emerald-600" : "text-rose-600"
+              }`}
             >
               {account.balance >= 0 ? "+" : ""}
               {account.balance.toLocaleString("en-US", {
@@ -550,7 +555,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     setTimeout(() => {
                       const escapedName =
                         typeof CSS !== "undefined" &&
-                          typeof CSS.escape === "function"
+                        typeof CSS.escape === "function"
                           ? CSS.escape(account.name)
                           : account.name.replace(/"/g, '\\"');
                       const input = document.querySelector(
@@ -837,10 +842,11 @@ export default function AccountDetails({ account, onUpdate }) {
                   <AutocompleteInput
                     suggestions={categorySuggestions}
                     placeholder="Category"
-                    className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${availableAccounts.includes(payee)
-                      ? "bg-slate-100 text-slate-500"
-                      : ""
-                      }`}
+                    className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${
+                      availableAccounts.includes(payee)
+                        ? "bg-slate-100 text-slate-500"
+                        : ""
+                    }`}
                     value={category}
                     onChange={setCategory}
                     disabled={availableAccounts.includes(payee)}
@@ -1059,10 +1065,11 @@ export default function AccountDetails({ account, onUpdate }) {
                         >
                           {tx.category ? (
                             <span
-                              className={`px-3 py-1.5 inline-flex text-xs font-bold rounded-xl border ${tx.category === "Transfer"
-                                ? "bg-purple-50 text-purple-700 border-purple-200"
-                                : "bg-slate-100 text-slate-700 border-slate-200"
-                                }`}
+                              className={`px-3 py-1.5 inline-flex text-xs font-bold rounded-xl border ${
+                                tx.category === "Transfer"
+                                  ? "bg-purple-50 text-purple-700 border-purple-200"
+                                  : "bg-slate-100 text-slate-700 border-slate-200"
+                              }`}
                             >
                               {tx.category}
                             </span>
@@ -1132,8 +1139,6 @@ export default function AccountDetails({ account, onUpdate }) {
           </table>
         </div>
       </div>
-
-
     </div>
   );
 }
