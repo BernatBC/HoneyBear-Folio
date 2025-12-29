@@ -356,12 +356,18 @@ export default function AccountDetails({ account, onUpdate }) {
           </div>
           {account.id !== "all" &&
             (!isAdding ? (
-              <button onClick={() => setIsAdding(true)} className="hb-btn hb-btn--primary">
+              <button
+                onClick={() => setIsAdding(true)}
+                className="hb-btn hb-btn--primary"
+              >
                 <Plus className="w-5 h-5 text-white" />
                 <span className="text-white">Add Transaction</span>
               </button>
             ) : (
-              <button onClick={() => setIsAdding(false)} className="hb-btn hb-btn--secondary">
+              <button
+                onClick={() => setIsAdding(false)}
+                className="hb-btn hb-btn--secondary"
+              >
                 <X className="w-5 h-5 text-slate-700" />
                 <span className="text-slate-700">Cancel</span>
               </button>
@@ -502,12 +508,12 @@ export default function AccountDetails({ account, onUpdate }) {
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
-                  <input
+                <input
                   type="number"
                   required
                   step="any"
                   placeholder="0"
-                    className="hb-input"
+                  className="hb-input"
                   value={shares}
                   onChange={handleSharesChange}
                 />
@@ -567,14 +573,20 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-6 flex justify-end mt-2">
-                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2">
+                <button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                >
                   <Check className="w-4 h-4" />
                   Save Transaction
                 </button>
               </div>
             </form>
           ) : (
-            <form onSubmit={handleAddTransaction} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <form
+              onSubmit={handleAddTransaction}
+              className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
+            >
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
                   Date
@@ -589,7 +601,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     dateFormat="yyyy-MM-dd"
                     shouldCloseOnSelect={false}
                     required
-                      className="hb-input hb-input--icon-left"
+                    className="hb-input hb-input--icon-left"
                   />
                 </div>
               </div>
@@ -667,7 +679,10 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-12 flex justify-end mt-2">
-                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5">
+                <button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
+                >
                   <Check className="w-4 h-4" />
                   <span className="text-white">Save Transaction</span>
                 </button>

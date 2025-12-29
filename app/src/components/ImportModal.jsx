@@ -213,7 +213,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
         <div className="hb-modal-body">
           {!file ? (
-            <div onClick={() => fileInputRef.current?.click()} className="hb-file-drop">
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="hb-file-drop"
+            >
               <FileSpreadsheet className="hb-file-icon" />
               <p className="text-slate-300 font-medium">
                 Click to upload CSV or Excel file
@@ -236,19 +239,14 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   <FileSpreadsheet className="w-5 h-5 text-green-500" />
                   <span className="text-white font-medium">{file.name}</span>
                 </div>
-                <button
-                  onClick={() => setFile(null)}
-                  className="hb-btn-cancel"
-                >
+                <button onClick={() => setFile(null)} className="hb-btn-cancel">
                   Change File
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="hb-label">
-                    Target Account
-                  </label>
+                  <label className="hb-label">Target Account</label>
                   <select
                     value={targetAccountId}
                     onChange={(e) => setTargetAccountId(e.target.value)}
@@ -265,15 +263,11 @@ export default function ImportModal({ onClose, onImportComplete }) {
               </div>
 
               <div className="space-y-3">
-                <h3 className="hb-mapping-heading">
-                  Map Columns
-                </h3>
+                <h3 className="hb-mapping-heading">Map Columns</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {Object.keys(mapping).map((field) => (
                     <div key={field}>
-                      <label className="hb-mapping-label">
-                        {field}
-                      </label>
+                      <label className="hb-mapping-label">{field}</label>
                       <select
                         value={mapping[field]}
                         onChange={(e) =>
@@ -304,7 +298,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   <div className="import-progress-bar mb-2">
                     <div
                       className="import-progress-bar__fill"
-                      style={{ ["--progress"]: `${(progress.current / progress.total) * 100}%` }}
+                      style={{
+                        ["--progress"]: `${(progress.current / progress.total) * 100}%`,
+                      }}
                     />
                   </div>
                   <div className="flex gap-4 text-xs">
@@ -324,11 +320,21 @@ export default function ImportModal({ onClose, onImportComplete }) {
         </div>
 
         <div className="hb-modal-footer">
-          <button onClick={onClose} className="hb-btn-cancel" disabled={importing}>
+          <button
+            onClick={onClose}
+            className="hb-btn-cancel"
+            disabled={importing}
+          >
             Cancel
           </button>
-          <button onClick={handleImport} disabled={!file || !targetAccountId || importing} className="hb-btn hb-btn--primary">
-            <span className="text-white">{importing ? "Importing..." : "Start Import"}</span>
+          <button
+            onClick={handleImport}
+            disabled={!file || !targetAccountId || importing}
+            className="hb-btn hb-btn--primary"
+          >
+            <span className="text-white">
+              {importing ? "Importing..." : "Start Import"}
+            </span>
           </button>
         </div>
       </div>

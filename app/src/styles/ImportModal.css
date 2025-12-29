@@ -1,11 +1,11 @@
-.import-progress-bar{
+.import-progress-bar {
   width: 100%;
   background-color: #1f2937; /* slate-700 */
   border-radius: 9999px;
   height: 0.5rem;
   overflow: hidden;
 }
-.import-progress-bar__fill{
+.import-progress-bar__fill {
   background-color: #2563eb; /* blue-600 */
   height: 100%;
   border-radius: 9999px;
@@ -14,10 +14,10 @@
 }
 
 /* Compact utility classes for ImportModal to replace long Tailwind sets */
-.hb-modal-overlay{
+.hb-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,19 +25,19 @@
   backdrop-filter: blur(4px);
 }
 
-.hb-modal-card{
+.hb-modal-card {
   background: #0f1724; /* slate-900 */
   width: 100%;
   max-width: 48rem; /* approx max-w-2xl */
   border-radius: 0.75rem;
   border: 1px solid #374151; /* slate-700 */
-  box-shadow: 0 25px 50px -12px rgba(2,6,23,0.6);
+  box-shadow: 0 25px 50px -12px rgba(2, 6, 23, 0.6);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
 }
 
-.hb-modal-header{
+.hb-modal-header {
   padding: 1.5rem;
   border-bottom: 1px solid #0f1724; /* slate-800 */
   display: flex;
@@ -45,7 +45,7 @@
   align-items: center;
 }
 
-.hb-file-drop{
+.hb-file-drop {
   border: 2px dashed #374151; /* slate-700 */
   border-radius: 0.75rem;
   padding: 3rem;
@@ -54,25 +54,27 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
 }
-.hb-file-drop:hover{
+.hb-file-drop:hover {
   border-color: #3b82f6; /* blue-500 */
-  background-color: rgba(15,23,42,0.2); /* slate-800/50 */
+  background-color: rgba(15, 23, 42, 0.2); /* slate-800/50 */
 }
 
-.hb-file-icon{
+.hb-file-icon {
   width: 3rem;
   height: 3rem;
   color: #94a3b8; /* slate-400 */
   margin-bottom: 1rem;
   transition: color 150ms ease;
 }
-.hb-file-drop:hover .hb-file-icon{
+.hb-file-drop:hover .hb-file-icon {
   color: #3b82f6;
 }
 
-.hb-file-preview{
+.hb-file-preview {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -83,7 +85,7 @@
 }
 
 .hb-select-dark,
-.hb-mapping-select{
+.hb-mapping-select {
   width: 100%;
   background: #111827; /* slate-800 */
   border: 1px solid #374151;
@@ -94,8 +96,8 @@
   outline: none;
 }
 .hb-select-dark:focus,
-.hb-mapping-select:focus{
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+.hb-mapping-select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
   border-color: #3b82f6;
 }
 
@@ -104,13 +106,13 @@
 /* button styles moved to Shared.css */
 
 /* Modal body and form labels */
-.hb-modal-body{
+.hb-modal-body {
   padding: 1.5rem;
   overflow-y: auto;
   flex: 1 1 auto;
 }
 
-.hb-label{
+.hb-label {
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
@@ -118,7 +120,7 @@
   margin-bottom: 0.25rem;
 }
 
-.hb-mapping-heading{
+.hb-mapping-heading {
   font-size: 0.875rem;
   font-weight: 700;
   color: #cbd5e1; /* slate-300 */
@@ -127,30 +129,27 @@
   margin-bottom: 0.5rem;
 }
 
-.hb-mapping-label{
-  display:block;
-  font-size:0.75rem;
-  font-weight:600;
-  color:#94a3b8;
-  margin-bottom:0.25rem;
-  text-transform:capitalize;
+.hb-mapping-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+  text-transform: capitalize;
 }
 
-.hb-importing-box{
-  background:#111827; /* slate-800 */
-  padding:1rem;
-  border-radius:0.5rem;
-  border:1px solid #374151; /* slate-700 */
+.hb-importing-box {
+  background: #111827; /* slate-800 */
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #374151; /* slate-700 */
 }
 
-
-
-.hb-modal-title{
-  font-size:1.125rem;
-  font-weight:700;
-  color:#ffffff;
-  display:flex;
-  align-items:center;
-  gap:0.5rem;
+.hb-modal-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-

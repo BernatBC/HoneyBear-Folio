@@ -172,33 +172,71 @@ export default function InvestmentDashboard() {
         <div className="hb-loading-container">
           <div className="hb-loading-center">
             <div className="hb-spinner"></div>
-            <span className="text-slate-600 font-medium text-lg">Loading investment data...</span>
-            <span className="text-slate-400 text-sm">Fetching latest market prices</span>
+            <span className="text-slate-600 font-medium text-lg">
+              Loading investment data...
+            </span>
+            <span className="text-slate-400 text-sm">
+              Fetching latest market prices
+            </span>
           </div>
         </div>
       ) : error ? (
         <div className="hb-error-card">
-          <div style={{display:'flex',alignItems:'center',gap:'0.75rem'}}>
-            <div style={{background:'#fecaca',padding:'0.5rem',borderRadius:'9999px'}}>
-              <svg className="w-6 h-6 text-rose-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+          >
+            <div
+              style={{
+                background: "#fecaca",
+                padding: "0.5rem",
+                borderRadius: "9999px",
+              }}
+            >
+              <svg
+                className="w-6 h-6 text-rose-700"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div>
-              <div style={{fontWeight:700}}>Error loading data</div>
-              <div style={{color:'#b91c1c',fontSize:'0.875rem'}}>{error}</div>
+              <div style={{ fontWeight: 700 }}>Error loading data</div>
+              <div style={{ color: "#b91c1c", fontSize: "0.875rem" }}>
+                {error}
+              </div>
             </div>
           </div>
         </div>
       ) : holdings.length === 0 ? (
         <div className="hb-empty-state">
           <div className="hb-empty-illustration">
-            <svg className="w-16 h-16 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            <svg
+              className="w-16 h-16 text-slate-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
             </svg>
           </div>
-          <p className="text-lg font-semibold text-slate-600 mb-2">No investments found</p>
-          <p className="text-sm text-slate-400">Start adding stock transactions to track your portfolio</p>
+          <p className="text-lg font-semibold text-slate-600 mb-2">
+            No investments found
+          </p>
+          <p className="text-sm text-slate-400">
+            Start adding stock transactions to track your portfolio
+          </p>
         </div>
       ) : (
         <>
@@ -276,9 +314,11 @@ export default function InvestmentDashboard() {
           <div className="hb-table-card">
             <div className="hb-table-header">
               <h3 className="text-lg font-semibold text-slate-800">Holdings</h3>
-              <p className="text-sm text-slate-500 mt-1">Detailed breakdown of your positions</p>
+              <p className="text-sm text-slate-500 mt-1">
+                Detailed breakdown of your positions
+              </p>
             </div>
-            <div style={{overflow:'auto',flex:1}}>
+            <div style={{ overflow: "auto", flex: 1 }}>
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                   <tr>
@@ -396,7 +436,9 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
         title={`${item.ticker}: ${item.currentValue.toLocaleString()} € (${item.roi.toFixed(2)}%)`}
       >
         <span className="font-bold text-gray-800">{item.ticker}</span>
-        <span className="text-gray-700 hidden sm:inline">{item.roi.toFixed(1)}%</span>
+        <span className="text-gray-700 hidden sm:inline">
+          {item.roi.toFixed(1)}%
+        </span>
       </div>
     );
   }
