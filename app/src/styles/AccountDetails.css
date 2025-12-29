@@ -1,0 +1,29 @@
+.hb-btn{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.hb-btn--primary{
+  background-color: #2563eb;
+  color: #ffffff;
+}
+.hb-btn--primary:hover{
+  background-color: #1d4ed8;
+}
+
+.hb-btn--secondary{
+  background-color: #f1f5f9;
+  color: #334155;
+}
+.hb-btn--secondary:hover{
+  background-color: #e2e8f0;
+}

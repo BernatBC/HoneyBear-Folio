@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/datepicker.css";
+import "../styles/AccountDetails.css";
+import "../styles/Shared.css";
 import { invoke } from "@tauri-apps/api/core";
 import {
   Search,
@@ -317,7 +319,7 @@ export default function AccountDetails({ account, onUpdate }) {
   return (
     <div className="max-w-6xl mx-auto pb-8">
       {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
+      <header className="hb-card hb-header mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             {account.name}
@@ -347,65 +349,21 @@ export default function AccountDetails({ account, onUpdate }) {
             <input
               type="text"
               placeholder="Search transactions..."
-              className="w-full pl-10 pr-4 py-3 bg-white border-2 border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm transition-all hover:border-slate-300"
+              className="hb-input-search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           {account.id !== "all" &&
             (!isAdding ? (
-              <button
-                onClick={() => setIsAdding(true)}
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "#ffffff",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 1.25rem",
-                  borderRadius: "0.75rem",
-                  fontWeight: "600",
-                  fontSize: "0.875rem",
-                  border: "none",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#1d4ed8")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#2563eb")
-                }
-              >
-                <Plus className="w-5 h-5" style={{ color: "#ffffff" }} />
-                <span style={{ color: "#ffffff" }}>Add Transaction</span>
+              <button onClick={() => setIsAdding(true)} className="hb-btn hb-btn--primary">
+                <Plus className="w-5 h-5 text-white" />
+                <span className="text-white">Add Transaction</span>
               </button>
             ) : (
-              <button
-                onClick={() => setIsAdding(false)}
-                style={{
-                  backgroundColor: "#f1f5f9",
-                  color: "#334155",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 1.25rem",
-                  borderRadius: "0.75rem",
-                  fontWeight: "600",
-                  fontSize: "0.875rem",
-                  border: "none",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#e2e8f0")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f1f5f9")
-                }
-              >
-                <X className="w-5 h-5" style={{ color: "#334155" }} />
-                <span style={{ color: "#334155" }}>Cancel</span>
+              <button onClick={() => setIsAdding(false)} className="hb-btn hb-btn--secondary">
+                <X className="w-5 h-5 text-slate-700" />
+                <span className="text-slate-700">Cancel</span>
               </button>
             ))}
         </div>
@@ -414,7 +372,7 @@ export default function AccountDetails({ account, onUpdate }) {
       {/* Add Transaction Form */}
       {isAdding && (
         <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in">
-          <h3 className="text-lg font-bold mb-6 text-slate-900 flex items-center gap-3">
+          <h3 className="hb-form-title">
             <div className="bg-brand-100 p-2.5 rounded-xl">
               <Plus className="w-5 h-5 text-brand-600" />
             </div>
@@ -424,7 +382,7 @@ export default function AccountDetails({ account, onUpdate }) {
           {account.kind === "brokerage" ? (
             <form
               onSubmit={handleAddTransaction}
-              className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
+              className="hb-form-grid"
             >
               <div className="md:col-span-12 mb-2 flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -467,7 +425,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     dateFormat="yyyy-MM-dd"
                     shouldCloseOnSelect={false}
                     required
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="hb-input"
                   />
                 </div>
               </div>
@@ -478,7 +436,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <select
                   required
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                  className="hb-input"
                   value={cashAccountId}
                   onChange={(e) => setCashAccountId(e.target.value)}
                 >
@@ -501,7 +459,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   type="text"
                   required
                   placeholder="AAPL"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all uppercase"
+                  className="hb-input"
                   value={ticker}
                   onChange={(e) => {
                     setTicker(e.target.value.toUpperCase());
@@ -549,7 +507,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   required
                   step="any"
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="hb-input"
                   value={shares}
                   onChange={handleSharesChange}
                 />
@@ -566,7 +524,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="any"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="hb-input"
                     value={pricePerShare}
                     onChange={handlePricePerShareChange}
                   />
@@ -584,7 +542,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="hb-input"
                     value={totalPrice}
                     onChange={handleTotalPriceChange}
                   />
@@ -601,7 +559,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="hb-input"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
                   />
@@ -609,20 +567,14 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-6 flex justify-end mt-2">
-                <button
-                  type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
-                >
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2">
                   <Check className="w-4 h-4" />
                   Save Transaction
                 </button>
               </div>
             </form>
           ) : (
-            <form
-              onSubmit={handleAddTransaction}
-              className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
-            >
+            <form onSubmit={handleAddTransaction} className="hb-form-grid">
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
                   Date
@@ -637,7 +589,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     dateFormat="yyyy-MM-dd"
                     shouldCloseOnSelect={false}
                     required
-                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
+                      className="hb-input"
                   />
                 </div>
               </div>
@@ -651,7 +603,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   <AutocompleteInput
                     suggestions={payeeSuggestions}
                     placeholder="Who got paid?"
-                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
+                    className="hb-input"
                     value={payee}
                     onChange={setPayee}
                   />
@@ -668,7 +620,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="text"
                     list="category-suggestions"
                     placeholder="Category"
-                    className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${
+                    className={`hb-input ${
                       availableAccounts.includes(payee)
                         ? "bg-slate-100 text-slate-500"
                         : ""
@@ -689,7 +641,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   <input
                     type="text"
                     placeholder="What was this for?"
-                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
+                    className="hb-input"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                   />
@@ -707,7 +659,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-10 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300"
+                    className="hb-input"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
@@ -715,10 +667,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-12 flex justify-end mt-2">
-                <button
-                  type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
-                >
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5">
                   <Check className="w-4 h-4" />
                   <span className="text-white">Save Transaction</span>
                 </button>

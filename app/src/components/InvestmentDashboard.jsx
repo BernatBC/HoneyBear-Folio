@@ -5,6 +5,8 @@ import { RefreshCw } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
+import "../styles/TreeMap.css";
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function InvestmentDashboard() {
@@ -147,8 +149,8 @@ export default function InvestmentDashboard() {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
-      <div className="flex justify-between items-center">
+    <div className="hb-dashboard-container">
+      <div className="hb-dashboard-header">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
             Investment Dashboard
@@ -159,7 +161,7 @@ export default function InvestmentDashboard() {
         </div>
         <button
           onClick={fetchData}
-          className="p-2.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200 shadow-sm border border-transparent hover:border-brand-100"
+          className="hb-refresh-btn"
           title="Refresh Data"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
@@ -167,73 +169,43 @@ export default function InvestmentDashboard() {
       </div>
 
       {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
-            <span className="text-slate-600 font-medium text-lg">
-              Loading investment data...
-            </span>
-            <span className="text-slate-400 text-sm">
-              Fetching latest market prices
-            </span>
+        <div className="hb-loading-container">
+          <div className="hb-loading-center">
+            <div className="hb-spinner"></div>
+            <span className="text-slate-600 font-medium text-lg">Loading investment data...</span>
+            <span className="text-slate-400 text-sm">Fetching latest market prices</span>
           </div>
         </div>
       ) : error ? (
-        <div className="bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 p-6 rounded-2xl border-2 border-rose-200 font-medium shadow-md">
-          <div className="flex items-center gap-3">
-            <div className="bg-rose-200 p-2 rounded-full">
-              <svg
-                className="w-6 h-6 text-rose-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+        <div className="hb-error-card">
+          <div style={{display:'flex',alignItems:'center',gap:'0.75rem'}}>
+            <div style={{background:'#fecaca',padding:'0.5rem',borderRadius:'9999px'}}>
+              <svg className="w-6 h-6 text-rose-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <div className="font-bold">Error loading data</div>
-              <div className="text-sm text-rose-600">{error}</div>
+              <div style={{fontWeight:700}}>Error loading data</div>
+              <div style={{color:'#b91c1c',fontSize:'0.875rem'}}>{error}</div>
             </div>
           </div>
         </div>
       ) : holdings.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-16">
-          <div className="bg-slate-100 p-6 rounded-2xl mb-4">
-            <svg
-              className="w-16 h-16 text-slate-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
+        <div className="hb-empty-state">
+          <div className="hb-empty-illustration">
+            <svg className="w-16 h-16 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
-          <p className="text-lg font-semibold text-slate-600 mb-2">
-            No investments found
-          </p>
-          <p className="text-sm text-slate-400">
-            Start adding stock transactions to track your portfolio
-          </p>
+          <p className="text-lg font-semibold text-slate-600 mb-2">No investments found</p>
+          <p className="text-sm text-slate-400">Start adding stock transactions to track your portfolio</p>
         </div>
       ) : (
         <>
           {/* Summary Card */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">
-                Total Portfolio Value
-              </h3>
+          <div className="hb-summary-grid">
+            <div className="hb-summary-card">
+              <h3 className="hb-summary-sub">Total Portfolio Value</h3>
               <p className="text-3xl font-bold text-slate-900 tracking-tight">
                 {totalValue.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -242,10 +214,8 @@ export default function InvestmentDashboard() {
                 €
               </p>
             </div>
-            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1 group cursor-pointer">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-emerald-600 transition-colors">
-                Top Performer
-              </h3>
+            <div className="hb-summary-card">
+              <h3 className="hb-summary-sub">Top Performer</h3>
               <p className="text-xl font-bold text-emerald-600 truncate tracking-tight">
                 {
                   holdings.reduce((prev, current) =>
@@ -263,10 +233,8 @@ export default function InvestmentDashboard() {
                 </span>
               </p>
             </div>
-            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">
-                Total Holdings
-              </h3>
+            <div className="hb-summary-card">
+              <h3 className="hb-summary-sub">Total Holdings</h3>
               <p className="text-3xl font-bold text-slate-900 tracking-tight">
                 {holdings.length}
               </p>
@@ -275,7 +243,7 @@ export default function InvestmentDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Portfolio Allocation */}
-            <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300">
+            <div className="hb-chart-card">
               {allocationData ? (
                 <Doughnut options={chartOptions} data={allocationData} />
               ) : (
@@ -291,28 +259,26 @@ export default function InvestmentDashboard() {
             </div>
 
             {/* TreeMap */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col h-[400px] hover:shadow-lg transition-shadow duration-300">
+            <div className="hb-treemap-card">
               <h3 className="text-lg font-semibold text-slate-800 mb-2">
                 Portfolio Heatmap
               </h3>
               <p className="text-sm text-slate-500 mb-4">
                 Visual representation of holdings by size and performance
               </p>
-              <div className="flex-1 min-h-0 border-2 border-slate-200 rounded-xl overflow-hidden relative shadow-inner">
+              <div className="hb-treemap-inner">
                 <TreeMap items={holdings} totalValue={totalValue} />
               </div>
             </div>
           </div>
 
           {/* Holdings Table */}
-          <div className="bg-white p-0 rounded-2xl shadow-md border border-slate-200 flex flex-col overflow-hidden h-full max-h-[600px] hover:shadow-lg transition-shadow duration-300">
-            <div className="p-6 border-b border-slate-200 bg-slate-50/50">
+          <div className="hb-table-card">
+            <div className="hb-table-header">
               <h3 className="text-lg font-semibold text-slate-800">Holdings</h3>
-              <p className="text-sm text-slate-500 mt-1">
-                Detailed breakdown of your positions
-              </p>
+              <p className="text-sm text-slate-500 mt-1">Detailed breakdown of your positions</p>
             </div>
-            <div className="overflow-auto flex-1">
+            <div style={{overflow:'auto',flex:1}}>
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
                   <tr>
@@ -419,23 +385,18 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
 
     return (
       <div
+        className="treemap-node p-1 text-xs text-center"
         style={{
-          position: "absolute",
           left: `${x}%`,
           top: `${y}%`,
           width: `${w}%`,
           height: `${h}%`,
-          backgroundColor: bgColor,
-          border: "1px solid white",
-          overflow: "hidden",
+          ["--bg-color"]: bgColor,
         }}
-        className="flex flex-col items-center justify-center p-1 text-xs text-center transition-all hover:opacity-90 hover:z-10 hover:scale-[1.02] cursor-pointer"
         title={`${item.ticker}: ${item.currentValue.toLocaleString()} € (${item.roi.toFixed(2)}%)`}
       >
         <span className="font-bold text-gray-800">{item.ticker}</span>
-        <span className="text-gray-700 hidden sm:inline">
-          {item.roi.toFixed(1)}%
-        </span>
+        <span className="text-gray-700 hidden sm:inline">{item.roi.toFixed(1)}%</span>
       </div>
     );
   }

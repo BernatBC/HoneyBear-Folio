@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import "../styles/ImportModal.css";
+import "../styles/AccountDetails.css";
 
 export default function ImportModal({ onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
@@ -197,10 +199,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-slate-900 w-full max-w-2xl rounded-xl border border-slate-700 shadow-2xl flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+    <div className="hb-modal-overlay">
+      <div className="hb-modal-card">
+        <div className="hb-modal-header">
+          <h2 className="hb-modal-title">
             <Upload className="w-5 h-5 text-blue-500" />
             Import Transactions
           </h2>
@@ -209,13 +211,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="hb-modal-body">
           {!file ? (
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-700 rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-slate-800/50 transition-all group"
-            >
-              <FileSpreadsheet className="w-12 h-12 text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+            <div onClick={() => fileInputRef.current?.click()} className="hb-file-drop">
+              <FileSpreadsheet className="hb-file-icon" />
               <p className="text-slate-300 font-medium">
                 Click to upload CSV or Excel file
               </p>
@@ -232,14 +231,14 @@ export default function ImportModal({ onClose, onImportComplete }) {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="flex items-center justify-between bg-slate-800 p-3 rounded-lg border border-slate-700">
+              <div className="hb-file-preview">
                 <div className="flex items-center gap-3">
                   <FileSpreadsheet className="w-5 h-5 text-green-500" />
                   <span className="text-white font-medium">{file.name}</span>
                 </div>
                 <button
                   onClick={() => setFile(null)}
-                  className="text-slate-400 hover:text-red-400 text-sm"
+                  className="hb-btn-cancel"
                 >
                   Change File
                 </button>
@@ -247,13 +246,13 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">
+                  <label className="hb-label">
                     Target Account
                   </label>
                   <select
                     value={targetAccountId}
                     onChange={(e) => setTargetAccountId(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                    className="hb-select-dark"
                   >
                     <option value="">Select Account...</option>
                     {accounts.map((acc) => (
@@ -266,13 +265,13 @@ export default function ImportModal({ onClose, onImportComplete }) {
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+                <h3 className="hb-mapping-heading">
                   Map Columns
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   {Object.keys(mapping).map((field) => (
                     <div key={field}>
-                      <label className="block text-xs font-medium text-slate-500 mb-1 capitalize">
+                      <label className="hb-mapping-label">
                         {field}
                       </label>
                       <select
@@ -280,7 +279,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                         onChange={(e) =>
                           setMapping({ ...mapping, [field]: e.target.value })
                         }
-                        className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                        className="hb-mapping-select"
                       >
                         <option value="">Skip</option>
                         {columns.map((col) => (
@@ -295,19 +294,17 @@ export default function ImportModal({ onClose, onImportComplete }) {
               </div>
 
               {importing && (
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                <div className="hb-importing-box">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-slate-300">Importing...</span>
                     <span className="text-slate-400">
                       {progress.current} / {progress.total}
                     </span>
                   </div>
-                  <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+                  <div className="import-progress-bar mb-2">
                     <div
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${(progress.current / progress.total) * 100}%`,
-                      }}
+                      className="import-progress-bar__fill"
+                      style={{ ["--progress"]: `${(progress.current / progress.total) * 100}%` }}
                     />
                   </div>
                   <div className="flex gap-4 text-xs">
@@ -326,22 +323,12 @@ export default function ImportModal({ onClose, onImportComplete }) {
           )}
         </div>
 
-        <div className="p-6 border-t border-slate-800 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
-            disabled={importing}
-          >
+        <div className="hb-modal-footer">
+          <button onClick={onClose} className="hb-btn-cancel" disabled={importing}>
             Cancel
           </button>
-          <button
-            onClick={handleImport}
-            disabled={!file || !targetAccountId || importing}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <span className="text-white">
-              {importing ? "Importing..." : "Start Import"}
-            </span>
+          <button onClick={handleImport} disabled={!file || !targetAccountId || importing} className="hb-btn hb-btn--primary">
+            <span className="text-white">{importing ? "Importing..." : "Start Import"}</span>
           </button>
         </div>
       </div>
