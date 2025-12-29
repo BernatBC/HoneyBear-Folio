@@ -1,73 +1,97 @@
-import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { save } from '@tauri-apps/plugin-dialog';
-import { writeTextFile, writeFile } from '@tauri-apps/plugin-fs';
-import { X, Download, FileJson, FileSpreadsheet, FileText } from 'lucide-react';
-import * as XLSX from 'xlsx';
-import '../styles/ExportModal.css';
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { invoke } from "@tauri-apps/api/core";
+import { save } from "@tauri-apps/plugin-dialog";
+import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
+import { X, Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
+import * as XLSX from "xlsx";
+import "../styles/ExportModal.css";
 
 export default function ExportModal({ onClose }) {
-  const [format, setFormat] = useState('json');
+  const [format, setFormat] = useState("json");
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {
     try {
       setExporting(true);
-      
+
       // 1. Fetch Data
-      const accounts = await invoke('get_accounts');
-      const transactions = await invoke('get_all_transactions');
-      
+      const accounts = await invoke("get_accounts");
+      const transactions = await invoke("get_all_transactions");
+
       // 2. Prepare Data based on format
       let content;
-      let defaultPath = `honeybear_export_${new Date().toISOString().split('T')[0]}`;
+      let defaultPath = `honeybear_export_${new Date().toISOString().split("T")[0]}`;
       let filters = [];
 
-      if (format === 'json') {
-        const data = { accounts, transactions, exportDate: new Date().toISOString() };
+      if (format === "json") {
+        const data = {
+          accounts,
+          transactions,
+          exportDate: new Date().toISOString(),
+        };
         content = JSON.stringify(data, null, 2);
-        defaultPath += '.json';
-        filters = [{ name: 'JSON', extensions: ['json'] }];
-      } else if (format === 'csv') {
+        defaultPath += ".json";
+        filters = [{ name: "JSON", extensions: ["json"] }];
+      } else if (format === "csv") {
         // Flatten transactions for CSV
-        const headers = ['Date', 'Account', 'Payee', 'Category', 'Amount', 'Notes', 'Ticker', 'Shares', 'Price', 'Fee'];
-        const rows = transactions.map(t => {
-            const acc = accounts.find(a => a.id === t.account_id);
-            return [
-                t.date,
-                acc ? acc.name : t.account_id,
-                t.payee,
-                t.category,
-                t.amount,
-                t.notes,
-                t.ticker,
-                t.shares,
-                t.price_per_share,
-                t.fee
-            ].map(v => v === null || v === undefined ? '' : String(v).includes(',') ? `"${v}"` : v).join(',');
+        const headers = [
+          "Date",
+          "Account",
+          "Payee",
+          "Category",
+          "Amount",
+          "Notes",
+          "Ticker",
+          "Shares",
+          "Price",
+          "Fee",
+        ];
+        const rows = transactions.map((t) => {
+          const acc = accounts.find((a) => a.id === t.account_id);
+          return [
+            t.date,
+            acc ? acc.name : t.account_id,
+            t.payee,
+            t.category,
+            t.amount,
+            t.notes,
+            t.ticker,
+            t.shares,
+            t.price_per_share,
+            t.fee,
+          ]
+            .map((v) =>
+              v === null || v === undefined
+                ? ""
+                : String(v).includes(",")
+                  ? `"${v}"`
+                  : v,
+            )
+            .join(",");
         });
-        content = [headers.join(','), ...rows].join('\n');
-        defaultPath += '.csv';
-        filters = [{ name: 'CSV', extensions: ['csv'] }];
-      } else if (format === 'xlsx') {
+        content = [headers.join(","), ...rows].join("\n");
+        defaultPath += ".csv";
+        filters = [{ name: "CSV", extensions: ["csv"] }];
+      } else if (format === "xlsx") {
         // Use XLSX to generate buffer
         const wb = XLSX.utils.book_new();
-        
+
         // Transactions Sheet
-        const txData = transactions.map(t => {
-            const acc = accounts.find(a => a.id === t.account_id);
-            return {
-                Date: t.date,
-                Account: acc ? acc.name : t.account_id,
-                Payee: t.payee,
-                Category: t.category,
-                Amount: t.amount,
-                Notes: t.notes,
-                Ticker: t.ticker,
-                Shares: t.shares,
-                Price: t.price_per_share,
-                Fee: t.fee
-            };
+        const txData = transactions.map((t) => {
+          const acc = accounts.find((a) => a.id === t.account_id);
+          return {
+            Date: t.date,
+            Account: acc ? acc.name : t.account_id,
+            Payee: t.payee,
+            Category: t.category,
+            Amount: t.amount,
+            Notes: t.notes,
+            Ticker: t.ticker,
+            Shares: t.shares,
+            Price: t.price_per_share,
+            Fee: t.fee,
+          };
         });
         const wsTx = XLSX.utils.json_to_sheet(txData);
         XLSX.utils.book_append_sheet(wb, wsTx, "Transactions");
@@ -77,16 +101,16 @@ export default function ExportModal({ onClose }) {
         XLSX.utils.book_append_sheet(wb, wsAcc, "Accounts");
 
         // Generate binary
-        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
         content = new Uint8Array(wbout);
-        defaultPath += '.xlsx';
-        filters = [{ name: 'Excel', extensions: ['xlsx'] }];
+        defaultPath += ".xlsx";
+        filters = [{ name: "Excel", extensions: ["xlsx"] }];
       }
 
       // 3. Open Save Dialog
       const filePath = await save({
         defaultPath,
-        filters
+        filters,
       });
 
       if (!filePath) {
@@ -95,10 +119,10 @@ export default function ExportModal({ onClose }) {
       }
 
       // 4. Write File
-      if (format === 'xlsx') {
-          await writeFile(filePath, content);
+      if (format === "xlsx") {
+        await writeFile(filePath, content);
       } else {
-          await writeTextFile(filePath, content);
+        await writeTextFile(filePath, content);
       }
 
       onClose();
@@ -127,33 +151,33 @@ export default function ExportModal({ onClose }) {
           <label className="modal-label">Select Format</label>
           <div className="format-grid">
             <button
-              onClick={() => setFormat('json')}
+              onClick={() => setFormat("json")}
               className={`format-button ${
-                format === 'json' 
-                  ? 'format-button-active' 
-                  : 'format-button-inactive'
+                format === "json"
+                  ? "format-button-active"
+                  : "format-button-inactive"
               }`}
             >
               <FileJson className="w-6 h-6 mb-2" />
               <span className="text-xs font-medium">JSON</span>
             </button>
             <button
-              onClick={() => setFormat('csv')}
+              onClick={() => setFormat("csv")}
               className={`format-button ${
-                format === 'csv' 
-                  ? 'format-button-active' 
-                  : 'format-button-inactive'
+                format === "csv"
+                  ? "format-button-active"
+                  : "format-button-inactive"
               }`}
             >
               <FileText className="w-6 h-6 mb-2" />
               <span className="text-xs font-medium">CSV</span>
             </button>
             <button
-              onClick={() => setFormat('xlsx')}
+              onClick={() => setFormat("xlsx")}
               className={`format-button ${
-                format === 'xlsx' 
-                  ? 'format-button-active' 
-                  : 'format-button-inactive'
+                format === "xlsx"
+                  ? "format-button-active"
+                  : "format-button-inactive"
               }`}
             >
               <FileSpreadsheet className="w-6 h-6 mb-2" />
@@ -163,22 +187,28 @@ export default function ExportModal({ onClose }) {
         </div>
 
         <div className="modal-footer">
-          <button 
+          <button
             onClick={onClose}
             className="modal-cancel-button"
             disabled={exporting}
           >
             Cancel
           </button>
-          <button 
+          <button
             onClick={handleExport}
             disabled={exporting}
             className="modal-export-button"
           >
-            <span className="text-white">{exporting ? 'Exporting...' : 'Select Location & Export'}</span>
+            <span className="text-white">
+              {exporting ? "Exporting..." : "Select Location & Export"}
+            </span>
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+ExportModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+};

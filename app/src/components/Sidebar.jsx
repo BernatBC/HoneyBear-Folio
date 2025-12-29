@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import ImportModal from './ImportModal';
-import ExportModal from './ExportModal';
-import { 
-  Wallet, 
-  Plus, 
-  CreditCard, 
-  TrendingUp, 
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { invoke } from "@tauri-apps/api/core";
+import ImportModal from "./ImportModal";
+import ExportModal from "./ExportModal";
+import {
+  Wallet,
+  Plus,
+  CreditCard,
+  TrendingUp,
   LayoutDashboard,
   X,
   Check,
@@ -14,22 +15,33 @@ import {
   PieChart,
   Calculator,
   Download,
-  Upload
-} from 'lucide-react';
-import packageJson from '../../package.json';
-import '../styles/Sidebar.css';
+  Upload,
+} from "lucide-react";
+import packageJson from "../../package.json";
+import "../styles/Sidebar.css";
 
-export default function Sidebar({ accounts, marketValues, selectedId, onSelectAccount, onUpdate }) {
+export default function Sidebar({
+  accounts,
+  marketValues,
+  selectedId,
+  onSelectAccount,
+  onUpdate,
+}) {
   const [isAdding, setIsAdding] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [newAccountName, setNewAccountName] = useState('');
-  const [newAccountBalance, setNewAccountBalance] = useState('');
-  const [newAccountType, setNewAccountType] = useState('cash');
+  const [newAccountName, setNewAccountName] = useState("");
+  const [newAccountBalance, setNewAccountBalance] = useState("");
+  const [newAccountType, setNewAccountType] = useState("cash");
 
   const totalBalance = accounts.reduce((sum, acc) => {
-    if (acc.kind === 'brokerage') {
-      return sum + (marketValues[acc.id] !== undefined ? marketValues[acc.id] : acc.balance);
+    if (acc.kind === "brokerage") {
+      return (
+        sum +
+        (marketValues[acc.id] !== undefined
+          ? marketValues[acc.id]
+          : acc.balance)
+      );
     }
     return sum + acc.balance;
   }, 0);
@@ -37,14 +49,14 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
   async function handleAddAccount(e) {
     e.preventDefault();
     try {
-      await invoke('create_account', { 
-        name: newAccountName, 
+      await invoke("create_account", {
+        name: newAccountName,
         balance: parseFloat(newAccountBalance) || 0.0,
-        kind: newAccountType
+        kind: newAccountType,
       });
-      setNewAccountName('');
-      setNewAccountBalance('');
-      setNewAccountType('cash');
+      setNewAccountName("");
+      setNewAccountBalance("");
+      setNewAccountType("cash");
       setIsAdding(false);
       onUpdate();
     } catch (e) {
@@ -77,61 +89,73 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
             Net Worth
           </div>
           <div className="net-worth-value">
-            {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+            {totalBalance.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{" "}
+            €
           </div>
         </div>
       </div>
-      
+
       {/* Navigation */}
       <div className="sidebar-nav">
         <div>
           <h2 className="sidebar-section-title">Overview</h2>
           <div className="space-y-1">
-            <button 
-              onClick={() => handleSelect('dashboard')}
+            <button
+              onClick={() => handleSelect("dashboard")}
               className={`sidebar-nav-item group ${
-                selectedId === 'dashboard' 
-                  ? 'sidebar-nav-item-active' 
-                  : 'sidebar-nav-item-inactive'
+                selectedId === "dashboard"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
               }`}
             >
-              <LayoutDashboard className={`sidebar-nav-icon ${selectedId === 'dashboard' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
+              <LayoutDashboard
+                className={`sidebar-nav-icon ${selectedId === "dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
+              />
               <span className="font-medium">Dashboard</span>
             </button>
 
-            <button 
-              onClick={() => handleSelect('investment-dashboard')}
+            <button
+              onClick={() => handleSelect("investment-dashboard")}
               className={`sidebar-nav-item group ${
-                selectedId === 'investment-dashboard' 
-                  ? 'sidebar-nav-item-active' 
-                  : 'sidebar-nav-item-inactive'
+                selectedId === "investment-dashboard"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
               }`}
             >
-              <PieChart className={`sidebar-nav-icon ${selectedId === 'investment-dashboard' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
+              <PieChart
+                className={`sidebar-nav-icon ${selectedId === "investment-dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
+              />
               <span className="font-medium">Investments</span>
             </button>
 
-            <button 
-              onClick={() => handleSelect('fire-calculator')}
+            <button
+              onClick={() => handleSelect("fire-calculator")}
               className={`sidebar-nav-item group ${
-                selectedId === 'fire-calculator' 
-                  ? 'sidebar-nav-item-active' 
-                  : 'sidebar-nav-item-inactive'
+                selectedId === "fire-calculator"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
               }`}
             >
-              <Calculator className={`sidebar-nav-icon ${selectedId === 'fire-calculator' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
+              <Calculator
+                className={`sidebar-nav-icon ${selectedId === "fire-calculator" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
+              />
               <span className="font-medium">FIRE Calculator</span>
             </button>
 
-            <button 
-              onClick={() => handleSelect('all')}
+            <button
+              onClick={() => handleSelect("all")}
               className={`sidebar-nav-item group ${
-                selectedId === 'all' 
-                  ? 'sidebar-nav-item-active' 
-                  : 'sidebar-nav-item-inactive'
+                selectedId === "all"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
               }`}
             >
-              <List className={`sidebar-nav-icon ${selectedId === 'all' ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
+              <List
+                className={`sidebar-nav-icon ${selectedId === "all" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
+              />
               <span className="font-medium">All Transactions</span>
             </button>
           </div>
@@ -141,34 +165,49 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
         <div>
           <div className="sidebar-section-header">
             <h2 className="sidebar-section-title-inline">Cash Accounts</h2>
-            <button 
-              onClick={() => { setIsAdding(true); setNewAccountType('cash'); }}
+            <button
+              onClick={() => {
+                setIsAdding(true);
+                setNewAccountType("cash");
+              }}
               className="sidebar-add-button"
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="space-y-1">
-            {accounts.filter(acc => acc.kind === 'cash').map(account => (
-              <button
-                key={account.id}
-                onClick={() => handleSelect(account.id)}
-                className={`sidebar-nav-item justify-between group ${
-                  selectedId === account.id 
-                    ? 'sidebar-nav-item-active' 
-                    : 'sidebar-nav-item-inactive'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <CreditCard className={`sidebar-nav-icon ${selectedId === account.id ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
-                  <span className="font-medium truncate max-w-[120px]">{account.name}</span>
-                </div>
-                <span className={`text-sm font-medium ${selectedId === account.id ? 'text-blue-100' : 'text-slate-500 group-hover:text-slate-300'}`}>
-                  {account.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-                </span>
-              </button>
-            ))}
+            {accounts
+              .filter((acc) => acc.kind === "cash")
+              .map((account) => (
+                <button
+                  key={account.id}
+                  onClick={() => handleSelect(account.id)}
+                  className={`sidebar-nav-item justify-between group ${
+                    selectedId === account.id
+                      ? "sidebar-nav-item-active"
+                      : "sidebar-nav-item-inactive"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <CreditCard
+                      className={`sidebar-nav-icon ${selectedId === account.id ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
+                    />
+                    <span className="font-medium truncate max-w-[120px]">
+                      {account.name}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
+                  >
+                    {account.balance.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    €
+                  </span>
+                </button>
+              ))}
           </div>
         </div>
 
@@ -176,43 +215,63 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
         <div>
           <div className="sidebar-section-header">
             <h2 className="sidebar-section-title-inline">Brokerage Accounts</h2>
-            <button 
-              onClick={() => { setIsAdding(true); setNewAccountType('brokerage'); }}
+            <button
+              onClick={() => {
+                setIsAdding(true);
+                setNewAccountType("brokerage");
+              }}
               className="sidebar-add-button"
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="space-y-1">
-            {accounts.filter(acc => acc.kind === 'brokerage').map(account => (
-              <button
-                key={account.id}
-                onClick={() => handleSelect(account.id)}
-                className={`sidebar-nav-item justify-between group ${
-                  selectedId === account.id 
-                    ? 'sidebar-nav-item-active' 
-                    : 'sidebar-nav-item-inactive'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <TrendingUp className={`sidebar-nav-icon ${selectedId === account.id ? 'sidebar-nav-icon-active' : 'sidebar-nav-icon-inactive'}`} />
-                  <span className="font-medium truncate max-w-[120px]">{account.name}</span>
-                </div>
-                <span className={`text-sm font-medium ${selectedId === account.id ? 'text-blue-100' : 'text-slate-500 group-hover:text-slate-300'}`}>
-                  {(marketValues[account.id] !== undefined ? marketValues[account.id] : account.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-                </span>
-              </button>
-            ))}
+            {accounts
+              .filter((acc) => acc.kind === "brokerage")
+              .map((account) => (
+                <button
+                  key={account.id}
+                  onClick={() => handleSelect(account.id)}
+                  className={`sidebar-nav-item justify-between group ${
+                    selectedId === account.id
+                      ? "sidebar-nav-item-active"
+                      : "sidebar-nav-item-inactive"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <TrendingUp
+                      className={`sidebar-nav-icon ${selectedId === account.id ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
+                    />
+                    <span className="font-medium truncate max-w-[120px]">
+                      {account.name}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
+                  >
+                    {(marketValues[account.id] !== undefined
+                      ? marketValues[account.id]
+                      : account.balance
+                    ).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    €
+                  </span>
+                </button>
+              ))}
           </div>
         </div>
         {isAdding && (
           <div className="sidebar-form-container">
             <form onSubmit={handleAddAccount} className="sidebar-form">
               <div className="sidebar-form-header">
-                <span className="sidebar-form-title">New {newAccountType === 'cash' ? 'Cash' : 'Brokerage'} Account</span>
-                <button 
-                  type="button" 
+                <span className="sidebar-form-title">
+                  New {newAccountType === "cash" ? "Cash" : "Brokerage"} Account
+                </span>
+                <button
+                  type="button"
                   onClick={() => setIsAdding(false)}
                   className="sidebar-form-close"
                 >
@@ -235,10 +294,7 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
                 onChange={(e) => setNewAccountBalance(e.target.value)}
                 className="sidebar-input"
               />
-              <button 
-                type="submit"
-                className="sidebar-submit-button"
-              >
+              <button type="submit" className="sidebar-submit-button">
                 <Check className="w-4 h-4" />
                 <span className="text-white">Create Account</span>
               </button>
@@ -247,18 +303,17 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
         )}
       </div>
 
-      
       {/* Footer */}
       <div className="sidebar-footer">
         <div className="sidebar-footer-buttons">
-          <button 
+          <button
             onClick={() => setShowImportModal(true)}
             className="sidebar-footer-button"
           >
             <Upload className="w-4 h-4" />
             <span className="text-xs font-medium">Import</span>
           </button>
-          <button 
+          <button
             onClick={() => setShowExportModal(true)}
             className="sidebar-footer-button"
           >
@@ -270,21 +325,35 @@ export default function Sidebar({ accounts, marketValues, selectedId, onSelectAc
           v{packageJson.version} • HoneyBear Folio
         </div>
       </div>
-      
+
       {showImportModal && (
-        <ImportModal 
-          onClose={() => setShowImportModal(false)} 
+        <ImportModal
+          onClose={() => setShowImportModal(false)}
           onImportComplete={() => {
             onUpdate();
-          }} 
+          }}
         />
       )}
 
       {showExportModal && (
-        <ExportModal 
-          onClose={() => setShowExportModal(false)} 
-        />
+        <ExportModal onClose={() => setShowExportModal(false)} />
       )}
     </div>
   );
 }
+
+Sidebar.propTypes = {
+  accounts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      name: PropTypes.string.isRequired,
+      balance: PropTypes.number.isRequired,
+      kind: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
+  marketValues: PropTypes.object.isRequired,
+  selectedId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
+  onSelectAccount: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
+};

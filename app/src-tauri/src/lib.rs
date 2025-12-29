@@ -310,9 +310,9 @@ fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, Strin
     Ok(transactions)
 }
 
-#[tauri::command]
-fn create_brokerage_transaction(
-    app_handle: AppHandle,
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CreateBrokerageTransactionArgs {
     brokerage_account_id: i32,
     cash_account_id: i32,
     date: String,
@@ -320,8 +320,37 @@ fn create_brokerage_transaction(
     shares: f64,
     price_per_share: f64,
     fee: f64,
-    is_buy: bool
+    is_buy: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct UpdateTransactionArgs {
+    id: i32,
+    account_id: i32,
+    date: String,
+    payee: String,
+    notes: Option<String>,
+    category: Option<String>,
+    amount: f64,
+}
+
+#[tauri::command]
+fn create_brokerage_transaction(
+    app_handle: AppHandle,
+    args: CreateBrokerageTransactionArgs
 ) -> Result<Transaction, String> {
+    let CreateBrokerageTransactionArgs {
+        brokerage_account_id,
+        cash_account_id,
+        date,
+        ticker,
+        shares,
+        price_per_share,
+        fee,
+        is_buy,
+    } = args;
+
     let db_path = get_db_path(&app_handle)?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
     
@@ -413,14 +442,18 @@ fn create_brokerage_transaction(
 #[tauri::command]
 fn update_transaction(
     app_handle: AppHandle,
-    id: i32,
-    account_id: i32,
-    date: String,
-    payee: String,
-    notes: Option<String>,
-    category: Option<String>,
-    amount: f64
+    args: UpdateTransactionArgs
 ) -> Result<Transaction, String> {
+    let UpdateTransactionArgs {
+        id,
+        account_id,
+        date,
+        payee,
+        notes,
+        category,
+        amount,
+    } = args;
+
     let db_path = get_db_path(&app_handle)?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
     

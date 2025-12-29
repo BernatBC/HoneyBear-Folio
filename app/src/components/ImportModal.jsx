@@ -1,27 +1,39 @@
-import { useState, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle } from 'lucide-react';
-import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
+import { useState, useRef } from "react";
+import PropTypes from "prop-types";
+import { invoke } from "@tauri-apps/api/core";
+import {
+  X,
+  Upload,
+  FileSpreadsheet,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import Papa from "papaparse";
+import * as XLSX from "xlsx";
 
 export default function ImportModal({ onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
   const [columns, setColumns] = useState([]);
   const [mapping, setMapping] = useState({
-    date: '',
-    payee: '',
-    amount: '',
-    category: '',
-    notes: ''
+    date: "",
+    payee: "",
+    amount: "",
+    category: "",
+    notes: "",
   });
   const [importing, setImporting] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 0, success: 0, failed: 0 });
-  const [targetAccountId, setTargetAccountId] = useState('');
+  const [progress, setProgress] = useState({
+    current: 0,
+    total: 0,
+    success: 0,
+    failed: 0,
+  });
+  const [targetAccountId, setTargetAccountId] = useState("");
   const [accounts, setAccounts] = useState([]);
   const fileInputRef = useRef(null);
 
   useState(() => {
-    invoke('get_accounts').then(setAccounts).catch(console.error);
+    invoke("get_accounts").then(setAccounts).catch(console.error);
   });
 
   const handleFileChange = (e) => {
@@ -35,32 +47,32 @@ export default function ImportModal({ onClose, onImportComplete }) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
-      
-      if (file.name.endsWith('.csv')) {
+
+      if (file.name.endsWith(".csv")) {
         Papa.parse(data, {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
             setColumns(results.meta.fields || []);
             autoMapColumns(results.meta.fields || []);
-          }
+          },
         });
-      } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        const workbook = XLSX.read(data, { type: 'binary' });
+      } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+        const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        
+
         if (json.length > 0) {
           const headers = json[0];
-          
+
           setColumns(headers);
           autoMapColumns(headers);
         }
       }
     };
 
-    if (file.name.endsWith('.csv')) {
+    if (file.name.endsWith(".csv")) {
       reader.readAsText(file);
     } else {
       reader.readAsBinaryString(file);
@@ -69,13 +81,20 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
   const autoMapColumns = (cols) => {
     const newMapping = { ...mapping };
-    cols.forEach(col => {
+    cols.forEach((col) => {
       const lower = col.toLowerCase();
-      if (lower.includes('date')) newMapping.date = col;
-      else if (lower.includes('payee') || lower.includes('description') || lower.includes('merchant')) newMapping.payee = col;
-      else if (lower.includes('amount') || lower.includes('value')) newMapping.amount = col;
-      else if (lower.includes('category')) newMapping.category = col;
-      else if (lower.includes('note') || lower.includes('memo')) newMapping.notes = col;
+      if (lower.includes("date")) newMapping.date = col;
+      else if (
+        lower.includes("payee") ||
+        lower.includes("description") ||
+        lower.includes("merchant")
+      )
+        newMapping.payee = col;
+      else if (lower.includes("amount") || lower.includes("value"))
+        newMapping.amount = col;
+      else if (lower.includes("category")) newMapping.category = col;
+      else if (lower.includes("note") || lower.includes("memo"))
+        newMapping.notes = col;
     });
     setMapping(newMapping);
   };
@@ -87,29 +106,29 @@ export default function ImportModal({ onClose, onImportComplete }) {
     }
 
     setImporting(true);
-    
+
     // Re-parse full file to get all data
     const reader = new FileReader();
     reader.onload = async (e) => {
       const data = e.target.result;
       let allRows = [];
 
-      if (file.name.endsWith('.csv')) {
+      if (file.name.endsWith(".csv")) {
         Papa.parse(data, {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
             allRows = results.data;
             processRows(allRows);
-          }
+          },
         });
       } else {
-        const workbook = XLSX.read(data, { type: 'binary' });
+        const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         const headers = json[0];
-        allRows = json.slice(1).map(row => {
+        allRows = json.slice(1).map((row) => {
           const obj = {};
           headers.forEach((header, index) => {
             obj[header] = row[index];
@@ -120,7 +139,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
       }
     };
 
-    if (file.name.endsWith('.csv')) {
+    if (file.name.endsWith(".csv")) {
       reader.readAsText(file);
     } else {
       reader.readAsBinaryString(file);
@@ -130,7 +149,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
   const processRows = async (rows) => {
     let successCount = 0;
     let failCount = 0;
-    
+
     setProgress({ current: 0, total: rows.length, success: 0, failed: 0 });
 
     for (let i = 0; i < rows.length; i++) {
@@ -138,30 +157,36 @@ export default function ImportModal({ onClose, onImportComplete }) {
       try {
         const dateStr = row[mapping.date];
         const amountStr = row[mapping.amount];
-        const payee = row[mapping.payee] || 'Unknown';
-        
+        const payee = row[mapping.payee] || "Unknown";
+
         // Basic date parsing (YYYY-MM-DD preferred, but try others)
-        let date = new Date(dateStr).toISOString().split('T')[0];
-        if (date === 'Invalid Date') date = new Date().toISOString().split('T')[0]; // Fallback
+        let date = new Date(dateStr).toISOString().split("T")[0];
+        if (date === "Invalid Date")
+          date = new Date().toISOString().split("T")[0]; // Fallback
 
         // Amount parsing
-        let amount = parseFloat(String(amountStr).replace(/[^0-9.-]/g, ''));
+        let amount = parseFloat(String(amountStr).replace(/[^0-9.-]/g, ""));
         if (isNaN(amount)) amount = 0;
 
-        await invoke('create_transaction', {
+        await invoke("create_transaction", {
           accountId: parseInt(targetAccountId),
           date,
           payee,
-          notes: row[mapping.notes] || '',
-          category: row[mapping.category] || 'Uncategorized',
-          amount
+          notes: row[mapping.notes] || "",
+          category: row[mapping.category] || "Uncategorized",
+          amount,
         });
         successCount++;
       } catch (e) {
         console.error("Row import failed:", e);
         failCount++;
       }
-      setProgress({ current: i + 1, total: rows.length, success: successCount, failed: failCount });
+      setProgress({
+        current: i + 1,
+        total: rows.length,
+        success: successCount,
+        failed: failCount,
+      });
     }
 
     setImporting(false);
@@ -186,19 +211,23 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
         <div className="p-6 overflow-y-auto flex-1">
           {!file ? (
-            <div 
+            <div
               onClick={() => fileInputRef.current?.click()}
               className="border-2 border-dashed border-slate-700 rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-slate-800/50 transition-all group"
             >
               <FileSpreadsheet className="w-12 h-12 text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
-              <p className="text-slate-300 font-medium">Click to upload CSV or Excel file</p>
-              <p className="text-slate-500 text-sm mt-1">Supports .csv, .xlsx, .xls</p>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileChange} 
-                accept=".csv,.xlsx,.xls" 
-                className="hidden" 
+              <p className="text-slate-300 font-medium">
+                Click to upload CSV or Excel file
+              </p>
+              <p className="text-slate-500 text-sm mt-1">
+                Supports .csv, .xlsx, .xls
+              </p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
               />
             </div>
           ) : (
@@ -208,41 +237,56 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   <FileSpreadsheet className="w-5 h-5 text-green-500" />
                   <span className="text-white font-medium">{file.name}</span>
                 </div>
-                <button onClick={() => setFile(null)} className="text-slate-400 hover:text-red-400 text-sm">
+                <button
+                  onClick={() => setFile(null)}
+                  className="text-slate-400 hover:text-red-400 text-sm"
+                >
                   Change File
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Target Account</label>
-                  <select 
-                    value={targetAccountId} 
+                  <label className="block text-sm font-medium text-slate-400 mb-1">
+                    Target Account
+                  </label>
+                  <select
+                    value={targetAccountId}
                     onChange={(e) => setTargetAccountId(e.target.value)}
                     className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
                   >
                     <option value="">Select Account...</option>
-                    {accounts.map(acc => (
-                      <option key={acc.id} value={acc.id}>{acc.name} ({acc.kind})</option>
+                    {accounts.map((acc) => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name} ({acc.kind})
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Map Columns</h3>
+                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+                  Map Columns
+                </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {Object.keys(mapping).map(field => (
+                  {Object.keys(mapping).map((field) => (
                     <div key={field}>
-                      <label className="block text-xs font-medium text-slate-500 mb-1 capitalize">{field}</label>
-                      <select 
-                        value={mapping[field]} 
-                        onChange={(e) => setMapping({...mapping, [field]: e.target.value})}
+                      <label className="block text-xs font-medium text-slate-500 mb-1 capitalize">
+                        {field}
+                      </label>
+                      <select
+                        value={mapping[field]}
+                        onChange={(e) =>
+                          setMapping({ ...mapping, [field]: e.target.value })
+                        }
                         className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500"
                       >
                         <option value="">Skip</option>
-                        {columns.map(col => (
-                          <option key={col} value={col}>{col}</option>
+                        {columns.map((col) => (
+                          <option key={col} value={col}>
+                            {col}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -254,17 +298,27 @@ export default function ImportModal({ onClose, onImportComplete }) {
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-slate-300">Importing...</span>
-                    <span className="text-slate-400">{progress.current} / {progress.total}</span>
+                    <span className="text-slate-400">
+                      {progress.current} / {progress.total}
+                    </span>
                   </div>
                   <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
-                      style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                    <div
+                      className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${(progress.current / progress.total) * 100}%`,
+                      }}
                     />
                   </div>
                   <div className="flex gap-4 text-xs">
-                    <span className="text-green-400 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> {progress.success} Success</span>
-                    <span className="text-red-400 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {progress.failed} Failed</span>
+                    <span className="text-green-400 flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" /> {progress.success}{" "}
+                      Success
+                    </span>
+                    <span className="text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {progress.failed}{" "}
+                      Failed
+                    </span>
                   </div>
                 </div>
               )}
@@ -273,22 +327,29 @@ export default function ImportModal({ onClose, onImportComplete }) {
         </div>
 
         <div className="p-6 border-t border-slate-800 flex justify-end gap-3">
-          <button 
+          <button
             onClick={onClose}
             className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
             disabled={importing}
           >
             Cancel
           </button>
-          <button 
+          <button
             onClick={handleImport}
             disabled={!file || !targetAccountId || importing}
             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            <span className="text-white">{importing ? 'Importing...' : 'Start Import'}</span>
+            <span className="text-white">
+              {importing ? "Importing..." : "Start Import"}
+            </span>
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+ImportModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  onImportComplete: PropTypes.func.isRequired,
+};

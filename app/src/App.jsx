@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from "@tauri-apps/api/core";
 import Sidebar from "./components/Sidebar";
 import AccountDetails from "./components/AccountDetails";
 import Dashboard from "./components/Dashboard";
@@ -9,23 +9,18 @@ import { Wallet } from "lucide-react";
 import "./styles/App.css";
 
 function App() {
-  const [selectedAccountId, setSelectedAccountId] = useState('dashboard');
+  const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [accounts, setAccounts] = useState([]);
   const [marketValues, setMarketValues] = useState({});
 
   const handleAccountUpdate = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
-
-  useEffect(() => {
-    fetchAccounts();
-    fetchMarketValues();
-  }, [refreshTrigger]);
 
   async function fetchAccounts() {
     try {
-      const accs = await invoke('get_accounts');
+      const accs = await invoke("get_accounts");
       accs.sort((a, b) => b.balance - a.balance);
       setAccounts(accs);
     } catch (e) {
@@ -35,13 +30,13 @@ function App() {
 
   async function fetchMarketValues() {
     try {
-      const transactions = await invoke('get_all_transactions');
-      
+      const transactions = await invoke("get_all_transactions");
+
       // Group holdings by account
       const accountHoldings = {};
       const allTickers = new Set();
 
-      transactions.forEach(tx => {
+      transactions.forEach((tx) => {
         if (tx.ticker && tx.shares) {
           if (!accountHoldings[tx.account_id]) {
             accountHoldings[tx.account_id] = {};
@@ -59,10 +54,12 @@ function App() {
         return;
       }
 
-      const quotes = await invoke('get_stock_quotes', { tickers: Array.from(allTickers) });
-      
+      const quotes = await invoke("get_stock_quotes", {
+        tickers: Array.from(allTickers),
+      });
+
       const quoteMap = {};
-      quotes.forEach(q => {
+      quotes.forEach((q) => {
         quoteMap[q.symbol] = q.regularMarketPrice;
       });
 
@@ -71,70 +68,90 @@ function App() {
         let totalValue = 0;
         for (const [ticker, shares] of Object.entries(holdings)) {
           if (shares > 0.0001) {
-             // Try exact match or uppercase match
-             const price = quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
-             totalValue += shares * price;
+            // Try exact match or uppercase match
+            const price =
+              quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
+            totalValue += shares * price;
           }
         }
         newMarketValues[accountId] = totalValue;
       }
       setMarketValues(newMarketValues);
-
     } catch (e) {
       console.error("Failed to fetch market values:", e);
     }
   }
 
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchAccounts();
+      await fetchMarketValues();
+    };
+    loadData();
+  }, [refreshTrigger]);
+
   // Calculate total balance
   const totalBalance = accounts.reduce((sum, acc) => {
-    if (acc.kind === 'brokerage') {
-      return sum + (marketValues[acc.id] !== undefined ? marketValues[acc.id] : acc.balance);
+    if (acc.kind === "brokerage") {
+      return (
+        sum +
+        (marketValues[acc.id] !== undefined
+          ? marketValues[acc.id]
+          : acc.balance)
+      );
     }
     return sum + acc.balance;
   }, 0);
 
   // Derive selectedAccount
   let selectedAccount = null;
-  if (selectedAccountId === 'dashboard') {
-    selectedAccount = { id: 'dashboard', name: 'Dashboard' };
-  } else if (selectedAccountId === 'investment-dashboard') {
-    selectedAccount = { id: 'investment-dashboard', name: 'Investments' };
-  } else if (selectedAccountId === 'fire-calculator') {
-    selectedAccount = { id: 'fire-calculator', name: 'FIRE Calculator' };
-  } else if (selectedAccountId === 'all') {
-    selectedAccount = { id: 'all', name: 'All Transactions', balance: totalBalance };
+  if (selectedAccountId === "dashboard") {
+    selectedAccount = { id: "dashboard", name: "Dashboard" };
+  } else if (selectedAccountId === "investment-dashboard") {
+    selectedAccount = { id: "investment-dashboard", name: "Investments" };
+  } else if (selectedAccountId === "fire-calculator") {
+    selectedAccount = { id: "fire-calculator", name: "FIRE Calculator" };
+  } else if (selectedAccountId === "all") {
+    selectedAccount = {
+      id: "all",
+      name: "All Transactions",
+      balance: totalBalance,
+    };
   } else {
-    const acc = accounts.find(a => a.id === selectedAccountId);
+    const acc = accounts.find((a) => a.id === selectedAccountId);
     if (acc) {
       selectedAccount = {
         ...acc,
-        balance: marketValues[acc.id] !== undefined ? marketValues[acc.id] : acc.balance
+        balance:
+          marketValues[acc.id] !== undefined
+            ? marketValues[acc.id]
+            : acc.balance,
       };
     }
   }
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
-      <Sidebar 
+      <Sidebar
         accounts={accounts}
         marketValues={marketValues}
         selectedId={selectedAccountId}
         onSelectAccount={setSelectedAccountId}
         onUpdate={handleAccountUpdate}
       />
-      
+
       <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50">
         <div className="max-w-7xl mx-auto">
-          {selectedAccountId === 'dashboard' ? (
+          {selectedAccountId === "dashboard" ? (
             <Dashboard />
-          ) : selectedAccountId === 'investment-dashboard' ? (
+          ) : selectedAccountId === "investment-dashboard" ? (
             <InvestmentDashboard />
-          ) : selectedAccountId === 'fire-calculator' ? (
+          ) : selectedAccountId === "fire-calculator" ? (
             <FireCalculator />
           ) : selectedAccount ? (
-            <AccountDetails 
-              key={selectedAccount.id} 
-              account={selectedAccount} 
+            <AccountDetails
+              key={selectedAccount.id}
+              account={selectedAccount}
               onUpdate={handleAccountUpdate}
             />
           ) : (
@@ -142,9 +159,12 @@ function App() {
               <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 mb-8 animate-in fade-in zoom-in duration-500">
                 <Wallet className="w-16 h-16 text-brand-500" />
               </div>
-              <h2 className="text-3xl font-bold mb-3 text-slate-800 tracking-tight">Welcome to HoneyBear Folio</h2>
+              <h2 className="text-3xl font-bold mb-3 text-slate-800 tracking-tight">
+                Welcome to HoneyBear Folio
+              </h2>
               <p className="text-lg text-slate-500 max-w-md text-center leading-relaxed">
-                Select an account from the sidebar to view details, or create a new one to get started.
+                Select an account from the sidebar to view details, or create a
+                new one to get started.
               </p>
             </div>
           )}

@@ -1,3 +1,4 @@
+/* global process */
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -33,15 +34,19 @@ export default defineConfig(async () => ({
       output: {
         manualChunks: {
           // Split React into its own chunk
-          'react-vendor': ['react', 'react-dom'],
+          "react-vendor": ["react", "react-dom"],
           // Split Chart.js into its own chunk
-          'chart-vendor': ['chart.js', 'react-chartjs-2'],
+          "chart-vendor": ["chart.js", "react-chartjs-2"],
           // Split file handling libraries into their own chunk
-          'file-vendor': ['xlsx', 'papaparse'],
+          "file-vendor": ["xlsx", "papaparse"],
           // Split Tauri APIs into their own chunk
-          'tauri-vendor': ['@tauri-apps/api', '@tauri-apps/plugin-dialog', '@tauri-apps/plugin-fs'],
+          "tauri-vendor": [
+            "@tauri-apps/api",
+            "@tauri-apps/plugin-dialog",
+            "@tauri-apps/plugin-fs",
+          ],
           // Split UI icons into their own chunk
-          'ui-vendor': ['lucide-react'],
+          "ui-vendor": ["lucide-react"],
         },
       },
     },
