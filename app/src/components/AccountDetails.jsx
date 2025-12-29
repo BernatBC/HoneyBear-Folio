@@ -71,6 +71,8 @@ export default function AccountDetails({ account, onUpdate }) {
   const [totalPrice, setTotalPrice] = useState("");
   const [fee, setFee] = useState("");
   const [cashAccountId, setCashAccountId] = useState("");
+  const [cashAccountName, setCashAccountName] = useState("");
+  const [cashAccountSuggestions, setCashAccountSuggestions] = useState([]);
   const [isBuy, setIsBuy] = useState(true);
 
   async function fetchSuggestions() {
@@ -116,11 +118,25 @@ export default function AccountDetails({ account, onUpdate }) {
       }
 
       setPayeeSuggestions(unique);
-      setCategorySuggestions(categories);
+      setCategorySuggestions(
+        categories.map((c) => ({
+          value: c,
+          label: "Category",
+          type: "category",
+        })),
+      );
 
       // Set default cash account if available
       const cashAcc = otherAccounts.find((a) => a.kind === "cash");
-      if (cashAcc) setCashAccountId(cashAcc.id);
+      if (cashAcc) {
+        setCashAccountId(cashAcc.id);
+        setCashAccountName(cashAcc.name);
+      }
+
+      const cashOptions = otherAccounts
+        .filter((a) => a.kind === "cash")
+        .map((a) => ({ value: a.name, label: "Account", type: "account" }));
+      setCashAccountSuggestions(cashOptions);
     } catch (e) {
       console.error("Failed to fetch suggestions:", e);
     }
@@ -257,6 +273,13 @@ export default function AccountDetails({ account, onUpdate }) {
     e.preventDefault();
     try {
       if (account.kind === "brokerage") {
+        if (!cashAccountId) {
+          await ask("Please select a valid Cash Account.", {
+            title: "Invalid Input",
+            kind: "error",
+          });
+          return;
+        }
         await invoke("create_brokerage_transaction", {
           args: {
             brokerageAccountId: account.id,
@@ -625,21 +648,24 @@ export default function AccountDetails({ account, onUpdate }) {
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Cash Account
                 </label>
-                <select
-                  required
+                <AutocompleteInput
+                  suggestions={cashAccountSuggestions}
+                  placeholder="Select Account"
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
-                  value={cashAccountId}
-                  onChange={(e) => setCashAccountId(e.target.value)}
-                >
-                  <option value="">Select Account</option>
-                  {availableAccounts
-                    .filter((a) => a.kind === "cash")
-                    .map((acc) => (
-                      <option key={acc.id} value={acc.id}>
-                        {acc.name}
-                      </option>
-                    ))}
-                </select>
+                  value={cashAccountName}
+                  required
+                  onChange={(val) => {
+                    setCashAccountName(val);
+                    const selected = availableAccounts.find(
+                      (a) => a.name === val && a.kind === "cash",
+                    );
+                    if (selected) {
+                      setCashAccountId(selected.id);
+                    } else {
+                      setCashAccountId("");
+                    }
+                  }}
+                />
               </div>
 
               <div className="md:col-span-2 relative">
@@ -813,9 +839,8 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <div className="relative">
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    type="text"
-                    list="category-suggestions"
+                  <AutocompleteInput
+                    suggestions={categorySuggestions}
                     placeholder="Category"
                     className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${
                       availableAccounts.includes(payee)
@@ -823,7 +848,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         : ""
                     }`}
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={setCategory}
                     disabled={availableAccounts.includes(payee)}
                   />
                 </div>
@@ -957,15 +982,14 @@ export default function AccountDetails({ account, onUpdate }) {
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <input
-                            type="text"
-                            list="category-suggestions"
+                          <AutocompleteInput
+                            suggestions={categorySuggestions}
                             className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 text-slate-500" : ""}`}
                             value={editForm.category || ""}
-                            onChange={(e) =>
+                            onChange={(val) =>
                               setEditForm({
                                 ...editForm,
-                                category: e.target.value,
+                                category: val,
                               })
                             }
                             disabled={availableAccounts.includes(
@@ -1115,12 +1139,6 @@ export default function AccountDetails({ account, onUpdate }) {
           </table>
         </div>
       </div>
-
-      <datalist id="category-suggestions">
-        {categorySuggestions.map((cat, index) => (
-          <option key={index} value={cat} />
-        ))}
-      </datalist>
     </div>
   );
 }
@@ -1132,6 +1150,7 @@ function AutocompleteInput({
   placeholder,
   className,
   disabled,
+  ...props
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -1147,6 +1166,7 @@ function AutocompleteInput({
   return (
     <div className="relative w-full">
       <input
+        {...props}
         type="text"
         value={value}
         onChange={(e) => {
