@@ -329,7 +329,16 @@ export default function AccountDetails({ account, onUpdate }) {
   }
 
   async function deleteTransaction(id) {
-    if (!confirm("Are you sure you want to delete this transaction?")) return;
+    const confirmed = await ask(
+      "Are you sure you want to delete this transaction?",
+      {
+        title: "Transaction",
+        kind: "warning",
+        okLabel: "Delete",
+        cancelLabel: "Cancel",
+      }
+    );
+    if (!confirmed) return;
     try {
       await invoke("delete_transaction", { id });
       setMenuOpenId(null);
@@ -424,9 +433,8 @@ export default function AccountDetails({ account, onUpdate }) {
               Balance:
             </span>
             <span
-              className={`text-3xl font-bold tracking-tight ${
-                account.balance >= 0 ? "text-emerald-600" : "text-rose-600"
-              }`}
+              className={`text-3xl font-bold tracking-tight ${account.balance >= 0 ? "text-emerald-600" : "text-rose-600"
+                }`}
             >
               {account.balance >= 0 ? "+" : ""}
               {account.balance.toLocaleString("en-US", {
@@ -807,11 +815,10 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="text"
                     list="category-suggestions"
                     placeholder="Category"
-                    className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${
-                      availableAccounts.includes(payee)
+                    className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${availableAccounts.includes(payee)
                         ? "bg-slate-100 text-slate-500"
                         : ""
-                    }`}
+                      }`}
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     disabled={availableAccounts.includes(payee)}
@@ -1031,11 +1038,10 @@ export default function AccountDetails({ account, onUpdate }) {
                         >
                           {tx.category ? (
                             <span
-                              className={`px-3 py-1.5 inline-flex text-xs font-bold rounded-xl border ${
-                                tx.category === "Transfer"
+                              className={`px-3 py-1.5 inline-flex text-xs font-bold rounded-xl border ${tx.category === "Transfer"
                                   ? "bg-purple-50 text-purple-700 border-purple-200"
                                   : "bg-slate-100 text-slate-700 border-slate-200"
-                              }`}
+                                }`}
                             >
                               {tx.category}
                             </span>
