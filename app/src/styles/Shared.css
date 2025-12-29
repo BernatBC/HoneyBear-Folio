@@ -37,6 +37,10 @@
 }
 .hb-input:focus{ box-shadow:0 0 0 6px rgba(59,130,246,0.08); border-color:#2563eb; }
 
+/* Helpers for inputs with icons */
+.hb-input--icon-left{ padding-left:2.5rem; }
+.hb-input--icon-right{ padding-right:2.5rem; }
+
 .hb-form-card{
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   padding:1.5rem;

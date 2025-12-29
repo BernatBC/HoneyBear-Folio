@@ -382,7 +382,7 @@ export default function AccountDetails({ account, onUpdate }) {
           {account.kind === "brokerage" ? (
             <form
               onSubmit={handleAddTransaction}
-              className="hb-form-grid"
+              className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
             >
               <div className="md:col-span-12 mb-2 flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -425,7 +425,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     dateFormat="yyyy-MM-dd"
                     shouldCloseOnSelect={false}
                     required
-                    className="hb-input"
+                    className="hb-input hb-input--icon-left"
                   />
                 </div>
               </div>
@@ -502,12 +502,12 @@ export default function AccountDetails({ account, onUpdate }) {
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
-                <input
+                  <input
                   type="number"
                   required
                   step="any"
                   placeholder="0"
-                  className="hb-input"
+                    className="hb-input"
                   value={shares}
                   onChange={handleSharesChange}
                 />
@@ -524,7 +524,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="any"
                     placeholder="0.00"
-                    className="hb-input"
+                    className="hb-input hb-input--icon-right"
                     value={pricePerShare}
                     onChange={handlePricePerShareChange}
                   />
@@ -542,7 +542,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="hb-input"
+                    className="hb-input hb-input--icon-right"
                     value={totalPrice}
                     onChange={handleTotalPriceChange}
                   />
@@ -559,7 +559,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    className="hb-input"
+                    className="hb-input hb-input--icon-right"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
                   />
@@ -574,7 +574,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
             </form>
           ) : (
-            <form onSubmit={handleAddTransaction} className="hb-form-grid">
+            <form onSubmit={handleAddTransaction} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
                   Date
@@ -589,7 +589,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     dateFormat="yyyy-MM-dd"
                     shouldCloseOnSelect={false}
                     required
-                      className="hb-input"
+                      className="hb-input hb-input--icon-left"
                   />
                 </div>
               </div>
@@ -603,7 +603,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   <AutocompleteInput
                     suggestions={payeeSuggestions}
                     placeholder="Who got paid?"
-                    className="hb-input"
+                    className="hb-input hb-input--icon-left"
                     value={payee}
                     onChange={setPayee}
                   />
@@ -620,7 +620,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="text"
                     list="category-suggestions"
                     placeholder="Category"
-                    className={`hb-input ${
+                    className={`hb-input hb-input--icon-left ${
                       availableAccounts.includes(payee)
                         ? "bg-slate-100 text-slate-500"
                         : ""
@@ -641,7 +641,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   <input
                     type="text"
                     placeholder="What was this for?"
-                    className="hb-input"
+                    className="hb-input hb-input--icon-left"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                   />
@@ -659,7 +659,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="hb-input"
+                    className="hb-input hb-input--icon-right"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
