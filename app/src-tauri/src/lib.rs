@@ -143,15 +143,34 @@ fn create_account(
     kind: String,
 ) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
-    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+    let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    conn.execute(
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    tx.execute(
         "INSERT INTO accounts (name, balance, kind) VALUES (?1, ?2, ?3)",
         params![name, balance, kind],
     )
     .map_err(|e| e.to_string())?;
 
-    let id = conn.last_insert_rowid() as i32;
+    let id = tx.last_insert_rowid() as i32;
+
+    if balance.abs() > f64::EPSILON {
+        // Create initial transaction
+        tx.execute(
+            "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, date('now'), ?2, ?3, ?4, ?5)",
+            params![
+                id,
+                "Opening Balance",
+                "Initial Balance",
+                "Income",
+                balance
+            ],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+
+    tx.commit().map_err(|e| e.to_string())?;
 
     Ok(Account {
         id,
