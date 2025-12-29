@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/datepicker.css";
 import { invoke } from "@tauri-apps/api/core";
+import { ask } from "@tauri-apps/plugin-dialog";
 import {
   Search,
   Plus,
@@ -18,6 +19,7 @@ import {
   Euro,
   ArrowRightLeft,
   User,
+  Edit,
 } from "lucide-react";
 
 export default function AccountDetails({ account, onUpdate }) {
@@ -34,6 +36,26 @@ export default function AccountDetails({ account, onUpdate }) {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [menuOpenId, setMenuOpenId] = useState(null);
+
+  // Account actions state
+  const [isRenamingAccount, setIsRenamingAccount] = useState(false);
+  const [renameValue, setRenameValue] = useState(account.name);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setRenameValue(account.name);
+  }, [account.name]);
+
+  // Close account menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (accountMenuOpen && !event.target.closest(".account-action-menu")) {
+        setAccountMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [accountMenuOpen]);
 
   // Form state
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -197,6 +219,40 @@ export default function AccountDetails({ account, onUpdate }) {
     }
   };
 
+  async function handleRenameAccount(e) {
+    e.preventDefault();
+    if (!renameValue.trim()) return;
+    try {
+      await invoke("rename_account", { id: account.id, newName: renameValue });
+      setIsRenamingAccount(false);
+      setAccountMenuOpen(false);
+      if (onUpdate) onUpdate();
+    } catch (e) {
+      console.error("Failed to rename account:", e);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    const confirmed = await ask(
+      `Are you sure you want to delete "${account.name}" and ALL its transactions? This action cannot be undone.`,
+      {
+        title: "Confirm Deletion",
+        kind: "warning",
+        okLabel: "Delete",
+        cancelLabel: "Cancel",
+      },
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await invoke("delete_account", { id: account.id });
+      if (onUpdate) onUpdate();
+    } catch (e) {
+      console.error("Failed to delete account:", e);
+    }
+  }
+
   async function handleAddTransaction(e) {
     e.preventDefault();
     try {
@@ -319,9 +375,50 @@ export default function AccountDetails({ account, onUpdate }) {
       {/* Header */}
       <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-            {account.name}
-          </h1>
+          {isRenamingAccount ? (
+            <form
+              onSubmit={handleRenameAccount}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="text"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                className="text-3xl font-bold text-slate-900 tracking-tight bg-transparent border-b-2 border-brand-500 focus:outline-none min-w-[200px]"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setIsRenamingAccount(false);
+                    setRenameValue(account.name);
+                  }
+                }}
+              />
+              <div className="flex gap-1">
+                <button
+                  type="submit"
+                  className="p-1 rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors"
+                  title="Save Name"
+                >
+                  <Check className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRenamingAccount(false);
+                    setRenameValue(account.name);
+                  }}
+                  className="p-1 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-rose-500 transition-colors"
+                  title="Cancel"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </form>
+          ) : (
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+              {account.name}
+            </h1>
+          )}
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
               Balance:
@@ -408,6 +505,48 @@ export default function AccountDetails({ account, onUpdate }) {
                 <span style={{ color: "#334155" }}>Cancel</span>
               </button>
             ))}
+
+          <div className="relative account-action-menu">
+            <button
+              onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+              className="p-3 bg-white border-2 border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all text-slate-600 hover:text-slate-900"
+            >
+              <MoreVertical className="w-5 h-5" />
+            </button>
+            {accountMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                <button
+                  onClick={() => {
+                    setIsRenamingAccount(true);
+                    setAccountMenuOpen(false);
+                    // Slight timeout to ensure input renders before focus
+                    setTimeout(() => {
+                      const escapedName =
+                        typeof CSS !== "undefined" && typeof CSS.escape === "function"
+                          ? CSS.escape(account.name)
+                          : account.name.replace(/"/g, '\\"');
+                      const input = document.querySelector(
+                        'input[value="' + escapedName + '"]',
+                      );
+                      if (input) input.focus();
+                    }, 50);
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4 text-slate-400" />
+                  Rename Account
+                </button>
+                <div className="h-px bg-slate-100 my-1" />
+                <button
+                  onClick={handleDeleteAccount}
+                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Account
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
