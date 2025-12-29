@@ -521,8 +521,12 @@ export default function AccountDetails({ account, onUpdate }) {
                     setAccountMenuOpen(false);
                     // Slight timeout to ensure input renders before focus
                     setTimeout(() => {
+                      const escapedName =
+                        typeof CSS !== "undefined" && typeof CSS.escape === "function"
+                          ? CSS.escape(account.name)
+                          : account.name.replace(/"/g, '\\"');
                       const input = document.querySelector(
-                        'input[value="' + account.name + '"]',
+                        'input[value="' + escapedName + '"]',
                       );
                       if (input) input.focus();
                     }, 50);
