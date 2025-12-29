@@ -32,7 +32,8 @@ jobs:
 
     - name: Lint Frontend (ESLint Fix)
       working-directory: ./app
-      run: npm run lint -- --fix || true
+      run: npm run lint -- --fix
+      continue-on-error: true
 
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
