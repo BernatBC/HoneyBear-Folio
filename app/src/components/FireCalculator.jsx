@@ -400,13 +400,13 @@ export default function FireCalculator() {
     <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3 tracking-tight">
-            <div className="bg-brand-100 p-2 rounded-xl">
-              <Calculator className="w-8 h-8 text-brand-600" />
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3 tracking-tight">
+            <div className="bg-brand-100 dark:bg-brand-900/30 p-2 rounded-xl">
+              <Calculator className="w-8 h-8 text-brand-600 dark:text-brand-400" />
             </div>
             FIRE Calculator
           </h1>
-          <p className="text-slate-500 font-medium mt-1 ml-14">
+          <p className="text-slate-500 dark:text-slate-400 font-medium mt-1 ml-14">
             Financial Independence, Retire Early
           </p>
         </div>
@@ -414,13 +414,13 @@ export default function FireCalculator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Inputs */}
-        <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-6 h-fit hover:shadow-lg transition-shadow duration-300">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Parameters</h2>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-6 h-fit hover:shadow-lg transition-shadow duration-300">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Parameters</h2>
 
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                <Euro className="w-4 h-4 text-brand-500" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Current Net Worth
               </label>
               <div className="relative">
@@ -431,7 +431,7 @@ export default function FireCalculator() {
                     setCurrentNetWorth(Number(e.target.value));
                     userModified.current.currentNetWorth = true;
                   }}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
@@ -441,8 +441,8 @@ export default function FireCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                <Euro className="w-4 h-4 text-brand-500" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Annual Expenses
               </label>
               <div className="relative">
@@ -453,7 +453,7 @@ export default function FireCalculator() {
                     setAnnualExpenses(Number(e.target.value));
                     userModified.current.annualExpenses = true;
                   }}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
@@ -463,8 +463,8 @@ export default function FireCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                <Euro className="w-4 h-4 text-brand-500" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Euro className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Annual Savings
               </label>
               <div className="relative">
@@ -475,7 +475,7 @@ export default function FireCalculator() {
                     setAnnualSavings(Number(e.target.value));
                     userModified.current.annualSavings = true;
                   }}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
@@ -485,8 +485,8 @@ export default function FireCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                <Percent className="w-4 h-4 text-brand-500" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Percent className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Expected Annual Return
               </label>
               <div className="relative">
@@ -497,7 +497,7 @@ export default function FireCalculator() {
                     setExpectedReturn(Number(e.target.value));
                     userModified.current.expectedReturn = true;
                   }}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
@@ -507,8 +507,8 @@ export default function FireCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                <Percent className="w-4 h-4 text-brand-500" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Percent className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Safe Withdrawal Rate
               </label>
               <div className="relative">
@@ -519,7 +519,7 @@ export default function FireCalculator() {
                     setWithdrawalRate(Number(e.target.value));
                     userModified.current.withdrawalRate = true;
                   }}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
@@ -534,41 +534,41 @@ export default function FireCalculator() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-blue-50 to-brand-50 p-6 rounded-2xl shadow-md border-2 border-blue-200 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+            <div className="bg-gradient-to-br from-blue-50 to-brand-50 dark:from-blue-900/20 dark:to-brand-900/20 p-6 rounded-2xl shadow-md border-2 border-blue-200 dark:border-blue-800 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <div>
-                <p className="text-sm font-bold text-blue-700 uppercase tracking-wider mb-1">
+                <p className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-1">
                   FIRE Number
                 </p>
-                <p className="text-3xl font-bold text-blue-900">
+                <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">
                   {formatCurrency(fireNumber)}
                 </p>
               </div>
-              <div className="bg-blue-500 p-4 rounded-2xl shadow-lg">
+              <div className="bg-blue-500 dark:bg-blue-600 p-4 rounded-2xl shadow-lg">
                 <TrendingUp className="w-8 h-8 text-white" />
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-6 rounded-2xl shadow-md border-2 border-emerald-200 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-6 rounded-2xl shadow-md border-2 border-emerald-200 dark:border-emerald-800 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <div>
-                <p className="text-sm font-bold text-emerald-700 uppercase tracking-wider mb-1">
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">
                   Time to FIRE
                 </p>
-                <p className="text-3xl font-bold text-emerald-900">
+                <p className="text-3xl font-bold text-emerald-900 dark:text-emerald-100">
                   {yearsToFire} Years
                 </p>
               </div>
-              <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg">
+              <div className="bg-emerald-500 dark:bg-emerald-600 p-4 rounded-2xl shadow-lg">
                 <Calendar className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
 
           {/* Chart */}
-          <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex-1 min-h-[400px] hover:shadow-lg transition-shadow duration-300">
-            <h3 className="text-lg font-semibold text-slate-700 mb-2">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex-1 min-h-[400px] hover:shadow-lg transition-shadow duration-300">
+            <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2">
               Projection
             </h3>
-            <p className="text-sm text-slate-500 mb-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
               Path to financial independence
             </p>
             <div className="h-[350px]">
@@ -580,6 +580,9 @@ export default function FireCalculator() {
                   plugins: {
                     legend: {
                       position: "top",
+                      labels: {
+                        color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#475569'
+                      }
                     },
                     tooltip: {
                       callbacks: {
@@ -603,7 +606,11 @@ export default function FireCalculator() {
                   scales: {
                     y: {
                       beginAtZero: true,
+                      grid: {
+                        color: document.documentElement.classList.contains('dark') ? '#334155' : '#e2e8f0'
+                      },
                       ticks: {
+                        color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b',
                         callback: function (value) {
                           return (
                             formatNumber(value / 1000, {
@@ -614,6 +621,14 @@ export default function FireCalculator() {
                         },
                       },
                     },
+                    x: {
+                      grid: {
+                        color: document.documentElement.classList.contains('dark') ? '#334155' : '#e2e8f0'
+                      },
+                      ticks: {
+                        color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b',
+                      }
+                    }
                   },
                 }}
               />

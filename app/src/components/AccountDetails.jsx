@@ -479,7 +479,7 @@ export default function AccountDetails({ account, onUpdate }) {
   return (
     <div className="max-w-full mx-4 lg:mx-8 px-2 lg:px-4 pb-8">
       {/* Header */}
-      <header className="mb-8 -mx-20 lg:-mx-28 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
+      <header className="mb-8 -mx-20 lg:-mx-28 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
         <div>
           {isRenamingAccount ? (
             <form
@@ -490,7 +490,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 type="text"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
-                className="text-3xl font-bold text-slate-900 tracking-tight bg-transparent border-b-2 border-brand-500 focus:outline-none min-w-[200px]"
+                className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight bg-transparent border-b-2 border-brand-500 focus:outline-none min-w-[200px]"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Escape") {
@@ -502,7 +502,7 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="flex gap-1">
                 <button
                   type="submit"
-                  className="p-1 rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors"
+                  className="p-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
                   title="Save Name"
                 >
                   <Check className="w-5 h-5" />
@@ -513,7 +513,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     setIsRenamingAccount(false);
                     setRenameValue(account.name);
                   }}
-                  className="p-1 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-rose-500 transition-colors"
+                  className="p-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-rose-500 transition-colors"
                   title="Cancel"
                 >
                   <X className="w-5 h-5" />
@@ -521,17 +521,17 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
             </form>
           ) : (
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-3">
               {account.name}
             </h1>
           )}
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Balance:
             </span>
             <span
               className={`text-3xl font-bold tracking-tight ${
-                account.balance >= 0 ? "text-emerald-600" : "text-rose-600"
+                account.balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
               }`}
             >
               {account.balance >= 0 ? "+" : ""}
@@ -546,7 +546,7 @@ export default function AccountDetails({ account, onUpdate }) {
             <input
               type="text"
               placeholder="Search transactions..."
-              className="w-full pl-10 pr-4 py-3 bg-white border-2 border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm transition-all hover:border-slate-300"
+              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 text-slate-900 dark:text-slate-100"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -561,7 +561,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   );
                   setAddTargetAccount(selected || null);
                 }}
-                className="px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm"
+                className="px-3 py-2 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100"
                 aria-label="Select account to add transaction"
               >
                 {availableAccounts.map((a) => (
@@ -584,56 +584,18 @@ export default function AccountDetails({ account, onUpdate }) {
                   }
                   setIsAdding(true);
                 }}
-                style={{
-                  backgroundColor: "#2563eb",
-                  color: "#ffffff",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 1.25rem",
-                  borderRadius: "0.75rem",
-                  fontWeight: "600",
-                  fontSize: "0.875rem",
-                  border: "none",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#1d4ed8")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#2563eb")
-                }
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
               >
-                <Plus className="w-5 h-5" style={{ color: "#ffffff" }} />
-                <span style={{ color: "#ffffff" }}>Add Transaction</span>
+                <Plus className="w-5 h-5" />
+                <span>Add Transaction</span>
               </button>
             ) : (
               <button
                 onClick={() => setIsAdding(false)}
-                style={{
-                  backgroundColor: "#f1f5f9",
-                  color: "#334155",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 1.25rem",
-                  borderRadius: "0.75rem",
-                  fontWeight: "600",
-                  fontSize: "0.875rem",
-                  border: "none",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#e2e8f0")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f1f5f9")
-                }
+                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
               >
-                <X className="w-5 h-5" style={{ color: "#334155" }} />
-                <span style={{ color: "#334155" }}>Cancel</span>
+                <X className="w-5 h-5" />
+                <span>Cancel</span>
               </button>
             )}
           </div>
@@ -642,12 +604,12 @@ export default function AccountDetails({ account, onUpdate }) {
             <div className="relative account-action-menu">
               <button
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                className="p-3 bg-white border-2 border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all text-slate-600 hover:text-slate-900"
+                className="p-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
               >
                 <MoreVertical className="w-5 h-5" />
               </button>
               {accountMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
                   <button
                     onClick={() => {
                       setIsRenamingAccount(true);
@@ -665,15 +627,15 @@ export default function AccountDetails({ account, onUpdate }) {
                         if (input) input.focus();
                       }, 50);
                     }}
-                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
                   >
                     <Edit className="w-4 h-4 text-slate-400" />
                     Rename Account
                   </button>
-                  <div className="h-px bg-slate-100 my-1" />
+                  <div className="h-px bg-slate-100 dark:bg-slate-700 my-1" />
                   <button
                     onClick={handleDeleteAccount}
-                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete Account
@@ -687,16 +649,16 @@ export default function AccountDetails({ account, onUpdate }) {
 
       {/* Add Transaction Form */}
       {isAdding && (
-        <div className="bg-gradient-to-br from-white to-slate-50 py-4 px-4 lg:px-6 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in -mx-20 lg:-mx-28">
-          <h3 className="text-lg font-bold mb-6 text-slate-900 flex items-center gap-3">
-            <div className="bg-brand-100 p-2.5 rounded-xl">
-              <Plus className="w-5 h-5 text-brand-600" />
+        <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 py-4 px-4 lg:px-6 rounded-2xl border-2 border-brand-200 dark:border-brand-800 shadow-xl mb-8 animate-slide-in -mx-20 lg:-mx-28">
+          <h3 className="text-lg font-bold mb-6 text-slate-900 dark:text-slate-100 flex items-center gap-3">
+            <div className="bg-brand-100 dark:bg-brand-900/30 p-2.5 rounded-xl">
+              <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
             </div>
             New Transaction
             {account.id === "all" && effectiveAddTarget && (
-              <span className="ml-3 text-sm text-slate-500">
+              <span className="ml-3 text-sm text-slate-500 dark:text-slate-400">
                 for{" "}
-                <span className="font-medium text-slate-700">
+                <span className="font-medium text-slate-700 dark:text-slate-300">
                   {effectiveAddTarget.name}
                 </span>
               </span>
@@ -716,9 +678,9 @@ export default function AccountDetails({ account, onUpdate }) {
                       name="txType"
                       checked={isBuy}
                       onChange={() => setIsBuy(true)}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-4 h-4 text-blue-600 dark:text-blue-400"
                     />
-                    <span className="text-sm font-medium text-slate-700">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Buy
                     </span>
                   </label>
@@ -728,17 +690,17 @@ export default function AccountDetails({ account, onUpdate }) {
                       name="txType"
                       checked={!isBuy}
                       onChange={() => setIsBuy(false)}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-4 h-4 text-blue-600 dark:text-blue-400"
                     />
-                    <span className="text-sm font-medium text-slate-700">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Sell
                     </span>
                   </label>
                 </div>
                 {account.id === "all" && (
-                  <div className="text-sm text-slate-500">
+                  <div className="text-sm text-slate-500 dark:text-slate-400">
                     Account:{" "}
-                    <span className="font-medium text-slate-700">
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
                       {effectiveAddTarget?.name}
                     </span>
                   </div>
@@ -746,7 +708,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Date
                 </label>
                 <div className="relative">
@@ -759,19 +721,19 @@ export default function AccountDetails({ account, onUpdate }) {
                     dateFormat="yyyy-MM-dd"
                     shouldCloseOnSelect={false}
                     required
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Cash Account
                 </label>
                 <AutocompleteInput
                   suggestions={cashAccountSuggestions}
                   placeholder="Select Account"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   value={cashAccountName}
                   required
                   onChange={(val) => {
@@ -789,14 +751,14 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-4 relative">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Ticker
                 </label>
                 <input
                   type="text"
                   required
                   placeholder="AAPL"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all uppercase"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all uppercase"
                   value={ticker}
                   onChange={(e) => {
                     setTicker(e.target.value.toUpperCase());
@@ -810,23 +772,23 @@ export default function AccountDetails({ account, onUpdate }) {
                   }
                 />
                 {showTickerSuggestions && tickerSuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full bg-white rounded-lg shadow-lg border border-slate-200 mt-1 max-h-60 overflow-y-auto">
+                  <div className="absolute z-50 w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 mt-1 max-h-60 overflow-y-auto">
                     {tickerSuggestions.map((suggestion, index) => (
                       <div
                         key={index}
-                        className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-sm"
+                        className="px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer text-sm"
                         onClick={() => {
                           setTicker(suggestion.symbol);
                           setShowTickerSuggestions(false);
                         }}
                       >
-                        <div className="font-medium text-slate-900">
+                        <div className="font-medium text-slate-900 dark:text-slate-100">
                           {suggestion.symbol}
                         </div>
-                        <div className="text-xs text-slate-500 truncate">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                           {suggestion.shortname || suggestion.longname}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-slate-400 dark:text-slate-500">
                           {suggestion.exchange} - {suggestion.typeDisp}
                         </div>
                       </div>
@@ -836,7 +798,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
                 <input
@@ -844,14 +806,14 @@ export default function AccountDetails({ account, onUpdate }) {
                   required
                   step="any"
                   placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   value={shares}
                   onChange={handleSharesChange}
                 />
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Price / Share
                 </label>
                 <div className="relative">
@@ -860,7 +822,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="any"
                     placeholder="0.00"
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={pricePerShare}
                     onChange={handlePricePerShareChange}
                   />
@@ -868,7 +830,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Total Price
                 </label>
                 <div className="relative">
@@ -877,7 +839,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={totalPrice}
                     onChange={handleTotalPriceChange}
                   />
@@ -885,7 +847,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Fee
                 </label>
                 <div className="relative">
@@ -893,7 +855,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
                   />
@@ -916,16 +878,16 @@ export default function AccountDetails({ account, onUpdate }) {
               className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
             >
               {account.id === "all" && (
-                <div className="md:col-span-12 mb-2 text-sm text-slate-500">
+                <div className="md:col-span-12 mb-2 text-sm text-slate-500 dark:text-slate-400">
                   Account:{" "}
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
                     {effectiveAddTarget?.name}
                   </span>
                 </div>
               )}
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Date
                 </label>
                 <div className="relative">
@@ -938,13 +900,13 @@ export default function AccountDetails({ account, onUpdate }) {
                     dateFormat="yyyy-MM-dd"
                     shouldCloseOnSelect={false}
                     required
-                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
+                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-600"
                   />
                 </div>
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Payee
                 </label>
                 <div className="relative">
@@ -952,7 +914,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   <AutocompleteInput
                     suggestions={payeeSuggestions}
                     placeholder="Who got paid?"
-                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
+                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-600"
                     value={payee}
                     onChange={setPayee}
                   />
@@ -960,7 +922,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Category
                 </label>
                 <div className="relative">
@@ -968,9 +930,9 @@ export default function AccountDetails({ account, onUpdate }) {
                   <AutocompleteInput
                     suggestions={categorySuggestions}
                     placeholder="Category"
-                    className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 ${
+                    className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-600 ${
                       availableAccounts.includes(payee)
-                        ? "bg-slate-100 text-slate-500"
+                        ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                         : ""
                     }`}
                     value={category}
@@ -981,7 +943,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Notes
                 </label>
                 <div className="relative">
@@ -989,7 +951,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   <input
                     type="text"
                     placeholder="What was this for?"
-                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300"
+                    className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-600"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                   />
@@ -997,7 +959,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Amount
                 </label>
                 <div className="relative">
@@ -1006,7 +968,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300"
+                    className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300 dark:hover:border-slate-600"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
@@ -1028,46 +990,46 @@ export default function AccountDetails({ account, onUpdate }) {
       )}
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50 rounded-t-2xl">
+          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-900 rounded-t-2xl">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-32">
                   Date
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Payee
                 </th>
                 {account.kind !== "cash" && (
                   <>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-48">
                       Ticker
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-36">
                       Shares
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-36">
                       Price
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-28">
                       Fee
                     </th>
                   </>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-56">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-56">
                   Category
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Notes
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-36">
                   Amount
                 </th>
                 <th className="w-16"></th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-slate-100">
+            <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
               {filteredTransactions.length === 0 ? (
                 <tr>
                   <td
@@ -1075,13 +1037,13 @@ export default function AccountDetails({ account, onUpdate }) {
                     className="px-6 py-16 text-center"
                   >
                     <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="bg-slate-100 p-4 rounded-full">
-                        <Search className="w-8 h-8 text-slate-300" />
+                      <div className="bg-slate-100 dark:bg-slate-700 p-4 rounded-full">
+                        <Search className="w-8 h-8 text-slate-300 dark:text-slate-500" />
                       </div>
-                      <p className="text-lg font-semibold text-slate-600 mb-1">
+                      <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-1">
                         No transactions found
                       </p>
-                      <p className="text-sm text-slate-400">
+                      <p className="text-sm text-slate-400 dark:text-slate-500">
                         {searchQuery
                           ? "Try adjusting your search terms."
                           : "Add a new transaction to get started."}
@@ -1093,7 +1055,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 filteredTransactions.map((tx) => (
                   <tr
                     key={tx.id}
-                    className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-transparent group transition-all duration-200"
+                    className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-transparent dark:hover:from-slate-700/50 group transition-all duration-200"
                   >
                     {editingId === tx.id ? (
                       <>
@@ -1112,7 +1074,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             }
                             dateFormat="yyyy-MM-dd"
                             shouldCloseOnSelect={false}
-                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                            className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                           />
                         </td>
 
@@ -1132,9 +1094,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                     onChange={() =>
                                       setEditForm({ ...editForm, payee: "Buy" })
                                     }
-                                    className="w-4 h-4 text-blue-600"
+                                    className="w-4 h-4 text-blue-600 dark:text-blue-400"
                                   />
-                                  <span className="text-sm">Buy</span>
+                                  <span className="text-sm text-slate-700 dark:text-slate-300">Buy</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                   <input
@@ -1150,9 +1112,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                         payee: "Sell",
                                       })
                                     }
-                                    className="w-4 h-4 text-blue-600"
+                                    className="w-4 h-4 text-blue-600 dark:text-blue-400"
                                   />
-                                  <span className="text-sm">Sell</span>
+                                  <span className="text-sm text-slate-700 dark:text-slate-300">Sell</span>
                                 </label>
                               </div>
                             </td>
@@ -1160,7 +1122,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <input
                                 type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
                                 value={editForm.ticker || ""}
                                 onChange={(e) =>
                                   setEditForm({
@@ -1175,7 +1137,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               <input
                                 type="number"
                                 step="any"
-                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={Math.abs(editForm.shares || 0)}
                                 onChange={(e) =>
                                   setEditForm({
@@ -1191,7 +1153,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 <input
                                   type="number"
                                   step="any"
-                                  className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.price_per_share || ""}
                                   onChange={(e) =>
                                     setEditForm({
@@ -1208,7 +1170,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 <input
                                   type="number"
                                   step="0.01"
-                                  className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.fee || ""}
                                   onChange={(e) =>
                                     setEditForm({
@@ -1223,7 +1185,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <input
                                 type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                                 value={editForm.category || "Investment"}
                                 onChange={(e) =>
                                   setEditForm({
@@ -1237,7 +1199,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <input
                                 type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                                 value={editForm.notes || ""}
                                 onChange={(e) =>
                                   setEditForm({
@@ -1248,7 +1210,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               />
                             </td>
 
-                            <td className="px-6 py-3 text-right font-bold">
+                            <td className="px-6 py-3 text-right font-bold text-slate-900 dark:text-slate-100">
                               {(() => {
                                 const s = parseFloat(editForm.shares) || 0;
                                 const p =
@@ -1264,13 +1226,13 @@ export default function AccountDetails({ account, onUpdate }) {
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={saveEdit}
-                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
                                 >
                                   <Check className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => setEditingId(null)}
-                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
@@ -1283,7 +1245,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <AutocompleteInput
                                 suggestions={payeeSuggestions}
-                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                                 value={editForm.payee}
                                 onChange={(val) =>
                                   setEditForm({ ...editForm, payee: val })
@@ -1293,7 +1255,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <AutocompleteInput
                                 suggestions={categorySuggestions}
-                                className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 text-slate-500" : ""}`}
+                                className={`w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400" : ""}`}
                                 value={editForm.category || ""}
                                 onChange={(val) =>
                                   setEditForm({
@@ -1309,7 +1271,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <input
                                 type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                                 value={editForm.notes || ""}
                                 onChange={(e) =>
                                   setEditForm({
@@ -1323,7 +1285,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               <input
                                 type="number"
                                 step="0.01"
-                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={editForm.amount}
                                 onChange={(e) =>
                                   setEditForm({
@@ -1337,13 +1299,13 @@ export default function AccountDetails({ account, onUpdate }) {
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={saveEdit}
-                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
                                 >
                                   <Check className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => setEditingId(null)}
-                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
@@ -1355,7 +1317,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     ) : (
                       <>
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 font-medium cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {new Date(tx.date).toLocaleDateString("en-US", {
@@ -1365,7 +1327,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           })}
                         </td>
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 dark:text-slate-100 cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.payee}
@@ -1374,7 +1336,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         {account.kind !== "cash" && (
                           <>
                             <td
-                              className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
+                              className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer text-slate-700 dark:text-slate-300"
                               onClick={() => startEditing(tx)}
                             >
                               {tx.ticker ? (
@@ -1382,43 +1344,43 @@ export default function AccountDetails({ account, onUpdate }) {
                                   {tx.ticker}
                                 </span>
                               ) : (
-                                <span className="text-slate-400">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">-</span>
                               )}
                             </td>
 
                             <td
-                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer text-slate-700 dark:text-slate-300"
                               onClick={() => startEditing(tx)}
                             >
                               {typeof tx.shares !== "undefined" &&
                               tx.shares !== null ? (
                                 <span>{Math.abs(tx.shares).toFixed(4)}</span>
                               ) : (
-                                <span className="text-slate-400">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">-</span>
                               )}
                             </td>
 
                             <td
-                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer text-slate-700 dark:text-slate-300"
                               onClick={() => startEditing(tx)}
                             >
                               {typeof tx.price_per_share !== "undefined" &&
                               tx.price_per_share !== null ? (
                                 <span>{tx.price_per_share.toFixed(2)} €</span>
                               ) : (
-                                <span className="text-slate-400">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">-</span>
                               )}
                             </td>
 
                             <td
-                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer text-slate-700 dark:text-slate-300"
                               onClick={() => startEditing(tx)}
                             >
                               {typeof tx.fee !== "undefined" &&
                               tx.fee !== null ? (
                                 <span>{tx.fee.toFixed(2)} €</span>
                               ) : (
-                                <span className="text-slate-400">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">-</span>
                               )}
                             </td>
                           </>
@@ -1432,28 +1394,28 @@ export default function AccountDetails({ account, onUpdate }) {
                             <span
                               className={`px-3 py-1.5 inline-flex text-xs font-bold rounded-xl border ${
                                 tx.category === "Transfer"
-                                  ? "bg-purple-50 text-purple-700 border-purple-200"
-                                  : "bg-slate-100 text-slate-700 border-slate-200"
+                                  ? "bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                                  : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600"
                               }`}
                             >
                               {tx.category}
                             </span>
                           ) : (
-                            <span className="text-slate-400">-</span>
+                            <span className="text-slate-400 dark:text-slate-500">-</span>
                           )}
                         </td>
                         <td
-                          className="px-6 py-4 text-sm text-slate-500 max-w-xs truncate cursor-pointer"
+                          className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.notes || (
-                            <span className="text-slate-300 italic">
+                            <span className="text-slate-300 dark:text-slate-600 italic">
                               No notes
                             </span>
                           )}
                         </td>
                         <td
-                          className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"}`}
+                          className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
                           onClick={() => startEditing(tx)}
                         >
                           {tx.amount >= 0 ? "+" : ""}
@@ -1480,7 +1442,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 setMenuOpenId(tx.id);
                               }
                             }}
-                            className={`p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200 ${menuOpenId === tx.id ? "opacity-100 bg-slate-100" : "opacity-0 group-hover:opacity-100"}`}
+                            className={`p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 ${menuOpenId === tx.id ? "opacity-100 bg-slate-100 dark:bg-slate-700" : "opacity-0 group-hover:opacity-100"}`}
                           >
                             <MoreVertical className="w-4 h-4" />
                           </button>
@@ -1489,7 +1451,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             menuCoords &&
                             createPortal(
                               <div
-                                className="fixed z-50 w-44 bg-white rounded-xl shadow-2xl border-2 border-slate-200 py-1.5 animate-fade-in action-menu-portal"
+                                className="fixed z-50 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border-2 border-slate-200 dark:border-slate-700 py-1.5 animate-fade-in action-menu-portal"
                                 style={{
                                   top: `${menuCoords.top + menuCoords.height + 8}px`,
                                   left: `${Math.min(Math.max(menuCoords.right - 176, 8), window.innerWidth - 176 - 8)}px`,
@@ -1501,9 +1463,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                     setMenuOpenId(null);
                                     setMenuCoords(null);
                                   }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 font-medium transition-colors"
+                                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-3 font-medium transition-colors"
                                 >
-                                  <Copy className="w-4 h-4 text-slate-400" />
+                                  <Copy className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                   Duplicate
                                 </button>
                                 <button
@@ -1512,7 +1474,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                     setMenuOpenId(null);
                                     setMenuCoords(null);
                                   }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-3 font-medium transition-colors"
+                                  className="w-full text-left px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-3 font-medium transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                   Delete
@@ -1571,11 +1533,11 @@ function AutocompleteInput({
         disabled={disabled}
       />
       {isOpen && filtered.length > 0 && (
-        <ul className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-auto text-left py-1">
+        <ul className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-auto text-left py-1">
           {filtered.map((s, i) => (
             <li
               key={i}
-              className="px-3 py-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center text-sm text-slate-700"
+              className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer flex justify-between items-center text-sm text-slate-700 dark:text-slate-200"
               onMouseDown={(e) => {
                 e.preventDefault();
                 onChange(s.value);
@@ -1584,7 +1546,7 @@ function AutocompleteInput({
             >
               <span className="font-medium">{s.value}</span>
               {s.type === "account" && (
-                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200 flex items-center gap-1">
+                <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800 flex items-center gap-1">
                   <ArrowRightLeft className="w-3 h-3" />
                   Transfer
                 </span>

@@ -10,6 +10,7 @@ import { Wallet } from "lucide-react";
 import "./styles/App.css";
 import { ToastProvider } from "./components/Toast";
 import { NumberFormatProvider } from "./contexts/NumberFormatContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
   const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
@@ -139,8 +140,9 @@ function App() {
 
   return (
     <NumberFormatProvider>
-      <ToastProvider>
-        <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
+      <ThemeProvider>
+        <ToastProvider>
+        <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
           <Sidebar
             accounts={accounts}
             marketValues={marketValues}
@@ -149,7 +151,7 @@ function App() {
             onUpdate={handleAccountUpdate}
           />
 
-          <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50">
+          <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50 dark:bg-slate-900">
             <div className="max-w-7xl mx-auto">
               {selectedAccountId === "dashboard" ? (
                 <Dashboard accounts={accounts} marketValues={marketValues} />
@@ -165,13 +167,13 @@ function App() {
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center h-[80vh] text-slate-400">
-                  <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 mb-8 animate-in fade-in zoom-in duration-500">
+                  <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none mb-8 animate-in fade-in zoom-in duration-500">
                     <Wallet className="w-16 h-16 text-brand-500" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-3 text-slate-800 tracking-tight">
+                  <h2 className="text-3xl font-bold mb-3 text-slate-800 dark:text-slate-100 tracking-tight">
                     Welcome to HoneyBear Folio
                   </h2>
-                  <p className="text-lg text-slate-500 max-w-md text-center leading-relaxed">
+                  <p className="text-lg text-slate-500 dark:text-slate-400 max-w-md text-center leading-relaxed">
                     Select an account from the sidebar to view details, or
                     create a new one to get started.
                   </p>
@@ -180,8 +182,7 @@ function App() {
             </div>
           </main>
         </div>
-      </ToastProvider>
-    </NumberFormatProvider>
+      </ToastProvider>      </ThemeProvider>    </NumberFormatProvider>
   );
 }
 

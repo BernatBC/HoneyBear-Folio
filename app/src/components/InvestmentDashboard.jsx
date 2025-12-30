@@ -153,16 +153,16 @@ export default function InvestmentDashboard() {
     <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
             Investment Dashboard
           </h2>
-          <p className="text-slate-500 font-medium mt-1">
+          <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
             Track your portfolio performance
           </p>
         </div>
         <button
           onClick={fetchData}
-          className="p-2.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200 shadow-sm border border-transparent hover:border-brand-100"
+          className="p-2.5 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/30 rounded-xl transition-all duration-200 shadow-sm border border-transparent hover:border-brand-100 dark:hover:border-brand-800"
           title="Refresh Data"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
@@ -172,21 +172,21 @@ export default function InvestmentDashboard() {
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
-            <span className="text-slate-600 font-medium text-lg">
+            <div className="w-16 h-16 border-4 border-brand-200 dark:border-brand-800 border-t-brand-600 dark:border-t-brand-400 rounded-full animate-spin"></div>
+            <span className="text-slate-600 dark:text-slate-300 font-medium text-lg">
               Loading investment data...
             </span>
-            <span className="text-slate-400 text-sm">
+            <span className="text-slate-400 dark:text-slate-500 text-sm">
               Fetching latest market prices
             </span>
           </div>
         </div>
       ) : error ? (
-        <div className="bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 p-6 rounded-2xl border-2 border-rose-200 font-medium shadow-md">
+        <div className="bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 text-rose-700 dark:text-rose-300 p-6 rounded-2xl border-2 border-rose-200 dark:border-rose-800 font-medium shadow-md">
           <div className="flex items-center gap-3">
-            <div className="bg-rose-200 p-2 rounded-full">
+            <div className="bg-rose-200 dark:bg-rose-800 p-2 rounded-full">
               <svg
-                className="w-6 h-6 text-rose-700"
+                className="w-6 h-6 text-rose-700 dark:text-rose-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -201,15 +201,15 @@ export default function InvestmentDashboard() {
             </div>
             <div>
               <div className="font-bold">Error loading data</div>
-              <div className="text-sm text-rose-600">{error}</div>
+              <div className="text-sm text-rose-600 dark:text-rose-400">{error}</div>
             </div>
           </div>
         </div>
       ) : holdings.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-16">
-          <div className="bg-slate-100 p-6 rounded-2xl mb-4">
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-16">
+          <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-2xl mb-4">
             <svg
-              className="w-16 h-16 text-slate-300"
+              className="w-16 h-16 text-slate-300 dark:text-slate-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -222,10 +222,10 @@ export default function InvestmentDashboard() {
               />
             </svg>
           </div>
-          <p className="text-lg font-semibold text-slate-600 mb-2">
+          <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-2">
             No investments found
           </p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             Start adding stock transactions to track your portfolio
           </p>
         </div>
@@ -233,25 +233,25 @@ export default function InvestmentDashboard() {
         <>
           {/* Summary Card */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">
+            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 dark:hover:border-brand-700 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                 Total Portfolio Value
               </h3>
-              <p className="text-3xl font-bold text-slate-900 tracking-tight">
+              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                 {formatNumber(totalValue)} €
               </p>
             </div>
-            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1 group cursor-pointer">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-emerald-600 transition-colors">
+            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-emerald-200 dark:hover:border-emerald-800 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                 Top Performer
               </h3>
-              <p className="text-xl font-bold text-emerald-600 truncate tracking-tight">
+              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 truncate tracking-tight">
                 {
                   holdings.reduce((prev, current) =>
                     prev.roi > current.roi ? prev : current,
                   ).ticker
                 }
-                <span className="text-sm font-medium ml-2 text-slate-500">
+                <span className="text-sm font-medium ml-2 text-slate-500 dark:text-slate-400">
                   (
                   {formatNumber(
                     holdings.reduce((prev, current) =>
@@ -263,11 +263,11 @@ export default function InvestmentDashboard() {
                 </span>
               </p>
             </div>
-            <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 group cursor-pointer">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 group-hover:text-brand-600 transition-colors">
+            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 dark:hover:border-brand-700 hover:-translate-y-1 group cursor-pointer">
+              <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                 Total Holdings
               </h3>
-              <p className="text-3xl font-bold text-slate-900 tracking-tight">
+              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                 {holdings.length}
               </p>
             </div>
@@ -275,14 +275,14 @@ export default function InvestmentDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Portfolio Allocation */}
-            <div className="bg-white p-6 rounded-2xl shadow-md border border-slate-200 h-[400px] hover:shadow-lg transition-shadow duration-300">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 h-[400px] hover:shadow-lg transition-shadow duration-300">
               {allocationData ? (
                 <Doughnut options={chartOptions} data={allocationData} />
               ) : (
                 <div className="h-full flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
-                    <span className="text-slate-400 font-medium">
+                    <div className="w-12 h-12 border-4 border-brand-200 dark:border-brand-800 border-t-brand-600 dark:border-t-brand-400 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 dark:text-slate-500 font-medium">
                       Loading data...
                     </span>
                   </div>
@@ -291,53 +291,53 @@ export default function InvestmentDashboard() {
             </div>
 
             {/* TreeMap */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col h-[400px] hover:shadow-lg transition-shadow duration-300">
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">
+            <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col h-[400px] hover:shadow-lg transition-shadow duration-300">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">
                 Portfolio Heatmap
               </h3>
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
                 Visual representation of holdings by size and performance
               </p>
-              <div className="flex-1 min-h-0 border-2 border-slate-200 rounded-xl overflow-hidden relative shadow-inner">
+              <div className="flex-1 min-h-0 border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-inner">
                 <TreeMap items={holdings} totalValue={totalValue} />
               </div>
             </div>
           </div>
 
           {/* Holdings Table */}
-          <div className="bg-white p-0 rounded-2xl shadow-md border border-slate-200 flex flex-col overflow-hidden h-full max-h-[600px] hover:shadow-lg transition-shadow duration-300">
-            <div className="p-6 border-b border-slate-200 bg-slate-50/50">
-              <h3 className="text-lg font-semibold text-slate-800">Holdings</h3>
-              <p className="text-sm text-slate-500 mt-1">
+          <div className="bg-white dark:bg-slate-800 p-0 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden h-full max-h-[600px] hover:shadow-lg transition-shadow duration-300">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Holdings</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Detailed breakdown of your positions
               </p>
             </div>
             <div className="overflow-auto flex-1">
               <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-900 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th className="p-4 font-bold text-slate-600 text-xs uppercase tracking-wider">
+                    <th className="p-4 font-bold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider">
                       Ticker
                     </th>
-                    <th className="p-4 font-bold text-slate-600 text-right text-xs uppercase tracking-wider">
+                    <th className="p-4 font-bold text-slate-600 dark:text-slate-400 text-right text-xs uppercase tracking-wider">
                       Value
                     </th>
-                    <th className="p-4 font-bold text-slate-600 text-right text-xs uppercase tracking-wider">
+                    <th className="p-4 font-bold text-slate-600 dark:text-slate-400 text-right text-xs uppercase tracking-wider">
                       ROI
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                   {holdings.map((h) => (
                     <tr
                       key={h.ticker}
-                      className="hover:bg-slate-50 transition-colors duration-150"
+                      className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150"
                     >
                       <td className="p-4">
-                        <div className="font-semibold text-slate-900">
+                        <div className="font-semibold text-slate-900 dark:text-slate-100">
                           {h.ticker}
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
                           {formatNumber(h.shares, {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
@@ -351,13 +351,13 @@ export default function InvestmentDashboard() {
                         </div>
                       </td>
                       <td className="p-4 text-right">
-                        <div className="font-semibold text-slate-700">
+                        <div className="font-semibold text-slate-700 dark:text-slate-300">
                           {formatNumber(h.currentValue, {
                             maximumFractionDigits: 0,
                           })}{" "}
                           €
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
                           Cost:{" "}
                           {formatNumber(h.costBasis, {
                             minimumFractionDigits: 0,
@@ -370,8 +370,8 @@ export default function InvestmentDashboard() {
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-lg font-semibold text-sm ${
                             h.roi >= 0
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-rose-50 text-rose-700 border border-rose-200"
+                              ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
+                              : "bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800"
                           }`}
                         >
                           {h.roi > 0 ? "+" : ""}

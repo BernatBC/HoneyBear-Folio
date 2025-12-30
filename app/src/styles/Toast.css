@@ -22,6 +22,12 @@
   border-left: 4px solid transparent;
 }
 
+.dark .toast {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f1f5f9;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
 .toast-content {
   display: flex;
   gap: 0.6rem;

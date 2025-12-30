@@ -3,10 +3,12 @@ import { X, Settings, ChevronDown } from "lucide-react";
 import { createPortal } from "react-dom";
 import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
+import { useTheme } from "../contexts/ThemeContext";
 import { formatNumberWithLocale } from "../utils/format";
 
 export default function SettingsModal({ onClose }) {
   const { locale, setLocale } = useNumberFormat();
+  const { theme, setTheme } = useTheme();
 
   const example = formatNumberWithLocale(1234.56, locale);
 
@@ -57,6 +59,22 @@ export default function SettingsModal({ onClose }) {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
           </div>
           <p className="text-slate-400 mt-3">Example: {example}</p>
+
+          <div className="flex items-center justify-between mt-6">
+            <label className="modal-label">Theme</label>
+          </div>
+          <div className="relative">
+            <select
+              className="modal-select appearance-none pr-8"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
+          </div>
         </div>
       </div>
     </div>
