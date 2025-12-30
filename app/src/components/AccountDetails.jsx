@@ -532,7 +532,9 @@ export default function AccountDetails({ account, onUpdate }) {
             </span>
             <span
               className={`text-3xl font-bold tracking-tight ${
-                account.balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                account.balance >= 0
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400"
               }`}
             >
               {account.balance >= 0 ? "+" : ""}
@@ -1104,7 +1106,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                     }
                                     className="w-4 h-4 text-blue-600 dark:text-blue-400"
                                   />
-                                  <span className="text-sm text-slate-700 dark:text-slate-300">Buy</span>
+                                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                                    Buy
+                                  </span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                   <input
@@ -1122,7 +1126,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                     }
                                     className="w-4 h-4 text-blue-600 dark:text-blue-400"
                                   />
-                                  <span className="text-sm text-slate-700 dark:text-slate-300">Sell</span>
+                                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                                    Sell
+                                  </span>
                                 </label>
                               </div>
                             </td>
@@ -1352,7 +1358,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                   {tx.ticker}
                                 </span>
                               ) : (
-                                <span className="text-slate-400 dark:text-slate-500">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">
+                                  -
+                                </span>
                               )}
                             </td>
 
@@ -1364,7 +1372,9 @@ export default function AccountDetails({ account, onUpdate }) {
                               tx.shares !== null ? (
                                 <span>{Math.abs(tx.shares).toFixed(4)}</span>
                               ) : (
-                                <span className="text-slate-400 dark:text-slate-500">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">
+                                  -
+                                </span>
                               )}
                             </td>
 
@@ -1376,7 +1386,9 @@ export default function AccountDetails({ account, onUpdate }) {
                               tx.price_per_share !== null ? (
                                 <span>{tx.price_per_share.toFixed(2)} €</span>
                               ) : (
-                                <span className="text-slate-400 dark:text-slate-500">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">
+                                  -
+                                </span>
                               )}
                             </td>
 
@@ -1388,7 +1400,9 @@ export default function AccountDetails({ account, onUpdate }) {
                               tx.fee !== null ? (
                                 <span>{tx.fee.toFixed(2)} €</span>
                               ) : (
-                                <span className="text-slate-400 dark:text-slate-500">-</span>
+                                <span className="text-slate-400 dark:text-slate-500">
+                                  -
+                                </span>
                               )}
                             </td>
                           </>
@@ -1409,7 +1423,9 @@ export default function AccountDetails({ account, onUpdate }) {
                               {tx.category}
                             </span>
                           ) : (
-                            <span className="text-slate-400 dark:text-slate-500">-</span>
+                            <span className="text-slate-400 dark:text-slate-500">
+                              -
+                            </span>
                           )}
                         </td>
                         <td

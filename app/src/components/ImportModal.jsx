@@ -331,7 +331,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
               <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-3">
                   <FileSpreadsheet className="w-5 h-5 text-green-500" />
-                  <span className="text-slate-900 dark:text-white font-medium">{file.name}</span>
+                  <span className="text-slate-900 dark:text-white font-medium">
+                    {file.name}
+                  </span>
                 </div>
                 <button
                   onClick={() => setFile(null)}
@@ -366,10 +368,15 @@ export default function ImportModal({ onClose, onImportComplete }) {
                       <div className="relative">
                         <CustomSelect
                           value={mapping[field]}
-                          onChange={(v) => setMapping({ ...mapping, [field]: v })}
+                          onChange={(v) =>
+                            setMapping({ ...mapping, [field]: v })
+                          }
                           options={[
                             { value: "", label: "Skip" },
-                            ...columns.map((col) => ({ value: col, label: col })),
+                            ...columns.map((col) => ({
+                              value: col,
+                              label: col,
+                            })),
                           ]}
                           placeholder={"Select column"}
                         />
@@ -382,7 +389,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
               {importing && (
                 <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-slate-700 dark:text-slate-300">Importing...</span>
+                    <span className="text-slate-700 dark:text-slate-300">
+                      Importing...
+                    </span>
                     <span className="text-slate-500 dark:text-slate-400">
                       {progress.current} / {progress.total}
                     </span>

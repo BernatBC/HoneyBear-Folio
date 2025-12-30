@@ -2,7 +2,12 @@ import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
 
-export default function CustomSelect({ value, onChange, options, placeholder }) {
+export default function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}) {
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(-1);
   const containerRef = useRef(null);
@@ -68,7 +73,9 @@ export default function CustomSelect({ value, onChange, options, placeholder }) 
         onClick={toggle}
         onKeyDown={handleKeyDown}
       >
-        <span className="truncate">{selected ? selected.label : placeholder}</span>
+        <span className="truncate">
+          {selected ? selected.label : placeholder}
+        </span>
         <ChevronDown className="w-4 h-4 text-slate-400" />
       </button>
 

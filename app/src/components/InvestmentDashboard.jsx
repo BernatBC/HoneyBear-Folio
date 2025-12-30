@@ -201,7 +201,9 @@ export default function InvestmentDashboard() {
             </div>
             <div>
               <div className="font-bold">Error loading data</div>
-              <div className="text-sm text-rose-600 dark:text-rose-400">{error}</div>
+              <div className="text-sm text-rose-600 dark:text-rose-400">
+                {error}
+              </div>
             </div>
           </div>
         </div>
@@ -307,7 +309,9 @@ export default function InvestmentDashboard() {
           {/* Holdings Table */}
           <div className="bg-white dark:bg-slate-800 p-0 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden h-full max-h-[600px] hover:shadow-lg transition-shadow duration-300">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Holdings</h3>
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+                Holdings
+              </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Detailed breakdown of your positions
               </p>

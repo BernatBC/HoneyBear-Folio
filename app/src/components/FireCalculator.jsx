@@ -415,7 +415,9 @@ export default function FireCalculator() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Inputs */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-6 h-fit hover:shadow-lg transition-shadow duration-300">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Parameters</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
+            Parameters
+          </h2>
 
           <div className="space-y-5">
             <div>
@@ -581,8 +583,12 @@ export default function FireCalculator() {
                     legend: {
                       position: "top",
                       labels: {
-                        color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#475569'
-                      }
+                        color: document.documentElement.classList.contains(
+                          "dark",
+                        )
+                          ? "#cbd5e1"
+                          : "#475569",
+                      },
                     },
                     tooltip: {
                       callbacks: {
@@ -607,10 +613,18 @@ export default function FireCalculator() {
                     y: {
                       beginAtZero: true,
                       grid: {
-                        color: document.documentElement.classList.contains('dark') ? '#334155' : '#e2e8f0'
+                        color: document.documentElement.classList.contains(
+                          "dark",
+                        )
+                          ? "#334155"
+                          : "#e2e8f0",
                       },
                       ticks: {
-                        color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b',
+                        color: document.documentElement.classList.contains(
+                          "dark",
+                        )
+                          ? "#94a3b8"
+                          : "#64748b",
                         callback: function (value) {
                           return (
                             formatNumber(value / 1000, {
@@ -623,12 +637,20 @@ export default function FireCalculator() {
                     },
                     x: {
                       grid: {
-                        color: document.documentElement.classList.contains('dark') ? '#334155' : '#e2e8f0'
+                        color: document.documentElement.classList.contains(
+                          "dark",
+                        )
+                          ? "#334155"
+                          : "#e2e8f0",
                       },
                       ticks: {
-                        color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b',
-                      }
-                    }
+                        color: document.documentElement.classList.contains(
+                          "dark",
+                        )
+                          ? "#94a3b8"
+                          : "#64748b",
+                      },
+                    },
                   },
                 }}
               />
