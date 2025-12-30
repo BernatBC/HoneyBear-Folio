@@ -331,7 +331,9 @@ export default function FireCalculator() {
       }
     })();
     return () => {
-      if (unlisten) unlisten();
+      if (typeof unlisten === "function") {
+        unlisten();
+      }
     };
   }, []);
 
