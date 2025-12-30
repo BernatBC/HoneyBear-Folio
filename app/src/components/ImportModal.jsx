@@ -5,6 +5,7 @@ import {
   X,
   Upload,
   FileSpreadsheet,
+  FileJson,
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
@@ -20,6 +21,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
     amount: "",
     category: "",
     notes: "",
+    account: "",
   });
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState({
@@ -57,6 +59,37 @@ export default function ImportModal({ onClose, onImportComplete }) {
             autoMapColumns(results.meta.fields || []);
           },
         });
+      } else if (file.name.endsWith(".json")) {
+        try {
+          const parsed = JSON.parse(data);
+          let rows = [];
+
+          if (Array.isArray(parsed)) {
+            rows = parsed;
+          } else if (parsed.transactions && Array.isArray(parsed.transactions)) {
+            rows = parsed.transactions;
+          } else if (parsed.data && Array.isArray(parsed.data)) {
+            rows = parsed.data;
+          } else {
+            // Unsupported JSON shape
+            setColumns([]);
+            autoMapColumns([]);
+            return;
+          }
+
+          // Collect union of keys as columns
+          const cols = Array.from(
+            rows.reduce((acc, row) => {
+              Object.keys(row || {}).forEach((k) => acc.add(k));
+              return acc;
+            }, new Set()),
+          );
+
+          setColumns(cols);
+          autoMapColumns(cols);
+        } catch (e) {
+          console.error("Failed to parse JSON import file:", e);
+        }
       } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
@@ -72,7 +105,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
       }
     };
 
-    if (file.name.endsWith(".csv")) {
+    if (file.name.endsWith(".csv") || file.name.endsWith(".json")) {
       reader.readAsText(file);
     } else {
       reader.readAsBinaryString(file);
@@ -95,12 +128,14 @@ export default function ImportModal({ onClose, onImportComplete }) {
       else if (lower.includes("category")) newMapping.category = col;
       else if (lower.includes("note") || lower.includes("memo"))
         newMapping.notes = col;
+      else if (lower.includes("account") || lower.includes("acc")) newMapping.account = col;
     });
     setMapping(newMapping);
   };
 
   const handleImport = async () => {
-    if (!targetAccountId) {
+    // Allow JSON files to include their own account references; otherwise require a target account
+    if (!targetAccountId && !(file && file.name && file.name.endsWith(".json"))) {
       alert("Please select a target account");
       return;
     }
@@ -122,6 +157,23 @@ export default function ImportModal({ onClose, onImportComplete }) {
             processRows(allRows);
           },
         });
+      } else if (file.name.endsWith(".json")) {
+        try {
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed)) {
+            allRows = parsed;
+          } else if (parsed.transactions && Array.isArray(parsed.transactions)) {
+            allRows = parsed.transactions;
+          } else if (parsed.data && Array.isArray(parsed.data)) {
+            allRows = parsed.data;
+          } else {
+            allRows = [];
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON import file:", e);
+          allRows = [];
+        }
+        processRows(allRows);
       } else {
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
@@ -139,7 +191,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
       }
     };
 
-    if (file.name.endsWith(".csv")) {
+    if (file.name.endsWith(".csv") || file.name.endsWith(".json")) {
       reader.readAsText(file);
     } else {
       reader.readAsBinaryString(file);
@@ -168,8 +220,27 @@ export default function ImportModal({ onClose, onImportComplete }) {
         let amount = parseFloat(String(amountStr).replace(/[^0-9.-]/g, ""));
         if (isNaN(amount)) amount = 0;
 
+        // Determine account id for this row. Priority:
+        // 1) explicit mapping column selected by user
+        // 2) explicit numeric account_id or accountId field in row
+        // 3) account name in row matched to existing accounts
+        // 4) selected targetAccountId
+        let accountId = null;
+        const mappedAccountValue = mapping.account ? row[mapping.account] : undefined;
+        const accountField = mappedAccountValue ?? row.account_id ?? row.accountId ?? row.account ?? row.account_name ?? row.accountName;
+        if (accountField) {
+          if (typeof accountField === "number") accountId = accountField;
+          else if (!isNaN(parseInt(accountField))) accountId = parseInt(accountField);
+          else if (typeof accountField === "string") {
+            const match = accounts.find((a) => a.name === accountField);
+            if (match) accountId = match.id;
+          }
+        }
+        if (!accountId && targetAccountId) accountId = parseInt(targetAccountId);
+        if (!accountId) throw new Error("No target account specified for imported row");
+
         await invoke("create_transaction", {
-          accountId: parseInt(targetAccountId),
+          accountId,
           date,
           payee,
           notes: row[mapping.notes] || "",
@@ -215,18 +286,22 @@ export default function ImportModal({ onClose, onImportComplete }) {
               onClick={() => fileInputRef.current?.click()}
               className="border-2 border-dashed border-slate-700 rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-slate-800/50 transition-all group"
             >
-              <FileSpreadsheet className="w-12 h-12 text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+              {file && file.name && file.name.endsWith('.json') ? (
+                <FileJson className="w-12 h-12 text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+              ) : (
+                <FileSpreadsheet className="w-12 h-12 text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+              )}
               <p className="text-slate-300 font-medium">
-                Click to upload CSV or Excel file
+                Click to upload CSV, Excel or JSON file
               </p>
               <p className="text-slate-500 text-sm mt-1">
-                Supports .csv, .xlsx, .xls
+                Supports .csv, .xlsx, .xls, .json
               </p>
               <input
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                accept=".csv,.xlsx,.xls"
+                accept=".csv,.xlsx,.xls,.json"
                 className="hidden"
               />
             </div>
@@ -306,7 +381,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                     <div
                       className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: `${(progress.current / progress.total) * 100}%`,
+                        width: progress.total ? `${(progress.current / progress.total) * 100}%` : "0%",
                       }}
                     />
                   </div>
