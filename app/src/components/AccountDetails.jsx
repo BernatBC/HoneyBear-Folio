@@ -678,7 +678,7 @@ export default function AccountDetails({ account, onUpdate }) {
 
       {/* Add Transaction Form */}
       {isAdding && (
-        <div className="bg-gradient-to-br from-white to-slate-50 p-4 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in">
+        <div className="bg-gradient-to-br from-white to-slate-50 py-4 px-4 lg:px-6 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in -mx-20 lg:-mx-28">
           <h3 className="text-lg font-bold mb-6 text-slate-900 flex items-center gap-3">
             <div className="bg-brand-100 p-2.5 rounded-xl">
               <Plus className="w-5 h-5 text-brand-600" />
