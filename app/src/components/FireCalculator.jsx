@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Line } from "react-chartjs-2";
 import { Calculator, TrendingUp, Euro, Percent, Calendar } from "lucide-react";
@@ -67,7 +67,7 @@ export default function FireCalculator() {
     withdrawalRate: false,
     annualSavings: false,
   };
-  const userModified = { current: initialUserModified }; // lightweight ref-like object
+  const userModified = useRef(initialUserModified); // keep as ref so it doesn't trigger effects
 
   async function fetchData() {
     setLoading(true);

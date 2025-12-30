@@ -17,7 +17,6 @@ import {
   Calendar,
   Tag,
   FileText,
-  Euro,
   ArrowRightLeft,
   User,
   Edit,
