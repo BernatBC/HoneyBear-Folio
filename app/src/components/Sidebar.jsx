@@ -85,9 +85,7 @@ export default function Sidebar({
             <TrendingUp className="w-3.5 h-3.5" />
             Net Worth
           </div>
-          <div className="net-worth-value">
-            {formatNumber(totalBalance)} €
-          </div>
+          <div className="net-worth-value">{formatNumber(totalBalance)} €</div>
         </div>
       </div>
 
@@ -239,11 +237,12 @@ export default function Sidebar({
                   <span
                     className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
                   >
-{formatNumber(
+                    {formatNumber(
                       marketValues[account.id] !== undefined
                         ? marketValues[account.id]
-                        : account.balance
-                    )} €
+                        : account.balance,
+                    )}{" "}
+                    €
                   </span>
                 </button>
               ))}

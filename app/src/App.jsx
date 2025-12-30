@@ -172,8 +172,8 @@ function App() {
                     Welcome to HoneyBear Folio
                   </h2>
                   <p className="text-lg text-slate-500 max-w-md text-center leading-relaxed">
-                    Select an account from the sidebar to view details, or create
-                    a new one to get started.
+                    Select an account from the sidebar to view details, or
+                    create a new one to get started.
                   </p>
                 </div>
               )}

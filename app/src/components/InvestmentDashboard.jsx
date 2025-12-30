@@ -342,7 +342,10 @@ export default function InvestmentDashboard() {
                       </td>
                       <td className="p-4 text-right">
                         <div className="font-semibold text-slate-700">
-                          {formatNumber(h.currentValue, { maximumFractionDigits: 0 })} €
+                          {formatNumber(h.currentValue, {
+                            maximumFractionDigits: 0,
+                          })}{" "}
+                          €
                         </div>
                         <div className="text-xs text-slate-500">
                           Cost: {h.costBasis.toFixed(0)} €

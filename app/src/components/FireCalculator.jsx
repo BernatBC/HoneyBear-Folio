@@ -612,7 +612,7 @@ export default function FireCalculator() {
                             }) + "k €"
                           );
                         },
-                      }
+                      },
                     },
                   },
                 }}
