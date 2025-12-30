@@ -9,6 +9,7 @@ import FireCalculator from "./components/FireCalculator";
 import { Wallet } from "lucide-react";
 import "./styles/App.css";
 import { ToastProvider } from "./components/Toast";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { NumberFormatProvider } from "./contexts/NumberFormatContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -138,50 +139,102 @@ function App() {
     }
   }
 
+  // Global error overlay state
+  const [globalError, setGlobalError] = useState(null);
+
+  // Install global handlers to catch uncaught errors and promise rejections
+  useEffect(() => {
+    function handleWindowError(event) {
+      console.error("Window error:", event.error || event.message, event);
+      setGlobalError(event.error || event.message || "Unknown error");
+    }
+
+    function handleRejection(event) {
+      console.error("Unhandled rejection:", event.reason || event);
+      setGlobalError(event.reason || "Unhandled promise rejection");
+    }
+
+    window.addEventListener("error", handleWindowError);
+    window.addEventListener("unhandledrejection", handleRejection);
+
+    return () => {
+      window.removeEventListener("error", handleWindowError);
+      window.removeEventListener("unhandledrejection", handleRejection);
+    };
+  }, []);
+
   return (
     <NumberFormatProvider>
       <ThemeProvider>
         <ToastProvider>
-          <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
-            <Sidebar
-              accounts={accounts}
-              marketValues={marketValues}
-              selectedId={selectedAccountId}
-              onSelectAccount={setSelectedAccountId}
-              onUpdate={handleAccountUpdate}
-            />
+          <ErrorBoundary>
+            <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
+              <Sidebar
+                accounts={accounts}
+                marketValues={marketValues}
+                selectedId={selectedAccountId}
+                onSelectAccount={setSelectedAccountId}
+                onUpdate={handleAccountUpdate}
+              />
 
-            <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50 dark:bg-slate-900">
-              <div className="max-w-7xl mx-auto">
-                {selectedAccountId === "dashboard" ? (
-                  <Dashboard accounts={accounts} marketValues={marketValues} />
-                ) : selectedAccountId === "investment-dashboard" ? (
-                  <InvestmentDashboard />
-                ) : selectedAccountId === "fire-calculator" ? (
-                  <FireCalculator />
-                ) : selectedAccount ? (
-                  <AccountDetails
-                    key={selectedAccount.id}
-                    account={selectedAccount}
-                    onUpdate={handleAccountUpdate}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-[80vh] text-slate-400">
-                    <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none mb-8 animate-in fade-in zoom-in duration-500">
-                      <Wallet className="w-16 h-16 text-brand-500" />
+              <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50 dark:bg-slate-900">
+                <div className="max-w-7xl mx-auto">
+                  {selectedAccountId === "dashboard" ? (
+                    <Dashboard accounts={accounts} marketValues={marketValues} />
+                  ) : selectedAccountId === "investment-dashboard" ? (
+                    <InvestmentDashboard />
+                  ) : selectedAccountId === "fire-calculator" ? (
+                    <FireCalculator />
+                  ) : selectedAccount ? (
+                    <AccountDetails
+                      key={selectedAccount.id}
+                      account={selectedAccount}
+                      onUpdate={handleAccountUpdate}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-[80vh] text-slate-400">
+                      <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none mb-8 animate-in fade-in zoom-in duration-500">
+                        <Wallet className="w-16 h-16 text-brand-500" />
+                      </div>
+                      <h2 className="text-3xl font-bold mb-3 text-slate-800 dark:text-slate-100 tracking-tight">
+                        Welcome to HoneyBear Folio
+                      </h2>
+                      <p className="text-lg text-slate-500 dark:text-slate-400 max-w-md text-center leading-relaxed">
+                        Select an account from the sidebar to view details, or
+                        create a new one to get started.
+                      </p>
                     </div>
-                    <h2 className="text-3xl font-bold mb-3 text-slate-800 dark:text-slate-100 tracking-tight">
-                      Welcome to HoneyBear Folio
-                    </h2>
-                    <p className="text-lg text-slate-500 dark:text-slate-400 max-w-md text-center leading-relaxed">
-                      Select an account from the sidebar to view details, or
-                      create a new one to get started.
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
+              </main>
+            </div>
+
+            {globalError && (
+              <div className="fixed inset-4 z-60 p-6 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
+                <h3 className="text-lg font-bold mb-2">An unexpected error occurred</h3>
+                <pre className="text-sm max-h-60 overflow-auto whitespace-pre-wrap">
+                  {typeof globalError === "string" ? globalError : (globalError && globalError.stack) || String(globalError)}
+                </pre>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    className="bg-white dark:bg-slate-700 text-sm px-3 py-1 rounded border"
+                    onClick={() => {
+                      console.clear();
+                      setGlobalError(null);
+                    }}
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    className="bg-slate-700 text-white text-sm px-3 py-1 rounded"
+                    onClick={() => window.location.reload()}
+                  >
+                    Reload
+                  </button>
+                </div>
               </div>
-            </main>
-          </div>
+            )}
+          </ErrorBoundary>
         </ToastProvider>{" "}
       </ThemeProvider>{" "}
     </NumberFormatProvider>

@@ -1,7 +1,6 @@
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-
-const ThemeContext = createContext();
+import { ThemeContext } from "./theme-core";
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {

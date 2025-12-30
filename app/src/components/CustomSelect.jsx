@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
 
 export default function CustomSelect({
@@ -12,13 +13,19 @@ export default function CustomSelect({
   const [highlighted, setHighlighted] = useState(-1);
   const containerRef = useRef(null);
   const listRef = useRef(null);
+  const [menuCoords, setMenuCoords] = useState(null);
 
   const selected = options.find((o) => String(o.value) === String(value));
 
   useEffect(() => {
     const onClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      const tgt = e && e.target;
+      const clickedInsideTrigger =
+        containerRef.current && tgt instanceof Node && containerRef.current.contains(tgt);
+      const clickedInsidePortal = tgt instanceof Element && tgt.closest(".custom-select-portal");
+      if (containerRef.current && !clickedInsideTrigger && !clickedInsidePortal) {
         setOpen(false);
+        setMenuCoords(null);
         setHighlighted(-1);
       }
     };
@@ -33,7 +40,69 @@ export default function CustomSelect({
     node?.scrollIntoView({ block: "nearest" });
   }, [highlighted, open]);
 
-  const toggle = () => setOpen((v) => !v);
+  useEffect(() => {
+    if (!open) return;
+    function handleScrollOrResize(e) {
+      // If the scroll/wheel/touch event originates from inside the menu or the trigger, ignore it
+      try {
+        const tgt = e && e.target;
+        if (
+          e &&
+          e.type === "scroll" &&
+          listRef.current &&
+          (tgt instanceof Node) &&
+          (listRef.current.contains(tgt) || (containerRef.current && containerRef.current.contains(tgt)))
+        ) {
+          return;
+        }
+        if (
+          e &&
+          (e.type === "wheel" || e.type === "touchmove") &&
+          listRef.current &&
+          (tgt instanceof Node) &&
+          listRef.current.contains(tgt)
+        ) {
+          return;
+        }
+      } catch (err) {
+        // be defensive; fall through and close
+      }
+
+      setOpen(false);
+      setMenuCoords(null);
+      setHighlighted(-1);
+    }
+
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("wheel", handleScrollOrResize, true);
+    window.addEventListener("touchmove", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("wheel", handleScrollOrResize, true);
+      window.removeEventListener("touchmove", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [open]);
+
+  const toggle = () => {
+    if (!open && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMenuCoords({
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+        right: rect.right + window.scrollX,
+        bottom: rect.bottom + window.scrollY,
+        width: rect.width,
+        height: rect.height,
+      });
+      setOpen(true);
+    } else {
+      setOpen(false);
+      setMenuCoords(null);
+      setHighlighted(-1);
+    }
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === "ArrowDown") {
@@ -53,12 +122,25 @@ export default function CustomSelect({
         const opt = options[highlighted];
         onChange(opt.value);
         setOpen(false);
+        setMenuCoords(null);
         setHighlighted(-1);
       } else {
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          setMenuCoords({
+            top: rect.top + window.scrollY,
+            left: rect.left + window.scrollX,
+            right: rect.right + window.scrollX,
+            bottom: rect.bottom + window.scrollY,
+            width: rect.width,
+            height: rect.height,
+          });
+        }
         setOpen(true);
       }
     } else if (e.key === "Escape") {
       setOpen(false);
+      setMenuCoords(null);
       setHighlighted(-1);
     }
   };
@@ -79,42 +161,53 @@ export default function CustomSelect({
         <ChevronDown className="w-4 h-4 text-slate-400" />
       </button>
 
-      {open && (
-        <ul
-          ref={listRef}
-          role="listbox"
-          tabIndex={-1}
-          className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-auto p-1"
-          onKeyDown={handleKeyDown}
-        >
-          {options.map((opt, i) => {
-            const isSelected = String(opt.value) === String(value);
-            const isHighlighted = i === highlighted;
-            return (
-              <li
-                key={String(opt.value) + i}
-                role="option"
-                aria-selected={isSelected}
-                data-highlighted={isHighlighted}
-                className={`px-3 py-2 rounded-md cursor-pointer flex justify-between items-center text-slate-900 dark:text-slate-100 text-sm ${
-                  isHighlighted
-                    ? "bg-slate-100 dark:bg-slate-700"
-                    : "hover:bg-slate-50 dark:hover:bg-slate-700"
-                } ${isSelected ? "font-semibold" : ""}`}
-                onMouseEnter={() => setHighlighted(i)}
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
-                  setHighlighted(-1);
-                }}
-              >
-                <span className="truncate">{opt.label}</span>
-                {isSelected && <Check className="w-4 h-4 text-green-500" />}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      {open && menuCoords &&
+        createPortal(
+          <ul
+            ref={listRef}
+            role="listbox"
+            tabIndex={-1}
+            className="custom-select-portal fixed z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-auto p-1 animate-fade-in"
+            style={{
+              top: `${menuCoords.top + menuCoords.height + 8}px`,
+              left: `${Math.min(
+                Math.max(menuCoords.left, 8),
+                window.innerWidth - menuCoords.width - 8,
+              )}px`,
+              width: `${menuCoords.width}px`,
+            }}
+            onKeyDown={handleKeyDown}
+          >
+            {options.map((opt, i) => {
+              const isSelected = String(opt.value) === String(value);
+              const isHighlighted = i === highlighted;
+              return (
+                <li
+                  key={String(opt.value) + i}
+                  role="option"
+                  aria-selected={isSelected}
+                  data-highlighted={isHighlighted}
+                  className={`px-3 py-2 rounded-md cursor-pointer flex justify-between items-center text-slate-900 dark:text-slate-100 text-sm ${
+                    isHighlighted
+                      ? "bg-slate-100 dark:bg-slate-700"
+                      : "hover:bg-slate-50 dark:hover:bg-slate-700"
+                  } ${isSelected ? "font-semibold" : ""}`}
+                  onMouseEnter={() => setHighlighted(i)}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                    setMenuCoords(null);
+                    setHighlighted(-1);
+                  }}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {isSelected && <Check className="w-4 h-4 text-green-500" />}
+                </li>
+              );
+            })}
+          </ul>,
+          document.body,
+        )}
     </div>
   );
 }
