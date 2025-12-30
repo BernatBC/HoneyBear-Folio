@@ -960,18 +960,22 @@ export default function AccountDetails({ account, onUpdate }) {
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Payee
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
-                  Ticker
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
-                  Shares
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
-                  Price
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
-                  Fee
-                </th>
+                {account.kind !== "cash" && (
+                  <>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                      Ticker
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                      Shares
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                      Price
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
+                      Fee
+                    </th>
+                  </>
+                )}
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
                   Category
                 </th>
@@ -987,7 +991,7 @@ export default function AccountDetails({ account, onUpdate }) {
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="px-6 py-16 text-center">
+                  <td colSpan={account.kind === "cash" ? "6" : "10"} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 p-4 rounded-full">
                         <Search className="w-8 h-8 text-slate-300" />
@@ -1030,8 +1034,8 @@ export default function AccountDetails({ account, onUpdate }) {
                           />
                         </td>
 
-                        {/* If brokerage tx, show brokerage-specific editable fields */}
-                        {editForm.ticker ? (
+                        {/* If brokerage tx, show brokerage-specific editable fields (only for non-cash views) */}
+                        {account.kind !== "cash" && editForm.ticker ? (
                           <>
                             <td className="px-6 py-3">
                               <div className="flex items-center gap-3">
@@ -1262,49 +1266,53 @@ export default function AccountDetails({ account, onUpdate }) {
                           {tx.payee}
                         </td>
 
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
-                          onClick={() => startEditing(tx)}
-                        >
-                          {tx.ticker ? (
-                            <span className="font-medium uppercase">{tx.ticker}</span>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                        </td>
+                        {account.kind !== "cash" && (
+                          <>
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {tx.ticker ? (
+                                <span className="font-medium uppercase">{tx.ticker}</span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
 
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
-                          onClick={() => startEditing(tx)}
-                        >
-                          {typeof tx.shares !== 'undefined' && tx.shares !== null ? (
-                            <span>{Math.abs(tx.shares).toFixed(4)}</span>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                        </td>
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {typeof tx.shares !== 'undefined' && tx.shares !== null ? (
+                                <span>{Math.abs(tx.shares).toFixed(4)}</span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
 
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
-                          onClick={() => startEditing(tx)}
-                        >
-                          {typeof tx.price_per_share !== 'undefined' && tx.price_per_share !== null ? (
-                            <span>{tx.price_per_share.toFixed(2)} €</span>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                        </td>
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {typeof tx.price_per_share !== 'undefined' && tx.price_per_share !== null ? (
+                                <span>{tx.price_per_share.toFixed(2)} €</span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
 
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
-                          onClick={() => startEditing(tx)}
-                        >
-                          {typeof tx.fee !== 'undefined' && tx.fee !== null ? (
-                            <span>{tx.fee.toFixed(2)} €</span>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                        </td>
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {typeof tx.fee !== 'undefined' && tx.fee !== null ? (
+                                <span>{tx.fee.toFixed(2)} €</span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+                          </>
+                        )}
 
                         <td
                           className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
