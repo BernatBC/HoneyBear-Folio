@@ -29,7 +29,10 @@ ChartJS.register(
   BarElement,
 );
 
-export default function Dashboard({ accounts: propAccounts = [], marketValues = {} }) {
+export default function Dashboard({
+  accounts: propAccounts = [],
+  marketValues = {},
+}) {
   const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
   const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, 1Y, ALL
