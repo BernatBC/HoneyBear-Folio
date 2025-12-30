@@ -44,12 +44,10 @@ export default function Dashboard({
       try {
         const txs = await invoke("get_all_transactions");
         setTransactions(txs);
-        // If parent passed accounts use them, otherwise fetch accounts from backend
+        // If parent did not pass accounts, fetch accounts from backend
         if (!propAccounts || propAccounts.length === 0) {
           const accs = await invoke("get_accounts");
           setAccounts(accs);
-        } else {
-          setAccounts(propAccounts);
         }
       } catch (e) {
         console.error("Failed to fetch data:", e);
