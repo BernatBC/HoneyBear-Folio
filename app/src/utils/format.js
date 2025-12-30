@@ -21,11 +21,11 @@ export function formatNumberWithLocale(value, locale, options = {}) {
       opts,
     );
     return formatter.format(num);
-  } catch (e) {
+  } catch {
     try {
       const fallback = new Intl.NumberFormat(undefined, opts);
       return fallback.format(num);
-    } catch (e2) {
+    } catch {
       // As a last resort, return a simple stringified number with fixed decimals
       return num.toFixed(opts.maximumFractionDigits);
     }
