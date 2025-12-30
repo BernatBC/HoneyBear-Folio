@@ -714,7 +714,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 />
               </div>
 
-              <div className="md:col-span-2 relative">
+              <div className="md:col-span-3 relative">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Ticker
                 </label>
@@ -781,13 +781,12 @@ export default function AccountDetails({ account, onUpdate }) {
                   Price / Share
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     required
                     step="any"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={pricePerShare}
                     onChange={handlePricePerShareChange}
                   />
@@ -799,30 +798,28 @@ export default function AccountDetails({ account, onUpdate }) {
                   Total Price
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={totalPrice}
                     onChange={handleTotalPriceChange}
                   />
                 </div>
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Fee
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
                   />
@@ -921,13 +918,12 @@ export default function AccountDetails({ account, onUpdate }) {
                   Amount
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-10 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300"
+                    className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
@@ -962,7 +958,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </th>
                 {account.kind !== "cash" && (
                   <>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
                       Ticker
                     </th>
                     <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
@@ -976,7 +972,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     </th>
                   </>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-56">
                   Category
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
@@ -1097,11 +1093,10 @@ export default function AccountDetails({ account, onUpdate }) {
 
                             <td className="px-6 py-3">
                               <div className="relative">
-                                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                 <input
                                   type="number"
                                   step="any"
-                                  className="w-full pl-3 pr-9 p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.price_per_share || ""}
                                   onChange={(e) =>
                                     setEditForm({ ...editForm, price_per_share: e.target.value })
@@ -1112,11 +1107,10 @@ export default function AccountDetails({ account, onUpdate }) {
 
                             <td className="px-6 py-3">
                               <div className="relative">
-                                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                 <input
                                   type="number"
                                   step="0.01"
-                                  className="w-full pl-3 pr-9 p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.fee || ""}
                                   onChange={(e) =>
                                     setEditForm({ ...editForm, fee: e.target.value })
