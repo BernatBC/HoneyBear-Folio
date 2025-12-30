@@ -16,6 +16,7 @@ import {
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import "../styles/Dashboard.css";
 import PropTypes from "prop-types";
+import { computeNetWorth } from "../utils/networth";
 
 ChartJS.register(
   CategoryScale,
@@ -127,17 +128,7 @@ export default function Dashboard({
 
     // Ensure current (last) data point uses current market values (same as Sidebar/Investments)
     if (totalData.length > 0) {
-      const currentTotal = accounts.reduce((sum, acc) => {
-        if (acc.kind === "brokerage") {
-          return (
-            sum +
-            (marketValues[acc.id] !== undefined
-              ? marketValues[acc.id]
-              : acc.balance)
-          );
-        }
-        return sum + acc.balance;
-      }, 0);
+      const currentTotal = computeNetWorth(accounts, marketValues);
       totalData[totalData.length - 1] = currentTotal;
     }
 
@@ -435,19 +426,7 @@ export default function Dashboard({
         <div className="summary-card group">
           <h3 className="summary-card-title">Current Net Worth</h3>
           <p className="summary-card-value">
-            {accounts
-              .reduce((sum, acc) => {
-                if (acc.kind === "brokerage") {
-                  return (
-                    sum +
-                    (marketValues[acc.id] !== undefined
-                      ? marketValues[acc.id]
-                      : acc.balance)
-                  );
-                }
-                return sum + acc.balance;
-              }, 0)
-              .toLocaleString(undefined, {
+            {computeNetWorth(accounts, marketValues).toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}{" "}

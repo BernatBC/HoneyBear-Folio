@@ -18,6 +18,7 @@ import {
   Upload,
 } from "lucide-react";
 import packageJson from "../../package.json";
+import { computeNetWorth } from "../utils/networth";
 import "../styles/Sidebar.css";
 
 export default function Sidebar({
@@ -34,17 +35,8 @@ export default function Sidebar({
   const [newAccountBalance, setNewAccountBalance] = useState("");
   const [newAccountType, setNewAccountType] = useState("cash");
 
-  const totalBalance = accounts.reduce((sum, acc) => {
-    if (acc.kind === "brokerage") {
-      return (
-        sum +
-        (marketValues[acc.id] !== undefined
-          ? marketValues[acc.id]
-          : acc.balance)
-      );
-    }
-    return sum + acc.balance;
-  }, 0);
+  // Compute total balance using helper so logic is shared with Dashboard/App
+  const totalBalance = computeNetWorth(accounts, marketValues);
 
   async function handleAddAccount(e) {
     e.preventDefault();
