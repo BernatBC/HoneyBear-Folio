@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { X, Settings } from "lucide-react";
+import { X, Settings, ChevronDown } from "lucide-react";
 import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/NumberFormatContext";
 import { formatNumberWithLocale } from "../utils/format";
@@ -41,17 +41,20 @@ export default function SettingsModal({ onClose }) {
             </button>
           </div>
 
-          <select
-            className="w-full bg-slate-800 text-white p-2 rounded"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value)}
-          >
-            <option value="en-US">1,234.56</option>
-            <option value="de-DE">1.234,56</option>
-            <option value="fr-FR">1 234,56</option>
-            <option value="de-CH">1'234.56</option>
-            <option value="en-IN">1,23,456.78</option>
-          </select>
+          <div className="relative">
+            <select
+              className="modal-select appearance-none pr-8"
+              value={locale}
+              onChange={(e) => setLocale(e.target.value)}
+            >
+              <option value="en-US">1,234.56</option>
+              <option value="de-DE">1.234,56</option>
+              <option value="fr-FR">1 234,56</option>
+              <option value="de-CH">1'234.56</option>
+              <option value="en-IN">1,23,456.78</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
+          </div>
           <p className="text-slate-400 mt-3">Example: {example}</p>
         </div>
       </div>

@@ -25,4 +25,11 @@
   .modal-body {
     @apply space-y-4 mb-8;
   }
+
+  .modal-select {
+    @apply w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
 }
