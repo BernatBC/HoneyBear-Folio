@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
-import { X, Settings, ChevronDown } from "lucide-react";
+import { X, Settings } from "lucide-react";
 import { createPortal } from "react-dom";
 import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
-import { useTheme } from "../contexts/ThemeContext";
+import { useTheme } from "../contexts/theme-core";
 import { formatNumberWithLocale } from "../utils/format";
 import CustomSelect from "./CustomSelect";
 

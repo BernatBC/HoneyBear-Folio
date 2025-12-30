@@ -8,7 +8,6 @@ import {
   FileJson,
   AlertCircle,
   CheckCircle,
-  ChevronDown,
 } from "lucide-react";
 import "../styles/SettingsModal.css";
 import CustomSelect from "./CustomSelect";
