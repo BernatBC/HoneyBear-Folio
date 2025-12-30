@@ -32,6 +32,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
   const [availableAccounts, setAvailableAccounts] = useState([]);
+  const [addTargetAccount, setAddTargetAccount] = useState(null);
   const [tickerSuggestions, setTickerSuggestions] = useState([]);
   const [showTickerSuggestions, setShowTickerSuggestions] = useState(false);
 
@@ -94,6 +95,11 @@ export default function AccountDetails({ account, onUpdate }) {
         .map((a) => ({ name: a.name, id: a.id, kind: a.kind }));
 
       setAvailableAccounts(otherAccounts);
+
+      // If viewing the consolidated "All" view, default the add-target to the first account
+      if (account.id === "all" && otherAccounts.length > 0 && !addTargetAccount) {
+        setAddTargetAccount(otherAccounts[0]);
+      }
 
       const accountOptions = otherAccounts.map((acc) => ({
         value: acc.name,
@@ -298,7 +304,16 @@ export default function AccountDetails({ account, onUpdate }) {
   async function handleAddTransaction(e) {
     e.preventDefault();
     try {
-      if (account.kind === "brokerage") {
+      const target = account.id === "all" ? addTargetAccount : account;
+      if (!target) {
+        await ask("Please select an account to add the transaction to.", {
+          title: "Invalid Input",
+          kind: "error",
+        });
+        return;
+      }
+
+      if (target.kind === "brokerage") {
         if (!cashAccountId) {
           await ask("Please select a valid Cash Account.", {
             title: "Invalid Input",
@@ -308,7 +323,7 @@ export default function AccountDetails({ account, onUpdate }) {
         }
         await invoke("create_brokerage_transaction", {
           args: {
-            brokerageAccountId: account.id,
+            brokerageAccountId: target.id,
             cashAccountId: parseInt(cashAccountId),
             date,
             ticker,
@@ -326,7 +341,7 @@ export default function AccountDetails({ account, onUpdate }) {
         setFee("");
       } else {
         await invoke("create_transaction", {
-          accountId: account.id,
+          accountId: target.id,
           date,
           payee,
           category: category || null,
@@ -451,6 +466,11 @@ export default function AccountDetails({ account, onUpdate }) {
     );
   });
 
+  // When viewing the consolidated "All" view, allow adding to a selected account
+  const effectiveAddTarget = account.id === "all" ? addTargetAccount : account;
+  const effectiveKind = effectiveAddTarget ? effectiveAddTarget.kind : account.kind;
+  const effectiveAccountId = effectiveAddTarget ? effectiveAddTarget.id : account.id; 
+
   return (
     <div className="max-w-full mx-4 lg:mx-8 px-2 lg:px-4 pb-8">
       {/* Header */}
@@ -526,10 +546,35 @@ export default function AccountDetails({ account, onUpdate }) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          {account.id !== "all" &&
-            (!isAdding ? (
+          <div className="flex items-center gap-3">
+            {account.id === "all" && (
+              <select
+                value={addTargetAccount ? addTargetAccount.id : ""}
+                onChange={(e) => {
+                  const selected = availableAccounts.find((a) =>
+                    String(a.id) === String(e.target.value),
+                  );
+                  setAddTargetAccount(selected || null);
+                }}
+                className="px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm"
+                aria-label="Select account to add transaction"
+              >
+                {availableAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} ({a.kind})
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {!isAdding ? (
               <button
-                onClick={() => setIsAdding(true)}
+                onClick={() => {
+                  if (account.id === "all" && !addTargetAccount && availableAccounts.length) {
+                    setAddTargetAccount(availableAccounts[0]);
+                  }
+                  setIsAdding(true);
+                }}
                 style={{
                   backgroundColor: "#2563eb",
                   color: "#ffffff",
@@ -581,7 +626,8 @@ export default function AccountDetails({ account, onUpdate }) {
                 <X className="w-5 h-5" style={{ color: "#334155" }} />
                 <span style={{ color: "#334155" }}>Cancel</span>
               </button>
-            ))}
+            )}
+          </div> 
 
           {account.id !== "all" && (
             <div className="relative account-action-menu">
@@ -638,38 +684,42 @@ export default function AccountDetails({ account, onUpdate }) {
               <Plus className="w-5 h-5 text-brand-600" />
             </div>
             New Transaction
+            {account.id === "all" && effectiveAddTarget && (
+              <span className="ml-3 text-sm text-slate-500">for <span className="font-medium text-slate-700">{effectiveAddTarget.name}</span></span>
+            )}
           </h3>
 
-          {account.kind === "brokerage" ? (
+          {effectiveKind === "brokerage" ? (
             <form
               onSubmit={handleAddTransaction}
               className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
             >
-              <div className="md:col-span-12 mb-2 flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="txType"
-                    checked={isBuy}
-                    onChange={() => setIsBuy(true)}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    Buy
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="txType"
-                    checked={!isBuy}
-                    onChange={() => setIsBuy(false)}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    Sell
-                  </span>
-                </label>
+              <div className="md:col-span-12 mb-2 flex items-center justify-between">
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="txType"
+                      checked={isBuy}
+                      onChange={() => setIsBuy(true)}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Buy</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="txType"
+                      checked={!isBuy}
+                      onChange={() => setIsBuy(false)}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Sell</span>
+                  </label>
+                </div>
+                {account.id === "all" && (
+                  <div className="text-sm text-slate-500">Account: <span className="font-medium text-slate-700">{effectiveAddTarget?.name}</span></div>
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -842,6 +892,12 @@ export default function AccountDetails({ account, onUpdate }) {
               onSubmit={handleAddTransaction}
               className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
             >
+              {account.id === "all" && (
+                <div className="md:col-span-12 mb-2 text-sm text-slate-500">
+                  Account: <span className="font-medium text-slate-700">{effectiveAddTarget?.name}</span>
+                </div>
+              )}
+
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
                   Date
