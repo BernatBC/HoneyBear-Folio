@@ -1130,7 +1130,8 @@ export default function AccountDetails({ account, onUpdate }) {
                                 setMenuOpenId(null);
                                 setMenuCoords(null);
                               } else {
-                                const rect = e.currentTarget.getBoundingClientRect();
+                                const rect =
+                                  e.currentTarget.getBoundingClientRect();
                                 setMenuCoords({
                                   top: rect.top + window.scrollY,
                                   left: rect.left + window.scrollX,
@@ -1147,31 +1148,41 @@ export default function AccountDetails({ account, onUpdate }) {
                             <MoreVertical className="w-4 h-4" />
                           </button>
 
-                          {menuOpenId === tx.id && menuCoords && createPortal(
-                            <div
-                              className="fixed z-50 w-44 bg-white rounded-xl shadow-2xl border-2 border-slate-200 py-1.5 animate-fade-in action-menu-portal"
-                              style={{
-                                top: `${menuCoords.top + menuCoords.height + 8}px`,
-                                left: `${Math.min(Math.max(menuCoords.right - 176, 8), window.innerWidth - 176 - 8)}px`,
-                              }}
-                            >
-                              <button
-                                onClick={() => { duplicateTransaction(tx); setMenuOpenId(null); setMenuCoords(null); }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 font-medium transition-colors"
+                          {menuOpenId === tx.id &&
+                            menuCoords &&
+                            createPortal(
+                              <div
+                                className="fixed z-50 w-44 bg-white rounded-xl shadow-2xl border-2 border-slate-200 py-1.5 animate-fade-in action-menu-portal"
+                                style={{
+                                  top: `${menuCoords.top + menuCoords.height + 8}px`,
+                                  left: `${Math.min(Math.max(menuCoords.right - 176, 8), window.innerWidth - 176 - 8)}px`,
+                                }}
                               >
-                                <Copy className="w-4 h-4 text-slate-400" />
-                                Duplicate
-                              </button>
-                              <button
-                                onClick={() => { deleteTransaction(tx.id); setMenuOpenId(null); setMenuCoords(null); }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-3 font-medium transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                Delete
-                              </button>
-                            </div>,
-                            document.body
-                          )}
+                                <button
+                                  onClick={() => {
+                                    duplicateTransaction(tx);
+                                    setMenuOpenId(null);
+                                    setMenuCoords(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 font-medium transition-colors"
+                                >
+                                  <Copy className="w-4 h-4 text-slate-400" />
+                                  Duplicate
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    deleteTransaction(tx.id);
+                                    setMenuOpenId(null);
+                                    setMenuCoords(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-3 font-medium transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Delete
+                                </button>
+                              </div>,
+                              document.body,
+                            )}
                         </td>
                       </>
                     )}
