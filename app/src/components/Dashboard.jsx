@@ -29,26 +29,29 @@ ChartJS.register(
   BarElement,
 );
 
-export default function Dashboard() {
-  const [accounts, setAccounts] = useState([]);
+export default function Dashboard({ accounts: propAccounts = [], marketValues = {} }) {
+  const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
   const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, 1Y, ALL
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [accs, txs] = await Promise.all([
-          invoke("get_accounts"),
-          invoke("get_all_transactions"),
-        ]);
-        setAccounts(accs);
+        const txs = await invoke("get_all_transactions");
         setTransactions(txs);
+        // If parent passed accounts use them, otherwise fetch accounts from backend
+        if (!propAccounts || propAccounts.length === 0) {
+          const accs = await invoke("get_accounts");
+          setAccounts(accs);
+        } else {
+          setAccounts(propAccounts);
+        }
       } catch (e) {
         console.error("Failed to fetch data:", e);
       }
     };
     fetchData();
-  }, []);
+  }, [propAccounts]);
 
   const chartData = useMemo(() => {
     if (accounts.length === 0) return null;
@@ -118,6 +121,22 @@ export default function Dashboard() {
       return total;
     });
 
+    // Ensure current (last) data point uses current market values (same as Sidebar/Investments)
+    if (totalData.length > 0) {
+      const currentTotal = accounts.reduce((sum, acc) => {
+        if (acc.kind === "brokerage") {
+          return (
+            sum +
+            (marketValues[acc.id] !== undefined
+              ? marketValues[acc.id]
+              : acc.balance)
+          );
+        }
+        return sum + acc.balance;
+      }, 0);
+      totalData[totalData.length - 1] = currentTotal;
+    }
+
     datasets.push({
       label: "Total Net Worth",
       data: totalData,
@@ -156,7 +175,7 @@ export default function Dashboard() {
       labels: sortedDates,
       datasets: datasets,
     };
-  }, [accounts, transactions, timeRange]);
+  }, [accounts, transactions, timeRange, marketValues]);
 
   const doughnutData = useMemo(() => {
     if (accounts.length === 0) return null;
@@ -413,7 +432,17 @@ export default function Dashboard() {
           <h3 className="summary-card-title">Current Net Worth</h3>
           <p className="summary-card-value">
             {accounts
-              .reduce((sum, acc) => sum + acc.balance, 0)
+              .reduce((sum, acc) => {
+                if (acc.kind === "brokerage") {
+                  return (
+                    sum +
+                    (marketValues[acc.id] !== undefined
+                      ? marketValues[acc.id]
+                      : acc.balance)
+                  );
+                }
+                return sum + acc.balance;
+              }, 0)
               .toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,

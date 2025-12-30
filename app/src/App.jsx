@@ -156,7 +156,7 @@ function App() {
       <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50">
         <div className="max-w-7xl mx-auto">
           {selectedAccountId === "dashboard" ? (
-            <Dashboard />
+            <Dashboard accounts={accounts} marketValues={marketValues} />
           ) : selectedAccountId === "investment-dashboard" ? (
             <InvestmentDashboard />
           ) : selectedAccountId === "fire-calculator" ? (
