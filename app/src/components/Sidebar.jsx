@@ -22,6 +22,7 @@ import {
 import packageJson from "../../package.json";
 import { computeNetWorth } from "../utils/networth";
 import "../styles/Sidebar.css";
+import { useFormatNumber } from "../utils/format";
 
 export default function Sidebar({
   accounts,
@@ -40,6 +41,7 @@ export default function Sidebar({
 
   // Compute total balance using helper so logic is shared with Dashboard/App
   const totalBalance = computeNetWorth(accounts, marketValues);
+  const formatNumber = useFormatNumber();
 
   async function handleAddAccount(e) {
     e.preventDefault();
@@ -84,11 +86,7 @@ export default function Sidebar({
             Net Worth
           </div>
           <div className="net-worth-value">
-            {totalBalance.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-            €
+            {formatNumber(totalBalance)} €
           </div>
         </div>
       </div>
@@ -195,11 +193,7 @@ export default function Sidebar({
                   <span
                     className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
                   >
-                    {account.balance.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}{" "}
-                    €
+                    {formatNumber(account.balance)} €
                   </span>
                 </button>
               ))}
@@ -245,14 +239,11 @@ export default function Sidebar({
                   <span
                     className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
                   >
-                    {(marketValues[account.id] !== undefined
-                      ? marketValues[account.id]
-                      : account.balance
-                    ).toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}{" "}
-                    €
+{formatNumber(
+                      marketValues[account.id] !== undefined
+                        ? marketValues[account.id]
+                        : account.balance
+                    )} €
                   </span>
                 </button>
               ))}

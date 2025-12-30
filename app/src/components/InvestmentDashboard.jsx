@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import { RefreshCw } from "lucide-react";
+import { useFormatNumber } from "../utils/format";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
@@ -11,6 +12,8 @@ export default function InvestmentDashboard() {
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const formatNumber = useFormatNumber();
 
   useEffect(() => {
     fetchData();
@@ -235,11 +238,7 @@ export default function InvestmentDashboard() {
                 Total Portfolio Value
               </h3>
               <p className="text-3xl font-bold text-slate-900 tracking-tight">
-                {totalValue.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                €
+                {formatNumber(totalValue)} €
               </p>
             </div>
             <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1 group cursor-pointer">
@@ -343,10 +342,7 @@ export default function InvestmentDashboard() {
                       </td>
                       <td className="p-4 text-right">
                         <div className="font-semibold text-slate-700">
-                          {h.currentValue.toLocaleString(undefined, {
-                            maximumFractionDigits: 0,
-                          })}{" "}
-                          €
+                          {formatNumber(h.currentValue, { maximumFractionDigits: 0 })} €
                         </div>
                         <div className="text-xs text-slate-500">
                           Cost: {h.costBasis.toFixed(0)} €
@@ -430,7 +426,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
           overflow: "hidden",
         }}
         className="flex flex-col items-center justify-center p-1 text-xs text-center transition-all hover:opacity-90 hover:z-10 hover:scale-[1.02] cursor-pointer"
-        title={`${item.ticker}: ${item.currentValue.toLocaleString()} € (${item.roi.toFixed(2)}%)`}
+        title={`${item.ticker}: ${formatNumber(item.currentValue)} € (${item.roi.toFixed(2)}%)`}
       >
         <span className="font-bold text-gray-800">{item.ticker}</span>
         <span className="text-gray-700 hidden sm:inline">

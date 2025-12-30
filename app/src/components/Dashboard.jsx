@@ -17,6 +17,7 @@ import { Line, Doughnut, Bar } from "react-chartjs-2";
 import "../styles/Dashboard.css";
 import PropTypes from "prop-types";
 import { computeNetWorth } from "../utils/networth";
+import { useFormatNumber } from "../utils/format";
 
 ChartJS.register(
   CategoryScale,
@@ -38,6 +39,8 @@ export default function Dashboard({
   const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
   const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, 1Y, ALL
+
+  const formatNumber = useFormatNumber();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -424,11 +427,7 @@ export default function Dashboard({
         <div className="summary-card group">
           <h3 className="summary-card-title">Current Net Worth</h3>
           <p className="summary-card-value">
-            {computeNetWorth(accounts, marketValues).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-            €
+            {formatNumber(computeNetWorth(accounts, marketValues))} €
           </p>
         </div>
         <div className="summary-card group">

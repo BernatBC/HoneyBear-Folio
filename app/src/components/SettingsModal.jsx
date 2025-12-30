@@ -1,8 +1,14 @@
 import PropTypes from "prop-types";
 import { X, Settings } from "lucide-react";
 import "../styles/SettingsModal.css";
+import { useNumberFormat } from "../contexts/NumberFormatContext";
+import { formatNumberWithLocale } from "../utils/format";
 
 export default function SettingsModal({ onClose }) {
+  const { locale, setLocale } = useNumberFormat();
+
+  const example = formatNumberWithLocale(1234.56, locale);
+
   return (
     <div className="modal-overlay">
       <div className="modal-container">
@@ -17,8 +23,17 @@ export default function SettingsModal({ onClose }) {
         </div>
 
         <div className="modal-body">
-          {/* Settings content will go here */}
-          <p className="text-slate-400">Settings window is currently empty.</p>
+          <label className="modal-label">Number format</label>
+          <select
+            className="w-full bg-slate-800 text-white p-2 rounded"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value)}
+          >
+            <option value="en-US">1,234.56 (en-US)</option>
+            <option value="de-DE">1.234,56 (de-DE)</option>
+            <option value="fr-FR">1 234,56 (fr-FR)</option>
+          </select>
+          <p className="text-slate-400 mt-3">Example: {example} €</p>
         </div>
       </div>
     </div>

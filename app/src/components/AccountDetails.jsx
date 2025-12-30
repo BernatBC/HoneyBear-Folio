@@ -21,9 +21,12 @@ import {
   User,
   Edit,
 } from "lucide-react";
+import { useFormatNumber } from "../utils/format";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);
+
+  const formatNumber = useFormatNumber();
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
@@ -507,11 +510,7 @@ export default function AccountDetails({ account, onUpdate }) {
               }`}
             >
               {account.balance >= 0 ? "+" : ""}
-              {account.balance.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
-              €
+              {formatNumber(account.balance)} €
             </span>
           </div>
         </div>
@@ -1373,12 +1372,8 @@ export default function AccountDetails({ account, onUpdate }) {
                           className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"}`}
                           onClick={() => startEditing(tx)}
                         >
-                          {tx.amount >= 0 ? "+" : ""}
-                          {Math.abs(tx.amount).toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}{" "}
-                          €
+{tx.amount >= 0 ? "+" : ""}
+                          {formatNumber(Math.abs(tx.amount))} €
                         </td>
                         <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button
