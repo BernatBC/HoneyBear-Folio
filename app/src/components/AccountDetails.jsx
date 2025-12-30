@@ -17,7 +17,6 @@ import {
   Calendar,
   Tag,
   FileText,
-  Euro,
   ArrowRightLeft,
   User,
   Edit,
@@ -356,17 +355,40 @@ export default function AccountDetails({ account, onUpdate }) {
 
   async function saveEdit() {
     try {
-      await invoke("update_transaction", {
-        args: {
-          id: editForm.id,
-          accountId: editForm.account_id,
-          date: editForm.date,
-          payee: editForm.payee,
-          category: editForm.category || null,
-          notes: editForm.notes || null,
-          amount: parseFloat(editForm.amount) || 0.0,
-        },
-      });
+      // If this is a brokerage transaction (has ticker), call the brokerage-specific update
+      if (editForm.ticker) {
+        const shares = Math.abs(parseFloat(editForm.shares) || 0);
+        const pricePerShare = parseFloat(editForm.price_per_share) || 0.0;
+        const feeVal = parseFloat(editForm.fee) || 0.0;
+        const isBuy =
+          editForm.payee === "Buy" || (parseFloat(editForm.shares) || 0) > 0;
+
+        await invoke("update_brokerage_transaction", {
+          args: {
+            id: editForm.id,
+            brokerageAccountId: editForm.account_id,
+            date: editForm.date,
+            ticker: editForm.ticker,
+            shares: shares,
+            pricePerShare: pricePerShare,
+            fee: feeVal,
+            isBuy: isBuy,
+          },
+        });
+      } else {
+        await invoke("update_transaction", {
+          args: {
+            id: editForm.id,
+            accountId: editForm.account_id,
+            date: editForm.date,
+            payee: editForm.payee,
+            category: editForm.category || null,
+            notes: editForm.notes || null,
+            amount: parseFloat(editForm.amount) || 0.0,
+          },
+        });
+      }
+
       setEditingId(null);
       fetchTransactions();
       if (onUpdate) onUpdate();
@@ -427,9 +449,9 @@ export default function AccountDetails({ account, onUpdate }) {
   });
 
   return (
-    <div className="max-w-6xl mx-auto pb-8">
+    <div className="max-w-full mx-4 lg:mx-8 px-2 lg:px-4 pb-8">
       {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
+      <header className="mb-8 -mx-20 lg:-mx-28 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
         <div>
           {isRenamingAccount ? (
             <form
@@ -609,7 +631,7 @@ export default function AccountDetails({ account, onUpdate }) {
 
       {/* Add Transaction Form */}
       {isAdding && (
-        <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in">
+        <div className="bg-gradient-to-br from-white to-slate-50 p-4 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in">
           <h3 className="text-lg font-bold mb-6 text-slate-900 flex items-center gap-3">
             <div className="bg-brand-100 p-2.5 rounded-xl">
               <Plus className="w-5 h-5 text-brand-600" />
@@ -692,7 +714,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 />
               </div>
 
-              <div className="md:col-span-2 relative">
+              <div className="md:col-span-3 relative">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Ticker
                 </label>
@@ -759,13 +781,12 @@ export default function AccountDetails({ account, onUpdate }) {
                   Price / Share
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     required
                     step="any"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={pricePerShare}
                     onChange={handlePricePerShareChange}
                   />
@@ -777,30 +798,28 @@ export default function AccountDetails({ account, onUpdate }) {
                   Total Price
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={totalPrice}
                     onChange={handleTotalPriceChange}
                   />
                 </div>
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Fee
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-9 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
                   />
@@ -810,7 +829,7 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-6 flex justify-end mt-2">
                 <button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
                 >
                   <Check className="w-4 h-4" />
                   Save Transaction
@@ -899,13 +918,12 @@ export default function AccountDetails({ account, onUpdate }) {
                   Amount
                 </label>
                 <div className="relative">
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="number"
                     required
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-3 pr-10 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300"
+                    className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
@@ -915,7 +933,7 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-12 flex justify-end mt-2">
                 <button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
                 >
                   <Check className="w-4 h-4" />
                   <span className="text-white">Save Transaction</span>
@@ -927,10 +945,10 @@ export default function AccountDetails({ account, onUpdate }) {
       )}
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300">
+      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
+            <thead className="bg-slate-50 rounded-t-2xl">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
                   Date
@@ -938,7 +956,23 @@ export default function AccountDetails({ account, onUpdate }) {
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Payee
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
+                {account.kind !== "cash" && (
+                  <>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
+                      Ticker
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                      Shares
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                      Price
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
+                      Fee
+                    </th>
+                  </>
+                )}
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-56">
                   Category
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
@@ -953,7 +987,10 @@ export default function AccountDetails({ account, onUpdate }) {
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-16 text-center">
+                  <td
+                    colSpan={account.kind === "cash" ? "6" : "10"}
+                    className="px-6 py-16 text-center"
+                  >
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 p-4 rounded-full">
                         <Search className="w-8 h-8 text-slate-300" />
@@ -977,7 +1014,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   >
                     {editingId === tx.id ? (
                       <>
-                        <td className="px-4 py-3">
+                        <td className="px-6 py-3">
                           <DatePicker
                             selected={
                               editForm.date ? new Date(editForm.date) : null
@@ -995,75 +1032,242 @@ export default function AccountDetails({ account, onUpdate }) {
                             className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                           />
                         </td>
-                        <td className="px-4 py-3">
-                          <AutocompleteInput
-                            suggestions={payeeSuggestions}
-                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                            value={editForm.payee}
-                            onChange={(val) =>
-                              setEditForm({ ...editForm, payee: val })
-                            }
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <AutocompleteInput
-                            suggestions={categorySuggestions}
-                            className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 text-slate-500" : ""}`}
-                            value={editForm.category || ""}
-                            onChange={(val) =>
-                              setEditForm({
-                                ...editForm,
-                                category: val,
-                              })
-                            }
-                            disabled={availableAccounts.includes(
-                              editForm.payee,
-                            )}
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="text"
-                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                            value={editForm.notes || ""}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                notes: e.target.value,
-                              })
-                            }
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            step="0.01"
-                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
-                            value={editForm.amount}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                amount: e.target.value,
-                              })
-                            }
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              onClick={saveEdit}
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
+
+                        {/* If brokerage tx, show brokerage-specific editable fields (only for non-cash views) */}
+                        {account.kind !== "cash" && editForm.ticker ? (
+                          <>
+                            <td className="px-6 py-3">
+                              <div className="flex items-center gap-3">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`txType-${tx.id}`}
+                                    checked={
+                                      editForm.payee === "Buy" ||
+                                      (parseFloat(editForm.shares) || 0) > 0
+                                    }
+                                    onChange={() =>
+                                      setEditForm({ ...editForm, payee: "Buy" })
+                                    }
+                                    className="w-4 h-4 text-blue-600"
+                                  />
+                                  <span className="text-sm">Buy</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`txType-${tx.id}`}
+                                    checked={
+                                      editForm.payee === "Sell" ||
+                                      (parseFloat(editForm.shares) || 0) < 0
+                                    }
+                                    onChange={() =>
+                                      setEditForm({
+                                        ...editForm,
+                                        payee: "Sell",
+                                      })
+                                    }
+                                    className="w-4 h-4 text-blue-600"
+                                  />
+                                  <span className="text-sm">Sell</span>
+                                </label>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
+                                value={editForm.ticker || ""}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    ticker: e.target.value.toUpperCase(),
+                                  })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <input
+                                type="number"
+                                step="any"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                value={Math.abs(editForm.shares || 0)}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    shares: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="any"
+                                  className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  value={editForm.price_per_share || ""}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      price_per_share: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  value={editForm.fee || ""}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      fee: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.category || "Investment"}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    category: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.notes || ""}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    notes: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-6 py-3 text-right font-bold">
+                              {(() => {
+                                const s = parseFloat(editForm.shares) || 0;
+                                const p =
+                                  parseFloat(editForm.price_per_share) || 0;
+                                const total = (Math.abs(s) * p).toFixed(2);
+                                const sign =
+                                  editForm.payee === "Sell" || s < 0 ? "" : "+";
+                                return `${sign}${total} €`;
+                              })()}
+                            </td>
+
+                            <td className="px-6 py-3 text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={saveEdit}
+                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => setEditingId(null)}
+                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        ) : (
+                          // Non-brokerage edit row
+                          <>
+                            <td className="px-6 py-3">
+                              <AutocompleteInput
+                                suggestions={payeeSuggestions}
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.payee}
+                                onChange={(val) =>
+                                  setEditForm({ ...editForm, payee: val })
+                                }
+                              />
+                            </td>
+                            <td className="px-6 py-3">
+                              <AutocompleteInput
+                                suggestions={categorySuggestions}
+                                className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 text-slate-500" : ""}`}
+                                value={editForm.category || ""}
+                                onChange={(val) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    category: val,
+                                  })
+                                }
+                                disabled={availableAccounts.includes(
+                                  editForm.payee,
+                                )}
+                              />
+                            </td>
+                            <td className="px-6 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.notes || ""}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    notes: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-6 py-3">
+                              <input
+                                type="number"
+                                step="0.01"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                value={editForm.amount}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    amount: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-6 py-3 text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={saveEdit}
+                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => setEditingId(null)}
+                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        )}
                       </>
                     ) : (
                       <>
@@ -1083,6 +1287,60 @@ export default function AccountDetails({ account, onUpdate }) {
                         >
                           {tx.payee}
                         </td>
+
+                        {account.kind !== "cash" && (
+                          <>
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {tx.ticker ? (
+                                <span className="font-medium uppercase">
+                                  {tx.ticker}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {typeof tx.shares !== "undefined" &&
+                              tx.shares !== null ? (
+                                <span>{Math.abs(tx.shares).toFixed(4)}</span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {typeof tx.price_per_share !== "undefined" &&
+                              tx.price_per_share !== null ? (
+                                <span>{tx.price_per_share.toFixed(2)} €</span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+
+                            <td
+                              className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                              onClick={() => startEditing(tx)}
+                            >
+                              {typeof tx.fee !== "undefined" &&
+                              tx.fee !== null ? (
+                                <span>{tx.fee.toFixed(2)} €</span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+                          </>
+                        )}
+
                         <td
                           className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
                           onClick={() => startEditing(tx)}
@@ -1122,7 +1380,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           })}{" "}
                           €
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
+                        <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
