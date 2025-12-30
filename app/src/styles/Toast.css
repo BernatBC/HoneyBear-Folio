@@ -35,9 +35,15 @@
   overflow-wrap: anywhere;
 }
 
-.toast-info { border-left-color: #0ea5e9; }
-.toast-success { border-left-color: #10b981; }
-.toast-error { border-left-color: #ef4444; }
+.toast-info {
+  border-left-color: #0ea5e9;
+}
+.toast-success {
+  border-left-color: #10b981;
+}
+.toast-error {
+  border-left-color: #ef4444;
+}
 
 .toast-close {
   background: transparent;

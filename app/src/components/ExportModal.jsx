@@ -137,10 +137,13 @@ export default function ExportModal({ onClose }) {
       // Show success toast and close modal
       try {
         // Some OS APIs may return a path object; make sure we stringify sensibly
-        const filePathStr = typeof filePath === "string" ? filePath : JSON.stringify(filePath);
+        const filePathStr =
+          typeof filePath === "string" ? filePath : JSON.stringify(filePath);
 
         if (showToast) {
-          showToast(`Export successful — saved to ${filePathStr}`, { type: "success" });
+          showToast(`Export successful — saved to ${filePathStr}`, {
+            type: "success",
+          });
         } else {
           // Fallback when toast system isn't available
           alert("Export successful — saved to " + filePathStr);

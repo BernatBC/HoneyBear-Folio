@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import PropTypes from "prop-types";
 import "../styles/Toast.css";
 
@@ -11,16 +17,19 @@ export function ToastProvider({ children }) {
     setToasts((t) => t.filter((x) => x.id !== id));
   }, []);
 
-  const showToast = useCallback((message, { type = "info", duration = 4000 } = {}) => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    setToasts((t) => [...t, { id, message, type }]);
+  const showToast = useCallback(
+    (message, { type = "info", duration = 4000 } = {}) => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      setToasts((t) => [...t, { id, message, type }]);
 
-    if (duration > 0) {
-      setTimeout(() => removeToast(id), duration);
-    }
+      if (duration > 0) {
+        setTimeout(() => removeToast(id), duration);
+      }
 
-    return id;
-  }, [removeToast]);
+      return id;
+    },
+    [removeToast],
+  );
 
   return (
     <ToastContext.Provider value={{ showToast }}>
