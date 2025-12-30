@@ -342,7 +342,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
               <div className="mb-2">
                 <p className="text-sm text-slate-400">
-                  Indicate which column contains the account name or ID in the mappings below — this will be used to assign each imported row to the correct account.
+                  Indicate which column contains the account name or ID in the
+                  mappings below — this will be used to assign each imported row
+                  to the correct account.
                 </p>
               </div>
 
@@ -351,7 +353,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   Map Columns
                 </h3>
                 <p className="text-xs text-slate-400 mb-2">
-                  Be sure to map the <strong>account</strong> column so the importer can assign each row to the right account.
+                  Be sure to map the <strong>account</strong> column so the
+                  importer can assign each row to the right account.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {Object.keys(mapping).map((field) => (
@@ -425,7 +428,12 @@ export default function ImportModal({ onClose, onImportComplete }) {
           </button>
           <button
             onClick={handleImport}
-            disabled={!file || (!mapping.account && !(file && file.name && file.name.endsWith('.json'))) || importing}
+            disabled={
+              !file ||
+              (!mapping.account &&
+                !(file && file.name && file.name.endsWith(".json"))) ||
+              importing
+            }
             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <span className="text-white">
