@@ -26,7 +26,7 @@ ChartJS.register(
 );
 
 export default function FireCalculator() {
-  // Initialize state from sessionStorage if available (session persists only while app is open)
+  // Initialize state from sessionStorage if available (persists for the lifetime of the browser/tab session, including reloads, and is cleared when the tab or window is closed)
   const savedState = useMemo(() => {
     const saved = sessionStorage.getItem("fireCalculatorState");
     if (saved) {
