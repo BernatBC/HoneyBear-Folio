@@ -11,14 +11,8 @@ import { useToast } from "./Toast";
 export default function ExportModal({ onClose }) {
   const [format, setFormat] = useState("json");
   const [exporting, setExporting] = useState(false);
-  // Toast API
-  let showToast;
-  try {
-    ({ showToast } = useToast());
-  } catch (err) {
-    // fallback: toast not available (tests, early renders)
-    showToast = null;
-  }
+  // Toast API (safe noop provided by useToast when provider missing)
+  const { showToast } = useToast();
 
   const handleExport = async () => {
     try {
