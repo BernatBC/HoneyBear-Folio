@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { X, Settings, ChevronDown } from "lucide-react";
+import { createPortal } from "react-dom";
 import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
 import { formatNumberWithLocale } from "../utils/format";
@@ -9,7 +10,7 @@ export default function SettingsModal({ onClose }) {
 
   const example = formatNumberWithLocale(1234.56, locale);
 
-  return (
+  const modal = (
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
@@ -60,6 +61,9 @@ export default function SettingsModal({ onClose }) {
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }
 
 SettingsModal.propTypes = {
