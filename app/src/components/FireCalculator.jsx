@@ -232,7 +232,10 @@ export default function FireCalculator() {
         // Sanity check: if years < 1, the exponent is > 1, amplifying short term gains/losses.
         // If years < 1, maybe just show the simple return? Or cap it?
         // Let's just set it.
-        if (isFinite(annualizedReturn) && !userModified.current.expectedReturn) {
+        if (
+          isFinite(annualizedReturn) &&
+          !userModified.current.expectedReturn
+        ) {
           setExpectedReturn(parseFloat(annualizedReturn.toFixed(2)));
         }
       }
