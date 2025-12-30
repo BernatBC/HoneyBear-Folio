@@ -475,9 +475,6 @@ export default function AccountDetails({ account, onUpdate }) {
   const effectiveKind = effectiveAddTarget
     ? effectiveAddTarget.kind
     : account.kind;
-  const effectiveAccountId = effectiveAddTarget
-    ? effectiveAddTarget.id
-    : account.id;
 
   return (
     <div className="max-w-full mx-4 lg:mx-8 px-2 lg:px-4 pb-8">
