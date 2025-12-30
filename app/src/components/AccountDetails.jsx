@@ -97,7 +97,11 @@ export default function AccountDetails({ account, onUpdate }) {
       setAvailableAccounts(otherAccounts);
 
       // If viewing the consolidated "All" view, default the add-target to the first account
-      if (account.id === "all" && otherAccounts.length > 0 && !addTargetAccount) {
+      if (
+        account.id === "all" &&
+        otherAccounts.length > 0 &&
+        !addTargetAccount
+      ) {
         setAddTargetAccount(otherAccounts[0]);
       }
 
@@ -468,8 +472,12 @@ export default function AccountDetails({ account, onUpdate }) {
 
   // When viewing the consolidated "All" view, allow adding to a selected account
   const effectiveAddTarget = account.id === "all" ? addTargetAccount : account;
-  const effectiveKind = effectiveAddTarget ? effectiveAddTarget.kind : account.kind;
-  const effectiveAccountId = effectiveAddTarget ? effectiveAddTarget.id : account.id; 
+  const effectiveKind = effectiveAddTarget
+    ? effectiveAddTarget.kind
+    : account.kind;
+  const effectiveAccountId = effectiveAddTarget
+    ? effectiveAddTarget.id
+    : account.id;
 
   return (
     <div className="max-w-full mx-4 lg:mx-8 px-2 lg:px-4 pb-8">
@@ -551,8 +559,8 @@ export default function AccountDetails({ account, onUpdate }) {
               <select
                 value={addTargetAccount ? addTargetAccount.id : ""}
                 onChange={(e) => {
-                  const selected = availableAccounts.find((a) =>
-                    String(a.id) === String(e.target.value),
+                  const selected = availableAccounts.find(
+                    (a) => String(a.id) === String(e.target.value),
                   );
                   setAddTargetAccount(selected || null);
                 }}
@@ -570,7 +578,11 @@ export default function AccountDetails({ account, onUpdate }) {
             {!isAdding ? (
               <button
                 onClick={() => {
-                  if (account.id === "all" && !addTargetAccount && availableAccounts.length) {
+                  if (
+                    account.id === "all" &&
+                    !addTargetAccount &&
+                    availableAccounts.length
+                  ) {
                     setAddTargetAccount(availableAccounts[0]);
                   }
                   setIsAdding(true);
@@ -627,7 +639,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 <span style={{ color: "#334155" }}>Cancel</span>
               </button>
             )}
-          </div> 
+          </div>
 
           {account.id !== "all" && (
             <div className="relative account-action-menu">
@@ -685,7 +697,12 @@ export default function AccountDetails({ account, onUpdate }) {
             </div>
             New Transaction
             {account.id === "all" && effectiveAddTarget && (
-              <span className="ml-3 text-sm text-slate-500">for <span className="font-medium text-slate-700">{effectiveAddTarget.name}</span></span>
+              <span className="ml-3 text-sm text-slate-500">
+                for{" "}
+                <span className="font-medium text-slate-700">
+                  {effectiveAddTarget.name}
+                </span>
+              </span>
             )}
           </h3>
 
@@ -704,7 +721,9 @@ export default function AccountDetails({ account, onUpdate }) {
                       onChange={() => setIsBuy(true)}
                       className="w-4 h-4 text-blue-600"
                     />
-                    <span className="text-sm font-medium text-slate-700">Buy</span>
+                    <span className="text-sm font-medium text-slate-700">
+                      Buy
+                    </span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -714,11 +733,18 @@ export default function AccountDetails({ account, onUpdate }) {
                       onChange={() => setIsBuy(false)}
                       className="w-4 h-4 text-blue-600"
                     />
-                    <span className="text-sm font-medium text-slate-700">Sell</span>
+                    <span className="text-sm font-medium text-slate-700">
+                      Sell
+                    </span>
                   </label>
                 </div>
                 {account.id === "all" && (
-                  <div className="text-sm text-slate-500">Account: <span className="font-medium text-slate-700">{effectiveAddTarget?.name}</span></div>
+                  <div className="text-sm text-slate-500">
+                    Account:{" "}
+                    <span className="font-medium text-slate-700">
+                      {effectiveAddTarget?.name}
+                    </span>
+                  </div>
                 )}
               </div>
 
@@ -894,7 +920,10 @@ export default function AccountDetails({ account, onUpdate }) {
             >
               {account.id === "all" && (
                 <div className="md:col-span-12 mb-2 text-sm text-slate-500">
-                  Account: <span className="font-medium text-slate-700">{effectiveAddTarget?.name}</span>
+                  Account:{" "}
+                  <span className="font-medium text-slate-700">
+                    {effectiveAddTarget?.name}
+                  </span>
                 </div>
               )}
 
