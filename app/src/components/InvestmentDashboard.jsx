@@ -254,11 +254,9 @@ export default function InvestmentDashboard() {
                 <span className="text-sm font-medium ml-2 text-slate-500">
                   (
                   {formatNumber(
-                    holdings
-                      .reduce((prev, current) =>
-                        prev.roi > current.roi ? prev : current,
-                      )
-                      .roi,
+                    holdings.reduce((prev, current) =>
+                      prev.roi > current.roi ? prev : current,
+                    ).roi,
                     { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                   )}
                   %)
@@ -340,7 +338,16 @@ export default function InvestmentDashboard() {
                           {h.ticker}
                         </div>
                         <div className="text-xs text-slate-500">
-                          {formatNumber(h.shares, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} shares @ {formatNumber(h.price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                          {formatNumber(h.shares, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}{" "}
+                          shares @{" "}
+                          {formatNumber(h.price, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}{" "}
+                          €
                         </div>
                       </td>
                       <td className="p-4 text-right">
@@ -351,7 +358,12 @@ export default function InvestmentDashboard() {
                           €
                         </div>
                         <div className="text-xs text-slate-500">
-                          Cost: {formatNumber(h.costBasis, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                          Cost:{" "}
+                          {formatNumber(h.costBasis, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          })}{" "}
+                          €
                         </div>
                       </td>
                       <td className="p-4 text-right">
@@ -363,7 +375,11 @@ export default function InvestmentDashboard() {
                           }`}
                         >
                           {h.roi > 0 ? "+" : ""}
-                          {formatNumber(h.roi, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
+                          {formatNumber(h.roi, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                          %
                         </span>
                       </td>
                     </tr>
@@ -438,7 +454,11 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
       >
         <span className="font-bold text-gray-800">{item.ticker}</span>
         <span className="text-gray-700 hidden sm:inline">
-          {formatNumber(item.roi, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
+          {formatNumber(item.roi, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          })}
+          %
         </span>
       </div>
     );
