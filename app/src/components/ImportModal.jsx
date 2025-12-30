@@ -66,7 +66,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
           if (Array.isArray(parsed)) {
             rows = parsed;
-          } else if (parsed.transactions && Array.isArray(parsed.transactions)) {
+          } else if (
+            parsed.transactions &&
+            Array.isArray(parsed.transactions)
+          ) {
             rows = parsed.transactions;
           } else if (parsed.data && Array.isArray(parsed.data)) {
             rows = parsed.data;
@@ -128,14 +131,18 @@ export default function ImportModal({ onClose, onImportComplete }) {
       else if (lower.includes("category")) newMapping.category = col;
       else if (lower.includes("note") || lower.includes("memo"))
         newMapping.notes = col;
-      else if (lower.includes("account") || lower.includes("acc")) newMapping.account = col;
+      else if (lower.includes("account") || lower.includes("acc"))
+        newMapping.account = col;
     });
     setMapping(newMapping);
   };
 
   const handleImport = async () => {
     // Allow JSON files to include their own account references; otherwise require a target account
-    if (!targetAccountId && !(file && file.name && file.name.endsWith(".json"))) {
+    if (
+      !targetAccountId &&
+      !(file && file.name && file.name.endsWith(".json"))
+    ) {
       alert("Please select a target account");
       return;
     }
@@ -162,7 +169,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
           const parsed = JSON.parse(data);
           if (Array.isArray(parsed)) {
             allRows = parsed;
-          } else if (parsed.transactions && Array.isArray(parsed.transactions)) {
+          } else if (
+            parsed.transactions &&
+            Array.isArray(parsed.transactions)
+          ) {
             allRows = parsed.transactions;
           } else if (parsed.data && Array.isArray(parsed.data)) {
             allRows = parsed.data;
@@ -226,18 +236,29 @@ export default function ImportModal({ onClose, onImportComplete }) {
         // 3) account name in row matched to existing accounts
         // 4) selected targetAccountId
         let accountId = null;
-        const mappedAccountValue = mapping.account ? row[mapping.account] : undefined;
-        const accountField = mappedAccountValue ?? row.account_id ?? row.accountId ?? row.account ?? row.account_name ?? row.accountName;
+        const mappedAccountValue = mapping.account
+          ? row[mapping.account]
+          : undefined;
+        const accountField =
+          mappedAccountValue ??
+          row.account_id ??
+          row.accountId ??
+          row.account ??
+          row.account_name ??
+          row.accountName;
         if (accountField) {
           if (typeof accountField === "number") accountId = accountField;
-          else if (!isNaN(parseInt(accountField))) accountId = parseInt(accountField);
+          else if (!isNaN(parseInt(accountField)))
+            accountId = parseInt(accountField);
           else if (typeof accountField === "string") {
             const match = accounts.find((a) => a.name === accountField);
             if (match) accountId = match.id;
           }
         }
-        if (!accountId && targetAccountId) accountId = parseInt(targetAccountId);
-        if (!accountId) throw new Error("No target account specified for imported row");
+        if (!accountId && targetAccountId)
+          accountId = parseInt(targetAccountId);
+        if (!accountId)
+          throw new Error("No target account specified for imported row");
 
         await invoke("create_transaction", {
           accountId,
@@ -286,7 +307,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
               onClick={() => fileInputRef.current?.click()}
               className="border-2 border-dashed border-slate-700 rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-slate-800/50 transition-all group"
             >
-              {file && file.name && file.name.endsWith('.json') ? (
+              {file && file.name && file.name.endsWith(".json") ? (
                 <FileJson className="w-12 h-12 text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
               ) : (
                 <FileSpreadsheet className="w-12 h-12 text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
@@ -381,7 +402,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
                     <div
                       className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: progress.total ? `${(progress.current / progress.total) * 100}%` : "0%",
+                        width: progress.total
+                          ? `${(progress.current / progress.total) * 100}%`
+                          : "0%",
                       }}
                     />
                   </div>
