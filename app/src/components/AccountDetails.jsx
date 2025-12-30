@@ -952,7 +952,7 @@ export default function AccountDetails({ account, onUpdate }) {
       <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50 -mx-4 lg:-mx-6 rounded-t-2xl">
+            <thead className="bg-slate-50 rounded-t-2xl">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
                   Date
@@ -1068,7 +1068,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               </div>
                             </td>
 
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <input
                                 type="text"
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
@@ -1091,7 +1091,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               />
                             </td>
 
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <div className="relative">
                                 <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                 <input
@@ -1106,7 +1106,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               </div>
                             </td>
 
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <div className="relative">
                                 <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                 <input
@@ -1121,7 +1121,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               </div>
                             </td>
 
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <input
                                 type="text"
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
@@ -1130,7 +1130,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               />
                             </td>
 
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <input
                                 type="text"
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
@@ -1151,7 +1151,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               })()}
                             </td>
 
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-6 py-3 text-center">
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={saveEdit}
@@ -1197,7 +1197,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 )}
                               />
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <input
                                 type="text"
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
@@ -1224,7 +1224,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 }
                               />
                             </td>
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-6 py-3 text-center">
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={saveEdit}
@@ -1246,7 +1246,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     ) : (
                       <>
                         <td
-                          className="px-4 py-4 whitespace-nowrap text-sm text-slate-600 font-medium cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {new Date(tx.date).toLocaleDateString("en-US", {
@@ -1256,14 +1256,14 @@ export default function AccountDetails({ account, onUpdate }) {
                           })}
                         </td>
                         <td
-                          className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.payee}
                         </td>
 
                         <td
-                          className="px-4 py-4 whitespace-nowrap text-sm cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.ticker ? (
@@ -1274,7 +1274,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-4 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {typeof tx.shares !== 'undefined' && tx.shares !== null ? (
@@ -1285,7 +1285,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-4 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {typeof tx.price_per_share !== 'undefined' && tx.price_per_share !== null ? (
@@ -1296,7 +1296,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-4 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {typeof tx.fee !== 'undefined' && tx.fee !== null ? (
@@ -1307,7 +1307,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-4 py-4 whitespace-nowrap text-sm cursor-pointer"
+                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.category ? (
@@ -1325,7 +1325,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           )}
                         </td>
                         <td
-                          className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate cursor-pointer"
+                          className="px-6 py-4 text-sm text-slate-500 max-w-xs truncate cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.notes || (
@@ -1335,7 +1335,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           )}
                         </td>
                         <td
-                          className={`px-4 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"}`}
+                          className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"}`}
                           onClick={() => startEditing(tx)}
                         >
                           {tx.amount >= 0 ? "+" : ""}
