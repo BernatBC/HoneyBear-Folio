@@ -449,9 +449,9 @@ export default function AccountDetails({ account, onUpdate }) {
   });
 
   return (
-    <div className="max-w-6xl mx-auto pb-8">
+    <div className="max-w-7xl mx-auto pb-8">
       {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
+      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 p-4 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
         <div>
           {isRenamingAccount ? (
             <form
@@ -631,7 +631,7 @@ export default function AccountDetails({ account, onUpdate }) {
 
       {/* Add Transaction Form */}
       {isAdding && (
-        <div className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in">
+        <div className="bg-gradient-to-br from-white to-slate-50 p-4 rounded-2xl border-2 border-brand-200 shadow-xl mb-8 animate-slide-in">
           <h3 className="text-lg font-bold mb-6 text-slate-900 flex items-center gap-3">
             <div className="bg-brand-100 p-2.5 rounded-xl">
               <Plus className="w-5 h-5 text-brand-600" />
@@ -832,7 +832,7 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-6 flex justify-end mt-2">
                 <button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
                 >
                   <Check className="w-4 h-4" />
                   Save Transaction
@@ -937,7 +937,7 @@ export default function AccountDetails({ account, onUpdate }) {
               <div className="md:col-span-12 flex justify-end mt-2">
                 <button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
                 >
                   <Check className="w-4 h-4" />
                   <span className="text-white">Save Transaction</span>
@@ -954,31 +954,31 @@ export default function AccountDetails({ account, onUpdate }) {
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
                   Date
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Payee
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
                   Ticker
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
                   Shares
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
                   Price
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
+                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
                   Fee
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
+                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
                   Category
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Notes
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
                   Amount
                 </th>
                 <th className="w-16"></th>
@@ -987,7 +987,7 @@ export default function AccountDetails({ account, onUpdate }) {
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="px-6 py-16 text-center">
+                  <td colSpan="10" className="px-4 py-16 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 p-4 rounded-full">
                         <Search className="w-8 h-8 text-slate-300" />
@@ -1246,7 +1246,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     ) : (
                       <>
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium cursor-pointer"
+                          className="px-4 py-4 whitespace-nowrap text-sm text-slate-600 font-medium cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {new Date(tx.date).toLocaleDateString("en-US", {
@@ -1256,14 +1256,14 @@ export default function AccountDetails({ account, onUpdate }) {
                           })}
                         </td>
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 cursor-pointer"
+                          className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.payee}
                         </td>
 
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
+                          className="px-4 py-4 whitespace-nowrap text-sm cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.ticker ? (
@@ -1274,7 +1274,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          className="px-4 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {typeof tx.shares !== 'undefined' && tx.shares !== null ? (
@@ -1285,7 +1285,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          className="px-4 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {typeof tx.price_per_share !== 'undefined' && tx.price_per_share !== null ? (
@@ -1296,7 +1296,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          className="px-4 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {typeof tx.fee !== 'undefined' && tx.fee !== null ? (
@@ -1307,7 +1307,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         </td>
 
                         <td
-                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
+                          className="px-4 py-4 whitespace-nowrap text-sm cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.category ? (
@@ -1325,7 +1325,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           )}
                         </td>
                         <td
-                          className="px-6 py-4 text-sm text-slate-500 max-w-xs truncate cursor-pointer"
+                          className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate cursor-pointer"
                           onClick={() => startEditing(tx)}
                         >
                           {tx.notes || (
@@ -1335,7 +1335,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           )}
                         </td>
                         <td
-                          className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"}`}
+                          className={`px-4 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"}`}
                           onClick={() => startEditing(tx)}
                         >
                           {tx.amount >= 0 ? "+" : ""}
@@ -1345,7 +1345,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           })}{" "}
                           €
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
+                        <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
