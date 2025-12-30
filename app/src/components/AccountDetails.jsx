@@ -583,48 +583,50 @@ export default function AccountDetails({ account, onUpdate }) {
               </button>
             ))}
 
-          <div className="relative account-action-menu">
-            <button
-              onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-              className="p-3 bg-white border-2 border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all text-slate-600 hover:text-slate-900"
-            >
-              <MoreVertical className="w-5 h-5" />
-            </button>
-            {accountMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
-                <button
-                  onClick={() => {
-                    setIsRenamingAccount(true);
-                    setAccountMenuOpen(false);
-                    // Slight timeout to ensure input renders before focus
-                    setTimeout(() => {
-                      const escapedName =
-                        typeof CSS !== "undefined" &&
-                        typeof CSS.escape === "function"
-                          ? CSS.escape(account.name)
-                          : account.name.replace(/"/g, '\\"');
-                      const input = document.querySelector(
-                        'input[value="' + escapedName + '"]',
-                      );
-                      if (input) input.focus();
-                    }, 50);
-                  }}
-                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                >
-                  <Edit className="w-4 h-4 text-slate-400" />
-                  Rename Account
-                </button>
-                <div className="h-px bg-slate-100 my-1" />
-                <button
-                  onClick={handleDeleteAccount}
-                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete Account
-                </button>
-              </div>
-            )}
-          </div>
+          {account.id !== "all" && (
+            <div className="relative account-action-menu">
+              <button
+                onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+                className="p-3 bg-white border-2 border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all text-slate-600 hover:text-slate-900"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+              {accountMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                  <button
+                    onClick={() => {
+                      setIsRenamingAccount(true);
+                      setAccountMenuOpen(false);
+                      // Slight timeout to ensure input renders before focus
+                      setTimeout(() => {
+                        const escapedName =
+                          typeof CSS !== "undefined" &&
+                          typeof CSS.escape === "function"
+                            ? CSS.escape(account.name)
+                            : account.name.replace(/"/g, '\\"');
+                        const input = document.querySelector(
+                          'input[value="' + escapedName + '"]',
+                        );
+                        if (input) input.focus();
+                      }, 50);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                  >
+                    <Edit className="w-4 h-4 text-slate-400" />
+                    Rename Account
+                  </button>
+                  <div className="h-px bg-slate-100 my-1" />
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Account
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
