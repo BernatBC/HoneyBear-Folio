@@ -425,9 +425,9 @@ export default function Dashboard({
           <h3 className="summary-card-title">Current Net Worth</h3>
           <p className="summary-card-value">
             {computeNetWorth(accounts, marketValues).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{" "}
             €
           </p>
         </div>
