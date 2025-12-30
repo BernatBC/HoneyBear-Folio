@@ -613,6 +613,130 @@ fn update_transaction(
     })
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct UpdateBrokerageTransactionArgs {
+    id: i32,
+    brokerage_account_id: i32,
+    date: String,
+    ticker: String,
+    shares: f64,
+    price_per_share: f64,
+    fee: f64,
+    is_buy: bool,
+}
+
+#[tauri::command]
+fn update_brokerage_transaction(
+    app_handle: AppHandle,
+    args: UpdateBrokerageTransactionArgs,
+) -> Result<Transaction, String> {
+    let UpdateBrokerageTransactionArgs {
+        id,
+        brokerage_account_id,
+        date,
+        ticker,
+        shares,
+        price_per_share,
+        fee,
+        is_buy,
+    } = args;
+
+    let db_path = get_db_path(&app_handle)?;
+    let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    // Get old amount and notes to locate the corresponding cash transaction
+    let (old_amount, old_notes): (f64, String) = tx
+        .query_row(
+            "SELECT amount, notes FROM transactions WHERE id = ?1",
+            params![id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .map_err(|e| e.to_string())?;
+
+    let total_price = shares * price_per_share;
+    let brokerage_amount = if is_buy { total_price } else { -total_price };
+    let brokerage_shares_signed = if is_buy { shares } else { -shares };
+    let new_notes = format!(
+        "{} {} shares of {}",
+        if is_buy { "Bought" } else { "Sold" },
+        shares,
+        ticker
+    );
+
+    tx.execute(
+        "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5, ticker = ?6, shares = ?7, price_per_share = ?8, fee = ?9 WHERE id = ?10",
+        params![
+            date,
+            if is_buy { "Buy" } else { "Sell" },
+            new_notes,
+            "Investment",
+            brokerage_amount,
+            ticker,
+            brokerage_shares_signed,
+            price_per_share,
+            fee,
+            id
+        ],
+    )
+    .map_err(|e| e.to_string())?;
+
+    let diff = brokerage_amount - old_amount;
+    if diff.abs() > f64::EPSILON {
+        tx.execute(
+            "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+            params![diff, brokerage_account_id],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+
+    // Try to find matching cash (transfer) transaction by exact notes match
+    if let Some((cash_id, old_cash_amount, cash_account_id)) = tx
+        .query_row(
+            "SELECT id, amount, account_id FROM transactions WHERE notes = ?1 AND category = 'Transfer' LIMIT 1",
+            params![old_notes],
+            |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+        )
+        .optional()
+        .map_err(|e| e.to_string())?
+    {
+        let new_cash_amount = if is_buy { -(total_price + fee) } else { total_price - fee };
+        let cash_diff: f64 = new_cash_amount - old_cash_amount;
+
+        tx.execute(
+            "UPDATE transactions SET amount = ?1 WHERE id = ?2",
+            params![new_cash_amount, cash_id],
+        )
+        .map_err(|e| e.to_string())?;
+
+        if cash_diff.abs() > f64::EPSILON {
+            tx.execute(
+                "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+                params![cash_diff, cash_account_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    }
+
+    tx.commit().map_err(|e| e.to_string())?;
+
+    Ok(Transaction {
+        id,
+        account_id: brokerage_account_id,
+        date,
+        payee: if is_buy { "Buy".to_string() } else { "Sell".to_string() },
+        notes: Some(new_notes),
+        category: Some("Investment".to_string()),
+        amount: brokerage_amount,
+        ticker: Some(ticker),
+        shares: Some(brokerage_shares_signed),
+        price_per_share: Some(price_per_share),
+        fee: Some(fee),
+    })
+}
+
 #[tauri::command]
 fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
     let db_path = get_db_path(&app_handle)?;
@@ -844,6 +968,7 @@ pub fn run() {
             get_payees,
             get_categories,
             create_brokerage_transaction,
+            update_brokerage_transaction,
             get_stock_quotes,
             search_ticker,
             rename_account,

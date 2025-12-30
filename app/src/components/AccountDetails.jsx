@@ -356,17 +356,39 @@ export default function AccountDetails({ account, onUpdate }) {
 
   async function saveEdit() {
     try {
-      await invoke("update_transaction", {
-        args: {
-          id: editForm.id,
-          accountId: editForm.account_id,
-          date: editForm.date,
-          payee: editForm.payee,
-          category: editForm.category || null,
-          notes: editForm.notes || null,
-          amount: parseFloat(editForm.amount) || 0.0,
-        },
-      });
+      // If this is a brokerage transaction (has ticker), call the brokerage-specific update
+      if (editForm.ticker) {
+        const shares = Math.abs(parseFloat(editForm.shares) || 0);
+        const pricePerShare = parseFloat(editForm.price_per_share) || 0.0;
+        const feeVal = parseFloat(editForm.fee) || 0.0;
+        const isBuy = editForm.payee === "Buy" || (parseFloat(editForm.shares) || 0) > 0;
+
+        await invoke("update_brokerage_transaction", {
+          args: {
+            id: editForm.id,
+            brokerageAccountId: editForm.account_id,
+            date: editForm.date,
+            ticker: editForm.ticker,
+            shares: shares,
+            pricePerShare: pricePerShare,
+            fee: feeVal,
+            isBuy: isBuy,
+          },
+        });
+      } else {
+        await invoke("update_transaction", {
+          args: {
+            id: editForm.id,
+            accountId: editForm.account_id,
+            date: editForm.date,
+            payee: editForm.payee,
+            category: editForm.category || null,
+            notes: editForm.notes || null,
+            amount: parseFloat(editForm.amount) || 0.0,
+          },
+        });
+      }
+
       setEditingId(null);
       fetchTransactions();
       if (onUpdate) onUpdate();
@@ -938,6 +960,18 @@ export default function AccountDetails({ account, onUpdate }) {
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Payee
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                  Ticker
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                  Shares
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                  Price
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
+                  Fee
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
                   Category
                 </th>
@@ -953,7 +987,7 @@ export default function AccountDetails({ account, onUpdate }) {
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-16 text-center">
+                  <td colSpan="10" className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 p-4 rounded-full">
                         <Search className="w-8 h-8 text-slate-300" />
@@ -995,75 +1029,219 @@ export default function AccountDetails({ account, onUpdate }) {
                             className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                           />
                         </td>
-                        <td className="px-4 py-3">
-                          <AutocompleteInput
-                            suggestions={payeeSuggestions}
-                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                            value={editForm.payee}
-                            onChange={(val) =>
-                              setEditForm({ ...editForm, payee: val })
-                            }
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <AutocompleteInput
-                            suggestions={categorySuggestions}
-                            className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 text-slate-500" : ""}`}
-                            value={editForm.category || ""}
-                            onChange={(val) =>
-                              setEditForm({
-                                ...editForm,
-                                category: val,
-                              })
-                            }
-                            disabled={availableAccounts.includes(
-                              editForm.payee,
-                            )}
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="text"
-                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                            value={editForm.notes || ""}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                notes: e.target.value,
-                              })
-                            }
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            step="0.01"
-                            className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
-                            value={editForm.amount}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                amount: e.target.value,
-                              })
-                            }
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              onClick={saveEdit}
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
+
+                        {/* If brokerage tx, show brokerage-specific editable fields */}
+                        {editForm.ticker ? (
+                          <>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`txType-${tx.id}`}
+                                    checked={
+                                      editForm.payee === "Buy" ||
+                                      (parseFloat(editForm.shares) || 0) > 0
+                                    }
+                                    onChange={() =>
+                                      setEditForm({ ...editForm, payee: "Buy" })
+                                    }
+                                    className="w-4 h-4 text-blue-600"
+                                  />
+                                  <span className="text-sm">Buy</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`txType-${tx.id}`}
+                                    checked={
+                                      editForm.payee === "Sell" ||
+                                      (parseFloat(editForm.shares) || 0) < 0
+                                    }
+                                    onChange={() =>
+                                      setEditForm({ ...editForm, payee: "Sell" })
+                                    }
+                                    className="w-4 h-4 text-blue-600"
+                                  />
+                                  <span className="text-sm">Sell</span>
+                                </label>
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
+                                value={editForm.ticker || ""}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, ticker: e.target.value.toUpperCase() })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <input
+                                type="number"
+                                step="any"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                value={Math.abs(editForm.shares || 0)}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, shares: e.target.value })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <div className="relative">
+                                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                  type="number"
+                                  step="any"
+                                  className="w-full pl-3 pr-9 p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  value={editForm.price_per_share || ""}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, price_per_share: e.target.value })
+                                  }
+                                />
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <div className="relative">
+                                <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  className="w-full pl-3 pr-9 p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  value={editForm.fee || ""}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, fee: e.target.value })
+                                  }
+                                />
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.category || "Investment"}
+                                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                              />
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.notes || ""}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, notes: e.target.value })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-4 py-3 text-right font-bold">
+                              {(() => {
+                                const s = parseFloat(editForm.shares) || 0;
+                                const p = parseFloat(editForm.price_per_share) || 0;
+                                const total = (Math.abs(s) * p).toFixed(2);
+                                const sign = editForm.payee === "Sell" || s < 0 ? "" : "+";
+                                return `${sign}${total} €`;
+                              })()}
+                            </td>
+
+                            <td className="px-4 py-3 text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={saveEdit}
+                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => setEditingId(null)}
+                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        ) : (
+                          // Non-brokerage edit row
+                          <>
+                            <td className="px-4 py-3">
+                              <AutocompleteInput
+                                suggestions={payeeSuggestions}
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.payee}
+                                onChange={(val) =>
+                                  setEditForm({ ...editForm, payee: val })
+                                }
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <AutocompleteInput
+                                suggestions={categorySuggestions}
+                                className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 text-slate-500" : ""}`}
+                                value={editForm.category || ""}
+                                onChange={(val) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    category: val,
+                                  })
+                                }
+                                disabled={availableAccounts.includes(
+                                  editForm.payee,
+                                )}
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.notes || ""}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    notes: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="number"
+                                step="0.01"
+                                className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                value={editForm.amount}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    amount: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={saveEdit}
+                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => setEditingId(null)}
+                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        )}
                       </>
                     ) : (
                       <>
@@ -1083,6 +1261,51 @@ export default function AccountDetails({ account, onUpdate }) {
                         >
                           {tx.payee}
                         </td>
+
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
+                          onClick={() => startEditing(tx)}
+                        >
+                          {tx.ticker ? (
+                            <span className="font-medium uppercase">{tx.ticker}</span>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
+                        </td>
+
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          onClick={() => startEditing(tx)}
+                        >
+                          {typeof tx.shares !== 'undefined' && tx.shares !== null ? (
+                            <span>{Math.abs(tx.shares).toFixed(4)}</span>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
+                        </td>
+
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          onClick={() => startEditing(tx)}
+                        >
+                          {typeof tx.price_per_share !== 'undefined' && tx.price_per_share !== null ? (
+                            <span>{tx.price_per_share.toFixed(2)} €</span>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
+                        </td>
+
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
+                          onClick={() => startEditing(tx)}
+                        >
+                          {typeof tx.fee !== 'undefined' && tx.fee !== null ? (
+                            <span>{tx.fee.toFixed(2)} €</span>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
+                        </td>
+
                         <td
                           className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
                           onClick={() => startEditing(tx)}
