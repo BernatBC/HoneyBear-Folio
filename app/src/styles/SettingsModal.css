@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@layer components {
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm;
+  }
+
+  .modal-container {
+    @apply bg-slate-900 w-full max-w-md rounded-xl border border-slate-700 shadow-2xl p-6;
+  }
+
+  .modal-header {
+    @apply flex justify-between items-center mb-6;
+  }
+
+  .modal-title {
+    @apply text-xl font-bold text-white flex items-center gap-2;
+  }
+
+  .modal-close-button {
+    @apply text-slate-400 hover:text-white;
+  }
+
+  .modal-body {
+    @apply space-y-4 mb-8;
+  }
+}

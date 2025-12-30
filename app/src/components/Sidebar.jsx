@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import ImportModal from "./ImportModal";
 import ExportModal from "./ExportModal";
+import SettingsModal from "./SettingsModal";
 import {
   Wallet,
   Plus,
@@ -16,6 +17,7 @@ import {
   Calculator,
   Download,
   Upload,
+  Settings,
 } from "lucide-react";
 import packageJson from "../../package.json";
 import { computeNetWorth } from "../utils/networth";
@@ -31,6 +33,7 @@ export default function Sidebar({
   const [isAdding, setIsAdding] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountBalance, setNewAccountBalance] = useState("");
   const [newAccountType, setNewAccountType] = useState("cash");
@@ -312,6 +315,13 @@ export default function Sidebar({
             <Download className="w-4 h-4" />
             <span className="text-xs font-medium">Export</span>
           </button>
+          <button
+            onClick={() => setShowSettingsModal(true)}
+            className="sidebar-footer-button"
+          >
+            <Settings className="w-4 h-4" />
+            <span className="text-xs font-medium">Settings</span>
+          </button>
         </div>
         <div className="sidebar-version">
           v{packageJson.version} • HoneyBear Folio
@@ -329,6 +339,10 @@ export default function Sidebar({
 
       {showExportModal && (
         <ExportModal onClose={() => setShowExportModal(false)} />
+      )}
+
+      {showSettingsModal && (
+        <SettingsModal onClose={() => setShowSettingsModal(false)} />
       )}
     </div>
   );
