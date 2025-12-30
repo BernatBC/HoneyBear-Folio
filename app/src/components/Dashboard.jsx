@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import "../styles/Dashboard.css";
+import PropTypes from "prop-types";
 
 ChartJS.register(
   CategoryScale,
@@ -530,3 +531,8 @@ export default function Dashboard({
     </div>
   );
 }
+
+Dashboard.propTypes = {
+  accounts: PropTypes.array,
+  marketValues: PropTypes.object,
+};
