@@ -32,7 +32,6 @@ export default function ImportModal({ onClose, onImportComplete }) {
     success: 0,
     failed: 0,
   });
-  const [targetAccountId, setTargetAccountId] = useState("");
   const [accounts, setAccounts] = useState([]);
   const fileInputRef = useRef(null);
 
@@ -140,12 +139,12 @@ export default function ImportModal({ onClose, onImportComplete }) {
   };
 
   const handleImport = async () => {
-    // Allow JSON files to include their own account references; otherwise require a target account
+    // Require that an account column is indicated (CSV/XLSX) or JSON includes account fields
     if (
-      !targetAccountId &&
+      !mapping.account &&
       !(file && file.name && file.name.endsWith(".json"))
     ) {
-      alert("Please select a target account");
+      alert("Please indicate the account column in the mapping");
       return;
     }
 
@@ -236,7 +235,6 @@ export default function ImportModal({ onClose, onImportComplete }) {
         // 1) explicit mapping column selected by user
         // 2) explicit numeric account_id or accountId field in row
         // 3) account name in row matched to existing accounts
-        // 4) selected targetAccountId
         let accountId = null;
         const mappedAccountValue = mapping.account
           ? row[mapping.account]
@@ -257,8 +255,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
             if (match) accountId = match.id;
           }
         }
-        if (!accountId && targetAccountId)
-          accountId = parseInt(targetAccountId);
+
         if (!accountId)
           throw new Error("No target account specified for imported row");
 
@@ -343,33 +340,22 @@ export default function ImportModal({ onClose, onImportComplete }) {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">
-                    Target Account
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={targetAccountId}
-                      onChange={(e) => setTargetAccountId(e.target.value)}
-                      className="modal-select appearance-none pr-8"
-                    >
-                      <option value="">Select Account...</option>
-                      {accounts.map((acc) => (
-                        <option key={acc.id} value={acc.id}>
-                          {acc.name} ({acc.kind})
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
-                  </div>
-                </div>
+              <div className="mb-2">
+                <p className="text-sm text-slate-400">
+                  Indicate which column contains the account name or ID in the
+                  mappings below — this will be used to assign each imported row
+                  to the correct account.
+                </p>
               </div>
 
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
                   Map Columns
                 </h3>
+                <p className="text-xs text-slate-400 mb-2">
+                  Be sure to map the <strong>account</strong> column so the
+                  importer can assign each row to the right account.
+                </p>
                 <div className="grid grid-cols-2 gap-4">
                   {Object.keys(mapping).map((field) => (
                     <div key={field}>
@@ -442,7 +428,12 @@ export default function ImportModal({ onClose, onImportComplete }) {
           </button>
           <button
             onClick={handleImport}
-            disabled={!file || !targetAccountId || importing}
+            disabled={
+              !file ||
+              (!mapping.account &&
+                !(file && file.name && file.name.endsWith(".json"))) ||
+              importing
+            }
             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <span className="text-white">
