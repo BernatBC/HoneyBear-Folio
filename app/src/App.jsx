@@ -90,6 +90,19 @@ function App() {
     loadData();
   }, [refreshTrigger]);
 
+  // Clear saved FIRE calculator state at app startup so user inputs reset after the
+  // app is closed and re-opened. We keep session persistence during the running
+  // session (switching tabs) since `sessionStorage` is still used by the
+  // `FireCalculator` component.
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem("fireCalculatorState");
+    } catch (e) {
+      // sessionStorage may be unavailable in some environments; ignore errors
+      console.debug("Could not clear fireCalculatorState on startup:", e);
+    }
+  }, []);
+
   // Calculate total balance
   const totalBalance = accounts.reduce((sum, acc) => {
     if (acc.kind === "brokerage") {

@@ -26,9 +26,9 @@ ChartJS.register(
 );
 
 export default function FireCalculator() {
-  // Initialize state from localStorage if available
+  // Initialize state from sessionStorage if available (session persists only while app is open)
   const savedState = useMemo(() => {
-    const saved = localStorage.getItem("fireCalculatorState");
+    const saved = sessionStorage.getItem("fireCalculatorState");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -55,6 +55,19 @@ export default function FireCalculator() {
     savedState?.annualSavings ?? 20000,
   );
   const [loading, setLoading] = useState(!savedState);
+
+  // Track which fields the user has manually edited during the session so
+  // computed backend updates don't overwrite them while the app is open. We
+  // persist these flags in sessionStorage alongside values so switching
+  // tabs/remounts keep user edits intact.
+  const initialUserModified = savedState?.userModified ?? {
+    currentNetWorth: false,
+    annualExpenses: false,
+    expectedReturn: false,
+    withdrawalRate: false,
+    annualSavings: false,
+  };
+  const userModified = { current: initialUserModified }; // lightweight ref-like object
 
   async function fetchData() {
     setLoading(true);
@@ -188,7 +201,9 @@ export default function FireCalculator() {
         return sum + acc.balance;
       }, 0);
 
-      setCurrentNetWorth(Math.round(totalBalance));
+      if (!userModified.current.currentNetWorth) {
+        setCurrentNetWorth(Math.round(totalBalance));
+      }
 
       // Calculate Expected Return (CAGR)
       if (totalPortfolioCostBasis > 0 && firstTradeDate) {
@@ -217,7 +232,7 @@ export default function FireCalculator() {
         // Sanity check: if years < 1, the exponent is > 1, amplifying short term gains/losses.
         // If years < 1, maybe just show the simple return? Or cap it?
         // Let's just set it.
-        if (isFinite(annualizedReturn)) {
+        if (isFinite(annualizedReturn) && !userModified.current.expectedReturn) {
           setExpectedReturn(parseFloat(annualizedReturn.toFixed(2)));
         }
       }
@@ -246,8 +261,12 @@ export default function FireCalculator() {
         }
       });
 
-      setAnnualExpenses(Math.round(expenses));
-      setAnnualSavings(Math.round(income - expenses));
+      if (!userModified.current.annualExpenses) {
+        setAnnualExpenses(Math.round(expenses));
+      }
+      if (!userModified.current.annualSavings) {
+        setAnnualSavings(Math.round(income - expenses));
+      }
 
       setLoading(false);
     } catch (e) {
@@ -271,8 +290,9 @@ export default function FireCalculator() {
         expectedReturn,
         withdrawalRate,
         annualSavings,
+        userModified: userModified.current,
       };
-      localStorage.setItem("fireCalculatorState", JSON.stringify(state));
+      sessionStorage.setItem("fireCalculatorState", JSON.stringify(state));
     }
   }, [
     currentNetWorth,
@@ -282,6 +302,35 @@ export default function FireCalculator() {
     annualSavings,
     loading,
   ]);
+
+  // Ensure the saved session state is cleared when the window is closed
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      // sessionStorage is usually cleared on window close, but remove explicitly to be safe
+      sessionStorage.removeItem("fireCalculatorState");
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
+
+  // Also listen to Tauri close event in case beforeunload doesn't fire in some environments
+  useEffect(() => {
+    let unlisten;
+    (async () => {
+      try {
+        const { listen } = await import("@tauri-apps/api/event");
+        unlisten = await listen("tauri://close-requested", () => {
+          sessionStorage.removeItem("fireCalculatorState");
+        });
+      } catch (e) {
+        // If Tauri event API isn't available, that's fine — beforeunload handles it
+        console.debug("Tauri event listener not available:", e);
+      }
+    })();
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, []);
 
   const { fireNumber, yearsToFire, chartData } = useMemo(() => {
     const fireNum = annualExpenses / (withdrawalRate / 100);
@@ -374,7 +423,10 @@ export default function FireCalculator() {
                 <input
                   type="number"
                   value={currentNetWorth}
-                  onChange={(e) => setCurrentNetWorth(Number(e.target.value))}
+                  onChange={(e) => {
+                    setCurrentNetWorth(Number(e.target.value));
+                    userModified.current.currentNetWorth = true;
+                  }}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
                   placeholder="0"
                 />
@@ -393,7 +445,10 @@ export default function FireCalculator() {
                 <input
                   type="number"
                   value={annualExpenses}
-                  onChange={(e) => setAnnualExpenses(Number(e.target.value))}
+                  onChange={(e) => {
+                    setAnnualExpenses(Number(e.target.value));
+                    userModified.current.annualExpenses = true;
+                  }}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
                   placeholder="0"
                 />
@@ -412,7 +467,10 @@ export default function FireCalculator() {
                 <input
                   type="number"
                   value={annualSavings}
-                  onChange={(e) => setAnnualSavings(Number(e.target.value))}
+                  onChange={(e) => {
+                    setAnnualSavings(Number(e.target.value));
+                    userModified.current.annualSavings = true;
+                  }}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
                   placeholder="0"
                 />
@@ -431,7 +489,10 @@ export default function FireCalculator() {
                 <input
                   type="number"
                   value={expectedReturn}
-                  onChange={(e) => setExpectedReturn(Number(e.target.value))}
+                  onChange={(e) => {
+                    setExpectedReturn(Number(e.target.value));
+                    userModified.current.expectedReturn = true;
+                  }}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
                   placeholder="0"
                 />
@@ -450,7 +511,10 @@ export default function FireCalculator() {
                 <input
                   type="number"
                   value={withdrawalRate}
-                  onChange={(e) => setWithdrawalRate(Number(e.target.value))}
+                  onChange={(e) => {
+                    setWithdrawalRate(Number(e.target.value));
+                    userModified.current.withdrawalRate = true;
+                  }}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 hover:border-slate-300"
                   placeholder="0"
                 />
