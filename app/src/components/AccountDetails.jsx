@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/datepicker.css";
+import { createPortal } from "react-dom";
 import { invoke } from "@tauri-apps/api/core";
 import { ask } from "@tauri-apps/plugin-dialog";
 import {
@@ -36,6 +37,8 @@ export default function AccountDetails({ account, onUpdate }) {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [menuOpenId, setMenuOpenId] = useState(null);
+  // Coordinates/state for portal menu (so it can render above scrollable containers)
+  const [menuCoords, setMenuCoords] = useState(null);
 
   // Account actions state
   const [isRenamingAccount, setIsRenamingAccount] = useState(false);
@@ -164,15 +167,36 @@ export default function AccountDetails({ account, onUpdate }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account.id]);
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside, and close on scroll/resize so portal positioning doesn't get stale
   useEffect(() => {
     function handleClickOutside(event) {
-      if (menuOpenId && !event.target.closest(".action-menu-container")) {
+      if (
+        menuOpenId &&
+        !event.target.closest(".action-menu-container") &&
+        !event.target.closest(".action-menu-portal")
+      ) {
         setMenuOpenId(null);
+        setMenuCoords(null);
       }
     }
+
+    function handleScrollOrResize() {
+      if (menuOpenId) {
+        setMenuOpenId(null);
+        setMenuCoords(null);
+      }
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    // capture true ensures we catch scrolls from inner containers too
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
   }, [menuOpenId]);
 
   // Auto-set category to Transfer if payee is an account
@@ -903,7 +927,7 @@ export default function AccountDetails({ account, onUpdate }) {
       )}
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
@@ -1102,32 +1126,51 @@ export default function AccountDetails({ account, onUpdate }) {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setMenuOpenId(
-                                menuOpenId === tx.id ? null : tx.id,
-                              );
+                              if (menuOpenId === tx.id) {
+                                setMenuOpenId(null);
+                                setMenuCoords(null);
+                              } else {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setMenuCoords({
+                                  top: rect.top + window.scrollY,
+                                  left: rect.left + window.scrollX,
+                                  right: rect.right + window.scrollX,
+                                  bottom: rect.bottom + window.scrollY,
+                                  width: rect.width,
+                                  height: rect.height,
+                                });
+                                setMenuOpenId(tx.id);
+                              }
                             }}
                             className={`p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200 ${menuOpenId === tx.id ? "opacity-100 bg-slate-100" : "opacity-0 group-hover:opacity-100"}`}
                           >
                             <MoreVertical className="w-4 h-4" />
                           </button>
 
-                          {menuOpenId === tx.id && (
-                            <div className="absolute right-8 top-8 w-44 bg-white rounded-xl shadow-2xl z-20 border-2 border-slate-200 py-1.5 animate-fade-in">
+                          {menuOpenId === tx.id && menuCoords && createPortal(
+                            <div
+                              className="fixed z-50 w-44 bg-white rounded-xl shadow-2xl border-2 border-slate-200 py-1.5 animate-fade-in action-menu-portal"
+                              style={{
+                                top: `${menuCoords.top + menuCoords.height + 8}px`,
+                                left: `${Math.min(Math.max(menuCoords.right - 176, 8), window.innerWidth - 176 - 8)}px`,
+                              }}
+                            >
                               <button
-                                onClick={() => duplicateTransaction(tx)}
+                                onClick={() => { duplicateTransaction(tx); setMenuOpenId(null); setMenuCoords(null); }}
                                 className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 font-medium transition-colors"
                               >
                                 <Copy className="w-4 h-4 text-slate-400" />
                                 Duplicate
                               </button>
                               <button
-                                onClick={() => deleteTransaction(tx.id)}
+                                onClick={() => { deleteTransaction(tx.id); setMenuOpenId(null); setMenuCoords(null); }}
                                 className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-3 font-medium transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                                 Delete
                               </button>
-                            </div>
+                            </div>,
+                            document.body
                           )}
                         </td>
                       </>
