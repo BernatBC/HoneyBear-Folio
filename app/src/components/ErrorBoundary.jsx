@@ -21,7 +21,9 @@ export default class ErrorBoundary extends React.Component {
       return (
         <div className="p-4 m-4 rounded border border-rose-200 bg-rose-50 dark:bg-rose-900/10 dark:border-rose-800 text-rose-700 dark:text-rose-300">
           <strong>Something went wrong rendering this view.</strong>
-          <div className="mt-2 text-sm">Check the developer console for details.</div>
+          <div className="mt-2 text-sm">
+            Check the developer console for details.
+          </div>
         </div>
       );
     }

@@ -21,9 +21,16 @@ export default function CustomSelect({
     const onClickOutside = (e) => {
       const tgt = e && e.target;
       const clickedInsideTrigger =
-        containerRef.current && tgt instanceof Node && containerRef.current.contains(tgt);
-      const clickedInsidePortal = tgt instanceof Element && tgt.closest(".custom-select-portal");
-      if (containerRef.current && !clickedInsideTrigger && !clickedInsidePortal) {
+        containerRef.current &&
+        tgt instanceof Node &&
+        containerRef.current.contains(tgt);
+      const clickedInsidePortal =
+        tgt instanceof Element && tgt.closest(".custom-select-portal");
+      if (
+        containerRef.current &&
+        !clickedInsideTrigger &&
+        !clickedInsidePortal
+      ) {
         setOpen(false);
         setMenuCoords(null);
         setHighlighted(-1);
@@ -50,8 +57,9 @@ export default function CustomSelect({
           e &&
           e.type === "scroll" &&
           listRef.current &&
-          (tgt instanceof Node) &&
-          (listRef.current.contains(tgt) || (containerRef.current && containerRef.current.contains(tgt)))
+          tgt instanceof Node &&
+          (listRef.current.contains(tgt) ||
+            (containerRef.current && containerRef.current.contains(tgt)))
         ) {
           return;
         }
@@ -59,7 +67,7 @@ export default function CustomSelect({
           e &&
           (e.type === "wheel" || e.type === "touchmove") &&
           listRef.current &&
-          (tgt instanceof Node) &&
+          tgt instanceof Node &&
           listRef.current.contains(tgt)
         ) {
           return;
@@ -161,7 +169,8 @@ export default function CustomSelect({
         <ChevronDown className="w-4 h-4 text-slate-400" />
       </button>
 
-      {open && menuCoords &&
+      {open &&
+        menuCoords &&
         createPortal(
           <ul
             ref={listRef}

@@ -180,7 +180,10 @@ function App() {
               <main className="flex-1 p-8 overflow-y-auto bg-slate-50/50 dark:bg-slate-900">
                 <div className="max-w-7xl mx-auto">
                   {selectedAccountId === "dashboard" ? (
-                    <Dashboard accounts={accounts} marketValues={marketValues} />
+                    <Dashboard
+                      accounts={accounts}
+                      marketValues={marketValues}
+                    />
                   ) : selectedAccountId === "investment-dashboard" ? (
                     <InvestmentDashboard />
                   ) : selectedAccountId === "fire-calculator" ? (
@@ -211,9 +214,13 @@ function App() {
 
             {globalError && (
               <div className="fixed inset-4 z-60 p-6 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
-                <h3 className="text-lg font-bold mb-2">An unexpected error occurred</h3>
+                <h3 className="text-lg font-bold mb-2">
+                  An unexpected error occurred
+                </h3>
                 <pre className="text-sm max-h-60 overflow-auto whitespace-pre-wrap">
-                  {typeof globalError === "string" ? globalError : (globalError && globalError.stack) || String(globalError)}
+                  {typeof globalError === "string"
+                    ? globalError
+                    : (globalError && globalError.stack) || String(globalError)}
                 </pre>
                 <div className="mt-3 flex gap-2">
                   <button
