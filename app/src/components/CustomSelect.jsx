@@ -72,7 +72,7 @@ export default function CustomSelect({
         ) {
           return;
         }
-      } catch (err) {
+      } catch {
         // be defensive; fall through and close
       }
 
