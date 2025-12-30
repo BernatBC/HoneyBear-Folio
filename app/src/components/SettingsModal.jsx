@@ -5,6 +5,7 @@ import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
 import { useTheme } from "../contexts/ThemeContext";
 import { formatNumberWithLocale } from "../utils/format";
+import CustomSelect from "./CustomSelect";
 
 export default function SettingsModal({ onClose }) {
   const { locale, setLocale } = useNumberFormat();
@@ -45,18 +46,18 @@ export default function SettingsModal({ onClose }) {
           </div>
 
           <div className="relative">
-            <select
-              className="modal-select appearance-none pr-8"
+            <CustomSelect
               value={locale}
-              onChange={(e) => setLocale(e.target.value)}
-            >
-              <option value="en-US">1,234.56</option>
-              <option value="de-DE">1.234,56</option>
-              <option value="fr-FR">1 234,56</option>
-              <option value="de-CH">1&apos;234.56</option>
-              <option value="en-IN">1,23,456.78</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
+              onChange={(v) => setLocale(v)}
+              options={[
+                { value: "en-US", label: "1,234.56" },
+                { value: "de-DE", label: "1.234,56" },
+                { value: "fr-FR", label: "1 234,56" },
+                { value: "de-CH", label: "1'234.56" },
+                { value: "en-IN", label: "1,23,456.78" },
+              ]}
+              placeholder={"Select format"}
+            />
           </div>
           <p className="text-slate-400 mt-3">Example: {example}</p>
 
@@ -64,16 +65,16 @@ export default function SettingsModal({ onClose }) {
             <label className="modal-label">Theme</label>
           </div>
           <div className="relative">
-            <select
-              className="modal-select appearance-none pr-8"
+            <CustomSelect
               value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
+              onChange={(v) => setTheme(v)}
+              options={[
+                { value: "light", label: "Light" },
+                { value: "dark", label: "Dark" },
+                { value: "system", label: "System" },
+              ]}
+              placeholder={"Select theme"}
+            />
           </div>
         </div>
       </div>

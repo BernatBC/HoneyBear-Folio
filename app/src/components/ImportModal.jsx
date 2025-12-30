@@ -11,6 +11,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import "../styles/SettingsModal.css";
+import CustomSelect from "./CustomSelect";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 
@@ -363,21 +364,15 @@ export default function ImportModal({ onClose, onImportComplete }) {
                         {field}
                       </label>
                       <div className="relative">
-                        <select
+                        <CustomSelect
                           value={mapping[field]}
-                          onChange={(e) =>
-                            setMapping({ ...mapping, [field]: e.target.value })
-                          }
-                          className="modal-select appearance-none pr-8 text-sm"
-                        >
-                          <option value="">Skip</option>
-                          {columns.map((col) => (
-                            <option key={col} value={col}>
-                              {col}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
+                          onChange={(v) => setMapping({ ...mapping, [field]: v })}
+                          options={[
+                            { value: "", label: "Skip" },
+                            ...columns.map((col) => ({ value: col, label: col })),
+                          ]}
+                          placeholder={"Select column"}
+                        />
                       </div>
                     </div>
                   ))}

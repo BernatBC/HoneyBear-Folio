@@ -27,9 +27,33 @@
   }
 
   .modal-select {
-    @apply w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all;
+    @apply w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    color-scheme: light dark;
+  }
+
+  /* Style native option dropdowns so they match the theme (dark/light) */
+  .modal-select option {
+    @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100;
+    background-color: #ffffff;
+    color: #0f172a; /* slate-900 */
+  }
+
+  .dark .modal-select option,
+  :root.dark .modal-select option {
+    background-color: #0f172a; /* slate-900 */
+    color: #ffffff;
+  }
+
+  /* Fallback: target generic selects used elsewhere */
+  select {
+    color-scheme: light dark;
+  }
+
+  .dark select,
+  :root.dark select {
+    color-scheme: dark;
   }
 }
