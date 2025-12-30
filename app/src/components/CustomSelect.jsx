@@ -89,7 +89,7 @@ export default function CustomSelect({ value, onChange, options, placeholder }) 
                 role="option"
                 aria-selected={isSelected}
                 data-highlighted={isHighlighted}
-                className={`px-3 py-2 rounded-md cursor-pointer flex justify-between items-center ${
+                className={`px-3 py-2 rounded-md cursor-pointer flex justify-between items-center text-slate-900 dark:text-slate-100 text-sm ${
                   isHighlighted
                     ? "bg-slate-100 dark:bg-slate-700"
                     : "hover:bg-slate-50 dark:hover:bg-slate-700"
