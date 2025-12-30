@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Line } from "react-chartjs-2";
 import { Calculator, TrendingUp, Euro, Percent, Calendar } from "lucide-react";
+import { useFormatNumber } from "../utils/format";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -390,12 +391,10 @@ export default function FireCalculator() {
     annualSavings,
   ]);
 
-  const formatCurrency = (val) => {
-    return (
-      new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(val) +
-      " €"
-    );
-  };
+  const formatNumber = useFormatNumber();
+  const formatCurrency = (val) =>
+    formatNumber(val, { maximumFractionDigits: 0, minimumFractionDigits: 0 }) +
+    " €";
 
   return (
     <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
@@ -591,9 +590,10 @@ export default function FireCalculator() {
                           }
                           if (context.parsed.y !== null) {
                             label +=
-                              new Intl.NumberFormat("en-US", {
+                              formatNumber(context.parsed.y, {
                                 maximumFractionDigits: 0,
-                              }).format(context.parsed.y) + " €";
+                                minimumFractionDigits: 0,
+                              }) + " €";
                           }
                           return label;
                         },
@@ -605,9 +605,14 @@ export default function FireCalculator() {
                       beginAtZero: true,
                       ticks: {
                         callback: function (value) {
-                          return value / 1000 + "k €";
+                          return (
+                            formatNumber(value / 1000, {
+                              maximumFractionDigits: 0,
+                              minimumFractionDigits: 0,
+                            }) + "k €"
+                          );
                         },
-                      },
+                      }
                     },
                   },
                 }}
