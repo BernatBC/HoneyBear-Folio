@@ -1001,7 +1001,7 @@ export default function AccountDetails({ account, onUpdate }) {
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-            <thead className="bg-slate-50 dark:bg-slate-900 rounded-t-2xl">
+            <thead className="bg-slate-50 dark:bg-slate-800 rounded-t-2xl">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-32">
                   Date
