@@ -765,7 +765,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 />
               </div>
 
-              <div className="md:col-span-3 relative">
+              <div className="md:col-span-4 relative">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Ticker
                 </label>
@@ -812,7 +812,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 )}
               </div>
 
-              <div className="md:col-span-2">
+              <div className="md:col-span-3">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
@@ -877,7 +877,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-6 flex justify-end mt-2">
+              <div className="md:col-span-4 flex justify-end mt-2">
                 <button
                   type="submit"
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
