@@ -6,10 +6,19 @@ import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
 import { X, Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import * as XLSX from "xlsx";
 import "../styles/ExportModal.css";
+import { useToast } from "./Toast";
 
 export default function ExportModal({ onClose }) {
   const [format, setFormat] = useState("json");
   const [exporting, setExporting] = useState(false);
+  // Toast API
+  let showToast;
+  try {
+    ({ showToast } = useToast());
+  } catch (err) {
+    // fallback: toast not available (tests, early renders)
+    showToast = null;
+  }
 
   const handleExport = async () => {
     try {
@@ -125,11 +134,38 @@ export default function ExportModal({ onClose }) {
         await writeTextFile(filePath, content);
       }
 
-      onClose();
+      // Show success toast and close modal
+      try {
+        // Some OS APIs may return a path object; make sure we stringify sensibly
+        const filePathStr = typeof filePath === "string" ? filePath : JSON.stringify(filePath);
+
+        if (showToast) {
+          showToast(`Export successful — saved to ${filePathStr}`, { type: "success" });
+        } else {
+          // Fallback when toast system isn't available
+          alert("Export successful — saved to " + filePathStr);
+        }
+
+        onClose();
+      } catch (e) {
+        console.error("Export failed:", e);
+        if (showToast) {
+          showToast("Export failed: " + String(e), { type: "error" });
+        } else {
+          alert("Export failed: " + e);
+        }
+      } finally {
+        setExporting(false);
+      }
     } catch (e) {
       console.error("Export failed:", e);
-      alert("Export failed: " + e);
+      if (showToast) {
+        showToast("Export failed: " + String(e), { type: "error" });
+      } else {
+        alert("Export failed: " + e);
+      }
     } finally {
+      // Ensure exporting flag is cleared even if an outer error occurs
       setExporting(false);
     }
   };
