@@ -23,17 +23,36 @@ export default function SettingsModal({ onClose }) {
         </div>
 
         <div className="modal-body">
-          <label className="modal-label">Number format</label>
+          <div className="flex items-center justify-between">
+            <label className="modal-label">Number format</label>
+            <button
+              type="button"
+              className="ml-2 bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded"
+              onClick={() => {
+                try {
+                  localStorage.removeItem("hb_number_format");
+                } catch (e) {
+                  // ignore
+                }
+                setLocale("en-US");
+              }}
+            >
+              Reset to default
+            </button>
+          </div>
+
           <select
             className="w-full bg-slate-800 text-white p-2 rounded"
             value={locale}
             onChange={(e) => setLocale(e.target.value)}
           >
-            <option value="en-US">1,234.56 (en-US)</option>
-            <option value="de-DE">1.234,56 (de-DE)</option>
-            <option value="fr-FR">1 234,56 (fr-FR)</option>
+            <option value="en-US">1,234.56</option>
+            <option value="de-DE">1.234,56</option>
+            <option value="fr-FR">1 234,56</option>
+            <option value="de-CH">1'234.56</option>
+            <option value="en-IN">1,23,456.78</option>
           </select>
-          <p className="text-slate-400 mt-3">Example: {example} €</p>
+          <p className="text-slate-400 mt-3">Example: {example}</p>
         </div>
       </div>
     </div>
