@@ -952,7 +952,7 @@ export default function AccountDetails({ account, onUpdate }) {
       <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
+            <thead className="bg-slate-50 -mx-4 lg:-mx-6 rounded-t-2xl">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
                   Date
