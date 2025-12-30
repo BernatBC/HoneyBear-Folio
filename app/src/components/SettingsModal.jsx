@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { X, Settings, ChevronDown } from "lucide-react";
 import "../styles/SettingsModal.css";
-import { useNumberFormat } from "../contexts/NumberFormatContext";
+import { useNumberFormat } from "../contexts/number-format";
 import { formatNumberWithLocale } from "../utils/format";
 
 export default function SettingsModal({ onClose }) {
@@ -31,8 +31,8 @@ export default function SettingsModal({ onClose }) {
               onClick={() => {
                 try {
                   localStorage.removeItem("hb_number_format");
-                } catch (e) {
-                  // ignore
+                } catch {
+                  /* ignore */
                 }
                 setLocale("en-US");
               }}
@@ -50,7 +50,7 @@ export default function SettingsModal({ onClose }) {
               <option value="en-US">1,234.56</option>
               <option value="de-DE">1.234,56</option>
               <option value="fr-FR">1 234,56</option>
-              <option value="de-CH">1'234.56</option>
+              <option value="de-CH">1&apos;234.56</option>
               <option value="en-IN">1,23,456.78</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />

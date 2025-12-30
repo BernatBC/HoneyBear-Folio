@@ -392,6 +392,8 @@ function TreeMap({ items, totalValue }) {
 }
 
 function TreeMapNode({ items, x, y, w, h, totalValue }) {
+  const formatNumber = useFormatNumber();
+
   if (items.length === 0) return null;
 
   if (items.length === 1) {

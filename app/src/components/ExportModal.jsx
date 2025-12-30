@@ -6,7 +6,7 @@ import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
 import { X, Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import * as XLSX from "xlsx";
 import "../styles/ExportModal.css";
-import { useToast } from "./Toast";
+import { useToast } from "../contexts/toast";
 
 export default function ExportModal({ onClose }) {
   const [format, setFormat] = useState("json");

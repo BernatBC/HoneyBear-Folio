@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-
-const NumberFormatContext = createContext(null);
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { NumberFormatContext } from "./number-format";
 
 export function NumberFormatProvider({ children }) {
   const [locale, setLocale] = useState(() => {
     try {
       return localStorage.getItem("hb_number_format") || "en-US";
-    } catch (e) {
+    } catch {
       return "en-US";
     }
   });
@@ -14,7 +14,7 @@ export function NumberFormatProvider({ children }) {
   useEffect(() => {
     try {
       localStorage.setItem("hb_number_format", locale);
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, [locale]);
@@ -26,10 +26,6 @@ export function NumberFormatProvider({ children }) {
   );
 }
 
-export function useNumberFormat() {
-  const ctx = useContext(NumberFormatContext);
-  if (!ctx) {
-    throw new Error("useNumberFormat must be used within NumberFormatProvider");
-  }
-  return ctx;
-}
+NumberFormatProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

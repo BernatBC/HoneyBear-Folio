@@ -1,4 +1,4 @@
-import { useNumberFormat } from "../contexts/NumberFormatContext";
+import { useNumberFormat } from "../contexts/number-format";
 
 export function formatNumberWithLocale(value, locale, options = {}) {
   if (value === undefined || value === null || Number.isNaN(Number(value)))

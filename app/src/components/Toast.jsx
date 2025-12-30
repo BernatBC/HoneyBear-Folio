@@ -1,8 +1,7 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import "../styles/Toast.css";
-
-const ToastContext = createContext(null);
+import { ToastContext } from "../contexts/toast";
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
@@ -49,14 +48,7 @@ export function ToastProvider({ children }) {
 }
 
 ToastProvider.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
 };
-
-export function useToast() {
-  const ctx = useContext(ToastContext);
-  // If there's no provider (e.g., in isolated tests), return a safe noop implementation
-  if (!ctx) return { showToast: () => {} };
-  return ctx;
-}
 
 export default ToastProvider;
