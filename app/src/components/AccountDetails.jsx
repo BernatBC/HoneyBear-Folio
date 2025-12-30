@@ -449,9 +449,9 @@ export default function AccountDetails({ account, onUpdate }) {
   });
 
   return (
-    <div className="max-w-7xl mx-auto pb-8">
+    <div className="max-w-full mx-4 lg:mx-8 px-2 lg:px-4 pb-8">
       {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 p-4 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
+      <header className="mb-8 -mx-20 lg:-mx-28 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg transition-all duration-300">
         <div>
           {isRenamingAccount ? (
             <form
@@ -949,36 +949,36 @@ export default function AccountDetails({ account, onUpdate }) {
       )}
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300">
+      <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
               <tr>
-                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
                   Date
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Payee
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
                   Ticker
                 </th>
-                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
                   Shares
                 </th>
-                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
                   Price
                 </th>
-                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-28">
                   Fee
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-48">
                   Category
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Notes
                 </th>
-                <th className="px-4 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider w-36">
                   Amount
                 </th>
                 <th className="w-16"></th>
@@ -987,7 +987,7 @@ export default function AccountDetails({ account, onUpdate }) {
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="px-4 py-16 text-center">
+                  <td colSpan="10" className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 p-4 rounded-full">
                         <Search className="w-8 h-8 text-slate-300" />
@@ -1011,7 +1011,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   >
                     {editingId === tx.id ? (
                       <>
-                        <td className="px-4 py-3">
+                        <td className="px-6 py-3">
                           <DatePicker
                             selected={
                               editForm.date ? new Date(editForm.date) : null
@@ -1033,7 +1033,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         {/* If brokerage tx, show brokerage-specific editable fields */}
                         {editForm.ticker ? (
                           <>
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <div className="flex items-center gap-3">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                   <input
@@ -1079,7 +1079,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               />
                             </td>
 
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <input
                                 type="number"
                                 step="any"
@@ -1141,7 +1141,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               />
                             </td>
 
-                            <td className="px-4 py-3 text-right font-bold">
+                            <td className="px-6 py-3 text-right font-bold">
                               {(() => {
                                 const s = parseFloat(editForm.shares) || 0;
                                 const p = parseFloat(editForm.price_per_share) || 0;
@@ -1171,7 +1171,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         ) : (
                           // Non-brokerage edit row
                           <>
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <AutocompleteInput
                                 suggestions={payeeSuggestions}
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
@@ -1181,7 +1181,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 }
                               />
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <AutocompleteInput
                                 suggestions={categorySuggestions}
                                 className={`w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 text-slate-500" : ""}`}
@@ -1210,7 +1210,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 }
                               />
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-3">
                               <input
                                 type="number"
                                 step="0.01"
