@@ -19,6 +19,7 @@ import {
   FileText,
   ArrowRightLeft,
   User,
+  ChevronDown,
   Edit,
 } from "lucide-react";
 import { useFormatNumber } from "../utils/format";
@@ -553,23 +554,30 @@ export default function AccountDetails({ account, onUpdate }) {
           </div>
           <div className="flex items-center gap-3">
             {account.id === "all" && (
-              <select
-                value={addTargetAccount ? addTargetAccount.id : ""}
-                onChange={(e) => {
-                  const selected = availableAccounts.find(
-                    (a) => String(a.id) === String(e.target.value),
-                  );
-                  setAddTargetAccount(selected || null);
-                }}
-                className="px-3 py-2 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100"
-                aria-label="Select account to add transaction"
-              >
-                {availableAccounts.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name} ({a.kind})
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={addTargetAccount ? addTargetAccount.id : ""}
+                  onChange={(e) => {
+                    const selected = availableAccounts.find(
+                      (a) => String(a.id) === String(e.target.value),
+                    );
+                    setAddTargetAccount(selected || null);
+                  }}
+                  className="px-3 py-2 pr-10 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 appearance-none"
+                  aria-label="Select account to add transaction"
+                >
+                  {availableAccounts.map((a) => (
+                    <option
+                      key={a.id}
+                      value={a.id}
+                      className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    >
+                      {a.name} ({a.kind})
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-400 pointer-events-none" />
+              </div>
             )}
 
             {!isAdding ? (
