@@ -361,7 +361,8 @@ export default function AccountDetails({ account, onUpdate }) {
         const shares = Math.abs(parseFloat(editForm.shares) || 0);
         const pricePerShare = parseFloat(editForm.price_per_share) || 0.0;
         const feeVal = parseFloat(editForm.fee) || 0.0;
-        const isBuy = editForm.payee === "Buy" || (parseFloat(editForm.shares) || 0) > 0;
+        const isBuy =
+          editForm.payee === "Buy" || (parseFloat(editForm.shares) || 0) > 0;
 
         await invoke("update_brokerage_transaction", {
           args: {
@@ -987,7 +988,10 @@ export default function AccountDetails({ account, onUpdate }) {
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={account.kind === "cash" ? "6" : "10"} className="px-6 py-16 text-center">
+                  <td
+                    colSpan={account.kind === "cash" ? "6" : "10"}
+                    className="px-6 py-16 text-center"
+                  >
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 p-4 rounded-full">
                         <Search className="w-8 h-8 text-slate-300" />
@@ -1059,7 +1063,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                       (parseFloat(editForm.shares) || 0) < 0
                                     }
                                     onChange={() =>
-                                      setEditForm({ ...editForm, payee: "Sell" })
+                                      setEditForm({
+                                        ...editForm,
+                                        payee: "Sell",
+                                      })
                                     }
                                     className="w-4 h-4 text-blue-600"
                                   />
@@ -1074,7 +1081,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
                                 value={editForm.ticker || ""}
                                 onChange={(e) =>
-                                  setEditForm({ ...editForm, ticker: e.target.value.toUpperCase() })
+                                  setEditForm({
+                                    ...editForm,
+                                    ticker: e.target.value.toUpperCase(),
+                                  })
                                 }
                               />
                             </td>
@@ -1086,7 +1096,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={Math.abs(editForm.shares || 0)}
                                 onChange={(e) =>
-                                  setEditForm({ ...editForm, shares: e.target.value })
+                                  setEditForm({
+                                    ...editForm,
+                                    shares: e.target.value,
+                                  })
                                 }
                               />
                             </td>
@@ -1099,7 +1112,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                   className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.price_per_share || ""}
                                   onChange={(e) =>
-                                    setEditForm({ ...editForm, price_per_share: e.target.value })
+                                    setEditForm({
+                                      ...editForm,
+                                      price_per_share: e.target.value,
+                                    })
                                   }
                                 />
                               </div>
@@ -1113,7 +1129,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                   className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.fee || ""}
                                   onChange={(e) =>
-                                    setEditForm({ ...editForm, fee: e.target.value })
+                                    setEditForm({
+                                      ...editForm,
+                                      fee: e.target.value,
+                                    })
                                   }
                                 />
                               </div>
@@ -1124,7 +1143,12 @@ export default function AccountDetails({ account, onUpdate }) {
                                 type="text"
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                                 value={editForm.category || "Investment"}
-                                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    category: e.target.value,
+                                  })
+                                }
                               />
                             </td>
 
@@ -1134,7 +1158,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                 className="w-full p-2 text-sm border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                                 value={editForm.notes || ""}
                                 onChange={(e) =>
-                                  setEditForm({ ...editForm, notes: e.target.value })
+                                  setEditForm({
+                                    ...editForm,
+                                    notes: e.target.value,
+                                  })
                                 }
                               />
                             </td>
@@ -1142,9 +1169,11 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3 text-right font-bold">
                               {(() => {
                                 const s = parseFloat(editForm.shares) || 0;
-                                const p = parseFloat(editForm.price_per_share) || 0;
+                                const p =
+                                  parseFloat(editForm.price_per_share) || 0;
                                 const total = (Math.abs(s) * p).toFixed(2);
-                                const sign = editForm.payee === "Sell" || s < 0 ? "" : "+";
+                                const sign =
+                                  editForm.payee === "Sell" || s < 0 ? "" : "+";
                                 return `${sign}${total} €`;
                               })()}
                             </td>
@@ -1267,7 +1296,9 @@ export default function AccountDetails({ account, onUpdate }) {
                               onClick={() => startEditing(tx)}
                             >
                               {tx.ticker ? (
-                                <span className="font-medium uppercase">{tx.ticker}</span>
+                                <span className="font-medium uppercase">
+                                  {tx.ticker}
+                                </span>
                               ) : (
                                 <span className="text-slate-400">-</span>
                               )}
@@ -1277,7 +1308,8 @@ export default function AccountDetails({ account, onUpdate }) {
                               className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                               onClick={() => startEditing(tx)}
                             >
-                              {typeof tx.shares !== 'undefined' && tx.shares !== null ? (
+                              {typeof tx.shares !== "undefined" &&
+                              tx.shares !== null ? (
                                 <span>{Math.abs(tx.shares).toFixed(4)}</span>
                               ) : (
                                 <span className="text-slate-400">-</span>
@@ -1288,7 +1320,8 @@ export default function AccountDetails({ account, onUpdate }) {
                               className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                               onClick={() => startEditing(tx)}
                             >
-                              {typeof tx.price_per_share !== 'undefined' && tx.price_per_share !== null ? (
+                              {typeof tx.price_per_share !== "undefined" &&
+                              tx.price_per_share !== null ? (
                                 <span>{tx.price_per_share.toFixed(2)} €</span>
                               ) : (
                                 <span className="text-slate-400">-</span>
@@ -1299,7 +1332,8 @@ export default function AccountDetails({ account, onUpdate }) {
                               className="px-6 py-4 whitespace-nowrap text-sm text-right cursor-pointer"
                               onClick={() => startEditing(tx)}
                             >
-                              {typeof tx.fee !== 'undefined' && tx.fee !== null ? (
+                              {typeof tx.fee !== "undefined" &&
+                              tx.fee !== null ? (
                                 <span>{tx.fee.toFixed(2)} €</span>
                               ) : (
                                 <span className="text-slate-400">-</span>

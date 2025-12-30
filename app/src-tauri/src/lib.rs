@@ -726,7 +726,11 @@ fn update_brokerage_transaction(
         id,
         account_id: brokerage_account_id,
         date,
-        payee: if is_buy { "Buy".to_string() } else { "Sell".to_string() },
+        payee: if is_buy {
+            "Buy".to_string()
+        } else {
+            "Sell".to_string()
+        },
         notes: Some(new_notes),
         category: Some("Investment".to_string()),
         amount: brokerage_amount,
