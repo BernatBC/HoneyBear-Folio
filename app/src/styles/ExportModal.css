@@ -45,7 +45,7 @@
   }
 
   .modal-footer {
-    @apply flex justify-end gap-3;
+    @apply mt-6 flex justify-end gap-3;
   }
 
   .modal-cancel-button {
