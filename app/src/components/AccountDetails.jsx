@@ -23,6 +23,7 @@ import {
   Edit,
 } from "lucide-react";
 import { useFormatNumber, useParseNumber } from "../utils/format";
+import NumberInput from "./NumberInput";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);
@@ -247,27 +248,24 @@ export default function AccountDetails({ account, onUpdate }) {
   }, [ticker]);
 
   // Auto-calculate total price or price per share
-  const handleSharesChange = (e) => {
-    const newShares = e.target.value;
-    setShares(newShares);
-    if (newShares && pricePerShare) {
-      setTotalPrice(((parseNumber(newShares) || 0) * (parseNumber(pricePerShare) || 0)).toFixed(2));
+  const handleSharesChange = (num) => {
+    setShares(num);
+    if (num !== undefined && num !== null && pricePerShare) {
+      setTotalPrice(((Math.abs(num) || 0) * (parseNumber(pricePerShare) || 0)).toFixed(2));
     }
   };
 
-  const handlePricePerShareChange = (e) => {
-    const newPrice = e.target.value;
-    setPricePerShare(newPrice);
-    if (shares && newPrice) {
-      setTotalPrice(((parseNumber(shares) || 0) * (parseNumber(newPrice) || 0)).toFixed(2));
+  const handlePricePerShareChange = (num) => {
+    setPricePerShare(num);
+    if (shares !== undefined && shares !== null && num !== undefined && num !== null) {
+      setTotalPrice(((parseNumber(shares) || 0) * (Math.abs(num) || 0)).toFixed(2));
     }
   };
 
-  const handleTotalPriceChange = (e) => {
-    const newTotal = e.target.value;
-    setTotalPrice(newTotal);
-    if (shares && newTotal) {
-      setPricePerShare(((parseNumber(newTotal) || 0) / (parseNumber(shares) || 1)).toFixed(4));
+  const handleTotalPriceChange = (val) => {
+    setTotalPrice(val);
+    if (shares !== undefined && shares !== null && val) {
+      setPricePerShare(((parseNumber(val) || 0) / (parseNumber(shares) || 1)).toFixed(4));
     }
   };
 
@@ -810,15 +808,13 @@ export default function AccountDetails({ account, onUpdate }) {
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  required
-                  step="any"
-                  placeholder={formatNumber(0, { maximumFractionDigits: 6, minimumFractionDigits: 0, useGrouping: false })}
-                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                <NumberInput
                   value={shares}
-                  onChange={handleSharesChange}
+                  onChange={(num) => handleSharesChange(num)}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  placeholder={formatNumber(0, { maximumFractionDigits: 6, minimumFractionDigits: 0, useGrouping: false })}
+                  maximumFractionDigits={6}
+                  useGrouping={false}
                 />
               </div>
 
@@ -827,15 +823,14 @@ export default function AccountDetails({ account, onUpdate }) {
                   Price / Share
                 </label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    required
-                    step="any"
-                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  <NumberInput
                     value={pricePerShare}
-                    onChange={handlePricePerShareChange}
+                    onChange={(num) => handlePricePerShareChange(num)}
+                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                    maximumFractionDigits={4}
+                    minimumFractionDigits={2}
+                    useGrouping={false}
                   />
                 </div>
               </div>
@@ -845,15 +840,14 @@ export default function AccountDetails({ account, onUpdate }) {
                   Total Price
                 </label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    required
-                    step="0.01"
-                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  <NumberInput
                     value={totalPrice}
-                    onChange={handleTotalPriceChange}
+                    onChange={(num) => handleTotalPriceChange(num)}
+                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                    maximumFractionDigits={2}
+                    minimumFractionDigits={2}
+                    useGrouping={false}
                   />
                 </div>
               </div>
@@ -1152,18 +1146,17 @@ export default function AccountDetails({ account, onUpdate }) {
                             </td>
 
                             <td className="px-6 py-3">
-                              <input
-                                type="text"
-                                inputMode="decimal"
-                                step="any"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
-                                value={Math.abs(editForm.shares || 0)}
-                                onChange={(e) =>
+                              <NumberInput
+                                value={editForm.shares}
+                                onChange={(num) =>
                                   setEditForm({
                                     ...editForm,
-                                    shares: e.target.value,
+                                    shares: num,
                                   })
                                 }
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                maximumFractionDigits={6}
+                                useGrouping={false}
                               />
                             </td>
 
@@ -1378,7 +1371,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.shares !== "undefined" &&
                               tx.shares !== null ? (
-                                <span>{formatNumber(Math.abs(tx.shares), { maximumFractionDigits: 4, minimumFractionDigits: 0, useGrouping: false })}</span>
+                                <span>{formatNumber(Math.abs(tx.shares), { maximumFractionDigits: 6, minimumFractionDigits: 0, useGrouping: false })}</span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
