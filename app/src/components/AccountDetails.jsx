@@ -1236,10 +1236,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                 const s = parseNumber(editForm.shares) || 0;
                                 const p =
                                   parseNumber(editForm.price_per_share) || 0;
-                                const total = (Math.abs(s) * p).toFixed(2);
-                                const sign =
-                                  editForm.payee === "Sell" || s < 0 ? "" : "+";
-                                return `${sign}${total} €`;
+                                const totalNum = Math.abs(s) * p;
+                                const sign = editForm.payee === "Sell" || s < 0 ? "" : "+";
+                                return sign + formatNumber(totalNum, { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + " €";
                               })()}
                             </td>
 
@@ -1379,7 +1378,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.shares !== "undefined" &&
                               tx.shares !== null ? (
-                                <span>{Math.abs(tx.shares).toFixed(4)}</span>
+                                <span>{formatNumber(Math.abs(tx.shares), { maximumFractionDigits: 4, minimumFractionDigits: 0, useGrouping: false })}</span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
@@ -1393,7 +1392,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.price_per_share !== "undefined" &&
                               tx.price_per_share !== null ? (
-                                <span>{tx.price_per_share.toFixed(2)} €</span>
+                                <span>{formatNumber(tx.price_per_share, { maximumFractionDigits: 2, minimumFractionDigits: 2 })} €</span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
@@ -1407,7 +1406,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.fee !== "undefined" &&
                               tx.fee !== null ? (
-                                <span>{tx.fee.toFixed(2)} €</span>
+                                <span>{formatNumber(tx.fee, { maximumFractionDigits: 2, minimumFractionDigits: 2 })} €</span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
