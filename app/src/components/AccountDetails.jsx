@@ -22,12 +22,14 @@ import {
   ChevronDown,
   Edit,
 } from "lucide-react";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber, useParseNumber } from "../utils/format";
+import NumberInput from "./NumberInput";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);
 
   const formatNumber = useFormatNumber();
+  const parseNumber = useParseNumber();
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
@@ -246,29 +248,35 @@ export default function AccountDetails({ account, onUpdate }) {
   }, [ticker]);
 
   // Auto-calculate total price or price per share
-  const handleSharesChange = (e) => {
-    const newShares = e.target.value;
-    setShares(newShares);
-    if (newShares && pricePerShare) {
+  const handleSharesChange = (num) => {
+    setShares(num);
+    if (num !== undefined && num !== null && pricePerShare) {
       setTotalPrice(
-        (parseFloat(newShares) * parseFloat(pricePerShare)).toFixed(2),
+        ((Math.abs(num) || 0) * (parseNumber(pricePerShare) || 0)).toFixed(2),
       );
     }
   };
 
-  const handlePricePerShareChange = (e) => {
-    const newPrice = e.target.value;
-    setPricePerShare(newPrice);
-    if (shares && newPrice) {
-      setTotalPrice((parseFloat(shares) * parseFloat(newPrice)).toFixed(2));
+  const handlePricePerShareChange = (num) => {
+    setPricePerShare(num);
+    if (
+      shares !== undefined &&
+      shares !== null &&
+      num !== undefined &&
+      num !== null
+    ) {
+      setTotalPrice(
+        ((parseNumber(shares) || 0) * (Math.abs(num) || 0)).toFixed(2),
+      );
     }
   };
 
-  const handleTotalPriceChange = (e) => {
-    const newTotal = e.target.value;
-    setTotalPrice(newTotal);
-    if (shares && newTotal) {
-      setPricePerShare((parseFloat(newTotal) / parseFloat(shares)).toFixed(4));
+  const handleTotalPriceChange = (val) => {
+    setTotalPrice(val);
+    if (shares !== undefined && shares !== null && val) {
+      setPricePerShare(
+        ((parseNumber(val) || 0) / (parseNumber(shares) || 1)).toFixed(4),
+      );
     }
   };
 
@@ -332,9 +340,9 @@ export default function AccountDetails({ account, onUpdate }) {
             cashAccountId: parseInt(cashAccountId),
             date,
             ticker,
-            shares: parseFloat(shares),
-            pricePerShare: parseFloat(pricePerShare),
-            fee: parseFloat(fee) || 0.0,
+            shares: parseNumber(shares),
+            pricePerShare: parseNumber(pricePerShare),
+            fee: parseNumber(fee) || 0.0,
             isBuy,
           },
         });
@@ -351,7 +359,7 @@ export default function AccountDetails({ account, onUpdate }) {
           payee,
           category: category || null,
           notes: notes || null,
-          amount: parseFloat(amount) || 0.0,
+          amount: parseNumber(amount) || 0.0,
         });
 
         setPayee("");
@@ -380,11 +388,11 @@ export default function AccountDetails({ account, onUpdate }) {
     try {
       // If this is a brokerage transaction (has ticker), call the brokerage-specific update
       if (editForm.ticker) {
-        const shares = Math.abs(parseFloat(editForm.shares) || 0);
-        const pricePerShare = parseFloat(editForm.price_per_share) || 0.0;
-        const feeVal = parseFloat(editForm.fee) || 0.0;
+        const shares = Math.abs(parseNumber(editForm.shares) || 0);
+        const pricePerShare = parseNumber(editForm.price_per_share) || 0.0;
+        const feeVal = parseNumber(editForm.fee) || 0.0;
         const isBuy =
-          editForm.payee === "Buy" || (parseFloat(editForm.shares) || 0) > 0;
+          editForm.payee === "Buy" || (parseNumber(editForm.shares) || 0) > 0;
 
         await invoke("update_brokerage_transaction", {
           args: {
@@ -407,7 +415,7 @@ export default function AccountDetails({ account, onUpdate }) {
             payee: editForm.payee,
             category: editForm.category || null,
             notes: editForm.notes || null,
-            amount: parseFloat(editForm.amount) || 0.0,
+            amount: parseNumber(editForm.amount) || 0.0,
           },
         });
       }
@@ -811,14 +819,17 @@ export default function AccountDetails({ account, onUpdate }) {
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
-                <input
-                  type="number"
-                  required
-                  step="any"
-                  placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                <NumberInput
                   value={shares}
-                  onChange={handleSharesChange}
+                  onChange={(num) => handleSharesChange(num)}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  placeholder={formatNumber(0, {
+                    maximumFractionDigits: 6,
+                    minimumFractionDigits: 0,
+                    useGrouping: false,
+                  })}
+                  maximumFractionDigits={6}
+                  useGrouping={false}
                 />
               </div>
 
@@ -827,14 +838,17 @@ export default function AccountDetails({ account, onUpdate }) {
                   Price / Share
                 </label>
                 <div className="relative">
-                  <input
-                    type="number"
-                    required
-                    step="any"
-                    placeholder="0.00"
-                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  <NumberInput
                     value={pricePerShare}
-                    onChange={handlePricePerShareChange}
+                    onChange={(num) => handlePricePerShareChange(num)}
+                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
+                    maximumFractionDigits={4}
+                    minimumFractionDigits={2}
+                    useGrouping={false}
                   />
                 </div>
               </div>
@@ -844,14 +858,17 @@ export default function AccountDetails({ account, onUpdate }) {
                   Total Price
                 </label>
                 <div className="relative">
-                  <input
-                    type="number"
-                    required
-                    step="0.01"
-                    placeholder="0.00"
-                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  <NumberInput
                     value={totalPrice}
-                    onChange={handleTotalPriceChange}
+                    onChange={(num) => handleTotalPriceChange(num)}
+                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
+                    maximumFractionDigits={2}
+                    minimumFractionDigits={2}
+                    useGrouping={false}
                   />
                 </div>
               </div>
@@ -862,9 +879,13 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
@@ -974,10 +995,14 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
                     className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300 dark:hover:border-slate-600"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
@@ -1099,7 +1124,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                     name={`txType-${tx.id}`}
                                     checked={
                                       editForm.payee === "Buy" ||
-                                      (parseFloat(editForm.shares) || 0) > 0
+                                      (parseNumber(editForm.shares) || 0) > 0
                                     }
                                     onChange={() =>
                                       setEditForm({ ...editForm, payee: "Buy" })
@@ -1116,7 +1141,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                     name={`txType-${tx.id}`}
                                     checked={
                                       editForm.payee === "Sell" ||
-                                      (parseFloat(editForm.shares) || 0) < 0
+                                      (parseNumber(editForm.shares) || 0) < 0
                                     }
                                     onChange={() =>
                                       setEditForm({
@@ -1148,24 +1173,25 @@ export default function AccountDetails({ account, onUpdate }) {
                             </td>
 
                             <td className="px-6 py-3">
-                              <input
-                                type="number"
-                                step="any"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
-                                value={Math.abs(editForm.shares || 0)}
-                                onChange={(e) =>
+                              <NumberInput
+                                value={editForm.shares}
+                                onChange={(num) =>
                                   setEditForm({
                                     ...editForm,
-                                    shares: e.target.value,
+                                    shares: num,
                                   })
                                 }
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                maximumFractionDigits={6}
+                                useGrouping={false}
                               />
                             </td>
 
                             <td className="px-6 py-3">
                               <div className="relative">
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   step="any"
                                   className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.price_per_share || ""}
@@ -1182,7 +1208,8 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <div className="relative">
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   step="0.01"
                                   className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.fee || ""}
@@ -1226,13 +1253,20 @@ export default function AccountDetails({ account, onUpdate }) {
 
                             <td className="px-6 py-3 text-right font-bold text-slate-900 dark:text-slate-100">
                               {(() => {
-                                const s = parseFloat(editForm.shares) || 0;
+                                const s = parseNumber(editForm.shares) || 0;
                                 const p =
-                                  parseFloat(editForm.price_per_share) || 0;
-                                const total = (Math.abs(s) * p).toFixed(2);
+                                  parseNumber(editForm.price_per_share) || 0;
+                                const totalNum = Math.abs(s) * p;
                                 const sign =
                                   editForm.payee === "Sell" || s < 0 ? "" : "+";
-                                return `${sign}${total} €`;
+                                return (
+                                  sign +
+                                  formatNumber(totalNum, {
+                                    maximumFractionDigits: 2,
+                                    minimumFractionDigits: 2,
+                                  }) +
+                                  " €"
+                                );
                               })()}
                             </td>
 
@@ -1297,8 +1331,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             </td>
                             <td className="px-6 py-3">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 step="0.01"
+                                placeholder={formatNumber(0, {
+                                  maximumFractionDigits: 2,
+                                  minimumFractionDigits: 2,
+                                })}
                                 className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={editForm.amount}
                                 onChange={(e) =>
@@ -1370,7 +1409,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.shares !== "undefined" &&
                               tx.shares !== null ? (
-                                <span>{Math.abs(tx.shares).toFixed(4)}</span>
+                                <span>
+                                  {formatNumber(Math.abs(tx.shares), {
+                                    maximumFractionDigits: 6,
+                                    minimumFractionDigits: 0,
+                                    useGrouping: false,
+                                  })}
+                                </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
@@ -1384,7 +1429,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.price_per_share !== "undefined" &&
                               tx.price_per_share !== null ? (
-                                <span>{tx.price_per_share.toFixed(2)} €</span>
+                                <span>
+                                  {formatNumber(tx.price_per_share, {
+                                    maximumFractionDigits: 2,
+                                    minimumFractionDigits: 2,
+                                  })}{" "}
+                                  €
+                                </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
@@ -1398,7 +1449,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.fee !== "undefined" &&
                               tx.fee !== null ? (
-                                <span>{tx.fee.toFixed(2)} €</span>
+                                <span>
+                                  {formatNumber(tx.fee, {
+                                    maximumFractionDigits: 2,
+                                    minimumFractionDigits: 2,
+                                  })}{" "}
+                                  €
+                                </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -

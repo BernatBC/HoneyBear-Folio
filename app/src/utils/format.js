@@ -36,3 +36,49 @@ export function useFormatNumber() {
   const { locale } = useNumberFormat();
   return (value, options) => formatNumberWithLocale(value, locale, options);
 }
+
+// Parse a localized number string into a JS number.
+export function parseNumberWithLocale(str, locale) {
+  if (str === undefined || str === null) return NaN;
+  if (typeof str === "number") return str;
+
+  const s = String(str).trim();
+  if (s === "") return NaN;
+
+  // Normalize common whitespace characters used as group separators
+  let normalized = s.replace(/\u00A0|\u202F|\s/g, "");
+
+  try {
+    const parts = new Intl.NumberFormat(locale || undefined).formatToParts(
+      12345.6,
+    );
+    const group = parts.find((p) => p.type === "group")?.value || ",";
+    const decimal = parts.find((p) => p.type === "decimal")?.value || ".";
+
+    // Remove group separators
+    if (group) {
+      const escapedGroup = group.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+      normalized = normalized.replace(new RegExp(escapedGroup, "g"), "");
+    }
+
+    // Replace locale decimal separator with dot
+    if (decimal && decimal !== ".") {
+      const escapedDecimal = decimal.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+      normalized = normalized.replace(new RegExp(escapedDecimal, "g"), ".");
+    }
+  } catch {
+    // If Intl fails, fall back to a conservative clean-up:
+    normalized = normalized.replace(/,/g, "");
+  }
+
+  // Keep only digits, dot, minus and plus
+  normalized = normalized.replace(/[^0-9.+-]/g, "");
+
+  const num = parseFloat(normalized);
+  return Number.isNaN(num) ? NaN : num;
+}
+
+export function useParseNumber() {
+  const { locale } = useNumberFormat();
+  return (str) => parseNumberWithLocale(str, locale);
+}
