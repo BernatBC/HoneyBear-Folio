@@ -30,6 +30,20 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "shortDescription": "Cross-platform personal finance desktop app.",
+    "longDescription": "HoneyBear Folio is a cross-platform personal finance desktop application built with Tauri, React, and SQLite. It focuses on fast local data management, clear dashboards and charts, portfolio tracking, and import/export to common formats.",
+    "copyright": "© 2025 BernatBC",
+    "license": "GPL-3.0-or-later",
+    "homepage": "https://github.com/BernatBC/HoneyBear-Folio",
+    "category": "Finance",
+    "linux": {
+      "deb": {
+        "depends": ["libwebkit2gtk-4.1-0", "libappindicator3-1", "librsvg2-2", "libgtk-3-0", "patchelf"]
+      },
+      "rpm": {
+        "depends": ["libwebkit2gtk-4.1", "libappindicator3", "librsvg2", "gtk3", "patchelf"]
+      }
+    }
   }
 }
