@@ -299,9 +299,14 @@ export default function ImportModal({ onClose, onImportComplete }) {
                 String(k).toLowerCase(),
               );
               const isBrokerage = lowerKeys.some((k) =>
-                ["ticker", "shares", "symbol", "quantity", "price", "price_per_share"].some((s) =>
-                  k.includes(s),
-                ),
+                [
+                  "ticker",
+                  "shares",
+                  "symbol",
+                  "quantity",
+                  "price",
+                  "price_per_share",
+                ].some((s) => k.includes(s)),
               );
               const kind = isBrokerage ? "brokerage" : "cash";
               try {
