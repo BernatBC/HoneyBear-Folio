@@ -363,7 +363,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
   // If SSR or tests, avoid touching document
   if (typeof document === "undefined") return null;
-  return createPortal((
+  return createPortal(
     <div className="modal-overlay">
       <div className="modal-container w-full max-w-4xl flex flex-col max-h-[90vh]">
         <div className="modal-header border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
@@ -572,8 +572,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
           </button>
         </div>
       </div>
-    </div>
-  ), document.body);
+    </div>,
+    document.body,
+  );
 }
 
 ImportModal.propTypes = {
