@@ -13,7 +13,7 @@ import "../styles/SettingsModal.css";
 import CustomSelect from "./CustomSelect";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { useParseNumber, parseNumberWithLocale } from "../utils/format";
+import { parseNumberWithLocale } from "../utils/format";
 
 export default function ImportModal({ onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
