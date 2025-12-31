@@ -8,15 +8,20 @@ import path from "path";
 const host = process.env.TAURI_DEV_HOST;
 
 // Read package version and compute the current commit (short) if available
-const pkg = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), "package.json"), "utf8"));
+const pkg = JSON.parse(
+  fs.readFileSync(path.resolve(process.cwd(), "package.json"), "utf8"),
+);
 let commit = process.env.GITHUB_SHA || process.env.APP_COMMIT || null;
 if (!commit) {
   try {
-    commit = child_process.execSync("git rev-parse --short HEAD").toString().trim();
+    commit = child_process
+      .execSync("git rev-parse --short HEAD")
+      .toString()
+      .trim();
   } catch (e) {
     commit = null;
   }
-} 
+}
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({

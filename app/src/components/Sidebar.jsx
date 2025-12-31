@@ -316,7 +316,8 @@ export default function Sidebar({
           </button>
         </div>
         <div className="sidebar-version">
-          {IS_RELEASE ? `v${getDisplayVersion()}` : getDisplayVersion()} • HoneyBear Folio
+          {IS_RELEASE ? `v${getDisplayVersion()}` : getDisplayVersion()} •
+          HoneyBear Folio
         </div>
       </div>
 
