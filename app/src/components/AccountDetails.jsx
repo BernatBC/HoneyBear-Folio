@@ -486,9 +486,9 @@ export default function AccountDetails({ account, onUpdate }) {
     : account.kind;
 
   return (
-    <div className="max-w-full mx-4 lg:mx-8 px-2 lg:px-4 pb-8">
+    <div className="max-w-full pb-8">
       {/* Header */}
-      <header className="mb-8 -mx-20 lg:-mx-28 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
+      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
         <div>
           {isRenamingAccount ? (
             <form
@@ -667,7 +667,7 @@ export default function AccountDetails({ account, onUpdate }) {
 
       {/* Add Transaction Form */}
       {isAdding && (
-        <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 py-4 px-4 lg:px-6 rounded-2xl border-2 border-brand-200 dark:border-brand-800 shadow-xl mb-8 animate-slide-in -mx-20 lg:-mx-28">
+        <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 py-4 px-4 lg:px-6 rounded-2xl border-2 border-brand-200 dark:border-brand-800 shadow-xl mb-8 animate-slide-in">
           <h3 className="text-lg font-bold mb-6 text-slate-900 dark:text-slate-100 flex items-center gap-3">
             <div className="bg-brand-100 dark:bg-brand-900/30 p-2.5 rounded-xl">
               <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
@@ -1025,7 +1025,7 @@ export default function AccountDetails({ account, onUpdate }) {
       )}
 
       {/* Transactions Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-visible hover:shadow-lg transition-shadow duration-300 -mx-20 lg:-mx-28 px-4 lg:px-6">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-visible hover:shadow-lg transition-shadow duration-300 px-4 lg:px-6">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
             <thead className="bg-white dark:bg-slate-800 rounded-t-2xl">
