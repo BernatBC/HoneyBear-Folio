@@ -129,14 +129,12 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             .map_err(|e| e.to_string())?;
         let mut has_linked = false;
         let col_iter = stmt
-            .query_map([], |row| Ok(row.get::<_, String>(1)?))
+            .query_map([], |row| row.get::<_, String>(1))
             .map_err(|e| e.to_string())?;
-        for col in col_iter {
-            if let Ok(name) = col {
-                if name == "linked_tx_id" {
-                    has_linked = true;
-                    break;
-                }
+        for name in col_iter.flatten() {
+            if name == "linked_tx_id" {
+                has_linked = true;
+                break;
             }
         }
         if !has_linked {
