@@ -815,7 +815,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   inputMode="decimal"
                   required
                   step="any"
-                  placeholder="0"
+                  placeholder={formatNumber(0, { maximumFractionDigits: 6, minimumFractionDigits: 0, useGrouping: false })}
                   className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   value={shares}
                   onChange={handleSharesChange}
@@ -832,7 +832,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     inputMode="decimal"
                     required
                     step="any"
-                    placeholder="0.00"
+                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={pricePerShare}
                     onChange={handlePricePerShareChange}
@@ -850,7 +850,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     inputMode="decimal"
                     required
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={totalPrice}
                     onChange={handleTotalPriceChange}
@@ -867,7 +867,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="text"
                     inputMode="decimal"
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
@@ -981,7 +981,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     inputMode="decimal"
                     required
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
                     className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300 dark:hover:border-slate-600"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
@@ -1307,6 +1307,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                 type="text"
                                 inputMode="decimal"
                                 step="0.01"
+                                placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
                                 className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={editForm.amount}
                                 onChange={(e) =>
