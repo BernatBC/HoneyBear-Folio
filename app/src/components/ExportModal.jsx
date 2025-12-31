@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
 import { X, Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import * as XLSX from "xlsx";
+import "../styles/Modal.css";
 import "../styles/ExportModal.css";
 import { formatNumberForExport } from "../utils/format";
 import { useToast } from "../contexts/toast";
@@ -176,7 +178,7 @@ export default function ExportModal({ onClose }) {
     }
   };
 
-  return (
+  const modal = (
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
@@ -249,6 +251,10 @@ export default function ExportModal({ onClose }) {
       </div>
     </div>
   );
+
+  // If SSR or tests, avoid touching document
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }
 
 ExportModal.propTypes = {

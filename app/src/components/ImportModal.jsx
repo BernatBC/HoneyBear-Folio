@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -9,6 +10,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import "../styles/Modal.css";
 import "../styles/SettingsModal.css";
 import CustomSelect from "./CustomSelect";
 import Papa from "papaparse";
@@ -26,6 +28,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
     notes: "",
     account: "",
   });
+
+  /* Modal JSX moved to end of function to avoid referencing refs/state before initialization */
+
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState({
     current: 0,
@@ -356,7 +361,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
     }, 1500);
   };
 
-  return (
+  // If SSR or tests, avoid touching document
+  if (typeof document === "undefined") return null;
+  return createPortal((
     <div className="modal-overlay">
       <div className="modal-container w-full max-w-4xl flex flex-col max-h-[90vh]">
         <div className="modal-header border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
@@ -566,7 +573,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 }
 
 ImportModal.propTypes = {

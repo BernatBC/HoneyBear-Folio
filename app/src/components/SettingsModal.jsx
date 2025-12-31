@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { X, Settings } from "lucide-react";
 import { createPortal } from "react-dom";
+import "../styles/Modal.css";
 import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
 import { useTheme } from "../contexts/theme-core";

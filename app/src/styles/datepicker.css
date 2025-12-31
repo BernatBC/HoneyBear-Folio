@@ -11,6 +11,7 @@
   /* shadow-lg */
   overflow: hidden;
   background-color: white !important;
+  z-index: 10003; /* ensure datepicker popover sits above modals */
 }
 
 .dark .react-datepicker {

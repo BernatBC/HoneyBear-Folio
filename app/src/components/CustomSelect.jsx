@@ -176,7 +176,7 @@ export default function CustomSelect({
             ref={listRef}
             role="listbox"
             tabIndex={-1}
-            className="custom-select-portal fixed z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-auto p-1 animate-fade-in"
+            className="custom-select-portal fixed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-auto p-1 animate-fade-in"
             style={{
               top: `${menuCoords.top + menuCoords.height + 8}px`,
               left: `${Math.min(
@@ -184,6 +184,7 @@ export default function CustomSelect({
                 window.innerWidth - menuCoords.width - 8,
               )}px`,
               width: `${menuCoords.width}px`,
+              zIndex: 10003,
             }}
             onKeyDown={handleKeyDown}
           >
