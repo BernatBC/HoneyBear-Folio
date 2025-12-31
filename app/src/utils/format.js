@@ -82,3 +82,26 @@ export function useParseNumber() {
   const { locale } = useNumberFormat();
   return (str) => parseNumberWithLocale(str, locale);
 }
+
+export function formatNumberForExport(value) {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "number") return String(value);
+  const s = String(value).trim();
+  if (s === "") return "";
+
+  // Remove common non-breaking/grouping spaces
+  let normalized = s.replace(/\u00A0|\u202F|\s/g, "");
+
+  // If contains comma and no dot, treat comma as decimal separator (e.g. "1234,56").
+  // If contains both comma and dot, assume commas are thousand separators and remove them (e.g. "1,234.56").
+  if (normalized.includes(",") && !normalized.includes(".")) {
+    normalized = normalized.replace(/,/g, ".");
+  } else if (normalized.includes(",") && normalized.includes(".")) {
+    normalized = normalized.replace(/,/g, "");
+  }
+
+  // Keep only digits, decimal point, sign characters
+  normalized = normalized.replace(/[^0-9.+-]/g, "");
+  const num = parseFloat(normalized);
+  return Number.isNaN(num) ? s : String(num);
+}

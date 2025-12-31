@@ -6,6 +6,7 @@ import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
 import { X, Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import * as XLSX from "xlsx";
 import "../styles/ExportModal.css";
+import { formatNumberForExport } from "../utils/format";
 import { useToast } from "../contexts/toast";
 
 export default function ExportModal({ onClose }) {
@@ -37,7 +38,7 @@ export default function ExportModal({ onClose }) {
         defaultPath += ".json";
         filters = [{ name: "JSON", extensions: ["json"] }];
       } else if (format === "csv") {
-        // Flatten transactions for CSV
+        // Flatten transactions for CSV — ensure numeric fields use dot decimal separator
         const headers = [
           "Date",
           "Account",
@@ -52,25 +53,24 @@ export default function ExportModal({ onClose }) {
         ];
         const rows = transactions.map((t) => {
           const acc = accounts.find((a) => a.id === t.account_id);
-          return [
+          const values = [
             t.date,
             acc ? acc.name : t.account_id,
             t.payee,
             t.category,
-            t.amount,
+            formatNumberForExport(t.amount),
             t.notes,
             t.ticker,
-            t.shares,
-            t.price_per_share,
-            t.fee,
-          ]
-            .map((v) =>
-              v === null || v === undefined
-                ? ""
-                : String(v).includes(",")
-                  ? `"${v}"`
-                  : v,
-            )
+            formatNumberForExport(t.shares),
+            formatNumberForExport(t.price_per_share),
+            formatNumberForExport(t.fee),
+          ];
+          return values
+            .map((v) => {
+              const s = v === null || v === undefined ? "" : String(v);
+              const escaped = s.replace(/"/g, '""');
+              return /[,"\n]/.test(escaped) ? `"${escaped}"` : escaped;
+            })
             .join(",");
         });
         content = [headers.join(","), ...rows].join("\n");
@@ -80,6 +80,15 @@ export default function ExportModal({ onClose }) {
         // Use XLSX to generate buffer
         const wb = XLSX.utils.book_new();
 
+        // Helper to coerce numeric-like values into numeric cells where possible
+        const coerceNumber = (v) => {
+          if (v === null || v === undefined || v === "") return null;
+          if (typeof v === "number") return v;
+          const s = formatNumberForExport(v);
+          const n = Number(s);
+          return Number.isNaN(n) ? v : n;
+        };
+
         // Transactions Sheet
         const txData = transactions.map((t) => {
           const acc = accounts.find((a) => a.id === t.account_id);
@@ -88,12 +97,12 @@ export default function ExportModal({ onClose }) {
             Account: acc ? acc.name : t.account_id,
             Payee: t.payee,
             Category: t.category,
-            Amount: t.amount,
+            Amount: coerceNumber(t.amount),
             Notes: t.notes,
             Ticker: t.ticker,
-            Shares: t.shares,
-            Price: t.price_per_share,
-            Fee: t.fee,
+            Shares: coerceNumber(t.shares),
+            Price: coerceNumber(t.price_per_share),
+            Fee: coerceNumber(t.fee),
           };
         });
         const wsTx = XLSX.utils.json_to_sheet(txData);
