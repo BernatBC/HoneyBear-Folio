@@ -9,6 +9,13 @@
   "ignore_labels": ["skip-changelog"],
   "sort": { "order": "DESC", "on_property": "mergedAt" },
   "template": "# Release notes for #{{TO_TAG}} (since #{{FROM_TAG}})\n\n#{{CHANGELOG}}\n\n**Contributors:** #{{CONTRIBUTORS}}\n\n**Assets:** Download the latest build for your platform from the **Assets** section below.",
+  "label_extractor": [
+    { "pattern": "\\[(feat|feature)\\]", "target": "feature", "on_property": "title", "flags": "iu" },
+    { "pattern": "\\[(fix)\\]", "target": "fix", "on_property": "title", "flags": "iu" },
+    { "pattern": "\\[(docs)\\]", "target": "docs", "on_property": "title", "flags": "iu" },
+    { "pattern": "\\[(chore)\\]", "target": "chore", "on_property": "title", "flags": "iu" },
+    { "pattern": "\\[(security)\\]", "target": "security", "on_property": "title", "flags": "iu" }
+  ],
   "pr_template": "- #{{TITLE}} ([#{{NUMBER}}]#{{URL}}) — @#{{AUTHOR}}",
   "empty_template": "- no changes",
   "fetchReleaseInformation": true,
