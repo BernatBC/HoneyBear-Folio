@@ -179,13 +179,19 @@ export default function Dashboard({
     const assetTypes = {};
     accounts.forEach((acc) => {
       let kind = acc.kind || "cash";
-      kind = kind.toLowerCase();
+      const accKindLower = kind.toLowerCase();
 
-      if (kind === "brokerage") kind = "Stock";
-      else if (kind === "cash") kind = "Cash";
+      // Use current market value for brokerage accounts when available
+      const value =
+        accKindLower === "brokerage" && marketValues && marketValues[acc.id] !== undefined
+          ? marketValues[acc.id]
+          : acc.balance || 0;
+
+      if (accKindLower === "brokerage") kind = "Stock";
+      else if (accKindLower === "cash") kind = "Cash";
       else kind = kind.charAt(0).toUpperCase() + kind.slice(1);
 
-      assetTypes[kind] = (assetTypes[kind] || 0) + acc.balance;
+      assetTypes[kind] = (assetTypes[kind] || 0) + value;
     });
 
     const labels = Object.keys(assetTypes);
@@ -213,7 +219,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [accounts]);
+  }, [accounts, marketValues]);
 
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;
