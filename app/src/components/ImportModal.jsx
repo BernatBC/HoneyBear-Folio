@@ -314,7 +314,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-container w-full max-w-2xl flex flex-col max-h-[90vh]">
+      <div className="modal-container w-full max-w-4xl flex flex-col max-h-[90vh]">
         <div className="modal-header border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h2 className="modal-title">
             <Upload className="w-5 h-5 text-blue-500" />
@@ -422,7 +422,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   <p className="text-sm text-red-500">{parseError}</p>
                 ) : previewRows && previewRows.length > 0 ? (
                   <div className="overflow-x-auto bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 p-2 mt-2">
-                    <table className="w-full text-sm table-fixed">
+                    <table className="w-full min-w-full text-sm table-auto">
                       <thead>
                         <tr className="bg-slate-100 dark:bg-slate-800">
                           {Object.keys(previewRows[0]).map((h) => (
@@ -434,7 +434,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                         {previewRows.map((r, idx) => (
                           <tr key={idx} className="hover:bg-slate-100 dark:hover:bg-slate-800 odd:bg-white even:bg-slate-50 dark:odd:bg-slate-900 dark:even:bg-slate-800">
                             {Object.keys(previewRows[0]).map((h) => (
-                              <td key={h} className="pr-4 text-slate-900 dark:text-white whitespace-nowrap truncate">{String(r[h] ?? "")}</td>
+                              <td key={h} className="pr-4 text-slate-900 dark:text-white whitespace-normal break-words">{String(r[h] ?? "")}</td>
                             ))}
                           </tr>
                         ))}
