@@ -1,12 +1,37 @@
 /* global process */
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import fs from "fs";
+import child_process from "child_process";
+import path from "path";
 
 const host = process.env.TAURI_DEV_HOST;
+
+// Read package version and compute the current commit (short) if available
+const pkg = JSON.parse(
+  fs.readFileSync(path.resolve(process.cwd(), "package.json"), "utf8"),
+);
+let commit = process.env.GITHUB_SHA || process.env.APP_COMMIT || null;
+if (!commit) {
+  try {
+    commit = child_process
+      .execSync("git rev-parse --short HEAD")
+      .toString()
+      .trim();
+  } catch {
+    commit = null;
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [react()],
+
+  // Build-time constants available to the client (version and commit)
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __APP_COMMIT__: JSON.stringify(commit),
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

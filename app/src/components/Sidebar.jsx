@@ -19,7 +19,7 @@ import {
   Upload,
   Settings,
 } from "lucide-react";
-import packageJson from "../../package.json";
+import { getDisplayVersion, IS_RELEASE } from "../utils/version";
 import { computeNetWorth } from "../utils/networth";
 import "../styles/Sidebar.css";
 import { useFormatNumber, useParseNumber } from "../utils/format";
@@ -316,7 +316,8 @@ export default function Sidebar({
           </button>
         </div>
         <div className="sidebar-version">
-          v{packageJson.version} • HoneyBear Folio
+          {IS_RELEASE ? `v${getDisplayVersion()}` : getDisplayVersion()} •
+          HoneyBear Folio
         </div>
       </div>
 
