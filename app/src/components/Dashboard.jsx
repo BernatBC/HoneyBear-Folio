@@ -375,7 +375,6 @@ export default function Dashboard({
         },
       },
     },
-
   };
 
   const options = {

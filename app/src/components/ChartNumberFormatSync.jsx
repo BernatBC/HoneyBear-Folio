@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import ChartJS from "chart.js/auto";
-import PropTypes from "prop-types";
 import { useFormatNumber } from "../utils/format";
 
 export default function ChartNumberFormatSync() {
@@ -22,13 +21,15 @@ export default function ChartNumberFormatSync() {
       if (value == null || Number.isNaN(Number(value))) return label;
 
       // Use currency style so grouping and decimal separators follow the app locale
-      return label +
+      return (
+        label +
         formatNumber(Number(value), {
           style: "currency",
           currency: "EUR",
           minimumFractionDigits: 0,
           maximumFractionDigits: 0,
-        });
+        })
+      );
     };
 
     // Linear scales (y axes) ticks
@@ -49,5 +50,3 @@ export default function ChartNumberFormatSync() {
 
   return null;
 }
-
-ChartNumberFormatSync.propTypes = {};

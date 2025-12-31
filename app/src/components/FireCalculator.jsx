@@ -599,13 +599,20 @@ export default function FireCalculator() {
                           }
 
                           const value =
-                            (context.parsed && (context.parsed.y ?? context.parsed)) ??
+                            (context.parsed &&
+                              (context.parsed.y ?? context.parsed)) ??
                             context.raw ??
-                            (context.dataset && context.dataset.data && context.dataIndex != null
+                            (context.dataset &&
+                            context.dataset.data &&
+                            context.dataIndex != null
                               ? context.dataset.data[context.dataIndex]
                               : undefined);
 
-                          if (value !== undefined && value !== null && !Number.isNaN(Number(value))) {
+                          if (
+                            value !== undefined &&
+                            value !== null &&
+                            !Number.isNaN(Number(value))
+                          ) {
                             label += formatNumber(Number(value), {
                               style: "currency",
                               currency: "EUR",
