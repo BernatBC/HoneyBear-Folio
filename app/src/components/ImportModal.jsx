@@ -271,7 +271,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
         // Determine account id for this row. Priority:
         // 1) explicit mapping column selected by user
         // 2) explicit numeric account_id or accountId field in row
-        // 3) account name in row matched to existing accounts
+        // 3) account name in row matched to existing accounts (create if missing)
         let accountId = null;
         const mappedAccountValue = mapping.account
           ? row[mapping.account]
@@ -283,12 +283,41 @@ export default function ImportModal({ onClose, onImportComplete }) {
           row.account ??
           row.account_name ??
           row.accountName;
+        // Use a mutable local copy of accounts so created accounts are immediately discoverable
+        let localAccounts = [...accounts];
         if (accountField) {
-          if (typeof accountField === "number") accountId = accountField;
-          else if (!isNaN(parseInt(accountField)))
+          if (typeof accountField === "number") {
+            accountId = accountField;
+          } else if (!isNaN(parseInt(accountField))) {
             accountId = parseInt(accountField);
-          else if (typeof accountField === "string") {
-            const match = accounts.find((a) => a.name === accountField);
+          } else if (typeof accountField === "string") {
+            const name = accountField.trim();
+            let match = localAccounts.find((a) => a.name === name);
+            if (!match) {
+              // Determine account kind: if row contains trade-like fields treat as brokerage
+              const lowerKeys = Object.keys(row || {}).map((k) =>
+                String(k).toLowerCase(),
+              );
+              const isBrokerage = lowerKeys.some((k) =>
+                ["ticker", "shares", "symbol", "quantity", "price", "price_per_share"].some((s) =>
+                  k.includes(s),
+                ),
+              );
+              const kind = isBrokerage ? "brokerage" : "cash";
+              try {
+                const created = await invoke("create_account", {
+                  name,
+                  balance: 0.0,
+                  kind,
+                });
+                // push to local and react state
+                localAccounts.push(created);
+                setAccounts((prev) => [...prev, created]);
+                match = created;
+              } catch (e) {
+                console.error("Failed to create account for import:", e);
+              }
+            }
             if (match) accountId = match.id;
           }
         }
