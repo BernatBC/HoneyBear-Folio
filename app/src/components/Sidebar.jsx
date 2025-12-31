@@ -22,7 +22,7 @@ import {
 import packageJson from "../../package.json";
 import { computeNetWorth } from "../utils/networth";
 import "../styles/Sidebar.css";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber, useParseNumber } from "../utils/format";
 
 export default function Sidebar({
   accounts,
@@ -42,13 +42,15 @@ export default function Sidebar({
   // Compute total balance using helper so logic is shared with Dashboard/App
   const totalBalance = computeNetWorth(accounts, marketValues);
   const formatNumber = useFormatNumber();
+  const parseNumber = useParseNumber();
 
   async function handleAddAccount(e) {
     e.preventDefault();
     try {
+      const balance = parseNumber(newAccountBalance) || 0.0;
       await invoke("create_account", {
         name: newAccountName,
-        balance: parseFloat(newAccountBalance) || 0.0,
+        balance,
         kind: newAccountType,
       });
       setNewAccountName("");
@@ -272,8 +274,8 @@ export default function Sidebar({
                 autoFocus
               />
               <input
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 placeholder="Initial Balance"
                 value={newAccountBalance}
                 onChange={(e) => setNewAccountBalance(e.target.value)}

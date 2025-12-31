@@ -22,12 +22,13 @@ import {
   ChevronDown,
   Edit,
 } from "lucide-react";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber, useParseNumber } from "../utils/format";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);
 
   const formatNumber = useFormatNumber();
+  const parseNumber = useParseNumber();
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
@@ -250,9 +251,7 @@ export default function AccountDetails({ account, onUpdate }) {
     const newShares = e.target.value;
     setShares(newShares);
     if (newShares && pricePerShare) {
-      setTotalPrice(
-        (parseFloat(newShares) * parseFloat(pricePerShare)).toFixed(2),
-      );
+      setTotalPrice(((parseNumber(newShares) || 0) * (parseNumber(pricePerShare) || 0)).toFixed(2));
     }
   };
 
@@ -260,7 +259,7 @@ export default function AccountDetails({ account, onUpdate }) {
     const newPrice = e.target.value;
     setPricePerShare(newPrice);
     if (shares && newPrice) {
-      setTotalPrice((parseFloat(shares) * parseFloat(newPrice)).toFixed(2));
+      setTotalPrice(((parseNumber(shares) || 0) * (parseNumber(newPrice) || 0)).toFixed(2));
     }
   };
 
@@ -268,7 +267,7 @@ export default function AccountDetails({ account, onUpdate }) {
     const newTotal = e.target.value;
     setTotalPrice(newTotal);
     if (shares && newTotal) {
-      setPricePerShare((parseFloat(newTotal) / parseFloat(shares)).toFixed(4));
+      setPricePerShare(((parseNumber(newTotal) || 0) / (parseNumber(shares) || 1)).toFixed(4));
     }
   };
 
@@ -332,9 +331,9 @@ export default function AccountDetails({ account, onUpdate }) {
             cashAccountId: parseInt(cashAccountId),
             date,
             ticker,
-            shares: parseFloat(shares),
-            pricePerShare: parseFloat(pricePerShare),
-            fee: parseFloat(fee) || 0.0,
+            shares: parseNumber(shares),
+            pricePerShare: parseNumber(pricePerShare),
+            fee: parseNumber(fee) || 0.0,
             isBuy,
           },
         });
@@ -351,7 +350,7 @@ export default function AccountDetails({ account, onUpdate }) {
           payee,
           category: category || null,
           notes: notes || null,
-          amount: parseFloat(amount) || 0.0,
+          amount: parseNumber(amount) || 0.0,
         });
 
         setPayee("");
@@ -380,11 +379,11 @@ export default function AccountDetails({ account, onUpdate }) {
     try {
       // If this is a brokerage transaction (has ticker), call the brokerage-specific update
       if (editForm.ticker) {
-        const shares = Math.abs(parseFloat(editForm.shares) || 0);
-        const pricePerShare = parseFloat(editForm.price_per_share) || 0.0;
-        const feeVal = parseFloat(editForm.fee) || 0.0;
+        const shares = Math.abs(parseNumber(editForm.shares) || 0);
+        const pricePerShare = parseNumber(editForm.price_per_share) || 0.0;
+        const feeVal = parseNumber(editForm.fee) || 0.0;
         const isBuy =
-          editForm.payee === "Buy" || (parseFloat(editForm.shares) || 0) > 0;
+          editForm.payee === "Buy" || (parseNumber(editForm.shares) || 0) > 0;
 
         await invoke("update_brokerage_transaction", {
           args: {
@@ -407,7 +406,7 @@ export default function AccountDetails({ account, onUpdate }) {
             payee: editForm.payee,
             category: editForm.category || null,
             notes: editForm.notes || null,
-            amount: parseFloat(editForm.amount) || 0.0,
+            amount: parseNumber(editForm.amount) || 0.0,
           },
         });
       }
@@ -812,7 +811,8 @@ export default function AccountDetails({ account, onUpdate }) {
                   Shares
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   required
                   step="any"
                   placeholder="0"
@@ -828,7 +828,8 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required
                     step="any"
                     placeholder="0.00"
@@ -845,7 +846,8 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required
                     step="0.01"
                     placeholder="0.00"
@@ -862,7 +864,8 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     step="0.01"
                     placeholder="0.00"
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
@@ -974,7 +977,8 @@ export default function AccountDetails({ account, onUpdate }) {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required
                     step="0.01"
                     placeholder="0.00"
@@ -1099,7 +1103,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                     name={`txType-${tx.id}`}
                                     checked={
                                       editForm.payee === "Buy" ||
-                                      (parseFloat(editForm.shares) || 0) > 0
+                                      (parseNumber(editForm.shares) || 0) > 0
                                     }
                                     onChange={() =>
                                       setEditForm({ ...editForm, payee: "Buy" })
@@ -1116,7 +1120,7 @@ export default function AccountDetails({ account, onUpdate }) {
                                     name={`txType-${tx.id}`}
                                     checked={
                                       editForm.payee === "Sell" ||
-                                      (parseFloat(editForm.shares) || 0) < 0
+                                      (parseNumber(editForm.shares) || 0) < 0
                                     }
                                     onChange={() =>
                                       setEditForm({
@@ -1149,7 +1153,8 @@ export default function AccountDetails({ account, onUpdate }) {
 
                             <td className="px-6 py-3">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 step="any"
                                 className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={Math.abs(editForm.shares || 0)}
@@ -1165,7 +1170,8 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <div className="relative">
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   step="any"
                                   className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.price_per_share || ""}
@@ -1182,7 +1188,8 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <div className="relative">
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   step="0.01"
                                   className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                   value={editForm.fee || ""}
@@ -1226,9 +1233,9 @@ export default function AccountDetails({ account, onUpdate }) {
 
                             <td className="px-6 py-3 text-right font-bold text-slate-900 dark:text-slate-100">
                               {(() => {
-                                const s = parseFloat(editForm.shares) || 0;
+                                const s = parseNumber(editForm.shares) || 0;
                                 const p =
-                                  parseFloat(editForm.price_per_share) || 0;
+                                  parseNumber(editForm.price_per_share) || 0;
                                 const total = (Math.abs(s) * p).toFixed(2);
                                 const sign =
                                   editForm.payee === "Sell" || s < 0 ? "" : "+";
@@ -1297,7 +1304,8 @@ export default function AccountDetails({ account, onUpdate }) {
                             </td>
                             <td className="px-6 py-3">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 step="0.01"
                                 className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={editForm.amount}

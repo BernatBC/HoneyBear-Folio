@@ -13,6 +13,7 @@ import "../styles/SettingsModal.css";
 import CustomSelect from "./CustomSelect";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import { useParseNumber } from "../utils/format";
 
 export default function ImportModal({ onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
@@ -38,6 +39,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
   useState(() => {
     invoke("get_accounts").then(setAccounts).catch(console.error);
   });
+
+  const parseNumber = useParseNumber();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -227,8 +230,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
         if (date === "Invalid Date")
           date = new Date().toISOString().split("T")[0]; // Fallback
 
-        // Amount parsing
-        let amount = parseFloat(String(amountStr).replace(/[^0-9.-]/g, ""));
+        // Amount parsing (respect app locale)
+        let amount = parseNumber(String(amountStr));
         if (isNaN(amount)) amount = 0;
 
         // Determine account id for this row. Priority:

@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Line } from "react-chartjs-2";
 import { Calculator, TrendingUp, Euro, Percent, Calendar } from "lucide-react";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber, useParseNumber } from "../utils/format";
+import NumberInput from "./NumberInput";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -392,6 +393,7 @@ export default function FireCalculator() {
   ]);
 
   const formatNumber = useFormatNumber();
+  const parseNumber = useParseNumber();
   const formatCurrency = (val) =>
     formatNumber(val, { maximumFractionDigits: 0, minimumFractionDigits: 0 }) +
     " €";
@@ -426,19 +428,18 @@ export default function FireCalculator() {
                 Current Net Worth
               </label>
               <div className="relative">
-                <input
-                  type="number"
+                <NumberInput
                   value={currentNetWorth}
-                  onChange={(e) => {
-                    setCurrentNetWorth(Number(e.target.value));
+                  onChange={(num) => {
+                    setCurrentNetWorth(Number.isNaN(num) ? 0 : Math.round(num));
                     userModified.current.currentNetWorth = true;
                   }}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
+                  maximumFractionDigits={0}
+                  minimumFractionDigits={0}
+                  useGrouping={false}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                  €
-                </span>
               </div>
             </div>
 
@@ -448,19 +449,18 @@ export default function FireCalculator() {
                 Annual Expenses
               </label>
               <div className="relative">
-                <input
-                  type="number"
+                <NumberInput
                   value={annualExpenses}
-                  onChange={(e) => {
-                    setAnnualExpenses(Number(e.target.value));
+                  onChange={(num) => {
+                    setAnnualExpenses(Number.isNaN(num) ? 0 : Math.round(num));
                     userModified.current.annualExpenses = true;
                   }}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
+                  maximumFractionDigits={0}
+                  minimumFractionDigits={0}
+                  useGrouping={false}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                  €
-                </span>
               </div>
             </div>
 
@@ -470,19 +470,18 @@ export default function FireCalculator() {
                 Annual Savings
               </label>
               <div className="relative">
-                <input
-                  type="number"
+                <NumberInput
                   value={annualSavings}
-                  onChange={(e) => {
-                    setAnnualSavings(Number(e.target.value));
+                  onChange={(num) => {
+                    setAnnualSavings(Number.isNaN(num) ? 0 : Math.round(num));
                     userModified.current.annualSavings = true;
                   }}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
+                  maximumFractionDigits={0}
+                  minimumFractionDigits={0}
+                  useGrouping={false}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                  €
-                </span>
               </div>
             </div>
 
@@ -492,19 +491,18 @@ export default function FireCalculator() {
                 Expected Annual Return
               </label>
               <div className="relative">
-                <input
-                  type="number"
+                <NumberInput
                   value={expectedReturn}
-                  onChange={(e) => {
-                    setExpectedReturn(Number(e.target.value));
+                  onChange={(num) => {
+                    setExpectedReturn(Number.isNaN(num) ? 0 : num);
                     userModified.current.expectedReturn = true;
                   }}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
+                  maximumFractionDigits={2}
+                  minimumFractionDigits={0}
+                  useGrouping={false}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                  %
-                </span>
               </div>
             </div>
 
@@ -514,15 +512,17 @@ export default function FireCalculator() {
                 Safe Withdrawal Rate
               </label>
               <div className="relative">
-                <input
-                  type="number"
+                <NumberInput
                   value={withdrawalRate}
-                  onChange={(e) => {
-                    setWithdrawalRate(Number(e.target.value));
+                  onChange={(num) => {
+                    setWithdrawalRate(Number.isNaN(num) ? 0 : num);
                     userModified.current.withdrawalRate = true;
                   }}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"
                   placeholder="0"
+                  maximumFractionDigits={2}
+                  minimumFractionDigits={0}
+                  useGrouping={false}
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                   %
