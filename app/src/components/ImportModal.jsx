@@ -52,8 +52,6 @@ export default function ImportModal({ onClose, onImportComplete }) {
     };
   }, []);
 
-  const parseNumber = useParseNumber();
-
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
