@@ -1,0 +1,74 @@
+name: Auto-label pull requests
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  autolabel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add labels based on title and files
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log('No pull request in context');
+              return;
+            }
+
+            const number = pr.number;
+            const title = pr.title || '';
+            const body = pr.body || '';
+            const existing = (pr.labels || []).map(l => l.name);
+
+            // Skip if maintainer added a skip label
+            if (existing.includes('skip-autolabel') || existing.includes('skip-changelog')) {
+              console.log('Skipping autolabel due to skip label');
+              return;
+            }
+
+            const rules = [
+              { name: 'feature', regex: /\b(feat|feature|enhancement|\[feat\]|\[feature\]|^feat:)/i },
+              { name: 'fix', regex: /\b(fix|bug|bugfix|\[fix\]|^fix:)/i },
+              { name: 'docs', regex: /\b(doc|docs|documentation|\[docs\]|^docs:)/i },
+              { name: 'chore', regex: /\b(chore|ci|build|refactor|deps|dependency|\[chore\]|^chore:)/i },
+              { name: 'security', regex: /\b(security|cve|\[security\]|^security:)/i }
+            ];
+
+            const found = new Set();
+            for (const r of rules) {
+              if (r.regex.test(title) || r.regex.test(body)) found.add(r.name);
+            }
+
+            // detect platform-specific files
+            const files = await github.paginate(github.rest.pulls.listFiles, { owner: context.repo.owner, repo: context.repo.repo, pull_number: number });
+            const paths = files.map(f => f.filename);
+            if (paths.some(p => p.includes('src-tauri') || p.includes('app/src-tauri'))) found.add('tauri');
+            if (paths.some(p => p.startsWith('app/src') || p.includes('src/'))) found.add('frontend');
+
+            // Remove labels that are already present
+            const labelsToAdd = Array.from(found).filter(l => !existing.includes(l));
+            if (labelsToAdd.length === 0) {
+              console.log('No new labels to add');
+              return;
+            }
+
+            // Ensure labels exist (create if missing)
+            for (const label of labelsToAdd) {
+              try {
+                await github.rest.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label });
+              } catch (e) {
+                // create default label with neutral color
+                await github.rest.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label, color: 'cccccc', description: 'Automatically created label' }).catch(err => console.log('Unable to create label', label, err.message));
+              }
+            }
+
+            await github.rest.issues.addLabels({ owner: context.repo.owner, repo: context.repo.repo, issue_number: number, labels: labelsToAdd });
+            console.log('Added labels to PR #' + number + ': ' + labelsToAdd.join(', '));
