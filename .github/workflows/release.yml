@@ -63,6 +63,9 @@ jobs:
         with:
           workspaces: './app/src-tauri -> target'
 
+      - name: Workaround npm optional-deps bug (remove lock & node_modules)
+        run: node -e "const fs=require('fs');['./app/node_modules','./app/package-lock.json'].forEach(p=>{try{fs.rmSync(p,{recursive:true, force:true});console.log('removed',p)}catch(e){}});"
+
       - name: Install frontend dependencies
         run: npm install
         working-directory: ./app
