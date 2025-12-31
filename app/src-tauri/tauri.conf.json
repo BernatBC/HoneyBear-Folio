@@ -39,10 +39,22 @@
     "category": "Finance",
     "linux": {
       "deb": {
-        "depends": ["libwebkit2gtk-4.1-0", "libappindicator3-1", "librsvg2-2", "libgtk-3-0", "patchelf"]
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libappindicator3-1",
+          "librsvg2-2",
+          "libgtk-3-0",
+          "patchelf"
+        ]
       },
       "rpm": {
-        "depends": ["libwebkit2gtk-4.1", "libappindicator3", "librsvg2", "gtk3", "patchelf"]
+        "depends": [
+          "libwebkit2gtk-4.1",
+          "libappindicator3",
+          "librsvg2",
+          "gtk3",
+          "patchelf"
+        ]
       }
     }
   }
