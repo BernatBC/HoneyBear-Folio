@@ -23,7 +23,7 @@
   }
 
   .modal-body {
-    @apply space-y-4 mb-8;
+    @apply space-y-4;
   }
 
   .modal-label {

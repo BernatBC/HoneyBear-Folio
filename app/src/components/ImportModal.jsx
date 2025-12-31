@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -38,9 +38,19 @@ export default function ImportModal({ onClose, onImportComplete }) {
   const [parseError, setParseError] = useState(null);
   const fileInputRef = useRef(null);
 
-  useState(() => {
+  useEffect(() => {
+    // Fetch accounts on mount
     invoke("get_accounts").then(setAccounts).catch(console.error);
-  });
+
+    // Prevent background from scrolling while modal is open
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      // Restore previous overflow setting on unmount
+      document.body.style.overflow = prevOverflow || "";
+    };
+  }, []);
 
   const parseNumber = useParseNumber();
 
