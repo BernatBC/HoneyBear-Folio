@@ -251,21 +251,32 @@ export default function AccountDetails({ account, onUpdate }) {
   const handleSharesChange = (num) => {
     setShares(num);
     if (num !== undefined && num !== null && pricePerShare) {
-      setTotalPrice(((Math.abs(num) || 0) * (parseNumber(pricePerShare) || 0)).toFixed(2));
+      setTotalPrice(
+        ((Math.abs(num) || 0) * (parseNumber(pricePerShare) || 0)).toFixed(2),
+      );
     }
   };
 
   const handlePricePerShareChange = (num) => {
     setPricePerShare(num);
-    if (shares !== undefined && shares !== null && num !== undefined && num !== null) {
-      setTotalPrice(((parseNumber(shares) || 0) * (Math.abs(num) || 0)).toFixed(2));
+    if (
+      shares !== undefined &&
+      shares !== null &&
+      num !== undefined &&
+      num !== null
+    ) {
+      setTotalPrice(
+        ((parseNumber(shares) || 0) * (Math.abs(num) || 0)).toFixed(2),
+      );
     }
   };
 
   const handleTotalPriceChange = (val) => {
     setTotalPrice(val);
     if (shares !== undefined && shares !== null && val) {
-      setPricePerShare(((parseNumber(val) || 0) / (parseNumber(shares) || 1)).toFixed(4));
+      setPricePerShare(
+        ((parseNumber(val) || 0) / (parseNumber(shares) || 1)).toFixed(4),
+      );
     }
   };
 
@@ -812,7 +823,11 @@ export default function AccountDetails({ account, onUpdate }) {
                   value={shares}
                   onChange={(num) => handleSharesChange(num)}
                   className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  placeholder={formatNumber(0, { maximumFractionDigits: 6, minimumFractionDigits: 0, useGrouping: false })}
+                  placeholder={formatNumber(0, {
+                    maximumFractionDigits: 6,
+                    minimumFractionDigits: 0,
+                    useGrouping: false,
+                  })}
                   maximumFractionDigits={6}
                   useGrouping={false}
                 />
@@ -827,7 +842,10 @@ export default function AccountDetails({ account, onUpdate }) {
                     value={pricePerShare}
                     onChange={(num) => handlePricePerShareChange(num)}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
                     maximumFractionDigits={4}
                     minimumFractionDigits={2}
                     useGrouping={false}
@@ -844,7 +862,10 @@ export default function AccountDetails({ account, onUpdate }) {
                     value={totalPrice}
                     onChange={(num) => handleTotalPriceChange(num)}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
                     maximumFractionDigits={2}
                     minimumFractionDigits={2}
                     useGrouping={false}
@@ -861,7 +882,10 @@ export default function AccountDetails({ account, onUpdate }) {
                     type="text"
                     inputMode="decimal"
                     step="0.01"
-                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
@@ -975,7 +999,10 @@ export default function AccountDetails({ account, onUpdate }) {
                     inputMode="decimal"
                     required
                     step="0.01"
-                    placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                    placeholder={formatNumber(0, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    })}
                     className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold hover:border-slate-300 dark:hover:border-slate-600"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
@@ -1230,8 +1257,16 @@ export default function AccountDetails({ account, onUpdate }) {
                                 const p =
                                   parseNumber(editForm.price_per_share) || 0;
                                 const totalNum = Math.abs(s) * p;
-                                const sign = editForm.payee === "Sell" || s < 0 ? "" : "+";
-                                return sign + formatNumber(totalNum, { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + " €";
+                                const sign =
+                                  editForm.payee === "Sell" || s < 0 ? "" : "+";
+                                return (
+                                  sign +
+                                  formatNumber(totalNum, {
+                                    maximumFractionDigits: 2,
+                                    minimumFractionDigits: 2,
+                                  }) +
+                                  " €"
+                                );
                               })()}
                             </td>
 
@@ -1299,7 +1334,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                 type="text"
                                 inputMode="decimal"
                                 step="0.01"
-                                placeholder={formatNumber(0, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                                placeholder={formatNumber(0, {
+                                  maximumFractionDigits: 2,
+                                  minimumFractionDigits: 2,
+                                })}
                                 className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
                                 value={editForm.amount}
                                 onChange={(e) =>
@@ -1371,7 +1409,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.shares !== "undefined" &&
                               tx.shares !== null ? (
-                                <span>{formatNumber(Math.abs(tx.shares), { maximumFractionDigits: 6, minimumFractionDigits: 0, useGrouping: false })}</span>
+                                <span>
+                                  {formatNumber(Math.abs(tx.shares), {
+                                    maximumFractionDigits: 6,
+                                    minimumFractionDigits: 0,
+                                    useGrouping: false,
+                                  })}
+                                </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
@@ -1385,7 +1429,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.price_per_share !== "undefined" &&
                               tx.price_per_share !== null ? (
-                                <span>{formatNumber(tx.price_per_share, { maximumFractionDigits: 2, minimumFractionDigits: 2 })} €</span>
+                                <span>
+                                  {formatNumber(tx.price_per_share, {
+                                    maximumFractionDigits: 2,
+                                    minimumFractionDigits: 2,
+                                  })}{" "}
+                                  €
+                                </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -
@@ -1399,7 +1449,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             >
                               {typeof tx.fee !== "undefined" &&
                               tx.fee !== null ? (
-                                <span>{formatNumber(tx.fee, { maximumFractionDigits: 2, minimumFractionDigits: 2 })} €</span>
+                                <span>
+                                  {formatNumber(tx.fee, {
+                                    maximumFractionDigits: 2,
+                                    minimumFractionDigits: 2,
+                                  })}{" "}
+                                  €
+                                </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
                                   -

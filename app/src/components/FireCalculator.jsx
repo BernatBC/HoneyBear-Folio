@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Line } from "react-chartjs-2";
 import { Calculator, TrendingUp, Euro, Percent, Calendar } from "lucide-react";
-import { useFormatNumber, useParseNumber } from "../utils/format";
+import { useFormatNumber } from "../utils/format";
 import NumberInput from "./NumberInput";
 import {
   Chart as ChartJS,
@@ -393,7 +393,6 @@ export default function FireCalculator() {
   ]);
 
   const formatNumber = useFormatNumber();
-  const parseNumber = useParseNumber();
   const formatCurrency = (val) =>
     formatNumber(val, { maximumFractionDigits: 0, minimumFractionDigits: 0 }) +
     " €";

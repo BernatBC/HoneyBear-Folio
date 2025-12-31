@@ -21,7 +21,11 @@ export default function NumberInput({
   // When value changes externally, update display if not editing
   useEffect(() => {
     if (!editing) {
-      if (value === undefined || value === null || Number.isNaN(Number(value))) {
+      if (
+        value === undefined ||
+        value === null ||
+        Number.isNaN(Number(value))
+      ) {
         setInputValue("");
       } else {
         setInputValue(
@@ -34,7 +38,13 @@ export default function NumberInput({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, editing, maximumFractionDigits, minimumFractionDigits, useGrouping]);
+  }, [
+    value,
+    editing,
+    maximumFractionDigits,
+    minimumFractionDigits,
+    useGrouping,
+  ]);
 
   const commitValue = () => {
     const parsed = parseNumber(inputValue);
