@@ -597,13 +597,23 @@ export default function FireCalculator() {
                           if (label) {
                             label += ": ";
                           }
-                          if (context.parsed.y !== null) {
-                            label +=
-                              formatNumber(context.parsed.y, {
-                                maximumFractionDigits: 0,
-                                minimumFractionDigits: 0,
-                              }) + " €";
+
+                          const value =
+                            (context.parsed && (context.parsed.y ?? context.parsed)) ??
+                            context.raw ??
+                            (context.dataset && context.dataset.data && context.dataIndex != null
+                              ? context.dataset.data[context.dataIndex]
+                              : undefined);
+
+                          if (value !== undefined && value !== null && !Number.isNaN(Number(value))) {
+                            label += formatNumber(Number(value), {
+                              style: "currency",
+                              currency: "EUR",
+                              maximumFractionDigits: 0,
+                              minimumFractionDigits: 0,
+                            });
                           }
+
                           return label;
                         },
                       },
@@ -626,8 +636,10 @@ export default function FireCalculator() {
                           ? "#94a3b8"
                           : "#64748b",
                         callback: function (value) {
+                          const num = Number(value);
+                          if (Number.isNaN(num)) return value;
                           return (
-                            formatNumber(value / 1000, {
+                            formatNumber(num / 1000, {
                               maximumFractionDigits: 0,
                               minimumFractionDigits: 0,
                             }) + "k €"

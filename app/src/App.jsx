@@ -12,6 +12,7 @@ import { ToastProvider } from "./components/Toast";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { NumberFormatProvider } from "./contexts/NumberFormatContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import ChartNumberFormatSync from "./components/ChartNumberFormatSync";
 
 function App() {
   const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
@@ -168,6 +169,7 @@ function App() {
       <ThemeProvider>
         <ToastProvider>
           <ErrorBoundary>
+            <ChartNumberFormatSync />
             <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
               <Sidebar
                 accounts={accounts}
