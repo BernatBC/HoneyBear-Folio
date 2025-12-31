@@ -34,6 +34,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
     failed: 0,
   });
   const [accounts, setAccounts] = useState([]);
+  const [previewRows, setPreviewRows] = useState([]);
+  const [parseError, setParseError] = useState(null);
   const fileInputRef = useRef(null);
 
   useState(() => {
@@ -50,6 +52,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
   };
 
   const parseFile = (file) => {
+    // Reset previous parse state
+    setParseError(null);
+    setPreviewRows([]);
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
@@ -60,6 +66,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
           skipEmptyLines: true,
           complete: (results) => {
             setColumns(results.meta.fields || []);
+            setPreviewRows((results.data || []).slice(0, 5));
             autoMapColumns(results.meta.fields || []);
           },
         });
@@ -80,6 +87,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
           } else {
             // Unsupported JSON shape
             setColumns([]);
+            setPreviewRows([]);
+            setParseError("Unsupported JSON structure — expected an array of objects or an object with a 'transactions' or 'data' array.");
             autoMapColumns([]);
             return;
           }
@@ -93,9 +102,14 @@ export default function ImportModal({ onClose, onImportComplete }) {
           );
 
           setColumns(cols);
+          setPreviewRows(rows.slice(0, 5));
+          setParseError(null);
           autoMapColumns(cols);
         } catch (e) {
           console.error("Failed to parse JSON import file:", e);
+          setParseError("Failed to parse JSON file: " + (e.message || e));
+          setColumns([]);
+          setPreviewRows([]);
         }
       } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
         const workbook = XLSX.read(data, { type: "binary" });
@@ -105,8 +119,16 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
         if (json.length > 0) {
           const headers = json[0];
+          const rows = json.slice(1).map((row) => {
+            const obj = {};
+            headers.forEach((header, index) => {
+              obj[header] = row[index];
+            });
+            return obj;
+          });
 
           setColumns(headers);
+          setPreviewRows(rows.slice(0, 5));
           autoMapColumns(headers);
         }
       }
@@ -117,7 +139,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
     } else {
       reader.readAsBinaryString(file);
     }
-  };
+  }; 
 
   const autoMapColumns = (cols) => {
     const newMapping = { ...mapping };
@@ -386,6 +408,42 @@ export default function ImportModal({ onClose, onImportComplete }) {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Preview
+                  </h3>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Showing first 5 rows</span>
+                </div>
+
+                {parseError ? (
+                  <p className="text-sm text-red-500">{parseError}</p>
+                ) : previewRows && previewRows.length > 0 ? (
+                  <div className="overflow-x-auto bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 p-2 mt-2">
+                    <table className="w-full text-sm table-fixed">
+                      <thead>
+                        <tr className="bg-slate-100 dark:bg-slate-800">
+                          {Object.keys(previewRows[0]).map((h) => (
+                            <th key={h} className="text-left pr-4 text-xs font-medium text-slate-700 dark:text-slate-200 uppercase tracking-wide">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {previewRows.map((r, idx) => (
+                          <tr key={idx} className="hover:bg-slate-100 dark:hover:bg-slate-800 odd:bg-white even:bg-slate-50 dark:odd:bg-slate-900 dark:even:bg-slate-800">
+                            {Object.keys(previewRows[0]).map((h) => (
+                              <td key={h} className="pr-4 text-slate-900 dark:text-white whitespace-nowrap truncate">{String(r[h] ?? "")}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500">No preview available</p>
+                )}
               </div>
 
               {importing && (
