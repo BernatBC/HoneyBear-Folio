@@ -183,7 +183,9 @@ export default function Dashboard({
 
       // Use current market value for brokerage accounts when available
       const value =
-        accKindLower === "brokerage" && marketValues && marketValues[acc.id] !== undefined
+        accKindLower === "brokerage" &&
+        marketValues &&
+        marketValues[acc.id] !== undefined
           ? marketValues[acc.id]
           : acc.balance || 0;
 
