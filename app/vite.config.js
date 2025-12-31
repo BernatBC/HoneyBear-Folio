@@ -18,7 +18,7 @@ if (!commit) {
       .execSync("git rev-parse --short HEAD")
       .toString()
       .trim();
-  } catch (e) {
+  } catch {
     commit = null;
   }
 }

@@ -1,3 +1,5 @@
+/* global __APP_VERSION__, __APP_COMMIT__ */
+
 // Small helper to compute a displayable version string.
 // Rules:
 // - In production builds we prefer the package.json version injected at build time
