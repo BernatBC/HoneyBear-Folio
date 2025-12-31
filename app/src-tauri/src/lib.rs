@@ -141,8 +141,11 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
         }
         if !has_linked {
             // Safe to ALTER TABLE to add the nullable column
-            conn.execute("ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER", [])
-                .map_err(|e| e.to_string())?;
+            conn.execute(
+                "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
+                [],
+            )
+            .map_err(|e| e.to_string())?;
         }
     }
 
@@ -563,11 +566,13 @@ fn create_brokerage_transaction(
     tx.execute(
         "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
         params![cash_tx_id, id],
-    ).map_err(|e| e.to_string())?;
+    )
+    .map_err(|e| e.to_string())?;
     tx.execute(
         "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
         params![id, cash_tx_id],
-    ).map_err(|e| e.to_string())?;
+    )
+    .map_err(|e| e.to_string())?;
 
     tx.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
@@ -863,7 +868,11 @@ fn update_brokerage_transaction(
         id,
         account_id: brokerage_account_id,
         date,
-        payee: if is_buy { "Buy".to_string() } else { "Sell".to_string() },
+        payee: if is_buy {
+            "Buy".to_string()
+        } else {
+            "Sell".to_string()
+        },
         notes: Some(new_notes),
         category: Some("Investment".to_string()),
         amount: brokerage_amount,
