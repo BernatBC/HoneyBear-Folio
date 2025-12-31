@@ -122,6 +122,30 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
     )
     .map_err(|e| e.to_string())?;
 
+    // Ensure we have a column to link transfer pairs so updates/deletes can keep both sides in sync
+    {
+        let mut stmt = conn
+            .prepare("PRAGMA table_info(transactions)")
+            .map_err(|e| e.to_string())?;
+        let mut has_linked = false;
+        let col_iter = stmt
+            .query_map([], |row| Ok(row.get::<_, String>(1)?))
+            .map_err(|e| e.to_string())?;
+        for col in col_iter {
+            if let Ok(name) = col {
+                if name == "linked_tx_id" {
+                    has_linked = true;
+                    break;
+                }
+            }
+        }
+        if !has_linked {
+            // Safe to ALTER TABLE to add the nullable column
+            conn.execute("ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER", [])
+                .map_err(|e| e.to_string())?;
+        }
+    }
+
     conn.execute(
         "CREATE TABLE IF NOT EXISTS stock_prices (
             ticker TEXT PRIMARY KEY,
@@ -322,6 +346,19 @@ fn create_transaction(
             params![target_id, date, source_name, notes, "Transfer", -amount],
         ).map_err(|e| e.to_string())?;
 
+        // Capture inserted target transaction id and link both transactions for future sync
+        let target_tx_id = tx.last_insert_rowid() as i32;
+        tx.execute(
+            "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+            params![target_tx_id, id],
+        )
+        .map_err(|e| e.to_string())?;
+        tx.execute(
+            "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+            params![id, target_tx_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         // Update target account balance
         tx.execute(
             "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
@@ -521,6 +558,17 @@ fn create_brokerage_transaction(
         ],
     ).map_err(|e| e.to_string())?;
 
+    // Link the cash transaction with the brokerage transaction
+    let cash_tx_id = tx.last_insert_rowid() as i32;
+    tx.execute(
+        "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+        params![cash_tx_id, id],
+    ).map_err(|e| e.to_string())?;
+    tx.execute(
+        "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+        params![id, cash_tx_id],
+    ).map_err(|e| e.to_string())?;
+
     tx.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
         params![cash_amount, cash_account_id],
@@ -594,6 +642,83 @@ fn update_transaction(
             params![diff, account_id],
         )
         .map_err(|e| e.to_string())?;
+    }
+
+    // Try to find and update corresponding transfer transaction if any
+    let mut counterpart_id_opt: Option<i32> = tx
+        .query_row(
+            "SELECT linked_tx_id FROM transactions WHERE id = ?1",
+            params![id],
+            |row| row.get(0),
+        )
+        .optional()
+        .map_err(|e| e.to_string())?;
+
+    if counterpart_id_opt.is_none() {
+        if let Some(ref n) = notes {
+            // fallback: find by exact notes match
+            if let Some((found_id, _found_amount, _found_acc)) = tx
+                .query_row(
+                    "SELECT id, amount, account_id FROM transactions WHERE notes = ?1 AND category = 'Transfer' AND id != ?2 LIMIT 1",
+                    params![n, id],
+                    |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+                )
+                .optional()
+                .map_err(|e| e.to_string())?
+            {
+                counterpart_id_opt = Some(found_id);
+                // set linkage for future operations
+                tx.execute(
+                    "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+                    params![found_id, id],
+                )
+                .map_err(|e| e.to_string())?;
+                tx.execute(
+                    "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+                    params![id, found_id],
+                )
+                .map_err(|e| e.to_string())?;
+            }
+        }
+    }
+
+    if let Some(counterpart_id) = counterpart_id_opt {
+        // Get old amount and account for counterpart
+        if let Some((old_ctr_amount, ctr_account_id)) = tx
+            .query_row(
+                "SELECT amount, account_id FROM transactions WHERE id = ?1",
+                params![counterpart_id],
+                |row| Ok((row.get::<_, f64>(0)?, row.get::<_, i32>(1)?)),
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+        {
+            let new_ctr_amount = -amount;
+            let ctr_diff = new_ctr_amount - old_ctr_amount;
+
+            // Determine payee for counterpart (source account name)
+            let source_name: String = tx
+                .query_row(
+                    "SELECT name FROM accounts WHERE id = ?1",
+                    params![account_id],
+                    |row| row.get(0),
+                )
+                .map_err(|e| e.to_string())?;
+
+            tx.execute(
+                "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5 WHERE id = ?6",
+                params![date, source_name, notes, "Transfer", new_ctr_amount, counterpart_id],
+            )
+            .map_err(|e| e.to_string())?;
+
+            if ctr_diff.abs() > f64::EPSILON {
+                tx.execute(
+                    "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+                    params![ctr_diff, ctr_account_id],
+                )
+                .map_err(|e| e.to_string())?;
+            }
+        }
     }
 
     tx.commit().map_err(|e| e.to_string())?;
@@ -711,6 +836,18 @@ fn update_brokerage_transaction(
         )
         .map_err(|e| e.to_string())?;
 
+        // Ensure linkage between brokerage tx and cash tx
+        tx.execute(
+            "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+            params![cash_id, id],
+        )
+        .map_err(|e| e.to_string())?;
+        tx.execute(
+            "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+            params![id, cash_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         if cash_diff.abs() > f64::EPSILON {
             tx.execute(
                 "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
@@ -726,11 +863,7 @@ fn update_brokerage_transaction(
         id,
         account_id: brokerage_account_id,
         date,
-        payee: if is_buy {
-            "Buy".to_string()
-        } else {
-            "Sell".to_string()
-        },
+        payee: if is_buy { "Buy".to_string() } else { "Sell".to_string() },
         notes: Some(new_notes),
         category: Some("Investment".to_string()),
         amount: brokerage_amount,
@@ -748,15 +881,16 @@ fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    // Get amount and account_id
-    let (amount, account_id): (f64, i32) = tx
+    // Get amount, account_id, notes and linked_tx_id (if any)
+    let (amount, account_id, notes, linked): (f64, i32, Option<String>, Option<i32>) = tx
         .query_row(
-            "SELECT amount, account_id FROM transactions WHERE id = ?1",
+            "SELECT amount, account_id, notes, linked_tx_id FROM transactions WHERE id = ?1",
             params![id],
-            |row| Ok((row.get(0)?, row.get(1)?)),
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
         )
         .map_err(|e| e.to_string())?;
 
+    // Delete the requested transaction
     tx.execute("DELETE FROM transactions WHERE id = ?1", params![id])
         .map_err(|e| e.to_string())?;
 
@@ -765,6 +899,48 @@ fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
         params![amount, account_id],
     )
     .map_err(|e| e.to_string())?;
+
+    // If there's a linked counterpart, delete it and update its account balance
+    if let Some(linked_id) = linked {
+        if let Some((ctr_amount, ctr_account_id)) = tx
+            .query_row(
+                "SELECT amount, account_id FROM transactions WHERE id = ?1",
+                params![linked_id],
+                |row| Ok((row.get::<_, f64>(0)?, row.get::<_, i32>(1)?)),
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+        {
+            tx.execute("DELETE FROM transactions WHERE id = ?1", params![linked_id])
+                .map_err(|e| e.to_string())?;
+
+            tx.execute(
+                "UPDATE accounts SET balance = balance - ?1 WHERE id = ?2",
+                params![ctr_amount, ctr_account_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    } else if let Some(ref n) = notes {
+        // fallback: try to find counterpart by notes
+        if let Some((found_id, ctr_amount, ctr_account_id)) = tx
+            .query_row(
+                "SELECT id, amount, account_id FROM transactions WHERE notes = ?1 AND category = 'Transfer' LIMIT 1",
+                params![n],
+                |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+        {
+            tx.execute("DELETE FROM transactions WHERE id = ?1", params![found_id])
+                .map_err(|e| e.to_string())?;
+
+            tx.execute(
+                "UPDATE accounts SET balance = balance - ?1 WHERE id = ?2",
+                params![ctr_amount, ctr_account_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    }
 
     tx.commit().map_err(|e| e.to_string())?;
 
