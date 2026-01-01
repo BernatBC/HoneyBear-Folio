@@ -5,7 +5,6 @@ description = "HoneyBear Folio is a cross-platform personal finance desktop appl
 authors = ["BernatBC"]
 edition = "2021"
 license = "GPL-3.0-or-later"
-license-file = "../../LICENSE"
 homepage = "https://github.com/BernatBC/HoneyBear-Folio"
 repository = "https://github.com/BernatBC/HoneyBear-Folio"
 readme = "../README.md"
