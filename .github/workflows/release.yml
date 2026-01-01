@@ -46,34 +46,43 @@ jobs:
           npm run version:sync
         shell: bash
 
-      - name: Install dependencies (Ubuntu only)
-        if: matrix.platform == 'ubuntu-latest'
+      - name: Install dependencies (Ubuntu amd64)
+        if: matrix.platform == 'ubuntu-latest' && matrix.args != '--target aarch64-unknown-linux-gnu'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf pkg-config
 
-      - name: Setup aarch64 cross toolchain (Ubuntu only)
-        if: matrix.args == '--target aarch64-unknown-linux-gnu' && matrix.platform == 'ubuntu-latest'
+      - name: Install dependencies (Ubuntu arm64)
+        if: matrix.platform == 'ubuntu-latest' && matrix.args == '--target aarch64-unknown-linux-gnu'
         run: |
           sudo dpkg --add-architecture arm64
-          # Restrict existing sources to amd64 only to prevent 404 errors when apt tries to fetch arm64 packages
-          sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list
-          sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list.d/*.list 2>/dev/null || true
-          # Add arm64 apt sources from ports.ubuntu.com
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main universe restricted multiverse" | sudo tee /etc/apt/sources.list.d/arm64.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
+          CODENAME=$(lsb_release -cs)
+          echo "Detected codename: $CODENAME"
+          
+          # Restrict main sources to amd64
+          sudo sed -i 's/^deb http/deb [arch=amd64] http/' /etc/apt/sources.list
+          
+          # Handle ubuntu.sources (DEB822) if it exists
+          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+            sudo sed -i 's/^Architectures: .*/Architectures: amd64/' /etc/apt/sources.list.d/ubuntu.sources
+          fi
+
+          # Add arm64 sources
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME} main universe restricted multiverse" | sudo tee /etc/apt/sources.list.d/arm64.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME}-updates main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME}-security main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
+          
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross
-          sudo apt-get install -y libwebkit2gtk-4.1-dev:arm64 libappindicator3-dev:arm64 librsvg2-dev:arm64 libglib2.0-dev:arm64 pkg-config
+          sudo apt-get install -y libwebkit2gtk-4.1-dev:arm64 libappindicator3-dev:arm64 librsvg2-dev:arm64 libglib2.0-dev:arm64 libssl-dev:arm64 pkg-config
 
-      - name: Configure pkg-config for aarch64 cross compilation
-        if: matrix.args == '--target aarch64-unknown-linux-gnu' && matrix.platform == 'ubuntu-latest'
+      - name: Configure environment for aarch64
+        if: matrix.platform == 'ubuntu-latest' && matrix.args == '--target aarch64-unknown-linux-gnu'
         run: |
           echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
-          echo "PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
           echo "PKG_CONFIG_SYSROOT_DIR=/" >> $GITHUB_ENV
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -90,7 +99,7 @@ jobs:
         with:
           workspaces: './app/src-tauri -> target'
 
-      - name: Workaround npm optional-deps bug (remove lock & node_modules)
+      - name: Workaround npm optional-deps bug
         run: node -e "const fs=require('fs');['./app/node_modules','./app/package-lock.json'].forEach(p=>{try{fs.rmSync(p,{recursive:true, force:true});console.log('removed',p)}catch(e){}});"
 
       - name: Install frontend dependencies
