@@ -23,7 +23,7 @@
   }
 
   .time-range-button {
-    @apply px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200;
+    @apply px-2 sm:px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200;
   }
 
   .time-range-button-active {
