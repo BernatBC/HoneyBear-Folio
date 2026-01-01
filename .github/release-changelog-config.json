@@ -8,7 +8,7 @@
   ],
   "ignore_labels": ["skip-changelog"],
   "sort": { "order": "DESC", "on_property": "mergedAt" },
-  "template": "# Release notes for #{{TO_TAG}} (since #{{FROM_TAG}})\n\n#{{CHANGELOG}}\n\n**Contributors:** {{CONTRIBUTORS}}\n\n**Assets:** Download the latest build for your platform from the **Assets** section below.",
+  "template": "# Release notes for #{{TO_TAG}} (since #{{FROM_TAG}})\n\n#{{CHANGELOG}}\n\n**Assets:** Download the latest build for your platform from the **Assets** section below.",
   "fetchContributors": true,
   "label_extractor": [
     { "pattern": "\\[(feat|feature)\\]", "target": "feature", "on_property": "title", "flags": "iu" },
