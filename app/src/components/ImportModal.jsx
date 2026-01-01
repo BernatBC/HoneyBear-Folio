@@ -300,7 +300,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
             const name = accountField.trim();
             // Do a case-insensitive, trimmed comparison to avoid duplicates
             let match = localAccounts.find(
-              (a) => a.name && a.name.trim().toLowerCase() === name.toLowerCase(),
+              (a) =>
+                a.name && a.name.trim().toLowerCase() === name.toLowerCase(),
             );
             if (!match) {
               // Determine account kind: if row contains trade-like fields treat as brokerage
