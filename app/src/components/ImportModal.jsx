@@ -255,6 +255,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
     setProgress({ current: 0, total: rows.length, success: 0, failed: 0 });
 
+    // Keep a single mutable copy of accounts for the whole import so we don't
+    // repeatedly create duplicates due to async React state updates.
+    let localAccounts = [...accounts];
+
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       try {
@@ -286,8 +290,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
           row.account ??
           row.account_name ??
           row.accountName;
-        // Use a mutable local copy of accounts so created accounts are immediately discoverable
-        let localAccounts = [...accounts];
+
         if (accountField) {
           if (typeof accountField === "number") {
             accountId = accountField;
@@ -295,7 +298,11 @@ export default function ImportModal({ onClose, onImportComplete }) {
             accountId = parseInt(accountField);
           } else if (typeof accountField === "string") {
             const name = accountField.trim();
-            let match = localAccounts.find((a) => a.name === name);
+            // Do a case-insensitive, trimmed comparison to avoid duplicates
+            let match = localAccounts.find(
+              (a) =>
+                a.name && a.name.trim().toLowerCase() === name.toLowerCase(),
+            );
             if (!match) {
               // Determine account kind: if row contains trade-like fields treat as brokerage
               const lowerKeys = Object.keys(row || {}).map((k) =>
@@ -318,9 +325,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   balance: 0.0,
                   kind,
                 });
-                // push to local and react state
+                // push to local cache (we'll update React state after the import completes)
                 localAccounts.push(created);
-                setAccounts((prev) => [...prev, created]);
                 match = created;
               } catch (e) {
                 console.error("Failed to create account for import:", e);
@@ -353,6 +359,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
         failed: failCount,
       });
     }
+
+    // Update React state to include any accounts we created during the import
+    setAccounts(localAccounts);
 
     setImporting(false);
     setTimeout(() => {
