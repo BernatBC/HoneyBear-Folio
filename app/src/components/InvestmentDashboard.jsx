@@ -151,7 +151,7 @@ export default function InvestmentDashboard() {
 
   return (
     <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
             Investment Dashboard
