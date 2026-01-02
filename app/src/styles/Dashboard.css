@@ -97,4 +97,28 @@
   .chart-card-full {
     @apply lg:col-span-2;
   }
+
+  /* Compact transaction table: reduce cell padding so more rows fit the screen */
+  .account-transactions-table thead th {
+    @apply px-2 py-1 text-xs;
+  }
+
+  /* Use explicit padding + font-size to ensure we override utility classes in cells */
+  .account-transactions-table tbody td {
+    padding: 0.25rem 0.5rem !important; /* py-1 px-2 */
+    font-size: 0.75rem !important; /* text-xs */
+  }
+
+  /* Make inputs and rounded controls inside table smaller */
+  .account-transactions-table input,
+  .account-transactions-table .rounded-lg,
+  .account-transactions-table .p-2 {
+    padding: 0.25rem !important; /* p-1 */
+    font-size: 0.75rem !important;
+  }
+
+  /* Slightly reduce padding for buttons/icons that use p-2 */
+  .account-transactions-table .p-2 {
+    padding: 0.25rem !important;
+  }
 }
