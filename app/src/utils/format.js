@@ -1,4 +1,5 @@
 import { useNumberFormat } from "../contexts/number-format";
+import { usePrivacy } from "../contexts/privacy";
 
 export function formatNumberWithLocale(value, locale, options = {}) {
   if (value === undefined || value === null || Number.isNaN(Number(value)))
@@ -34,7 +35,14 @@ export function formatNumberWithLocale(value, locale, options = {}) {
 
 export function useFormatNumber() {
   const { locale } = useNumberFormat();
-  return (value, options) => formatNumberWithLocale(value, locale, options);
+  const { isPrivacyMode } = usePrivacy();
+
+  return (value, options) => {
+    if (isPrivacyMode && !options?.ignorePrivacy) {
+      return "••••••";
+    }
+    return formatNumberWithLocale(value, locale, options);
+  };
 }
 
 // Parse a localized number string into a JS number.

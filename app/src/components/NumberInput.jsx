@@ -61,7 +61,23 @@ export default function NumberInput({
       className={className}
       placeholder={placeholder}
       value={inputValue}
-      onFocus={() => setEditing(true)}
+      onFocus={() => {
+        setEditing(true);
+        if (
+          value !== undefined &&
+          value !== null &&
+          !Number.isNaN(Number(value))
+        ) {
+          setInputValue(
+            formatNumber(Number(value), {
+              maximumFractionDigits,
+              minimumFractionDigits,
+              useGrouping,
+              ignorePrivacy: true,
+            }),
+          );
+        }
+      }}
       onChange={(e) => setInputValue(e.target.value)}
       onBlur={() => commitValue()}
       onKeyDown={(e) => {
