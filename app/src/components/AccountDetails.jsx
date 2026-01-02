@@ -1471,7 +1471,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         >
                           {tx.category ? (
                             <span
-                              className={`px-3 py-1.5 inline-flex text-xs font-bold rounded-xl border ${
+                              className={`px-2 py-1 inline-flex text-xs font-bold rounded-lg border ${
                                 tx.category === "Transfer"
                                   ? "bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
                                   : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600"
