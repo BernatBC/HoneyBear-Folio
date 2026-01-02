@@ -18,11 +18,14 @@ import {
   Download,
   Upload,
   Settings,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { getDisplayVersion, IS_RELEASE } from "../utils/version";
 import { computeNetWorth } from "../utils/networth";
 import "../styles/Sidebar.css";
 import { useFormatNumber, useParseNumber } from "../utils/format";
+import { usePrivacy } from "../contexts/privacy";
 
 export default function Sidebar({
   accounts,
@@ -43,6 +46,7 @@ export default function Sidebar({
   const totalBalance = computeNetWorth(accounts, marketValues);
   const formatNumber = useFormatNumber();
   const parseNumber = useParseNumber();
+  const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
 
   async function handleAddAccount(e) {
     e.preventDefault();
@@ -83,9 +87,22 @@ export default function Sidebar({
 
         {/* Net Worth Card */}
         <div className="net-worth-card">
-          <div className="net-worth-label">
-            <TrendingUp className="w-3.5 h-3.5" />
-            Net Worth
+          <div className="flex items-center justify-between mb-2">
+            <div className="net-worth-label !mb-0">
+              <TrendingUp className="w-3.5 h-3.5" />
+              Net Worth
+            </div>
+            <button
+              onClick={togglePrivacyMode}
+              className="text-slate-400 hover:text-white transition-colors p-1 rounded-md hover:bg-slate-700/50"
+              title={isPrivacyMode ? "Show values" : "Hide values"}
+            >
+              {isPrivacyMode ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
           </div>
           <div className="net-worth-value">{formatNumber(totalBalance)} €</div>
         </div>
