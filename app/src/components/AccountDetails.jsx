@@ -1027,7 +1027,7 @@ export default function AccountDetails({ account, onUpdate }) {
       {/* Transactions Table */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-visible hover:shadow-lg transition-shadow duration-300 px-4 lg:px-6">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+          <table className="account-transactions-table min-w-full divide-y divide-slate-200 dark:divide-slate-700">
             <thead className="bg-white dark:bg-slate-800 rounded-t-2xl">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-32">
@@ -1069,7 +1069,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 <tr>
                   <td
                     colSpan={account.kind === "cash" ? "6" : "10"}
-                    className="px-6 py-16 text-center"
+                    className="px-3 py-4 text-center"
                   >
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="bg-slate-100 dark:bg-slate-700 p-4 rounded-full">
