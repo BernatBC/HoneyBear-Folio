@@ -11,6 +11,14 @@ export function NumberFormatProvider({ children }) {
     }
   });
 
+  const [currency, setCurrency] = useState(() => {
+    try {
+      return localStorage.getItem("hb_currency") || "USD";
+    } catch {
+      return "USD";
+    }
+  });
+
   useEffect(() => {
     try {
       localStorage.setItem("hb_number_format", locale);
@@ -19,8 +27,16 @@ export function NumberFormatProvider({ children }) {
     }
   }, [locale]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem("hb_currency", currency);
+    } catch {
+      // ignore
+    }
+  }, [currency]);
+
   return (
-    <NumberFormatContext.Provider value={{ locale, setLocale }}>
+    <NumberFormatContext.Provider value={{ locale, setLocale, currency, setCurrency }}>
       {children}
     </NumberFormatContext.Provider>
   );

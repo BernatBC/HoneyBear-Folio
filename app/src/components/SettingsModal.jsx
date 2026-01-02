@@ -6,21 +6,25 @@ import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
 import { useTheme } from "../contexts/theme-core";
 import { formatNumberWithLocale } from "../utils/format";
+import { CURRENCIES } from "../utils/currencies";
 import CustomSelect from "./CustomSelect";
 import ErrorBoundary from "./ErrorBoundary";
 
 export default function SettingsModal({ onClose }) {
-  const { locale, setLocale } = useNumberFormat();
+  const { locale, setLocale, currency, setCurrency } = useNumberFormat();
   const { theme, setTheme } = useTheme();
 
   // Helpful debug logs so we can see contextual values the component depends on
   try {
-    console.debug("SettingsModal render", { locale, theme });
+    console.debug("SettingsModal render", { locale, theme, currency });
   } catch (e) {
     console.error("SettingsModal failed to read context values:", e);
   }
 
-  const example = formatNumberWithLocale(1234.56, locale);
+  const example = formatNumberWithLocale(1234.56, locale, {
+    style: "currency",
+    currency: currency || "USD",
+  });
 
   const modal = (
     <div className="modal-overlay">
@@ -45,13 +49,17 @@ export default function SettingsModal({ onClose }) {
                 onClick={() => {
                   try {
                     localStorage.removeItem("hb_number_format");
+                    localStorage.removeItem("hb_currency");
+                    localStorage.removeItem("hb_theme");
                   } catch {
                     /* ignore */
                   }
                   setLocale("en-US");
+                  setCurrency("USD");
+                  setTheme("system");
                 }}
               >
-                Reset to default
+                Reset to defaults
               </button>
             </div>
 
@@ -70,6 +78,21 @@ export default function SettingsModal({ onClose }) {
               />
             </div>
             <p className="text-slate-400 mt-3">Example: {example}</p>
+
+            <div className="flex items-center justify-between mt-6">
+              <label className="modal-label">Currency</label>
+            </div>
+            <div className="relative">
+              <CustomSelect
+                value={currency}
+                onChange={(v) => setCurrency(v)}
+                options={CURRENCIES.map((c) => ({
+                  value: c.code,
+                  label: `${c.code} - ${c.name} (${c.symbol})`,
+                }))}
+                placeholder={"Select currency"}
+              />
+            </div>
 
             <div className="flex items-center justify-between mt-6">
               <label className="modal-label">Theme</label>

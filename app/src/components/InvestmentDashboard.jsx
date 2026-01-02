@@ -240,7 +240,7 @@ export default function InvestmentDashboard() {
                 Total Portfolio Value
               </h3>
               <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                {formatNumber(totalValue)} €
+                {formatNumber(totalValue, { style: "currency" })}
               </p>
             </div>
             <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-emerald-200 dark:hover:border-emerald-800 hover:-translate-y-1 group cursor-pointer">
@@ -348,26 +348,26 @@ export default function InvestmentDashboard() {
                           })}{" "}
                           shares @{" "}
                           {formatNumber(h.price, {
+                            style: "currency",
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
-                          })}{" "}
-                          €
+                          })}
                         </div>
                       </td>
                       <td className="p-4 text-right">
                         <div className="font-semibold text-slate-700 dark:text-slate-300">
                           {formatNumber(h.currentValue, {
+                            style: "currency",
                             maximumFractionDigits: 0,
-                          })}{" "}
-                          €
+                          })}
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
                           Cost:{" "}
                           {formatNumber(h.costBasis, {
+                            style: "currency",
                             minimumFractionDigits: 0,
                             maximumFractionDigits: 0,
-                          })}{" "}
-                          €
+                          })}
                         </div>
                       </td>
                       <td className="p-4 text-right">
@@ -454,7 +454,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
           overflow: "hidden",
         }}
         className="flex flex-col items-center justify-center p-1 text-xs text-center transition-all hover:opacity-90 hover:z-10 hover:scale-[1.02] cursor-pointer"
-        title={`${item.ticker}: ${formatNumber(item.currentValue)} € (${formatNumber(item.roi, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%)`}
+        title={`${item.ticker}: ${formatNumber(item.currentValue, { style: "currency" })} (${formatNumber(item.roi, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%)`}
       >
         <span className="font-bold text-gray-800">{item.ticker}</span>
         <span className="text-gray-700 hidden sm:inline">

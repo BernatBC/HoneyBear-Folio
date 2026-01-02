@@ -370,7 +370,6 @@ export default function Dashboard({
             if (Number.isNaN(num)) return value;
             return formatNumber(num, {
               style: "currency",
-              currency: "EUR",
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             });
@@ -410,7 +409,6 @@ export default function Dashboard({
             if (Number.isNaN(num)) return value;
             return formatNumber(num, {
               style: "currency",
-              currency: "EUR",
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             });
@@ -459,7 +457,9 @@ export default function Dashboard({
         <div className="summary-card group">
           <h3 className="summary-card-title">Current Net Worth</h3>
           <p className="summary-card-value">
-            {formatNumber(computeNetWorth(accounts, marketValues))} €
+            {formatNumber(computeNetWorth(accounts, marketValues), {
+              style: "currency",
+            })}
           </p>
         </div>
         <div className="summary-card group">

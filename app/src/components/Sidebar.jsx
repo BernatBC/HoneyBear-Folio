@@ -104,7 +104,9 @@ export default function Sidebar({
               )}
             </button>
           </div>
-          <div className="net-worth-value">{formatNumber(totalBalance)} €</div>
+          <div className="net-worth-value">
+            {formatNumber(totalBalance, { style: "currency" })}
+          </div>
         </div>
       </div>
 
@@ -210,7 +212,7 @@ export default function Sidebar({
                   <span
                     className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
                   >
-                    {formatNumber(account.balance)} €
+                    {formatNumber(account.balance, { style: "currency" })}
                   </span>
                 </button>
               ))}
@@ -260,8 +262,8 @@ export default function Sidebar({
                       marketValues[account.id] !== undefined
                         ? marketValues[account.id]
                         : account.balance,
-                    )}{" "}
-                    €
+                      { style: "currency" },
+                    )}
                   </span>
                 </button>
               ))}

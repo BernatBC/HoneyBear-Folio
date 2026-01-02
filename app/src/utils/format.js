@@ -1,5 +1,6 @@
 import { useNumberFormat } from "../contexts/number-format";
 import { usePrivacy } from "../contexts/privacy";
+import { CURRENCIES } from "./currencies";
 
 export function formatNumberWithLocale(value, locale, options = {}) {
   if (value === undefined || value === null || Number.isNaN(Number(value)))
@@ -12,6 +13,39 @@ export function formatNumberWithLocale(value, locale, options = {}) {
   };
 
   const num = Number(value);
+
+  // Custom currency formatting to respect 'position' from CURRENCIES list
+  if (opts.style === "currency" && opts.currency) {
+    const currencyDef = CURRENCIES.find((c) => c.code === opts.currency);
+    if (currencyDef) {
+      // Format the number as decimal first (preserving locale separators)
+      const decimalOptions = { ...opts, style: "decimal" };
+      delete decimalOptions.currency;
+      delete decimalOptions.currencyDisplay;
+
+      let formattedValue;
+      try {
+        formattedValue = new Intl.NumberFormat(
+          locale || undefined,
+          decimalOptions
+        ).format(Math.abs(num));
+      } catch {
+        formattedValue = Math.abs(num).toFixed(opts.maximumFractionDigits);
+      }
+
+      const symbol = currencyDef.symbol;
+      const isNegative = num < 0;
+      const sign = isNegative ? "-" : "";
+
+      if (currencyDef.position === "left") {
+        // Left: -$10.00 or $10.00
+        return `${sign}${symbol}${formattedValue}`;
+      } else {
+        // Right: -10.00 € or 10.00 €
+        return `${sign}${formattedValue} ${symbol}`;
+      }
+    }
+  }
 
   // Try to use the provided locale, but gracefully fallback to the runtime default
   // if the locale is unsupported or an error occurs (e.g., corrupted value in localStorage).
@@ -34,14 +68,20 @@ export function formatNumberWithLocale(value, locale, options = {}) {
 }
 
 export function useFormatNumber() {
-  const { locale } = useNumberFormat();
+  const { locale, currency } = useNumberFormat();
   const { isPrivacyMode } = usePrivacy();
 
-  return (value, options) => {
+  return (value, options = {}) => {
     if (isPrivacyMode && !options?.ignorePrivacy) {
       return "••••••";
     }
-    return formatNumberWithLocale(value, locale, options);
+
+    const finalOptions = { ...options };
+    if (finalOptions.style === "currency" && !finalOptions.currency) {
+      finalOptions.currency = currency || "USD";
+    }
+
+    return formatNumberWithLocale(value, locale, finalOptions);
   };
 }
 

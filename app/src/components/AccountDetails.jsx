@@ -546,7 +546,7 @@ export default function AccountDetails({ account, onUpdate }) {
               }`}
             >
               {account.balance >= 0 ? "+" : ""}
-              {formatNumber(account.balance)} €
+              {formatNumber(account.balance, { style: "currency" })}
             </span>
           </div>
         </div>
@@ -1262,10 +1262,10 @@ export default function AccountDetails({ account, onUpdate }) {
                                 return (
                                   sign +
                                   formatNumber(totalNum, {
+                                    style: "currency",
                                     maximumFractionDigits: 2,
                                     minimumFractionDigits: 2,
-                                  }) +
-                                  " €"
+                                  })
                                 );
                               })()}
                             </td>
@@ -1431,10 +1431,10 @@ export default function AccountDetails({ account, onUpdate }) {
                               tx.price_per_share !== null ? (
                                 <span>
                                   {formatNumber(tx.price_per_share, {
+                                    style: "currency",
                                     maximumFractionDigits: 2,
                                     minimumFractionDigits: 2,
-                                  })}{" "}
-                                  €
+                                  })}
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1451,10 +1451,10 @@ export default function AccountDetails({ account, onUpdate }) {
                               tx.fee !== null ? (
                                 <span>
                                   {formatNumber(tx.fee, {
+                                    style: "currency",
                                     maximumFractionDigits: 2,
                                     minimumFractionDigits: 2,
-                                  })}{" "}
-                                  €
+                                  })}
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1500,7 +1500,9 @@ export default function AccountDetails({ account, onUpdate }) {
                           onClick={() => startEditing(tx)}
                         >
                           {tx.amount >= 0 ? "+" : ""}
-                          {formatNumber(Math.abs(tx.amount))} €
+                          {formatNumber(Math.abs(tx.amount), {
+                            style: "currency",
+                          })}
                         </td>
                         <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button

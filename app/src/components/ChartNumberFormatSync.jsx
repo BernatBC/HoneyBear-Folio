@@ -25,7 +25,6 @@ export default function ChartNumberFormatSync() {
         label +
         formatNumber(Number(value), {
           style: "currency",
-          currency: "EUR",
           minimumFractionDigits: 0,
           maximumFractionDigits: 0,
         })
@@ -40,7 +39,6 @@ export default function ChartNumberFormatSync() {
         if (Number.isNaN(num)) return v;
         return formatNumber(num, {
           style: "currency",
-          currency: "EUR",
           minimumFractionDigits: 0,
           maximumFractionDigits: 0,
         });

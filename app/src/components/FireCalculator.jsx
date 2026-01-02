@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Line } from "react-chartjs-2";
-import { Calculator, TrendingUp, Euro, Percent, Calendar } from "lucide-react";
+import { Calculator, TrendingUp, Banknote, Percent, Calendar } from "lucide-react";
 import { useFormatNumber } from "../utils/format";
 import NumberInput from "./NumberInput";
 import {
@@ -394,8 +394,11 @@ export default function FireCalculator() {
 
   const formatNumber = useFormatNumber();
   const formatCurrency = (val) =>
-    formatNumber(val, { maximumFractionDigits: 0, minimumFractionDigits: 0 }) +
-    " €";
+    formatNumber(val, {
+      style: "currency",
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+    });
 
   return (
     <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
@@ -423,7 +426,7 @@ export default function FireCalculator() {
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                <Euro className="w-4 h-4 text-brand-500 dark:text-brand-400" />
+                <Banknote className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Current Net Worth
               </label>
               <div className="relative">
@@ -444,7 +447,7 @@ export default function FireCalculator() {
 
             <div>
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                <Euro className="w-4 h-4 text-brand-500 dark:text-brand-400" />
+                <Banknote className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Annual Expenses
               </label>
               <div className="relative">
@@ -465,7 +468,7 @@ export default function FireCalculator() {
 
             <div>
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                <Euro className="w-4 h-4 text-brand-500 dark:text-brand-400" />
+                <Banknote className="w-4 h-4 text-brand-500 dark:text-brand-400" />
                 Annual Savings
               </label>
               <div className="relative">
@@ -614,7 +617,6 @@ export default function FireCalculator() {
                           ) {
                             label += formatNumber(Number(value), {
                               style: "currency",
-                              currency: "EUR",
                               maximumFractionDigits: 0,
                               minimumFractionDigits: 0,
                             });
@@ -644,12 +646,11 @@ export default function FireCalculator() {
                         callback: function (value) {
                           const num = Number(value);
                           if (Number.isNaN(num)) return value;
-                          return (
-                            formatNumber(num / 1000, {
-                              maximumFractionDigits: 0,
-                              minimumFractionDigits: 0,
-                            }) + "k €"
-                          );
+                          return formatNumber(num, {
+                            style: "currency",
+                            notation: "compact",
+                            maximumFractionDigits: 1,
+                          });
                         },
                       },
                     },
