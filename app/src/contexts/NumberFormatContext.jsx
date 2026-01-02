@@ -36,7 +36,9 @@ export function NumberFormatProvider({ children }) {
   }, [currency]);
 
   return (
-    <NumberFormatContext.Provider value={{ locale, setLocale, currency, setCurrency }}>
+    <NumberFormatContext.Provider
+      value={{ locale, setLocale, currency, setCurrency }}
+    >
       {children}
     </NumberFormatContext.Provider>
   );

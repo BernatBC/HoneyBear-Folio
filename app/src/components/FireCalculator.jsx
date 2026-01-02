@@ -1,7 +1,13 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Line } from "react-chartjs-2";
-import { Calculator, TrendingUp, Banknote, Percent, Calendar } from "lucide-react";
+import {
+  Calculator,
+  TrendingUp,
+  Banknote,
+  Percent,
+  Calendar,
+} from "lucide-react";
 import { useFormatNumber } from "../utils/format";
 import NumberInput from "./NumberInput";
 import {

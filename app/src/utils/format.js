@@ -27,7 +27,7 @@ export function formatNumberWithLocale(value, locale, options = {}) {
       try {
         formattedValue = new Intl.NumberFormat(
           locale || undefined,
-          decimalOptions
+          decimalOptions,
         ).format(Math.abs(num));
       } catch {
         formattedValue = Math.abs(num).toFixed(opts.maximumFractionDigits);
