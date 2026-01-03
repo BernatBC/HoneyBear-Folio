@@ -125,4 +125,103 @@
   .reset-button:hover {
     @apply text-red-700 dark:text-red-400 border-red-200 dark:border-red-600;
   }
+
+  /* Help icon next to setting labels */
+  .label-with-help {
+    @apply inline-flex items-center gap-2;
+  }
+
+  .label-with-help .modal-label {
+    @apply inline-block mb-0 text-sm font-medium text-slate-500 dark:text-slate-400;
+  }
+
+  .label-with-help .help-wrapper {
+    @apply inline-flex items-center justify-center rounded-full cursor-help;
+    padding: 0.125rem;
+    line-height: 0;
+  }
+
+  .label-with-help .help-wrapper:focus,
+  .label-with-help .help-wrapper:hover {
+    @apply bg-slate-50 dark:bg-slate-800;
+    outline: none;
+  }
+
+  .label-with-help .help-icon {
+    @apply text-slate-400 hover:text-slate-700 dark:hover:text-slate-200;
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  /* Custom tooltips for help icons (show immediately on hover/focus) */
+  .label-with-help .help-wrapper {
+    position: relative;
+  }
+
+  .label-with-help .help-wrapper[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: fixed; /* render in viewport so it doesn't get clipped */
+    top: var(--tooltip-top, 0);
+    left: var(--tooltip-left, 0);
+    transform: translateX(-50%) translateY(-100%); /* default: above and centered */
+    background-color: rgba(15,23,42,0.95); /* slate-900 */
+    color: #fff;
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 10003;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.08s ease-in;
+  }
+
+  .label-with-help .help-wrapper[data-tooltip]::before {
+    content: "";
+    position: fixed; /* render in viewport so it doesn't get clipped */
+    top: calc(var(--tooltip-top, 0) - 6px);
+    left: var(--tooltip-left, 0);
+    transform: translateX(-50%) translateY(-100%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(15,23,42,0.95) transparent transparent transparent;
+    opacity: 0;
+    transition: opacity 0.08s ease-in;
+    z-index: 10003;
+  }
+
+  /* Right-aligned tooltip */
+  .label-with-help .help-wrapper[data-tooltip][data-tooltip-side="right"]::after {
+    transform: translateY(-50%); /* vertically center next to icon */
+    top: var(--tooltip-top, 0);
+    left: var(--tooltip-left, 0);
+    margin-left: 6px; /* slightly less right offset */
+  }
+
+  .label-with-help .help-wrapper[data-tooltip][data-tooltip-side="right"]::before {
+    transform: translateY(-50%);
+    top: calc(var(--tooltip-top, 0) - 4px); /* nudge arrow slightly higher */
+    left: calc(var(--tooltip-left, 0) - 4px);
+    border-color: transparent rgba(15,23,42,0.95) transparent transparent;
+  }
+
+  .label-with-help .help-wrapper[data-tooltip][data-tooltip-visible="true"]::after,
+  .label-with-help .help-wrapper[data-tooltip][data-tooltip-visible="true"]::before {
+    opacity: 1;
+  }
+
+  /* Support dark theme variants (ensure readable background) */
+  :root .label-with-help .help-wrapper[data-tooltip]::after {
+    background-color: rgba(15,23,42,0.95);
+    color: #fff;
+  }
+
+  .dark .label-with-help .help-wrapper[data-tooltip]::after,
+  :root.dark .label-with-help .help-wrapper[data-tooltip]::after {
+    background-color: rgba(15,23,42,0.95);
+    color: #fff;
+  }
 }
+
