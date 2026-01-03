@@ -5,7 +5,7 @@
   /* .modal-overlay moved to ./Modal.css */
 
   .modal-container {
-    @apply bg-white dark:bg-slate-900 w-full max-w-5xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[95vh] overflow-y-auto;
+    @apply bg-white dark:bg-slate-900 w-full max-w-[1200px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-y-auto;
   }
 
   /* Header action group on the right */
@@ -20,19 +20,22 @@
     .settings-tab {
       @apply px-2 py-1 text-xs;
     }
+    .settings-tabs {
+      @apply flex-row border-b border-slate-100 dark:border-slate-800 pr-0 mr-0 min-w-0;
+    }
   }
 
   /* Tabs */
   .settings-tabs {
-    @apply flex gap-2 items-center border-b border-slate-100 dark:border-slate-800 mb-4;
+    @apply flex flex-col gap-2 items-start border-r border-slate-100 dark:border-slate-800 pr-4 mr-6 min-w-[14rem];
   }
 
   .settings-tab {
-    @apply px-3 py-2 rounded-md text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer w-full text-left;
   }
 
   .settings-tab-active {
-    @apply text-slate-900 dark:text-white font-semibold border-b-2 border-brand-500;
+    @apply text-slate-900 dark:text-white font-semibold bg-slate-50 dark:bg-slate-800;
   }
 
   .modal-header {

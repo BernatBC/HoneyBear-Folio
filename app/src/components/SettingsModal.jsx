@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { X, Settings } from "lucide-react";
+import { X, Settings, SlidersHorizontal, Globe } from "lucide-react";
 import { createPortal } from "react-dom";
 import "../styles/Modal.css";
 import "../styles/SettingsModal.css";
@@ -108,106 +108,109 @@ export default function SettingsModal({ onClose }) {
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="settings-tabs" role="tablist" aria-label="Settings tabs">
-            <button
-              role="tab"
-              aria-selected={activeTab === "general"}
-              onClick={() => setActiveTab("general")}
-              className={`settings-tab ${activeTab === "general" ? "settings-tab-active" : ""}`}
-            >
-              General
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeTab === "formats"}
-              onClick={() => setActiveTab("formats")}
-              className={`settings-tab ${activeTab === "formats" ? "settings-tab-active" : ""}`}
-            >
-              Formats
-            </button>
-          </div>
+          <div className="settings-content flex">
+            <div className="settings-tabs" role="tablist" aria-label="Settings tabs">
+              <button
+                role="tab"
+                aria-selected={activeTab === "general"}
+                onClick={() => setActiveTab("general")}
+                className={`settings-tab ${activeTab === "general" ? "settings-tab-active" : ""}`}
+              >
+                <SlidersHorizontal className="w-4 h-4 text-slate-400" />
+                <span>General</span>
+              </button>
+              <button
+                role="tab"
+                aria-selected={activeTab === "formats"}
+                onClick={() => setActiveTab("formats")}
+                className={`settings-tab ${activeTab === "formats" ? "settings-tab-active" : ""}`}
+              >
+                <Globe className="w-4 h-4 text-slate-400" />
+                <span>Formats</span>
+              </button>
+            </div>
 
-          <div className="modal-body">
-            {activeTab === "general" && (
-              <>
-                <div className="flex items-center justify-between">
-                  <label className="modal-label">General</label>
-                </div>
-
-                <div className="flex items-center justify-between mt-6">
-                  <label className="modal-label">Theme</label>
-                </div>
-                <div className="relative">
-                  <CustomSelect
-                    value={theme}
-                    onChange={(v) => setTheme(v)}
-                    options={[
-                      { value: "light", label: "Light" },
-                      { value: "dark", label: "Dark" },
-                      { value: "system", label: "System" },
-                    ]}
-                    placeholder={"Select theme"}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between mt-6">
-                  <label className="modal-label">Database file</label>
-                </div>
-                <div className="relative">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded w-full text-left overflow-hidden truncate"
-                      onClick={handleSelectDb}
-                      title={dbPath || "Select DB file"}
-                    >
-                      {dbPath && dbPath.length > 0 ? dbPath : "Select DB file"}
-                    </button>
+            <div className="modal-body flex-1">
+              {activeTab === "general" && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <label className="modal-label">General</label>
                   </div>
-                </div>
-              </>
-            )}
 
-            {activeTab === "formats" && (
-              <>
-                <div className="flex items-center justify-between">
-                  <label className="modal-label">Currency</label>
-                </div>
-                <div className="relative">
-                  <CustomSelect
-                    value={currency}
-                    onChange={(v) => setCurrency(v)}
-                    options={CURRENCIES.map((c) => ({
-                      value: c.code,
-                      label: `${c.code} - ${c.name} (${c.symbol})`,
-                    }))}
-                    placeholder={"Select currency"}
-                  />
-                </div>
+                  <div className="flex items-center justify-between mt-6">
+                    <label className="modal-label">Theme</label>
+                  </div>
+                  <div className="relative">
+                    <CustomSelect
+                      value={theme}
+                      onChange={(v) => setTheme(v)}
+                      options={[
+                        { value: "light", label: "Light" },
+                        { value: "dark", label: "Dark" },
+                        { value: "system", label: "System" },
+                      ]}
+                      placeholder={"Select theme"}
+                    />
+                  </div>
 
-                <div className="flex items-center justify-between mt-6">
-                  <label className="modal-label">Number format</label>
-                </div>
+                  <div className="flex items-center justify-between mt-6">
+                    <label className="modal-label">Database file</label>
+                  </div>
+                  <div className="relative">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded w-full text-left overflow-hidden truncate"
+                        onClick={handleSelectDb}
+                        title={dbPath || "Select DB file"}
+                      >
+                        {dbPath && dbPath.length > 0 ? dbPath : "Select DB file"}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
 
-                <div className="relative">
-                  <CustomSelect
-                    value={locale}
-                    onChange={(v) => setLocale(v)}
-                    options={[
-                      { value: "en-US", label: "1,234.56" },
-                      { value: "de-DE", label: "1.234,56" },
-                      { value: "fr-FR", label: "1 234,56" },
-                      { value: "de-CH", label: "1'234.56" },
-                      { value: "en-IN", label: "1,23,456.78" },
-                    ]}
-                    placeholder={"Select format"}
-                  />
-                </div>
-                <p className="text-slate-400 mt-3">Example: {example}</p>
-              </>
-            )}
+              {activeTab === "formats" && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <label className="modal-label">Currency</label>
+                  </div>
+                  <div className="relative">
+                    <CustomSelect
+                      value={currency}
+                      onChange={(v) => setCurrency(v)}
+                      options={CURRENCIES.map((c) => ({
+                        value: c.code,
+                        label: `${c.code} - ${c.name} (${c.symbol})`,
+                      }))}
+                      placeholder={"Select currency"}
+                    />
+                  </div>
 
+                  <div className="flex items-center justify-between mt-6">
+                    <label className="modal-label">Number format</label>
+                  </div>
+
+                  <div className="relative">
+                    <CustomSelect
+                      value={locale}
+                      onChange={(v) => setLocale(v)}
+                      options={[
+                        { value: "en-US", label: "1,234.56" },
+                        { value: "de-DE", label: "1.234,56" },
+                        { value: "fr-FR", label: "1 234,56" },
+                        { value: "de-CH", label: "1'234.56" },
+                        { value: "en-IN", label: "1,23,456.78" },
+                      ]}
+                      placeholder={"Select format"}
+                    />
+                  </div>
+                  <p className="text-slate-400 mt-3">Example: {example}</p>
+                </>
+              )}
+
+            </div>
           </div>
         </div>
       </ErrorBoundary>
