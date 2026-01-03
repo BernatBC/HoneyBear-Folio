@@ -271,38 +271,63 @@ export default function Dashboard({
   const incomeVsExpensesData = useMemo(() => {
     if (transactions.length === 0) return null;
 
-    // Group by month (last 6 months)
-    const months = [];
     const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      months.push(`${year}-${month}`);
+    const keys = []; // keys for matching (YYYY-MM-DD for days or YYYY-MM for months)
+    const labels = [];
+
+    if (timeRange === "1M") {
+      // Last 30 days
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        keys.push(key);
+        labels.push(formatDate(key));
+      }
+    } else {
+      // Use months for 3M, 6M, 1Y and ALL
+      let monthsCount = 6; // default
+      if (timeRange === "3M") monthsCount = 3;
+      else if (timeRange === "6M") monthsCount = 6;
+      else if (timeRange === "1Y") monthsCount = 12;
+      else if (timeRange === "ALL") {
+        const txDates = transactions.map((t) => t.date).sort();
+        const first = new Date(txDates[0]);
+        monthsCount =
+          (now.getFullYear() - first.getFullYear()) * 12 +
+          (now.getMonth() - first.getMonth()) +
+          1;
+        if (monthsCount < 1) monthsCount = 1;
+      }
+
+      for (let i = monthsCount - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+          2,
+          "0",
+        )}`;
+        keys.push(key);
+        const opts = { month: "short" };
+        if (monthsCount > 12) opts.year = "numeric";
+        labels.push(d.toLocaleDateString(undefined, opts));
+      }
     }
 
-    const incomeData = new Array(6).fill(0);
-    const expenseData = new Array(6).fill(0);
+    const incomeData = new Array(keys.length).fill(0);
+    const expenseData = new Array(keys.length).fill(0);
 
     transactions.forEach((t) => {
       if (t.category === "Transfer") return;
-      const month = t.date.slice(0, 7);
-      const index = months.indexOf(month);
+      const key = timeRange === "1M" ? t.date : t.date.slice(0, 7);
+      const index = keys.indexOf(key);
       if (index !== -1) {
-        if (t.amount > 0) {
-          incomeData[index] += t.amount;
-        } else {
-          expenseData[index] += Math.abs(t.amount);
-        }
+        if (t.amount > 0) incomeData[index] += t.amount;
+        else expenseData[index] += Math.abs(t.amount);
       }
     });
 
     return {
-      labels: months.map((m) => {
-        const [y, month] = m.split("-");
-        const date = new Date(parseInt(y), parseInt(month) - 1);
-        return date.toLocaleDateString("en-US", { month: "long" });
-      }),
+      labels,
       datasets: [
         {
           label: "Income",
@@ -318,7 +343,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [transactions]);
+  }, [transactions, timeRange, formatDate]);
 
   const doughnutOptions = {
     responsive: true,
@@ -348,43 +373,54 @@ export default function Dashboard({
     },
   };
 
-  const barOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Income vs Expenses (Last 6 Months)",
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: "rgba(0, 0, 0, 0.05)",
+  const barOptions = useMemo(() => {
+    const labelMap = {
+      "1M": "Last 1 Month",
+      "3M": "Last 3 Months",
+      "6M": "Last 6 Months",
+      "1Y": "Last 1 Year",
+      ALL: "All time",
+    };
+    const titleText = `Income vs Expenses (${labelMap[timeRange] || timeRange})`;
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "top",
         },
-        ticks: {
-          callback: function (value) {
-            const num = Number(value);
-            if (Number.isNaN(num)) return value;
-            return formatNumber(num, {
-              style: "currency",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            });
+        title: {
+          display: true,
+          text: titleText,
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(0, 0, 0, 0.05)",
+          },
+          ticks: {
+            callback: function (value) {
+              const num = Number(value);
+              if (Number.isNaN(num)) return value;
+              return formatNumber(num, {
+                style: "currency",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              });
+            },
+          },
+        },
+        x: {
+          grid: {
+            display: false,
           },
         },
       },
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-    },
-  };
+    };
+  }, [timeRange, formatNumber]);
 
   const options = {
     responsive: true,
