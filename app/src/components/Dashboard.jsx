@@ -303,7 +303,7 @@ export default function Dashboard({
       labels: months.map((m) => {
         const [y, month] = m.split("-");
         const date = new Date(parseInt(y), parseInt(month) - 1);
-        return date.toLocaleDateString("en-US", { month: "short" });
+        return date.toLocaleDateString("en-US", { month: "long" });
       }),
       datasets: [
         {
