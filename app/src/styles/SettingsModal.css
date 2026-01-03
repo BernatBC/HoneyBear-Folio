@@ -178,19 +178,7 @@
     transition: opacity 0.08s ease-in;
   }
 
-  .label-with-help .help-wrapper[data-tooltip]::before {
-    content: "";
-    position: fixed; /* render in viewport so it doesn't get clipped */
-    top: calc(var(--tooltip-top, 0) - 6px);
-    left: var(--tooltip-left, 0);
-    transform: translateX(-50%) translateY(-100%);
-    border-width: 6px;
-    border-style: solid;
-    border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
-    opacity: 0;
-    transition: opacity 0.08s ease-in;
-    z-index: 10003;
-  }
+
 
   /* Right-aligned tooltip */
   .label-with-help
@@ -201,18 +189,10 @@
     margin-left: 6px; /* slightly less right offset */
   }
 
-  .label-with-help
-    .help-wrapper[data-tooltip][data-tooltip-side="right"]::before {
-    transform: translateY(-50%);
-    top: calc(var(--tooltip-top, 0) - 4px); /* nudge arrow slightly higher */
-    left: calc(var(--tooltip-left, 0) - 4px);
-    border-color: transparent rgba(15, 23, 42, 0.95) transparent transparent;
-  }
+
 
   .label-with-help
-    .help-wrapper[data-tooltip][data-tooltip-visible="true"]::after,
-  .label-with-help
-    .help-wrapper[data-tooltip][data-tooltip-visible="true"]::before {
+    .help-wrapper[data-tooltip][data-tooltip-visible="true"]::after {
     opacity: 1;
   }
 
