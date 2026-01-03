@@ -105,12 +105,19 @@ pub(crate) fn init_db_at_path(db_path: &PathBuf) -> Result<(), String> {
             }
         }
         if !has_linked {
-            // Safe to ALTER TABLE to add the nullable column
-            conn.execute(
+            // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
+            match conn.execute(
                 "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
                 [],
-            )
-            .map_err(|e| e.to_string())?;
+            ) {
+                Ok(_) => {}
+                Err(e) => {
+                    let s = e.to_string();
+                    if !s.contains("duplicate column name") && !s.contains("already exists") {
+                        return Err(s);
+                    }
+                }
+            }
         }
     }
 
