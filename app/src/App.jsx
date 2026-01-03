@@ -111,6 +111,19 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("hb_tx_row_padding");
+      const padding = stored ? parseInt(stored, 10) : 12;
+      document.documentElement.style.setProperty(
+        "--hb-tx-cell-py",
+        `${padding}px`,
+      );
+    } catch (e) {
+      console.debug("Failed to apply transaction row padding:", e);
+    }
+  }, []);
+
   // Calculate total balance
 
   const totalBalance = computeNetWorth(accounts, marketValues);

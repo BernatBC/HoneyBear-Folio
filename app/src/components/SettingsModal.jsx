@@ -17,6 +17,26 @@ export default function SettingsModal({ onClose }) {
   const { locale, setLocale, currency, setCurrency } = useNumberFormat();
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
+  const [txRowPadding, setTxRowPadding] = useState(() => {
+    try {
+      const v = localStorage.getItem("hb_tx_row_padding");
+      return v ? parseInt(v, 10) : 12;
+    } catch {
+      return 12;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      document.documentElement.style.setProperty(
+        "--hb-tx-cell-py",
+        `${txRowPadding}px`,
+      );
+      localStorage.setItem("hb_tx_row_padding", String(txRowPadding));
+    } catch (e) {
+      console.error("Failed to apply tx row padding:", e);
+    }
+  }, [txRowPadding]);
 
   // Helpful debug logs so we can see contextual values the component depends on
   try {
@@ -67,12 +87,14 @@ export default function SettingsModal({ onClose }) {
       localStorage.removeItem("hb_number_format");
       localStorage.removeItem("hb_currency");
       localStorage.removeItem("hb_theme");
+      localStorage.removeItem("hb_tx_row_padding");
     } catch {
       /* ignore */
     }
     setLocale("en-US");
     setCurrency("USD");
     setTheme("system");
+    setTxRowPadding(12);
     try {
       await invoke("reset_db_path");
       const p = await invoke("get_db_path_command");
@@ -171,6 +193,31 @@ export default function SettingsModal({ onClose }) {
                           : "Select DB file"}
                       </button>
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
+                    <label className="modal-label">
+                      Transaction row height
+                    </label>
+                    <div className="text-sm text-slate-500">
+                      {txRowPadding}px
+                    </div>
+                  </div>
+                  <div className="relative mt-1 settings-slider">
+                    <input
+                      type="range"
+                      min={4}
+                      max={24}
+                      step={1}
+                      value={txRowPadding}
+                      onChange={(e) => setTxRowPadding(Number(e.target.value))}
+                      className="w-full"
+                      aria-label="Transaction row height"
+                    />
+                    <p className="text-xs text-slate-400 mt-1">
+                      Adjust row padding to control transaction row height
+                      (smaller = more rows).
+                    </p>
                   </div>
                 </>
               )}
