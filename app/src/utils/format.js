@@ -172,6 +172,62 @@ export function useParseNumber() {
   return (str) => parseNumberWithLocale(str, locale);
 }
 
+// Date format helpers used for UI-only date formatting. These do NOT affect
+// import/export formats which continue to use ISO dates.
+export const DATE_FORMATS = {
+  "YYYY-MM-DD": { datePicker: "yyyy-MM-dd" },
+  "MM/DD/YYYY": { datePicker: "MM/dd/yyyy" },
+  "DD/MM/YYYY": { datePicker: "dd/MM/yyyy" },
+  "DD MMM YYYY": { datePicker: "dd MMM yyyy" },
+  "MMM DD, YYYY": { datePicker: "MMM dd, yyyy" },
+};
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+export function formatDateForUI(value, formatKey, locale) {
+  if (!value) return "";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  switch (formatKey) {
+    case "YYYY-MM-DD":
+      return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
+        date.getDate(),
+      )}`;
+    case "MM/DD/YYYY":
+      return `${pad2(date.getMonth() + 1)}/${pad2(date.getDate())}/${date.getFullYear()}`;
+    case "DD/MM/YYYY":
+      return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+    case "DD MMM YYYY":
+      return date.toLocaleDateString(locale || undefined, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    case "MMM DD, YYYY":
+      // toLocaleDateString often orders month/day differently depending on locale,
+      // but for this case we want a short month then day, then year.
+      return date.toLocaleDateString(locale || undefined, {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      });
+    default:
+      return date.toISOString().split("T")[0];
+  }
+}
+
+export function getDatePickerFormat(formatKey) {
+  return DATE_FORMATS[formatKey]?.datePicker || "yyyy-MM-dd";
+}
+
+export function useFormatDate() {
+  const { dateFormat, locale } = useNumberFormat();
+  return (value) => formatDateForUI(value, dateFormat, locale);
+}
+
 export function formatNumberForExport(value) {
   if (value === undefined || value === null) return "";
   if (typeof value === "number") return String(value);

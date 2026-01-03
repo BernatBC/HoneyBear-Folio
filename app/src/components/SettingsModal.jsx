@@ -11,7 +11,7 @@ import "../styles/Modal.css";
 import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
 import { useTheme } from "../contexts/theme-core";
-import { formatNumberWithLocale } from "../utils/format";
+import { formatNumberWithLocale, formatDateForUI } from "../utils/format";
 import { CURRENCIES } from "../utils/currencies";
 import CustomSelect from "./CustomSelect";
 import ErrorBoundary from "./ErrorBoundary";
@@ -20,7 +20,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { t } from "../i18n/i18n";
 export default function SettingsModal({ onClose }) {
-  const { locale, setLocale, currency, setCurrency } = useNumberFormat();
+  const { locale, setLocale, currency, setCurrency, dateFormat, setDateFormat } = useNumberFormat();
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
   const [txRowPadding, setTxRowPadding] = useState(() => {
@@ -118,6 +118,7 @@ export default function SettingsModal({ onClose }) {
       localStorage.removeItem("hb_currency");
       localStorage.removeItem("hb_theme");
       localStorage.removeItem("hb_tx_row_padding");
+      localStorage.removeItem("hb_date_format");
     } catch {
       /* ignore */
     }
@@ -125,6 +126,7 @@ export default function SettingsModal({ onClose }) {
     setCurrency("USD");
     setTheme("system");
     setTxRowPadding(12);
+    setDateFormat("YYYY-MM-DD");
     try {
       await invoke("reset_db_path");
       const p = await invoke("get_db_path_command");
@@ -393,6 +395,48 @@ export default function SettingsModal({ onClose }) {
                   </div>
                   <p className="text-slate-400 mt-3">
                     {t("settings.example", { example })}
+                  </p>
+
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="label-with-help">
+                      <span
+                        className="help-wrapper"
+                        data-tooltip="Choose how dates are shown in the app. This affects only UI display and will NOT change import/export formats."
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Choose how dates are shown in the app"
+                        onMouseEnter={showTooltip}
+                        onFocus={showTooltip}
+                        onMouseLeave={hideTooltip}
+                        onBlur={hideTooltip}
+                      >
+                        <HelpCircle
+                          className="w-4 h-4 text-slate-400 help-icon"
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <label className="modal-label">
+                        {t("settings.date_format")}
+                      </label>
+                    </div>
+                  </div>
+                  <div className="relative settings-select">
+                    <CustomSelect
+                      value={dateFormat}
+                      onChange={(v) => setDateFormat(v)}
+                      options={[
+                        { value: "YYYY-MM-DD", label: "2026-01-03" },
+                        { value: "MM/DD/YYYY", label: "01/03/2026" },
+                        { value: "DD/MM/YYYY", label: "03/01/2026" },
+                        { value: "DD MMM YYYY", label: "03 Jan 2026" },
+                        { value: "MMM DD, YYYY", label: "Jan 03, 2026" },
+                      ]}
+                      placeholder={t("settings.select_date_format_placeholder")}
+                      fullWidth={false}
+                    />
+                  </div>
+                  <p className="text-slate-400 mt-3">
+                    {t("settings.example_date", { example: formatDateForUI("2026-01-03", dateFormat, locale) })}
                   </p>
                 </>
               )}
