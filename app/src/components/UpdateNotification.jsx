@@ -61,7 +61,7 @@ export default function UpdateNotification() {
     try {
       setDownloading(true);
       setError(null);
-      
+
       let downloaded = 0;
       let contentLength = 0;
 
@@ -160,7 +160,7 @@ export default function UpdateNotification() {
               </ReactMarkdown>
             </div>
           )}
-          
+
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm mb-4">
               {error}
@@ -174,8 +174,8 @@ export default function UpdateNotification() {
                 <span>{progress}%</span>
               </div>
               <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
@@ -223,6 +223,6 @@ export default function UpdateNotification() {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
