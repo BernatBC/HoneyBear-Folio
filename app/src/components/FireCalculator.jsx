@@ -457,7 +457,7 @@ export default function FireCalculator() {
             <button
               type="button"
               onClick={resetToHistoric}
-              title="Reset to suggested defaults"
+              title="Reset to suggested defaults — computed from your historic data: net worth & expected return from accounts/portfolio; expenses & savings from the last 12 months"
               className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition"
             >
               <RotateCw className="w-4 h-4" />
