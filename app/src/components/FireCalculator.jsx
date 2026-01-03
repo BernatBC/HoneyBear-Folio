@@ -7,6 +7,7 @@ import {
   Banknote,
   Percent,
   Calendar,
+  RotateCw,
 } from "lucide-react";
 import { useFormatNumber } from "../utils/format";
 import NumberInput from "./NumberInput";
@@ -314,6 +315,30 @@ export default function FireCalculator() {
     loading,
   ]);
 
+  // Reset calculation to defaults computed from historic data
+  function resetToHistoric() {
+    // Remove any saved session so fetchData recomputes defaults from historic data
+    try {
+      sessionStorage.removeItem("fireCalculatorState");
+    } catch (e) {
+      // ignore
+    }
+
+    userModified.current = {
+      currentNetWorth: false,
+      annualExpenses: false,
+      expectedReturn: false,
+      withdrawalRate: false,
+      annualSavings: false,
+    };
+
+    // Reset withdrawal rate to the default value as it's not computed from history
+    setWithdrawalRate(4);
+
+    // Re-fetch data which will set the computed defaults
+    fetchData();
+  }
+
   // Ensure the saved session state is cleared when the window is closed
   useEffect(() => {
     const onBeforeUnload = () => {
@@ -425,9 +450,20 @@ export default function FireCalculator() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Inputs */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-6 h-fit hover:shadow-lg transition-shadow duration-300">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            Parameters
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              Parameters
+            </h2>
+            <button
+              type="button"
+              onClick={resetToHistoric}
+              title="Reset to suggested defaults"
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+            >
+              <RotateCw className="w-4 h-4" />
+              Reset
+            </button>
+          </div>
 
           <div className="space-y-5">
             <div>
