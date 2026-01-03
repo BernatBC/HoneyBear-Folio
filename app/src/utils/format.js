@@ -213,21 +213,22 @@ export function formatDateForUI(value, formatKey, locale) {
     case "DD.MM.YYYY":
       return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
     case "DD MMM YYYY":
-      return date.toLocaleDateString(locale || undefined, {
+      // Use English month names for UI display (independent of number locale)
+      return date.toLocaleDateString("en-US", {
         day: "2-digit",
         month: "short",
         year: "numeric",
       });
     case "MMM DD, YYYY":
-      // short month name format
-      return date.toLocaleDateString(locale || undefined, {
+      // short month name format — force English month names to avoid mixing with number locale
+      return date.toLocaleDateString("en-US", {
         month: "short",
         day: "2-digit",
         year: "numeric",
       });
     case "MMMM D, YYYY":
-      // full month name (e.g. "January 3, 2026")
-      return date.toLocaleDateString(locale || undefined, {
+      // full month name (e.g. "January 3, 2026") — force English months
+      return date.toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
         year: "numeric",
