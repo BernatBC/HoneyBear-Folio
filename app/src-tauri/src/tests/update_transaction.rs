@@ -106,3 +106,42 @@ fn test_update_transaction_finds_counterpart_by_notes() {
     assert_eq!(txs2[0].amount, 60.0);
     assert_eq!(txs2[0].payee, acc1.name);
 }
+
+#[test]
+fn test_update_transaction_updates_counterpart_when_linked() {
+    let (_dir, db_path) = setup_db();
+    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
+
+    // Create transfer via API which should link txs
+    let tx = crate::create_transaction_db(&db_path, acc1.id, "2023-01-01".to_string(), acc2.name.clone(), Some("X".to_string()), None, -40.0).unwrap();
+
+    // Verify counterpart exists
+    let txs2 = crate::get_transactions_db(&db_path, acc2.id).unwrap();
+    assert_eq!(txs2.len(), 1);
+
+    // Update original tx amount to -50.0 -- counterpart should update and balances adjust
+    let args = crate::UpdateTransactionArgs {
+        id: tx.id,
+        account_id: acc1.id,
+        date: "2023-01-02".to_string(),
+        payee: acc2.name.clone(),
+        notes: Some("X".to_string()),
+        category: Some("Transfer".to_string()),
+        amount: -50.0,
+    };
+
+    crate::update_transaction_db(&db_path, args).unwrap();
+
+    let accounts = crate::get_accounts_db(&db_path).unwrap();
+    let a1 = accounts.iter().find(|a| a.id == acc1.id).unwrap();
+    let a2 = accounts.iter().find(|a| a.id == acc2.id).unwrap();
+
+    assert_eq!(a1.balance, 50.0);
+    assert_eq!(a2.balance, 50.0);
+
+    let txs2_after = crate::get_transactions_db(&db_path, acc2.id).unwrap();
+    assert_eq!(txs2_after.len(), 1);
+    assert_eq!(txs2_after[0].amount, 50.0);
+    assert_eq!(txs2_after[0].payee, acc1.name);
+}

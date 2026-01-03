@@ -115,3 +115,10 @@ fn test_delete_transaction_fallback_by_notes() {
     assert_eq!(a1_after, 100.0);
     assert_eq!(a2_after, 0.0);
 }
+
+#[test]
+fn test_delete_transaction_missing_id_should_error() {
+    let (_dir, db_path) = setup_db();
+    let res = crate::delete_transaction_db(&db_path, -999);
+    assert!(res.is_err());
+}

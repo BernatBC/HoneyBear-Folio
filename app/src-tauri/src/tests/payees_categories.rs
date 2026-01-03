@@ -23,3 +23,12 @@ fn test_get_payees_and_categories() {
     // Transfer should not be present
     assert!(!cats.contains(&"Transfer".to_string()));
 }
+
+#[test]
+fn test_get_payees_and_categories_empty() {
+    let (_dir, db_path) = setup_db();
+    let payees = crate::get_payees_db(&db_path).unwrap();
+    let cats = crate::get_categories_db(&db_path).unwrap();
+    assert!(payees.is_empty());
+    assert!(cats.is_empty());
+}

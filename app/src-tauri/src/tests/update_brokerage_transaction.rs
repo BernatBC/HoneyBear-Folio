@@ -1,5 +1,4 @@
 use super::common::setup_db;
-
 #[test]
 fn test_update_brokerage_transaction_missing_id_should_error() {
     let (_dir, db_path) = setup_db();
@@ -66,5 +65,65 @@ fn test_update_brokerage_transaction_updates_cash_counterpart() {
     assert_eq!(brokerage_after, 1000.0);
     // cash: initial 1000 - (10*100 + 2) = -2.0; after update: 1000 - (5*200 + 1) = -1.0
     assert_eq!(cash_before, -2.0);
+    assert_eq!(cash_after, -1.0);
+}
+
+#[test]
+fn test_update_brokerage_transaction_fallback_by_notes() {
+    let (_dir, db_path) = setup_db();
+    let cash_acc = crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
+    let brokerage_acc = crate::create_account_db(&db_path, "Brokerage".to_string(), 0.0, "investment".to_string()).unwrap();
+
+    // Create initial buy which sets linked_tx_id
+    let args = crate::CreateBrokerageTransactionArgs {
+        brokerage_account_id: brokerage_acc.id,
+        cash_account_id: cash_acc.id,
+        date: "2023-01-01".to_string(),
+        ticker: "FOO".to_string(),
+        shares: 10.0,
+        price_per_share: 100.0,
+        fee: 2.0,
+        is_buy: true,
+    };
+
+    let created = crate::create_brokerage_transaction_db(&db_path, args).unwrap();
+
+    // Remove linked_tx_id to force fallback via notes
+    let conn = rusqlite::Connection::open(&db_path).unwrap();
+    conn.execute("UPDATE transactions SET linked_tx_id = NULL WHERE id = ?1", rusqlite::params![created.id]).unwrap();
+
+    // Also clear linked from cash tx (if any)
+    let cash_tx_id: i32 = conn.query_row("SELECT id FROM transactions WHERE account_id = ?1 AND category = 'Transfer' LIMIT 1", rusqlite::params![cash_acc.id], |r| r.get(0)).unwrap();
+    conn.execute("UPDATE transactions SET linked_tx_id = NULL WHERE id = ?1", rusqlite::params![cash_tx_id]).unwrap();
+
+    // Update the cash tx notes to match the brokerage tx old notes so fallback by notes succeeds
+    let old_notes = created.notes.clone().unwrap();
+    conn.execute("UPDATE transactions SET notes = ?1 WHERE id = ?2", rusqlite::params![old_notes, cash_tx_id]).unwrap();
+
+    // Now run an update which should fallback to matching by old notes
+    let update_args = crate::UpdateBrokerageTransactionArgs {
+        id: created.id,
+        brokerage_account_id: brokerage_acc.id,
+        date: "2023-01-02".to_string(),
+        ticker: "FOO".to_string(),
+        shares: 5.0,
+        price_per_share: 200.0,
+        fee: 1.0,
+        is_buy: true,
+    };
+
+    crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();
+
+    // Verify cash tx amount updated (now should be -(5*200 + 1) = -1001). There may be an opening balance tx, so find the Transfer tx.
+    let cash_txs = crate::get_transactions_db(&db_path, cash_acc.id).unwrap();
+    let transfer_tx = cash_txs.iter().find(|t| t.category.as_deref() == Some("Transfer")).expect("Transfer tx not found");
+    assert_eq!(transfer_tx.amount, -1001.0);
+
+    // Verify balances as well
+    let accounts_after = crate::get_accounts_db(&db_path).unwrap();
+    let cash_after = accounts_after.iter().find(|a| a.id == cash_acc.id).unwrap().balance;
+    let brokerage_after = accounts_after.iter().find(|a| a.id == brokerage_acc.id).unwrap().balance;
+
+    assert_eq!(brokerage_after, 1000.0);
     assert_eq!(cash_after, -1.0);
 }
