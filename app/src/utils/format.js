@@ -190,7 +190,7 @@ function pad2(n) {
   return String(n).padStart(2, "0");
 }
 
-export function formatDateForUI(value, formatKey, locale) {
+export function formatDateForUI(value, formatKey, _locale) {
   if (!value) return "";
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "";

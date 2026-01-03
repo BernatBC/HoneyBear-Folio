@@ -11,7 +11,7 @@ import "../styles/Modal.css";
 import "../styles/SettingsModal.css";
 import { useNumberFormat } from "../contexts/number-format";
 import { useTheme } from "../contexts/theme-core";
-import { formatNumberWithLocale, formatDateForUI } from "../utils/format";
+import { formatNumberWithLocale } from "../utils/format";
 import { CURRENCIES } from "../utils/currencies";
 import CustomSelect from "./CustomSelect";
 import ErrorBoundary from "./ErrorBoundary";
