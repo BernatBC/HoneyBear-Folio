@@ -1,6 +1,8 @@
 use super::common::setup_db;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use proptest::prelude::*;
+use rusqlite::Connection;
 
 #[test]
 fn test_randomized_balance_invariants() {
@@ -22,7 +24,7 @@ fn test_randomized_balance_invariants() {
     // Run a deterministic sequence of operations
     for _ in 0..100 {
         let op: f64 = rng.gen();
-        if op < 0.6 {
+        if op < 0.45 {
             // create transaction
             let acc_idx = rng.gen_range(0..accounts.len());
             let amount = rng.gen_range(-200..200) as f64;
@@ -31,7 +33,30 @@ fn test_randomized_balance_invariants() {
             if let Ok(tx) = res {
                 tx_ids.push(tx.id);
             }
+        } else if op < 0.65 {
+            // create a transfer by using another account's name as payee
+            let a = rng.gen_range(0..accounts.len());
+            let b = (a + 1) % accounts.len();
+            let res = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), accounts[b].name.clone(), Some("XFER".to_string()), None, -rng.gen_range(1..150) as f64);
+            if let Ok(tx) = res {
+                tx_ids.push(tx.id);
+            }
         } else if op < 0.85 {
+            // create brokerage transaction
+            let brokerage_idx = rng.gen_range(0..accounts.len());
+            let cash_idx = (brokerage_idx + 1) % accounts.len();
+            let args = crate::CreateBrokerageTransactionArgs {
+                brokerage_account_id: accounts[brokerage_idx].id,
+                cash_account_id: accounts[cash_idx].id,
+                date: "2023-01-01".to_string(),
+                ticker: "RND".to_string(),
+                shares: rng.gen_range(1..10) as f64,
+                price_per_share: rng.gen_range(1..50) as f64,
+                fee: rng.gen_range(0..5) as f64,
+                is_buy: rng.gen_bool(0.5),
+            };
+            let _ = crate::create_brokerage_transaction_db(&db_path, args);
+        } else if op < 0.9 {
             // update a random tx
             if !tx_ids.is_empty() {
                 let idx = rng.gen_range(0..tx_ids.len());
@@ -69,5 +94,24 @@ fn test_randomized_balance_invariants() {
         let sum: f64 = txs.iter().map(|t| t.amount).sum();
         // Floating point small errors allowed
         assert!((acc.balance - sum).abs() < 1e-6, "Balance mismatch for account {}: {} != {}", acc.id, acc.balance, sum);
+    }
+
+    // Additional invariant: linked_tx_id consistency
+    let all = crate::get_all_transactions_db(&db_path).unwrap();
+    for t in &all {
+        if let Some(linked) = t.ticker.as_ref() {
+            // ignore ticker; wrong field used - correct check below
+        }
+    }
+
+    // Check linked tx invariants explicitly
+    let conn = Connection::open(&db_path).unwrap();
+    let mut stmt = conn.prepare("SELECT id, linked_tx_id FROM transactions WHERE linked_tx_id IS NOT NULL").unwrap();
+    let iter = stmt.query_map([], |row: &rusqlite::Row| Ok((row.get::<_, i32>(0)?, row.get::<_, i32>(1)?))).unwrap();
+    for res in iter {
+        let (id, linked) = res.unwrap();
+        // counterpart should exist and point back
+        let back: Option<i32> = conn.query_row("SELECT linked_tx_id FROM transactions WHERE id = ?1", rusqlite::params![linked], |r: &rusqlite::Row| r.get::<_, Option<i32>>(0)).unwrap();
+        assert_eq!(back.unwrap(), id);
     }
 }
