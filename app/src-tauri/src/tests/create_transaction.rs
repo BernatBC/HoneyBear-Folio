@@ -63,3 +63,23 @@ fn test_get_transactions_ordering() {
     assert_eq!(txs[0].date, "2023-02-01");
     assert_eq!(txs[1].date, "2023-01-01");
 }
+
+#[test]
+fn test_create_transaction_with_nonexistent_account_errors_due_to_foreign_key() {
+    let (_dir, db_path) = setup_db();
+    // creating a transaction with a non-existent account id should fail due to FK constraint
+    let res = crate::create_transaction_db(&db_path, -999, "2023-01-01".to_string(), "Someone".to_string(), None, Some("Food".to_string()), -10.0);
+    assert!(res.is_err());
+
+    // ensure no accounts were created with that id
+    let accounts = crate::get_accounts_db(&db_path).unwrap();
+    assert!(accounts.iter().all(|a| a.id != -999));
+}
+
+#[test]
+fn test_create_transaction_preserves_nontransfer_category() {
+    let (_dir, db_path) = setup_db();
+    let acc = crate::create_account_db(&db_path, "A".to_string(), 100.0, "cash".to_string()).unwrap();
+    let tx = crate::create_transaction_db(&db_path, acc.id, "2023-01-02".to_string(), "NonAccountPayee".to_string(), None, Some("Entertainment".to_string()), -15.0).unwrap();
+    assert_eq!(tx.category.as_deref(), Some("Entertainment"));
+}

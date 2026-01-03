@@ -69,3 +69,22 @@ fn test_brokerage_transaction_sell() {
     assert_eq!(created.fee, Some(5.0));
     assert_eq!(created.category.as_deref(), Some("Investment"));
 }
+#[test]
+fn test_create_brokerage_transaction_missing_brokerage_account_should_error() {
+    let (_dir, db_path) = setup_db();
+    let cash_acc = crate::create_account_db(&db_path, "Cash".to_string(), 100.0, "cash".to_string()).unwrap();
+
+    let args = crate::CreateBrokerageTransactionArgs {
+        brokerage_account_id: -999,
+        cash_account_id: cash_acc.id,
+        date: "2023-01-01".to_string(),
+        ticker: "FOO".to_string(),
+        shares: 1.0,
+        price_per_share: 100.0,
+        fee: 1.0,
+        is_buy: true,
+    };
+
+    let res = crate::create_brokerage_transaction_db(&db_path, args);
+    assert!(res.is_err());
+}

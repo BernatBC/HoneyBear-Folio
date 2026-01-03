@@ -32,3 +32,18 @@ fn test_get_payees_and_categories_empty() {
     assert!(payees.is_empty());
     assert!(cats.is_empty());
 }
+
+#[test]
+fn test_payees_and_categories_sorted() {
+    let (_dir, db_path) = setup_db();
+    // Use zero opening balance to avoid the "Opening Balance" payee
+    let acc = crate::create_account_db(&db_path, "A".to_string(), 0.0, "cash".to_string()).unwrap();
+    crate::create_transaction_db(&db_path, acc.id, "2023-01-03".to_string(), "ZPay".to_string(), None, Some("ZCat".to_string()), -10.0).unwrap();
+    crate::create_transaction_db(&db_path, acc.id, "2023-01-02".to_string(), "APay".to_string(), None, Some("ACat".to_string()), -5.0).unwrap();
+
+    let payees = crate::get_payees_db(&db_path).unwrap();
+    assert_eq!(payees, vec!["APay".to_string(), "ZPay".to_string()]);
+
+    let cats = crate::get_categories_db(&db_path).unwrap();
+    assert_eq!(cats, vec!["ACat".to_string(), "ZCat".to_string()]);
+}
