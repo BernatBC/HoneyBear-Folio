@@ -84,7 +84,7 @@ export default function SettingsModal({ onClose }) {
       el.style.setProperty("--tooltip-left", `${rect.right - 15}px`);
       el.setAttribute("data-tooltip-visible", "true");
       el.setAttribute("data-tooltip-side", "right");
-    } catch (err) {
+    } catch {
       // ignore measurement errors
     }
   }
