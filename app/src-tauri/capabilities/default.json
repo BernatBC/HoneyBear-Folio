@@ -9,6 +9,8 @@
     "fs:default",
     "fs:allow-write-text-file",
     "fs:allow-write-file",
+    "updater:default",
+    "process:allow-restart",
     {
       "identifier": "fs:scope",
       "allow": ["$HOME/**"]
