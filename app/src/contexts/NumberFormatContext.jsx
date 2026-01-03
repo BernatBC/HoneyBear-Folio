@@ -53,7 +53,14 @@ export function NumberFormatProvider({ children }) {
 
   return (
     <NumberFormatContext.Provider
-      value={{ locale, setLocale, currency, setCurrency, dateFormat, setDateFormat }}
+      value={{
+        locale,
+        setLocale,
+        currency,
+        setCurrency,
+        dateFormat,
+        setDateFormat,
+      }}
     >
       {children}
     </NumberFormatContext.Provider>

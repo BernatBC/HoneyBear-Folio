@@ -22,7 +22,12 @@ import {
   ChevronDown,
   Edit,
 } from "lucide-react";
-import { useFormatNumber, useParseNumber, useFormatDate, getDatePickerFormat } from "../utils/format";
+import {
+  useFormatNumber,
+  useParseNumber,
+  useFormatDate,
+  getDatePickerFormat,
+} from "../utils/format";
 import { useNumberFormat } from "../contexts/number-format";
 import NumberInput from "./NumberInput";
 import { t } from "../i18n/i18n";

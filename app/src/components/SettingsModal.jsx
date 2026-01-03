@@ -20,7 +20,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { t } from "../i18n/i18n";
 export default function SettingsModal({ onClose }) {
-  const { locale, setLocale, currency, setCurrency, dateFormat, setDateFormat } = useNumberFormat();
+  const {
+    locale,
+    setLocale,
+    currency,
+    setCurrency,
+    dateFormat,
+    setDateFormat,
+  } = useNumberFormat();
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
   const [txRowPadding, setTxRowPadding] = useState(() => {
