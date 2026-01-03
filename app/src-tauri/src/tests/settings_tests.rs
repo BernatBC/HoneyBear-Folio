@@ -1,5 +1,4 @@
 use tempfile::tempdir;
-use std::path::PathBuf;
 
 #[test]
 fn test_write_and_read_settings() {

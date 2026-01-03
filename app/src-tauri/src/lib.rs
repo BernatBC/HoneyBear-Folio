@@ -117,7 +117,6 @@ mod test_helpers;
 
 #[cfg(test)]
 pub(crate) use test_helpers::{
-    settings_file_path_for_dir,
     write_settings_to_dir,
     read_settings_from_dir,
     get_db_path_for_dir,
@@ -1382,6 +1381,7 @@ async fn get_stock_quotes_with_client(
 }
 
 // Variant that accepts a direct DB path so tests can call without needing an AppHandle
+#[allow(dead_code)]
 async fn get_stock_quotes_with_client_and_db(
     client: reqwest::Client,
     base_url: String,

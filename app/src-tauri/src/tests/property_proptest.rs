@@ -64,7 +64,7 @@ proptest! {
         // linked_tx invariants
         let all = crate::get_all_transactions_db(&db_path).unwrap();
         for t in all.iter().filter(|t| t.category.as_deref() == Some("Transfer")) {
-            if let Some(linked) = t.id.checked_sub(0) { // dummy to satisfy borrow
+            if let Some(_linked) = t.id.checked_sub(0) { // dummy to satisfy borrow
                 // check counterpart exists either by linked_tx_id or notes matching
                 if let Some(link) = {
                     let conn = rusqlite::Connection::open(&db_path).unwrap();

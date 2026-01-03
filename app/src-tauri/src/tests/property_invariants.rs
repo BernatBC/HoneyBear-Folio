@@ -1,7 +1,6 @@
 use super::common::setup_db;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
-use proptest::prelude::*;
 use rusqlite::Connection;
 
 #[test]
@@ -96,13 +95,6 @@ fn test_randomized_balance_invariants() {
         assert!((acc.balance - sum).abs() < 1e-6, "Balance mismatch for account {}: {} != {}", acc.id, acc.balance, sum);
     }
 
-    // Additional invariant: linked_tx_id consistency
-    let all = crate::get_all_transactions_db(&db_path).unwrap();
-    for t in &all {
-        if let Some(linked) = t.ticker.as_ref() {
-            // ignore ticker; wrong field used - correct check below
-        }
-    }
 
     // Check linked tx invariants explicitly
     let conn = Connection::open(&db_path).unwrap();

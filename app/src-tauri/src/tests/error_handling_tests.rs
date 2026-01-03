@@ -1,7 +1,6 @@
 use super::common::setup_db;
 use std::os::unix::fs::PermissionsExt;
 use std::fs::{self, File};
-use std::path::Path;
 
 #[test]
 fn test_write_settings_to_readonly_dir_errors() {

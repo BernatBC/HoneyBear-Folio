@@ -1,5 +1,4 @@
 use super::common::setup_db;
-use rusqlite::Connection;
 
 #[test]
 fn test_update_transaction_move_between_accounts() {
