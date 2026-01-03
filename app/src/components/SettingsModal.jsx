@@ -123,12 +123,11 @@ export default function SettingsModal({ onClose }) {
             </div>
 
             <div className="modal-body flex-1">
+              <div className="settings-section-title">
+                <h3 className="settings-section-heading">{activeTab === "general" ? "General" : "Formats"}</h3>
+              </div>
               {activeTab === "general" && (
                 <>
-                  <div className="flex items-center justify-between">
-                    <label className="modal-label">General</label>
-                  </div>
-
                   <div className="flex items-center justify-between mt-6">
                     <label className="modal-label">Theme</label>
                   </div>
