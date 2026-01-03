@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.bernatbc.honeybearfolio</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>HoneyBear-Folio</name>
+  <summary>Cross-platform personal finance desktop app</summary>
+  <description>
+    <p>
+      HoneyBear Folio is a cross-platform personal finance desktop application built with Tauri, React, and SQLite. It focuses on fast local data management, clear dashboards and charts, portfolio tracking, and import/export to common formats.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.bernatbc.honeybearfolio.desktop</launchable>
+  <url type="homepage">https://github.com/BernatBC/HoneyBear-Folio</url>
+  <developer_name>BernatBC</developer_name>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-01-03" />
+  </releases>
+</component>
