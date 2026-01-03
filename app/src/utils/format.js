@@ -72,13 +72,47 @@ export function useFormatNumber() {
   const { isPrivacyMode } = usePrivacy();
 
   return (value, options = {}) => {
-    if (isPrivacyMode && !options?.ignorePrivacy) {
-      return "••••••";
-    }
-
     const finalOptions = { ...options };
     if (finalOptions.style === "currency" && !finalOptions.currency) {
       finalOptions.currency = currency || "USD";
+    }
+
+    if (isPrivacyMode && !options?.ignorePrivacy) {
+      if (finalOptions.style === "currency") {
+        // Keep currency symbol visible but mask the numeric amount with
+        // as many bullets as the localized numeric string length.
+        const currencyDef =
+          CURRENCIES.find((c) => c.code === finalOptions.currency) ||
+          CURRENCIES.find((c) => c.code === currency) ||
+          { symbol: finalOptions.currency || "¤", position: "left" };
+        const symbol = currencyDef.symbol || finalOptions.currency || "¤";
+        const isNegative = Number(value) < 0;
+        const sign = isNegative ? "-" : "";
+
+        // Build decimal options (same fraction digits as finalOptions)
+        const decimalOptions = { ...finalOptions, style: "decimal" };
+        delete decimalOptions.currency;
+        delete decimalOptions.currencyDisplay;
+
+        // Use the localized formatter to determine the visible numeric length
+        let formattedNumeric = formatNumberWithLocale(value, locale, decimalOptions);
+        // Remove any leading sign characters that may be present
+        formattedNumeric = String(formattedNumeric).replace(/^[+-]/, "");
+        const len = Math.max(formattedNumeric.length, 1);
+        const masked = "•".repeat(len);
+
+        if (currencyDef.position === "left") {
+          return `${sign}${symbol}${masked}`;
+        } else {
+          return `${sign}${masked} ${symbol}`;
+        }
+      }
+
+      // Non-currency values: mask with as many bullets as the localized formatted value
+      let formatted = formatNumberWithLocale(value, locale, finalOptions);
+      formatted = String(formatted).replace(/^[+-]/, "");
+      const length = Math.max(formatted.length, 1);
+      return "•".repeat(length);
     }
 
     return formatNumberWithLocale(value, locale, finalOptions);
