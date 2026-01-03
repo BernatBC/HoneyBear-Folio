@@ -17,7 +17,7 @@ fn test_brokerage_transaction() {
         is_buy: true,
     };
 
-    crate::create_brokerage_transaction_db(&db_path, args).unwrap();
+    let created = crate::create_brokerage_transaction_db(&db_path, args).unwrap();
 
     let accounts = crate::get_accounts_db(&db_path).unwrap();
     let cash_new = accounts.iter().find(|a| a.id == cash_acc.id).unwrap();
@@ -28,6 +28,12 @@ fn test_brokerage_transaction() {
 
     // Brokerage: 0 + (10 * 150) = 1500
     assert_eq!(brokerage_new.balance, 1500.0);
+
+    // Returned transaction should contain ticker/shares/fee/category
+    assert_eq!(created.ticker.as_deref(), Some("AAPL"));
+    assert_eq!(created.shares, Some(10.0));
+    assert_eq!(created.fee, Some(5.0));
+    assert_eq!(created.category.as_deref(), Some("Investment"));
 }
 
 #[test]
@@ -47,7 +53,7 @@ fn test_brokerage_transaction_sell() {
         is_buy: false,
     };
 
-    crate::create_brokerage_transaction_db(&db_path, args).unwrap();
+    let created = crate::create_brokerage_transaction_db(&db_path, args).unwrap();
 
     let accounts = crate::get_accounts_db(&db_path).unwrap();
     let cash_new = accounts.iter().find(|a| a.id == cash_acc.id).unwrap();
@@ -56,4 +62,10 @@ fn test_brokerage_transaction_sell() {
     // For a sell: brokerage decreases by 1500, cash increases by 1500 - 5 = 1495
     assert_eq!(cash_new.balance, 2495.0);
     assert_eq!(brokerage_new.balance, -1500.0);
+
+    // Returned transaction should reflect negative shares for sell
+    assert_eq!(created.ticker.as_deref(), Some("AAPL"));
+    assert_eq!(created.shares, Some(-10.0));
+    assert_eq!(created.fee, Some(5.0));
+    assert_eq!(created.category.as_deref(), Some("Investment"));
 }
