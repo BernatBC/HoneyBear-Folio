@@ -14,6 +14,7 @@ import { NumberFormatProvider } from "./contexts/NumberFormatContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PrivacyProvider } from "./contexts/PrivacyContext";
 import ChartNumberFormatSync from "./components/ChartNumberFormatSync";
+import UpdateNotification from "./components/UpdateNotification";
 
 function App() {
   const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
@@ -172,6 +173,7 @@ function App() {
           <ToastProvider>
             <ErrorBoundary>
               <ChartNumberFormatSync />
+              <UpdateNotification />
               <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
                 <Sidebar
                   accounts={accounts}

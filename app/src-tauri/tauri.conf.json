@@ -21,6 +21,14 @@
       "csp": null
     }
   },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/BernatBC/HoneyBear-Folio/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc5RjI0MERDNzgwQTZFMEIKUldRTGJncDQzRUR5ZVg2QXFYY2hsTkV0UDgvY0dDNWhGblVzS200OFpzQkhZczRlL1kvTmxwWmMK"
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",

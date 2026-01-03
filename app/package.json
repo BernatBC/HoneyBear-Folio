@@ -20,6 +20,8 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.4.2",
     "@tauri-apps/plugin-fs": "^2.4.4",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-updater": "^2.9.0",
     "chart.js": "^4.5.1",
     "lucide-react": "^0.562.0",
     "papaparse": "^5.5.3",
@@ -27,12 +29,13 @@
     "react-chartjs-2": "^5.3.1",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
     "xlsx": "^0.18.5"
   },
   "optionalDependencies": {
     "@tauri-apps/cli-darwin-arm64": "^2.9.6",
-    "@tauri-apps/cli-darwin-x64": "^2.9.6",
     "@tauri-apps/cli-darwin-universal": "^2.9.6",
+    "@tauri-apps/cli-darwin-x64": "^2.9.6",
     "@tauri-apps/cli-linux-arm-gnueabihf": "^2.9.6",
     "@tauri-apps/cli-linux-arm64-gnu": "^2.9.6",
     "@tauri-apps/cli-linux-arm64-musl": "^2.9.6",
