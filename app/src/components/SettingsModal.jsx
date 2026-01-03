@@ -150,6 +150,7 @@ export default function SettingsModal({ onClose }) {
                         { value: "system", label: "System" },
                       ]}
                       placeholder={"Select theme"}
+                      fullWidth={false}
                     />
                   </div>
 
@@ -160,7 +161,7 @@ export default function SettingsModal({ onClose }) {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        className="bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded w-full text-left overflow-hidden truncate"
+                        className="bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded w-full sm:w-[20rem] max-w-full text-left overflow-hidden truncate"
                         onClick={handleSelectDb}
                         title={dbPath || "Select DB file"}
                       >
@@ -185,6 +186,7 @@ export default function SettingsModal({ onClose }) {
                         label: `${c.code} - ${c.name} (${c.symbol})`,
                       }))}
                       placeholder={"Select currency"}
+                      fullWidth={false}
                     />
                   </div>
 
@@ -204,6 +206,7 @@ export default function SettingsModal({ onClose }) {
                         { value: "en-IN", label: "1,23,456.78" },
                       ]}
                       placeholder={"Select format"}
+                      fullWidth={false}
                     />
                   </div>
                   <p className="text-slate-400 mt-3">Example: {example}</p>
