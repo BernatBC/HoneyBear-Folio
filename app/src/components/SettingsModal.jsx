@@ -28,7 +28,10 @@ export default function SettingsModal({ onClose }) {
 
   useEffect(() => {
     try {
-      document.documentElement.style.setProperty("--hb-tx-cell-py", `${txRowPadding}px`);
+      document.documentElement.style.setProperty(
+        "--hb-tx-cell-py",
+        `${txRowPadding}px`,
+      );
       localStorage.setItem("hb_tx_row_padding", String(txRowPadding));
     } catch (e) {
       console.error("Failed to apply tx row padding:", e);
@@ -193,8 +196,12 @@ export default function SettingsModal({ onClose }) {
                   </div>
 
                   <div className="flex items-center justify-between mt-4">
-                    <label className="modal-label">Transaction row height</label>
-                    <div className="text-sm text-slate-500">{txRowPadding}px</div>
+                    <label className="modal-label">
+                      Transaction row height
+                    </label>
+                    <div className="text-sm text-slate-500">
+                      {txRowPadding}px
+                    </div>
                   </div>
                   <div className="relative mt-1 settings-slider">
                     <input
@@ -207,7 +214,10 @@ export default function SettingsModal({ onClose }) {
                       className="w-full"
                       aria-label="Transaction row height"
                     />
-                    <p className="text-xs text-slate-400 mt-1">Adjust row padding to control transaction row height (smaller = more rows).</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Adjust row padding to control transaction row height
+                      (smaller = more rows).
+                    </p>
                   </div>
                 </>
               )}
