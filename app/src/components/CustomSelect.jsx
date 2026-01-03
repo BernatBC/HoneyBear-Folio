@@ -190,7 +190,7 @@ export default function CustomSelect({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`px-3 py-2 pr-10 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 ${fullWidth ? 'w-full' : ''} text-left flex items-center justify-between custom-select-trigger`}
+        className={`px-3 py-2 pr-10 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 ${fullWidth ? "w-full" : ""} text-left flex items-center justify-between custom-select-trigger`}
         onClick={toggle}
         onKeyDown={handleKeyDown}
       >

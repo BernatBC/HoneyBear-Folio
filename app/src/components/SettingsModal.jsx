@@ -94,14 +94,22 @@ export default function SettingsModal({ onClose }) {
               Settings
             </h2>
             <div className="flex items-center gap-2">
-              <button onClick={onClose} className="modal-close-button" aria-label="Close settings">
+              <button
+                onClick={onClose}
+                className="modal-close-button"
+                aria-label="Close settings"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
           </div>
 
           <div className="settings-content flex">
-            <div className="settings-tabs" role="tablist" aria-label="Settings tabs">
+            <div
+              className="settings-tabs"
+              role="tablist"
+              aria-label="Settings tabs"
+            >
               <button
                 role="tab"
                 aria-selected={activeTab === "general"}
@@ -124,7 +132,9 @@ export default function SettingsModal({ onClose }) {
 
             <div className="modal-body flex-1">
               <div className="settings-section-title">
-                <h3 className="settings-section-heading">{activeTab === "general" ? "General" : "Formats"}</h3>
+                <h3 className="settings-section-heading">
+                  {activeTab === "general" ? "General" : "Formats"}
+                </h3>
               </div>
               {activeTab === "general" && (
                 <>
@@ -156,7 +166,9 @@ export default function SettingsModal({ onClose }) {
                         onClick={handleSelectDb}
                         title={dbPath || "Select DB file"}
                       >
-                        {dbPath && dbPath.length > 0 ? dbPath : "Select DB file"}
+                        {dbPath && dbPath.length > 0
+                          ? dbPath
+                          : "Select DB file"}
                       </button>
                     </div>
                   </div>
@@ -203,7 +215,6 @@ export default function SettingsModal({ onClose }) {
                   <p className="text-slate-400 mt-3">Example: {example}</p>
                 </>
               )}
-
             </div>
           </div>
 
