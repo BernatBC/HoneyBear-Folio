@@ -22,3 +22,13 @@ fn test_create_account_zero_balance_no_initial_tx() {
     let txs = crate::get_transactions_db(&db_path, account.id).unwrap();
     assert_eq!(txs.len(), 0);
 }
+
+#[test]
+fn test_create_account_negative_balance_creates_initial_tx() {
+    let (_dir, db_path) = setup_db();
+    let acc = crate::create_account_db(&db_path, "Neg".to_string(), -50.0, "cash".to_string()).unwrap();
+    let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
+    assert_eq!(txs.len(), 1);
+    assert_eq!(txs[0].amount, -50.0);
+    assert_eq!(txs[0].payee, "Opening Balance");
+}

@@ -9,3 +9,4 @@ pub mod brokerage_transaction;
 pub mod update_transaction;
 pub mod update_brokerage_transaction;
 pub mod delete_transaction;
+pub mod payees_categories;

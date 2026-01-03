@@ -957,16 +957,49 @@ fn update_brokerage_transaction_db(
         .map_err(|e| e.to_string())?;
     }
 
-    // Try to find matching cash (transfer) transaction by exact notes match
-    if let Some((cash_id, old_cash_amount, cash_account_id)) = tx
+    // Try to find matching cash (transfer) transaction by linked_tx_id first, fallback to exact notes match
+    let mut cash_row_opt: Option<(i32, f64, i32)> = None;
+
+    // linked_tx_id should have been set when the brokerage transaction was created
+    if let Some(linked_id_opt) = tx
         .query_row(
-            "SELECT id, amount, account_id FROM transactions WHERE notes = ?1 AND category = 'Transfer' LIMIT 1",
-            params![old_notes],
-            |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+            "SELECT linked_tx_id FROM transactions WHERE id = ?1",
+            params![id],
+            |row| row.get::<_, Option<i32>>(0),
         )
         .optional()
         .map_err(|e| e.to_string())?
+        .flatten()
     {
+        if let Some(row) = tx
+            .query_row(
+                "SELECT id, amount, account_id FROM transactions WHERE id = ?1",
+                params![linked_id_opt],
+                |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+        {
+            cash_row_opt = Some(row);
+        }
+    }
+
+    // Fallback to matching by notes if we didn't find a linked tx
+    if cash_row_opt.is_none() {
+        if let Some((cash_id, old_cash_amount, cash_account_id)) = tx
+            .query_row(
+                "SELECT id, amount, account_id FROM transactions WHERE notes = ?1 AND category = 'Transfer' LIMIT 1",
+                params![old_notes],
+                |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+        {
+            cash_row_opt = Some((cash_id, old_cash_amount, cash_account_id));
+        }
+    }
+
+    if let Some((cash_id, old_cash_amount, cash_account_id)) = cash_row_opt {
         let new_cash_amount = if is_buy { -(total_price + fee) } else { total_price - fee };
         let cash_diff: f64 = new_cash_amount - old_cash_amount;
 
