@@ -9,10 +9,14 @@ import { formatNumberWithLocale } from "../utils/format";
 import { CURRENCIES } from "../utils/currencies";
 import CustomSelect from "./CustomSelect";
 import ErrorBoundary from "./ErrorBoundary";
+import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { save } from "@tauri-apps/plugin-dialog";
 
 export default function SettingsModal({ onClose }) {
   const { locale, setLocale, currency, setCurrency } = useNumberFormat();
   const { theme, setTheme } = useTheme();
+  const [dbPath, setDbPath] = useState("");
 
   // Helpful debug logs so we can see contextual values the component depends on
   try {
@@ -25,6 +29,37 @@ export default function SettingsModal({ onClose }) {
     style: "currency",
     currency: currency || "USD",
   });
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const p = await invoke("get_db_path_command");
+        if (mounted) setDbPath(p);
+      } catch (e) {
+        console.error("Failed to fetch DB path:", e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function handleSelectDb() {
+    try {
+      const path = await save({
+        defaultPath: "honeybear.db",
+        filters: [{ name: "SQLite", extensions: ["db", "sqlite"] }],
+      });
+      if (path) {
+        await invoke("set_db_path", { path });
+        const p = await invoke("get_db_path_command");
+        setDbPath(p);
+      }
+    } catch (e) {
+      console.error("Failed to select DB file:", e);
+    }
+  }
 
   const modal = (
     <div className="modal-overlay">
@@ -46,7 +81,7 @@ export default function SettingsModal({ onClose }) {
               <button
                 type="button"
                 className="ml-2 bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded"
-                onClick={() => {
+                onClick={async () => {
                   try {
                     localStorage.removeItem("hb_number_format");
                     localStorage.removeItem("hb_currency");
@@ -57,6 +92,13 @@ export default function SettingsModal({ onClose }) {
                   setLocale("en-US");
                   setCurrency("USD");
                   setTheme("system");
+                  try {
+                    await invoke("reset_db_path");
+                    const p = await invoke("get_db_path_command");
+                    setDbPath(p);
+                  } catch (e) {
+                    console.error("Failed to reset DB path:", e);
+                  }
                 }}
               >
                 Reset to defaults
@@ -108,6 +150,22 @@ export default function SettingsModal({ onClose }) {
                 ]}
                 placeholder={"Select theme"}
               />
+            </div>
+
+            <div className="flex items-center justify-between mt-6">
+              <label className="modal-label">Database file</label>
+            </div>
+            <div className="relative">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded w-full text-left overflow-hidden truncate"
+                  onClick={handleSelectDb}
+                  title={dbPath || "Select DB file"}
+                >
+                  {dbPath && dbPath.length > 0 ? dbPath : "Select DB file"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

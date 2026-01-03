@@ -77,7 +77,55 @@ struct Transaction {
     fee: Option<f64>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Default)]
+struct AppSettings {
+    db_path: Option<String>,
+}
+
+fn settings_file_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    let app_dir = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?;
+    if !app_dir.exists() {
+        fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
+    }
+    Ok(app_dir.join("settings.json"))
+}
+
+fn read_settings(app_handle: &AppHandle) -> Result<AppSettings, String> {
+    let settings_path = settings_file_path(app_handle)?;
+    if settings_path.exists() {
+        let contents = fs::read_to_string(&settings_path).map_err(|e| e.to_string())?;
+        let s: AppSettings = serde_json::from_str(&contents).map_err(|e| e.to_string())?;
+        Ok(s)
+    } else {
+        Ok(AppSettings::default())
+    }
+}
+
+fn write_settings(app_handle: &AppHandle, settings: &AppSettings) -> Result<(), String> {
+    let settings_path = settings_file_path(app_handle)?;
+    let json = serde_json::to_string_pretty(settings).map_err(|e| e.to_string())?;
+    fs::write(&settings_path, json).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    // If the user has configured an override, use it
+    if let Ok(settings) = read_settings(app_handle) {
+        if let Some(ref p) = settings.db_path {
+            let pb = PathBuf::from(p);
+            // Ensure parent dir exists
+            if let Some(parent) = pb.parent() {
+                if !parent.exists() {
+                    fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+                }
+            }
+            return Ok(pb);
+        }
+    }
+
     let app_dir = app_handle
         .path()
         .app_data_dir()
@@ -158,6 +206,41 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+#[tauri::command]
+fn set_db_path(app_handle: AppHandle, path: String) -> Result<(), String> {
+    let mut settings = read_settings(&app_handle)?;
+    settings.db_path = Some(path.clone());
+    write_settings(&app_handle, &settings)?;
+
+    // Ensure any parent dir exists and initialize DB at new path
+    let pb = PathBuf::from(path);
+    if let Some(parent) = pb.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+    }
+
+    init_db(&app_handle)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn reset_db_path(app_handle: AppHandle) -> Result<(), String> {
+    let mut settings = read_settings(&app_handle)?;
+    settings.db_path = None;
+    write_settings(&app_handle, &settings)?;
+
+    // Ensure default DB exists
+    init_db(&app_handle)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn get_db_path_command(app_handle: AppHandle) -> Result<String, String> {
+    let pb = get_db_path(&app_handle)?;
+    Ok(pb.to_string_lossy().to_string())
 }
 
 #[tauri::command]
@@ -1162,6 +1245,10 @@ pub fn run() {
             search_ticker,
             rename_account,
             delete_account,
+            // DB path commands
+            set_db_path,
+            reset_db_path,
+            get_db_path_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
