@@ -426,10 +426,14 @@ export default function SettingsModal({ onClose }) {
                       onChange={(v) => setDateFormat(v)}
                       options={[
                         { value: "YYYY-MM-DD", label: "2026-01-03" },
+                        { value: "YYYY/MM/DD", label: "2026/01/03" },
                         { value: "MM/DD/YYYY", label: "01/03/2026" },
                         { value: "DD/MM/YYYY", label: "03/01/2026" },
+                        { value: "DD-MM-YYYY", label: "03-01-2026" },
+                        { value: "DD.MM.YYYY", label: "03.01.2026" },
                         { value: "DD MMM YYYY", label: "03 Jan 2026" },
                         { value: "MMM DD, YYYY", label: "Jan 03, 2026" },
+                        { value: "MMMM D, YYYY", label: "January 3, 2026" },
                       ]}
                       placeholder={t("settings.select_date_format_placeholder")}
                       fullWidth={false}

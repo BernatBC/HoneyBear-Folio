@@ -176,10 +176,14 @@ export function useParseNumber() {
 // import/export formats which continue to use ISO dates.
 export const DATE_FORMATS = {
   "YYYY-MM-DD": { datePicker: "yyyy-MM-dd" },
+  "YYYY/MM/DD": { datePicker: "yyyy/MM/dd" },
   "MM/DD/YYYY": { datePicker: "MM/dd/yyyy" },
   "DD/MM/YYYY": { datePicker: "dd/MM/yyyy" },
+  "DD-MM-YYYY": { datePicker: "dd-MM-yyyy" },
+  "DD.MM.YYYY": { datePicker: "dd.MM.yyyy" },
   "DD MMM YYYY": { datePicker: "dd MMM yyyy" },
   "MMM DD, YYYY": { datePicker: "MMM dd, yyyy" },
+  "MMMM D, YYYY": { datePicker: "MMMM d, yyyy" },
 };
 
 function pad2(n) {
@@ -196,10 +200,18 @@ export function formatDateForUI(value, formatKey, locale) {
       return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
         date.getDate(),
       )}`;
+    case "YYYY/MM/DD":
+      return `${date.getFullYear()}/${pad2(date.getMonth() + 1)}/${pad2(
+        date.getDate(),
+      )}`;
     case "MM/DD/YYYY":
       return `${pad2(date.getMonth() + 1)}/${pad2(date.getDate())}/${date.getFullYear()}`;
     case "DD/MM/YYYY":
       return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+    case "DD-MM-YYYY":
+      return `${pad2(date.getDate())}-${pad2(date.getMonth() + 1)}-${date.getFullYear()}`;
+    case "DD.MM.YYYY":
+      return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
     case "DD MMM YYYY":
       return date.toLocaleDateString(locale || undefined, {
         day: "2-digit",
@@ -207,11 +219,17 @@ export function formatDateForUI(value, formatKey, locale) {
         year: "numeric",
       });
     case "MMM DD, YYYY":
-      // toLocaleDateString often orders month/day differently depending on locale,
-      // but for this case we want a short month then day, then year.
+      // short month name format
       return date.toLocaleDateString(locale || undefined, {
         month: "short",
         day: "2-digit",
+        year: "numeric",
+      });
+    case "MMMM D, YYYY":
+      // full month name (e.g. "January 3, 2026")
+      return date.toLocaleDateString(locale || undefined, {
+        month: "long",
+        day: "numeric",
         year: "numeric",
       });
     default:
