@@ -1,5 +1,11 @@
 import PropTypes from "prop-types";
-import { X, Settings, SlidersHorizontal, Globe, HelpCircle } from "lucide-react";
+import {
+  X,
+  Settings,
+  SlidersHorizontal,
+  Globe,
+  HelpCircle,
+} from "lucide-react";
 import { createPortal } from "react-dom";
 import "../styles/Modal.css";
 import "../styles/SettingsModal.css";
@@ -71,7 +77,10 @@ export default function SettingsModal({ onClose }) {
     try {
       const rect = el.getBoundingClientRect();
       // place tooltip to the right of the control, slightly higher than center
-      el.style.setProperty("--tooltip-top", `${rect.top + rect.height / 2 - 15}px`);
+      el.style.setProperty(
+        "--tooltip-top",
+        `${rect.top + rect.height / 2 - 15}px`,
+      );
       el.style.setProperty("--tooltip-left", `${rect.right - 15}px`);
       el.setAttribute("data-tooltip-visible", "true");
       el.setAttribute("data-tooltip-side", "right");
@@ -183,8 +192,21 @@ export default function SettingsModal({ onClose }) {
                 <>
                   <div className="flex items-center justify-between">
                     <div className="label-with-help">
-                      <span className="help-wrapper" data-tooltip="Choose light/dark or follow system preference." role="button" tabIndex={0} aria-label="Choose light/dark or follow system preference" onMouseEnter={showTooltip} onFocus={showTooltip} onMouseLeave={hideTooltip} onBlur={hideTooltip}>
-                        <HelpCircle className="w-4 h-4 text-slate-400 help-icon" aria-hidden="true" />
+                      <span
+                        className="help-wrapper"
+                        data-tooltip="Choose light/dark or follow system preference."
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Choose light/dark or follow system preference"
+                        onMouseEnter={showTooltip}
+                        onFocus={showTooltip}
+                        onMouseLeave={hideTooltip}
+                        onBlur={hideTooltip}
+                      >
+                        <HelpCircle
+                          className="w-4 h-4 text-slate-400 help-icon"
+                          aria-hidden="true"
+                        />
                       </span>
                       <label className="modal-label">Theme</label>
                     </div>
@@ -205,8 +227,21 @@ export default function SettingsModal({ onClose }) {
 
                   <div className="flex items-center justify-between">
                     <div className="label-with-help">
-                      <span className="help-wrapper" data-tooltip="Path to your local SQLite database file." role="button" tabIndex={0} aria-label="Path to your local SQLite database file" onMouseEnter={showTooltip} onFocus={showTooltip} onMouseLeave={hideTooltip} onBlur={hideTooltip}>
-                        <HelpCircle className="w-4 h-4 text-slate-400 help-icon" aria-hidden="true" />
+                      <span
+                        className="help-wrapper"
+                        data-tooltip="Path to your local SQLite database file."
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Path to your local SQLite database file"
+                        onMouseEnter={showTooltip}
+                        onFocus={showTooltip}
+                        onMouseLeave={hideTooltip}
+                        onBlur={hideTooltip}
+                      >
+                        <HelpCircle
+                          className="w-4 h-4 text-slate-400 help-icon"
+                          aria-hidden="true"
+                        />
                       </span>
                       <label className="modal-label">Database file</label>
                     </div>
@@ -233,11 +268,26 @@ export default function SettingsModal({ onClose }) {
 
                   <div className="flex items-center justify-between mt-4">
                     <div className="label-with-help">
-                      <span className="help-wrapper" data-tooltip="Adjust row padding to control transaction row height
-                      (smaller = more rows)." role="button" tabIndex={0} aria-label="Adjusts padding inside each transaction row (affects visible rows)" onMouseEnter={showTooltip} onFocus={showTooltip} onMouseLeave={hideTooltip} onBlur={hideTooltip}>
-                        <HelpCircle className="w-4 h-4 text-slate-400 help-icon" aria-hidden="true" />
+                      <span
+                        className="help-wrapper"
+                        data-tooltip="Adjust row padding to control transaction row height
+                      (smaller = more rows)."
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Adjusts padding inside each transaction row (affects visible rows)"
+                        onMouseEnter={showTooltip}
+                        onFocus={showTooltip}
+                        onMouseLeave={hideTooltip}
+                        onBlur={hideTooltip}
+                      >
+                        <HelpCircle
+                          className="w-4 h-4 text-slate-400 help-icon"
+                          aria-hidden="true"
+                        />
                       </span>
-                      <label className="modal-label">Transaction row height</label>
+                      <label className="modal-label">
+                        Transaction row height
+                      </label>
                     </div>
                     <div className="text-sm text-slate-500">
                       {txRowPadding}px
@@ -262,8 +312,21 @@ export default function SettingsModal({ onClose }) {
                 <>
                   <div className="flex items-center justify-between">
                     <div className="label-with-help">
-                      <span className="help-wrapper" data-tooltip="Default currency used by the app when formatting amounts." role="button" tabIndex={0} aria-label="Default currency used by the app when formatting amounts" onMouseEnter={showTooltip} onFocus={showTooltip} onMouseLeave={hideTooltip} onBlur={hideTooltip}>
-                        <HelpCircle className="w-4 h-4 text-slate-400 help-icon" aria-hidden="true" />
+                      <span
+                        className="help-wrapper"
+                        data-tooltip="Default currency used by the app when formatting amounts."
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Default currency used by the app when formatting amounts"
+                        onMouseEnter={showTooltip}
+                        onFocus={showTooltip}
+                        onMouseLeave={hideTooltip}
+                        onBlur={hideTooltip}
+                      >
+                        <HelpCircle
+                          className="w-4 h-4 text-slate-400 help-icon"
+                          aria-hidden="true"
+                        />
                       </span>
                       <label className="modal-label">Currency</label>
                     </div>
@@ -283,8 +346,21 @@ export default function SettingsModal({ onClose }) {
 
                   <div className="flex items-center justify-between">
                     <div className="label-with-help">
-                      <span className="help-wrapper" data-tooltip="Choose how numbers are grouped and decimal separators are shown." role="button" tabIndex={0} aria-label="Choose how numbers are grouped and decimal separators are shown" onMouseEnter={showTooltip} onFocus={showTooltip} onMouseLeave={hideTooltip} onBlur={hideTooltip}>
-                        <HelpCircle className="w-4 h-4 text-slate-400 help-icon" aria-hidden="true" />
+                      <span
+                        className="help-wrapper"
+                        data-tooltip="Choose how numbers are grouped and decimal separators are shown."
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Choose how numbers are grouped and decimal separators are shown"
+                        onMouseEnter={showTooltip}
+                        onFocus={showTooltip}
+                        onMouseLeave={hideTooltip}
+                        onBlur={hideTooltip}
+                      >
+                        <HelpCircle
+                          className="w-4 h-4 text-slate-400 help-icon"
+                          aria-hidden="true"
+                        />
                       </span>
                       <label className="modal-label">Number format</label>
                     </div>
