@@ -178,8 +178,6 @@
     transition: opacity 0.08s ease-in;
   }
 
-
-
   /* Right-aligned tooltip */
   .label-with-help
     .help-wrapper[data-tooltip][data-tooltip-side="right"]::after {
@@ -188,8 +186,6 @@
     left: var(--tooltip-left, 0);
     margin-left: 6px; /* slightly less right offset */
   }
-
-
 
   .label-with-help
     .help-wrapper[data-tooltip][data-tooltip-visible="true"]::after {
