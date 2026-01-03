@@ -111,6 +111,135 @@ fn write_settings(app_handle: &AppHandle, settings: &AppSettings) -> Result<(), 
     Ok(())
 }
 
+// Test-only helpers to allow testing settings and init_db logic without an AppHandle
+#[cfg(test)]
+pub(crate) fn settings_file_path_for_dir(dir: &std::path::PathBuf) -> std::path::PathBuf {
+    dir.join("settings.json")
+}
+
+#[cfg(test)]
+pub(crate) fn write_settings_to_dir(dir: &std::path::PathBuf, settings: &AppSettings) -> Result<(), String> {
+    let settings_path = settings_file_path_for_dir(dir);
+    let json = serde_json::to_string_pretty(settings).map_err(|e| e.to_string())?;
+    fs::write(&settings_path, json).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[cfg(test)]
+pub(crate) fn read_settings_from_dir(dir: &std::path::PathBuf) -> Result<AppSettings, String> {
+    let settings_path = settings_file_path_for_dir(dir);
+    if settings_path.exists() {
+        let contents = fs::read_to_string(&settings_path).map_err(|e| e.to_string())?;
+        let s: AppSettings = serde_json::from_str(&contents).map_err(|e| e.to_string())?;
+        Ok(s)
+    } else {
+        Ok(AppSettings::default())
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn get_db_path_for_dir(dir: &std::path::PathBuf) -> Result<std::path::PathBuf, String> {
+    // If the user has configured an override, use it
+    if let Ok(settings) = read_settings_from_dir(dir) {
+        if let Some(ref p) = settings.db_path {
+            let pb = std::path::PathBuf::from(p);
+            // Ensure parent dir exists
+            if let Some(parent) = pb.parent() {
+                if !parent.exists() {
+                    fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+                }
+            }
+            return Ok(pb);
+        }
+    }
+
+    // Default path
+    let app_dir = dir;
+    if !app_dir.exists() {
+        fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
+    }
+    Ok(app_dir.join("honeybear.db"))
+}
+
+#[cfg(test)]
+pub(crate) fn init_db_at_path(db_path: &std::path::PathBuf) -> Result<(), String> {
+    // Ensure parent dir exists
+    if let Some(parent) = db_path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+    }
+
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS accounts (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            balance REAL NOT NULL,
+            kind TEXT DEFAULT 'cash'
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY,
+            account_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            payee TEXT NOT NULL,
+            notes TEXT,
+            category TEXT,
+            amount REAL NOT NULL,
+            ticker TEXT,
+            shares REAL,
+            price_per_share REAL,
+            fee REAL,
+            FOREIGN KEY(account_id) REFERENCES accounts(id)
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
+    // Ensure we have a column to link transfer pairs so updates/deletes can keep both sides in sync
+    {
+        let mut stmt = conn
+            .prepare("PRAGMA table_info(transactions)")
+            .map_err(|e| e.to_string())?;
+        let mut has_linked = false;
+        let col_iter = stmt
+            .query_map([], |row| row.get::<_, String>(1))
+            .map_err(|e| e.to_string())?;
+        for name in col_iter.flatten() {
+            if name == "linked_tx_id" {
+                has_linked = true;
+                break;
+            }
+        }
+        if !has_linked {
+            // Safe to ALTER TABLE to add the nullable column
+            conn.execute(
+                "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
+                [],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    }
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS stock_prices (
+            ticker TEXT PRIMARY KEY,
+            price REAL NOT NULL,
+            last_updated TEXT NOT NULL
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     // If the user has configured an override, use it
     if let Ok(settings) = read_settings(app_handle) {
@@ -753,25 +882,41 @@ fn update_transaction_db(
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    // Get old amount
-    let old_amount: f64 = tx
+    // Get old amount and account
+    let (old_amount, old_account_id): (f64, i32) = tx
         .query_row(
-            "SELECT amount FROM transactions WHERE id = ?1",
+            "SELECT amount, account_id FROM transactions WHERE id = ?1",
             params![id],
-            |row| row.get(0),
+            |row| Ok((row.get(0)?, row.get(1)?)),
         )
         .map_err(|e| e.to_string())?;
 
+    // Update transaction including account_id to support moving between accounts
     tx.execute(
-        "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5 WHERE id = ?6",
-        params![date, payee, notes, category, amount, id],
+        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6 WHERE id = ?7",
+        params![account_id, date, payee, notes, category, amount, id],
     ).map_err(|e| e.to_string())?;
 
-    let diff = amount - old_amount;
-    if diff.abs() > f64::EPSILON {
+    if old_account_id == account_id {
+        let diff = amount - old_amount;
+        if diff.abs() > f64::EPSILON {
+            tx.execute(
+                "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+                params![diff, account_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    } else {
+        // Moving transaction between accounts: revert old account and apply to new account
+        tx.execute(
+            "UPDATE accounts SET balance = balance - ?1 WHERE id = ?2",
+            params![old_amount, old_account_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         tx.execute(
             "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-            params![diff, account_id],
+            params![amount, account_id],
         )
         .map_err(|e| e.to_string())?;
     }
@@ -912,12 +1057,12 @@ fn update_brokerage_transaction_db(
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    // Get old amount and notes to locate the corresponding cash transaction
-    let (old_amount, old_notes): (f64, String) = tx
+    // Get old amount, notes and account to locate the corresponding cash transaction and previous brokerage account
+    let (old_amount, old_notes, old_account_id): (f64, String, i32) = tx
         .query_row(
-            "SELECT amount, notes FROM transactions WHERE id = ?1",
+            "SELECT amount, notes, account_id FROM transactions WHERE id = ?1",
             params![id],
-            |row| Ok((row.get(0)?, row.get(1)?)),
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
         )
         .map_err(|e| e.to_string())?;
 
@@ -931,9 +1076,11 @@ fn update_brokerage_transaction_db(
         ticker
     );
 
+    // Update transaction row (including account_id to support moving between brokerage accounts)
     tx.execute(
-        "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5, ticker = ?6, shares = ?7, price_per_share = ?8, fee = ?9 WHERE id = ?10",
+        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6, ticker = ?7, shares = ?8, price_per_share = ?9, fee = ?10 WHERE id = ?11",
         params![
+            brokerage_account_id,
             date,
             if is_buy { "Buy" } else { "Sell" },
             new_notes,
@@ -949,10 +1096,25 @@ fn update_brokerage_transaction_db(
     .map_err(|e| e.to_string())?;
 
     let diff = brokerage_amount - old_amount;
-    if diff.abs() > f64::EPSILON {
+    if old_account_id == brokerage_account_id {
+        if diff.abs() > f64::EPSILON {
+            tx.execute(
+                "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+                params![diff, brokerage_account_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    } else {
+        // Move the brokerage transaction between accounts: revert old account effect and apply new amount to new account
+        tx.execute(
+            "UPDATE accounts SET balance = balance - ?1 WHERE id = ?2",
+            params![old_amount, old_account_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         tx.execute(
             "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-            params![diff, brokerage_account_id],
+            params![brokerage_amount, brokerage_account_id],
         )
         .map_err(|e| e.to_string())?;
     }

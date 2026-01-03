@@ -14,3 +14,4 @@ pub mod api_error_tests;
 pub mod stock_parsing_tests;
 pub mod property_invariants;
 pub mod stock_http_mock_tests;
+pub mod settings_tests;
