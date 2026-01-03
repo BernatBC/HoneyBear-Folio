@@ -47,8 +47,9 @@ export default function SettingsModal({ onClose }) {
 
   async function handleSelectDb() {
     try {
+      const defaultPath = dbPath && dbPath.length > 0 ? dbPath : undefined;
       const path = await save({
-        defaultPath: "honeybear.db",
+        defaultPath,
         filters: [{ name: "SQLite", extensions: ["db", "sqlite"] }],
       });
       if (path) {
