@@ -44,6 +44,20 @@ jobs:
           cd app
           npm version $TAG_VERSION --no-git-tag-version --allow-same-version
           npm run version:sync
+
+          # Update Flatpak metainfo version and date
+          node -e '
+            const fs = require("fs");
+            const path = "flatpak/com.bernatbc.honeybearfolio.metainfo.xml";
+            if (fs.existsSync(path)) {
+              let content = fs.readFileSync(path, "utf8");
+              const version = process.argv[1];
+              const date = new Date().toISOString().split("T")[0];
+              content = content.replace(/<release version=".*" date=".*" \/>/, `<release version="${version}" date="${date}" />`);
+              fs.writeFileSync(path, content);
+              console.log("Updated metainfo.xml version to " + version);
+            }
+          ' "$TAG_VERSION"
         shell: bash
 
       - name: Install dependencies (Ubuntu only)
@@ -102,7 +116,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Install runtime/sdk
-          flatpak install -y --user flathub org.freedesktop.Platform//25.08 org.freedesktop.Sdk//25.08
+          flatpak install -y --user flathub org.gnome.Platform//49 org.gnome.Sdk//49
           
           # Extract target from args
           ARGS="${{ matrix.args }}"
