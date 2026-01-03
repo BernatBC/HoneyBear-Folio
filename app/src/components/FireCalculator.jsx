@@ -320,7 +320,7 @@ export default function FireCalculator() {
     // Remove any saved session so fetchData recomputes defaults from historic data
     try {
       sessionStorage.removeItem("fireCalculatorState");
-    } catch (e) {
+    } catch {
       // ignore
     }
 
