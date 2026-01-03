@@ -1512,7 +1512,7 @@ async fn get_stock_quotes_with_client_and_db(
         .collect();
 
     if !missing_tickers.is_empty() {
-        let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+        let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
         let mut stmt = conn
             .prepare("SELECT ticker, price FROM stock_prices WHERE ticker = ?1 COLLATE NOCASE")
             .map_err(|e| e.to_string())?;
