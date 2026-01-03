@@ -94,14 +94,6 @@ export default function SettingsModal({ onClose }) {
               Settings
             </h2>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleResetDefaults}
-                className="bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded"
-                title="Reset to defaults"
-              >
-                Reset to defaults
-              </button>
               <button onClick={onClose} className="modal-close-button" aria-label="Close settings">
                 <X className="w-5 h-5" />
               </button>
@@ -214,6 +206,17 @@ export default function SettingsModal({ onClose }) {
               )}
 
             </div>
+          </div>
+
+          <div className="modal-footer">
+            <button
+              type="button"
+              onClick={handleResetDefaults}
+              className="reset-button"
+              title="Reset to defaults"
+            >
+              Reset to defaults
+            </button>
           </div>
         </div>
       </ErrorBoundary>

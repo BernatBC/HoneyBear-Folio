@@ -5,7 +5,7 @@
   /* .modal-overlay moved to ./Modal.css */
 
   .modal-container {
-    @apply bg-white dark:bg-slate-900 w-[min(95vw,720px)] max-w-[720px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-y-auto overflow-x-hidden;
+    @apply flex flex-col bg-white dark:bg-slate-900 w-[min(95vw,720px)] max-w-[720px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-hidden overflow-x-hidden;
   }
 
   /* Ensure settings modal width cannot be overridden by other modal styles */
@@ -66,8 +66,12 @@
     @apply text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white;
   }
 
+  .settings-content {
+    @apply flex gap-4 flex-1 overflow-y-auto min-h-0;
+  }
+
   .modal-body {
-    @apply space-y-4;
+    @apply space-y-4 flex-1 overflow-y-auto min-h-0 pb-6;
   }
 
   .modal-select {
@@ -99,5 +103,18 @@
   .dark select,
   :root.dark select {
     color-scheme: dark;
+  }
+
+  /* Footer and reset button styles */
+  .modal-footer {
+    @apply mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 mt-6 flex justify-start bg-white dark:bg-slate-900 z-10 shadow-sm;
+  }
+
+  .reset-button {
+    @apply text-sm font-medium px-3 py-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm;
+  }
+
+  .reset-button:hover {
+    @apply text-red-700 dark:text-red-400 border-red-200 dark:border-red-600;
   }
 }
