@@ -184,7 +184,7 @@ export default function SettingsModal({ onClose }) {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        className="bg-slate-700 hover:bg-slate-600 text-white text-sm py-1 px-2 rounded w-full sm:w-[20rem] max-w-full text-left overflow-hidden truncate"
+                        className="bg-white dark:bg-slate-700 text-slate-700 dark:text-white text-sm py-1 px-2 rounded w-full sm:w-[20rem] max-w-full text-left overflow-hidden truncate border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
                         onClick={handleSelectDb}
                         title={dbPath || "Select DB file"}
                       >
