@@ -1,7 +1,7 @@
 app-id: com.bernatbc.honeybearfolio
-runtime: org.freedesktop.Platform
-runtime-version: "25.08"
-sdk: org.freedesktop.Sdk
+runtime: org.gnome.Platform
+runtime-version: "49"
+sdk: org.gnome.Sdk
 command: honeybear-folio
 finish-args:
   - --share=ipc
