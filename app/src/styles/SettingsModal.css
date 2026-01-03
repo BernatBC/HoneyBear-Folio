@@ -5,7 +5,23 @@
   /* .modal-overlay moved to ./Modal.css */
 
   .modal-container {
-    @apply bg-white dark:bg-slate-900 w-full max-w-[1200px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-y-auto;
+    @apply bg-white dark:bg-slate-900 w-[min(95vw,900px)] max-w-[900px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-y-auto overflow-x-hidden;
+  }
+
+  /* Ensure settings modal width cannot be overridden by other modal styles */
+  .modal-container.settings-modal-container {
+    @apply w-[min(95vw,900px)] max-w-[900px] overflow-x-visible; /* allow internal content to lay out but avoid horizontal scrollbar */
+  }
+
+  /* Narrow select triggers within settings modal */
+  .settings-modal-container .settings-select .custom-select-trigger {
+    @apply w-[20rem] max-w-full;
+  }
+
+  @media (max-width: 640px) {
+    .settings-modal-container .settings-select .custom-select-trigger {
+      @apply w-full;
+    }
   }
 
   /* Header action group on the right */

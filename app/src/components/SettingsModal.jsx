@@ -87,7 +87,7 @@ export default function SettingsModal({ onClose }) {
   const modal = (
     <div className="modal-overlay">
       <ErrorBoundary>
-        <div className="modal-container">
+        <div className="modal-container settings-modal-container">
           <div className="modal-header">
             <h2 className="modal-title">
               <Settings className="w-6 h-6 text-brand-400" />
@@ -140,7 +140,7 @@ export default function SettingsModal({ onClose }) {
                   <div className="flex items-center justify-between mt-6">
                     <label className="modal-label">Theme</label>
                   </div>
-                  <div className="relative">
+                  <div className="relative settings-select">
                     <CustomSelect
                       value={theme}
                       onChange={(v) => setTheme(v)}
@@ -176,7 +176,7 @@ export default function SettingsModal({ onClose }) {
                   <div className="flex items-center justify-between">
                     <label className="modal-label">Currency</label>
                   </div>
-                  <div className="relative">
+                  <div className="relative settings-select">
                     <CustomSelect
                       value={currency}
                       onChange={(v) => setCurrency(v)}
@@ -192,7 +192,7 @@ export default function SettingsModal({ onClose }) {
                     <label className="modal-label">Number format</label>
                   </div>
 
-                  <div className="relative">
+                  <div className="relative settings-select">
                     <CustomSelect
                       value={locale}
                       onChange={(v) => setLocale(v)}
