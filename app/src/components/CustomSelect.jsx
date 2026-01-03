@@ -13,9 +13,16 @@ export default function CustomSelect({
   const [highlighted, setHighlighted] = useState(-1);
   const containerRef = useRef(null);
   const listRef = useRef(null);
+  const searchRef = useRef(null);
   const [menuCoords, setMenuCoords] = useState(null);
+  const [search, setSearch] = useState("");
 
   const selected = options.find((o) => String(o.value) === String(value));
+
+  const filteredOptions = options.filter((opt) => {
+    const label = opt.label ? String(opt.label) : String(opt.value);
+    return label.toLowerCase().includes(search.toLowerCase());
+  });
 
   useEffect(() => {
     const onClickOutside = (e) => {
@@ -34,6 +41,7 @@ export default function CustomSelect({
         setOpen(false);
         setMenuCoords(null);
         setHighlighted(-1);
+        setSearch("");
       }
     };
     document.addEventListener("mousedown", onClickOutside);
@@ -45,7 +53,7 @@ export default function CustomSelect({
     // scroll highlighted into view
     const node = listRef.current?.querySelector("[data-highlighted='true']");
     node?.scrollIntoView({ block: "nearest" });
-  }, [highlighted, open]);
+  }, [highlighted, open, search]);
 
   useEffect(() => {
     if (!open) return;
@@ -79,6 +87,7 @@ export default function CustomSelect({
       setOpen(false);
       setMenuCoords(null);
       setHighlighted(-1);
+      setSearch("");
     }
 
     window.addEventListener("scroll", handleScrollOrResize, true);
@@ -93,6 +102,13 @@ export default function CustomSelect({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    // focus input when menu opens
+    const timer = setTimeout(() => searchRef.current?.focus(), 0);
+    return () => clearTimeout(timer);
+  }, [open]);
+
   const toggle = () => {
     if (!open && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -104,11 +120,23 @@ export default function CustomSelect({
         width: rect.width,
         height: rect.height,
       });
+
+      // compute initial highlighted index from the current filtered options
+      const currentFiltered = options.filter((opt) => {
+        const label = opt.label ? String(opt.label) : String(opt.value);
+        return label.toLowerCase().includes(search.toLowerCase());
+      });
+      const idx = currentFiltered.findIndex(
+        (o) => String(o.value) === String(value),
+      );
+      setHighlighted(idx >= 0 ? idx : currentFiltered.length > 0 ? 0 : -1);
+
       setOpen(true);
     } else {
       setOpen(false);
       setMenuCoords(null);
       setHighlighted(-1);
+      setSearch("");
     }
   };
 
@@ -120,18 +148,19 @@ export default function CustomSelect({
         setHighlighted(0);
         return;
       }
-      setHighlighted((h) => Math.min(h + 1, options.length - 1));
+      setHighlighted((h) => Math.min(h + 1, filteredOptions.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlighted((h) => Math.max(h - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (open && highlighted >= 0) {
-        const opt = options[highlighted];
+      if (open && highlighted >= 0 && filteredOptions[highlighted]) {
+        const opt = filteredOptions[highlighted];
         onChange(opt.value);
         setOpen(false);
         setMenuCoords(null);
         setHighlighted(-1);
+        setSearch("");
       } else {
         if (containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
@@ -150,6 +179,7 @@ export default function CustomSelect({
       setOpen(false);
       setMenuCoords(null);
       setHighlighted(-1);
+      setSearch("");
     }
   };
 
@@ -176,7 +206,7 @@ export default function CustomSelect({
             ref={listRef}
             role="listbox"
             tabIndex={-1}
-            className="custom-select-portal fixed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-auto p-1 animate-fade-in"
+            className="custom-select-portal fixed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-auto p-2 animate-fade-in"
             style={{
               top: `${menuCoords.top + menuCoords.height + 8}px`,
               left: `${Math.min(
@@ -188,7 +218,25 @@ export default function CustomSelect({
             }}
             onKeyDown={handleKeyDown}
           >
-            {options.map((opt, i) => {
+            <li className="px-1 py-1">
+              <input
+                ref={searchRef}
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setHighlighted(0);
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="Search..."
+                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1 text-sm text-slate-900 dark:text-slate-100"
+              />
+            </li>
+
+            {filteredOptions.length === 0 && (
+              <li className="px-3 py-2 text-slate-500">No results</li>
+            )}
+
+            {filteredOptions.map((opt, i) => {
               const isSelected = String(opt.value) === String(value);
               const isHighlighted = i === highlighted;
               return (
@@ -208,6 +256,7 @@ export default function CustomSelect({
                     setOpen(false);
                     setMenuCoords(null);
                     setHighlighted(-1);
+                    setSearch("");
                   }}
                 >
                   <span className="truncate">{opt.label}</span>
