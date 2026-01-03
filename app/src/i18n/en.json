@@ -84,6 +84,8 @@
   "settings.select_currency_placeholder": "Select currency",
   "settings.select_format_placeholder": "Select format",
   "settings.example": "Example: {example}",
+  "settings.date_format": "Date format",
+  "settings.select_date_format_placeholder": "Select date format",
 
   "dashboard.title": "Dashboard",
   "dashboard.current_net_worth": "Current Net Worth",

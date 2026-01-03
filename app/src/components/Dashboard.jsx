@@ -17,7 +17,7 @@ import { Line, Doughnut, Bar } from "react-chartjs-2";
 import "../styles/Dashboard.css";
 import PropTypes from "prop-types";
 import { computeNetWorth } from "../utils/networth";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber, useFormatDate } from "../utils/format";
 import { t } from "../i18n/i18n";
 
 ChartJS.register(
@@ -42,6 +42,7 @@ export default function Dashboard({
   const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, 1Y, ALL
 
   const formatNumber = useFormatNumber();
+  const formatDate = useFormatDate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -169,10 +170,10 @@ export default function Dashboard({
     });
 
     return {
-      labels: sortedDates,
+      labels: sortedDates.map((d) => formatDate(d)),
       datasets: datasets,
     };
-  }, [accounts, transactions, timeRange, marketValues]);
+  }, [accounts, transactions, timeRange, marketValues, formatDate]);
 
   const doughnutData = useMemo(() => {
     if (accounts.length === 0) return null;
@@ -300,7 +301,7 @@ export default function Dashboard({
       labels: months.map((m) => {
         const [y, month] = m.split("-");
         const date = new Date(parseInt(y), parseInt(month) - 1);
-        return date.toLocaleDateString("en-US", { month: "short" });
+        return date.toLocaleDateString("en-US", { month: "long" });
       }),
       datasets: [
         {

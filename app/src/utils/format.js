@@ -172,6 +172,81 @@ export function useParseNumber() {
   return (str) => parseNumberWithLocale(str, locale);
 }
 
+// Date format helpers used for UI-only date formatting. These do NOT affect
+// import/export formats which continue to use ISO dates.
+export const DATE_FORMATS = {
+  "YYYY-MM-DD": { datePicker: "yyyy-MM-dd" },
+  "YYYY/MM/DD": { datePicker: "yyyy/MM/dd" },
+  "MM/DD/YYYY": { datePicker: "MM/dd/yyyy" },
+  "DD/MM/YYYY": { datePicker: "dd/MM/yyyy" },
+  "DD-MM-YYYY": { datePicker: "dd-MM-yyyy" },
+  "DD.MM.YYYY": { datePicker: "dd.MM.yyyy" },
+  "DD MMM YYYY": { datePicker: "dd MMM yyyy" },
+  "MMM DD, YYYY": { datePicker: "MMM dd, yyyy" },
+  "MMMM D, YYYY": { datePicker: "MMMM d, yyyy" },
+};
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+export function formatDateForUI(value, formatKey, _locale) {
+  if (!value) return "";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  switch (formatKey) {
+    case "YYYY-MM-DD":
+      return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
+        date.getDate(),
+      )}`;
+    case "YYYY/MM/DD":
+      return `${date.getFullYear()}/${pad2(date.getMonth() + 1)}/${pad2(
+        date.getDate(),
+      )}`;
+    case "MM/DD/YYYY":
+      return `${pad2(date.getMonth() + 1)}/${pad2(date.getDate())}/${date.getFullYear()}`;
+    case "DD/MM/YYYY":
+      return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+    case "DD-MM-YYYY":
+      return `${pad2(date.getDate())}-${pad2(date.getMonth() + 1)}-${date.getFullYear()}`;
+    case "DD.MM.YYYY":
+      return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
+    case "DD MMM YYYY":
+      // Use English month names for UI display (independent of number locale)
+      return date.toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    case "MMM DD, YYYY":
+      // short month name format — force English month names to avoid mixing with number locale
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      });
+    case "MMMM D, YYYY":
+      // full month name (e.g. "January 3, 2026") — force English months
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    default:
+      return date.toISOString().split("T")[0];
+  }
+}
+
+export function getDatePickerFormat(formatKey) {
+  return DATE_FORMATS[formatKey]?.datePicker || "yyyy-MM-dd";
+}
+
+export function useFormatDate() {
+  const { dateFormat, locale } = useNumberFormat();
+  return (value) => formatDateForUI(value, dateFormat, locale);
+}
+
 export function formatNumberForExport(value) {
   if (value === undefined || value === null) return "";
   if (typeof value === "number") return String(value);

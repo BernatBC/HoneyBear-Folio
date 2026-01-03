@@ -19,6 +19,14 @@ export function NumberFormatProvider({ children }) {
     }
   });
 
+  const [dateFormat, setDateFormat] = useState(() => {
+    try {
+      return localStorage.getItem("hb_date_format") || "YYYY-MM-DD";
+    } catch {
+      return "YYYY-MM-DD";
+    }
+  });
+
   useEffect(() => {
     try {
       localStorage.setItem("hb_number_format", locale);
@@ -35,9 +43,24 @@ export function NumberFormatProvider({ children }) {
     }
   }, [currency]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem("hb_date_format", dateFormat);
+    } catch {
+      // ignore
+    }
+  }, [dateFormat]);
+
   return (
     <NumberFormatContext.Provider
-      value={{ locale, setLocale, currency, setCurrency }}
+      value={{
+        locale,
+        setLocale,
+        currency,
+        setCurrency,
+        dateFormat,
+        setDateFormat,
+      }}
     >
       {children}
     </NumberFormatContext.Provider>
