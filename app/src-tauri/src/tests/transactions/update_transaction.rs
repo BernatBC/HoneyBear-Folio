@@ -1,10 +1,11 @@
 use super::common::setup_db;
-use rusqlite::{Connection, params};
+use rusqlite::{params, Connection};
 
 #[test]
 fn test_update_transaction() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Test".to_string(), 100.0, "cash".to_string()).unwrap();
+    let account =
+        crate::create_account_db(&db_path, "Test".to_string(), 100.0, "cash".to_string()).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
         account.id,
@@ -12,8 +13,9 @@ fn test_update_transaction() {
         "Payee".to_string(),
         None,
         None,
-        -10.0
-    ).unwrap();
+        -10.0,
+    )
+    .unwrap();
 
     let args = crate::UpdateTransactionArgs {
         id: tx.id,
@@ -52,8 +54,10 @@ fn test_update_transaction_missing_id_should_error() {
 #[test]
 fn test_update_transaction_finds_counterpart_by_notes() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
+    let acc1 =
+        crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc2 =
+        crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
 
     // Insert two transactions manually without linked_tx_id but with matching notes
     let conn = Connection::open(&db_path).unwrap();
@@ -73,11 +77,13 @@ fn test_update_transaction_finds_counterpart_by_notes() {
     conn.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
         params![-50.0, acc1.id],
-    ).unwrap();
+    )
+    .unwrap();
     conn.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
         params![50.0, acc2.id],
-    ).unwrap();
+    )
+    .unwrap();
 
     // Now update tx1 amount to -60.0 using update_transaction_db which should find counterpart by notes
     let args = crate::UpdateTransactionArgs {
@@ -110,11 +116,22 @@ fn test_update_transaction_finds_counterpart_by_notes() {
 #[test]
 fn test_update_transaction_updates_counterpart_when_linked() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
+    let acc1 =
+        crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc2 =
+        crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
 
     // Create transfer via API which should link txs
-    let tx = crate::create_transaction_db(&db_path, acc1.id, "2023-01-01".to_string(), acc2.name.clone(), Some("X".to_string()), None, -40.0).unwrap();
+    let tx = crate::create_transaction_db(
+        &db_path,
+        acc1.id,
+        "2023-01-01".to_string(),
+        acc2.name.clone(),
+        Some("X".to_string()),
+        None,
+        -40.0,
+    )
+    .unwrap();
 
     // Verify counterpart exists
     let txs2 = crate::get_transactions_db(&db_path, acc2.id).unwrap();
@@ -149,8 +166,18 @@ fn test_update_transaction_updates_counterpart_when_linked() {
 #[test]
 fn test_update_transaction_no_amount_change_doesnt_alter_balances() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "T".to_string(), 100.0, "cash".to_string()).unwrap();
-    let tx = crate::create_transaction_db(&db_path, account.id, "2023-01-01".to_string(), "Payee".to_string(), None, None, -20.0).unwrap();
+    let account =
+        crate::create_account_db(&db_path, "T".to_string(), 100.0, "cash".to_string()).unwrap();
+    let tx = crate::create_transaction_db(
+        &db_path,
+        account.id,
+        "2023-01-01".to_string(),
+        "Payee".to_string(),
+        None,
+        None,
+        -20.0,
+    )
+    .unwrap();
 
     let args = crate::UpdateTransactionArgs {
         id: tx.id,
@@ -165,5 +192,12 @@ fn test_update_transaction_no_amount_change_doesnt_alter_balances() {
     crate::update_transaction_db(&db_path, args).unwrap();
 
     let accounts = crate::get_accounts_db(&db_path).unwrap();
-    assert_eq!(accounts.iter().find(|a| a.id == account.id).unwrap().balance, 80.0);
+    assert_eq!(
+        accounts
+            .iter()
+            .find(|a| a.id == account.id)
+            .unwrap()
+            .balance,
+        80.0
+    );
 }

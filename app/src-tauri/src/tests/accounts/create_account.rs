@@ -3,7 +3,13 @@ use super::common::setup_db;
 #[test]
 fn test_create_account() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Test Account".to_string(), 100.0, "cash".to_string()).unwrap();
+    let account = crate::create_account_db(
+        &db_path,
+        "Test Account".to_string(),
+        100.0,
+        "cash".to_string(),
+    )
+    .unwrap();
     assert_eq!(account.name, "Test Account");
     assert_eq!(account.balance, 100.0);
     assert_eq!(account.kind, "cash");
@@ -18,7 +24,8 @@ fn test_create_account() {
 #[test]
 fn test_create_account_zero_balance_no_initial_tx() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Zero".to_string(), 0.0, "cash".to_string()).unwrap();
+    let account =
+        crate::create_account_db(&db_path, "Zero".to_string(), 0.0, "cash".to_string()).unwrap();
     let txs = crate::get_transactions_db(&db_path, account.id).unwrap();
     assert_eq!(txs.len(), 0);
 }
@@ -26,7 +33,8 @@ fn test_create_account_zero_balance_no_initial_tx() {
 #[test]
 fn test_create_account_negative_balance_creates_initial_tx() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(&db_path, "Neg".to_string(), -50.0, "cash".to_string()).unwrap();
+    let acc =
+        crate::create_account_db(&db_path, "Neg".to_string(), -50.0, "cash".to_string()).unwrap();
     let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
     assert_eq!(txs.len(), 1);
     assert_eq!(txs[0].amount, -50.0);
@@ -36,7 +44,9 @@ fn test_create_account_negative_balance_creates_initial_tx() {
 #[test]
 fn test_create_account_initial_tx_details() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Detail".to_string(), 200.0, "cash".to_string()).unwrap();
+    let account =
+        crate::create_account_db(&db_path, "Detail".to_string(), 200.0, "cash".to_string())
+            .unwrap();
     let txs = crate::get_transactions_db(&db_path, account.id).unwrap();
     assert_eq!(txs.len(), 1);
     assert_eq!(txs[0].notes.as_deref(), Some("Initial Balance"));

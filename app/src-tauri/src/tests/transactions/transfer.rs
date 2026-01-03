@@ -3,8 +3,10 @@ use super::common::setup_db;
 #[test]
 fn test_transfer() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
+    let acc1 =
+        crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc2 =
+        crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
 
     // Transfer 50 from Acc1 to Acc2
     // Payee should be "Acc2"
@@ -15,8 +17,9 @@ fn test_transfer() {
         "Acc2".to_string(),
         None,
         None,
-        -50.0
-    ).unwrap();
+        -50.0,
+    )
+    .unwrap();
 
     let accounts = crate::get_accounts_db(&db_path).unwrap();
     let acc1_new = accounts.iter().find(|a| a.id == acc1.id).unwrap();

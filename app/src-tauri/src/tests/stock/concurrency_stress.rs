@@ -1,6 +1,6 @@
 use super::common::setup_db;
-use httpmock::MockServer;
 use httpmock::Method::GET;
+use httpmock::MockServer;
 
 #[tokio::test]
 async fn test_get_stock_quotes_concurrency_stress() {
@@ -32,7 +32,9 @@ async fn test_get_stock_quotes_concurrency_stress() {
         let db = db_path.clone();
         let tks = tickers.clone();
         handles.push(tokio::spawn(async move {
-            crate::get_stock_quotes_with_client_and_db(c, base, &db, tks).await.unwrap()
+            crate::get_stock_quotes_with_client_and_db(c, base, &db, tks)
+                .await
+                .unwrap()
         }));
     }
 

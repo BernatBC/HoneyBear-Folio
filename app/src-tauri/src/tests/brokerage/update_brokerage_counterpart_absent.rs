@@ -3,8 +3,15 @@ use super::common::setup_db;
 #[test]
 fn test_update_brokerage_transaction_when_counterpart_missing() {
     let (_dir, db_path) = setup_db();
-    let cash_acc = crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
-    let brokerage_acc = crate::create_account_db(&db_path, "Brokerage".to_string(), 0.0, "investment".to_string()).unwrap();
+    let cash_acc =
+        crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
+    let brokerage_acc = crate::create_account_db(
+        &db_path,
+        "Brokerage".to_string(),
+        0.0,
+        "investment".to_string(),
+    )
+    .unwrap();
 
     // Create initial brokerage transaction (buy)
     let args = crate::CreateBrokerageTransactionArgs {
@@ -32,12 +39,24 @@ fn test_update_brokerage_transaction_when_counterpart_missing() {
         .unwrap();
 
     assert!(linked_id.is_some());
-    conn.execute("DELETE FROM transactions WHERE id = ?1", rusqlite::params![linked_id.unwrap()]).unwrap();
+    conn.execute(
+        "DELETE FROM transactions WHERE id = ?1",
+        rusqlite::params![linked_id.unwrap()],
+    )
+    .unwrap();
 
     // Record balances before update
     let accts_before = crate::get_accounts_db(&db_path).unwrap();
-    let cash_before = accts_before.iter().find(|a| a.id == cash_acc.id).unwrap().balance;
-    let brokerage_before = accts_before.iter().find(|a| a.id == brokerage_acc.id).unwrap().balance;
+    let cash_before = accts_before
+        .iter()
+        .find(|a| a.id == cash_acc.id)
+        .unwrap()
+        .balance;
+    let brokerage_before = accts_before
+        .iter()
+        .find(|a| a.id == brokerage_acc.id)
+        .unwrap()
+        .balance;
 
     // Update brokerage transaction (reduce shares and change price/fee)
     let update_args = crate::UpdateBrokerageTransactionArgs {
@@ -60,8 +79,16 @@ fn test_update_brokerage_transaction_when_counterpart_missing() {
 
     // Check brokerage account updated by diff and cash account unchanged (counterpart missing)
     let accts_after = crate::get_accounts_db(&db_path).unwrap();
-    let cash_after = accts_after.iter().find(|a| a.id == cash_acc.id).unwrap().balance;
-    let brokerage_after = accts_after.iter().find(|a| a.id == brokerage_acc.id).unwrap().balance;
+    let cash_after = accts_after
+        .iter()
+        .find(|a| a.id == cash_acc.id)
+        .unwrap()
+        .balance;
+    let brokerage_after = accts_after
+        .iter()
+        .find(|a| a.id == brokerage_acc.id)
+        .unwrap()
+        .balance;
 
     assert!((brokerage_after - (brokerage_before + diff)).abs() < 1e-6);
     assert!((cash_after - cash_before).abs() < 1e-6);

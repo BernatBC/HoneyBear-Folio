@@ -1,6 +1,6 @@
+use rusqlite::Connection;
 use std::fs;
 use std::path::PathBuf;
-use rusqlite::Connection;
 
 // Test-only helpers to allow testing settings and init_db logic without an AppHandle
 
@@ -8,7 +8,10 @@ pub(crate) fn settings_file_path_for_dir(dir: &PathBuf) -> PathBuf {
     dir.join("settings.json")
 }
 
-pub(crate) fn write_settings_to_dir(dir: &PathBuf, settings: &super::AppSettings) -> Result<(), String> {
+pub(crate) fn write_settings_to_dir(
+    dir: &PathBuf,
+    settings: &super::AppSettings,
+) -> Result<(), String> {
     let settings_path = settings_file_path_for_dir(dir);
     let json = serde_json::to_string_pretty(settings).map_err(|e| e.to_string())?;
     fs::write(&settings_path, json).map_err(|e| e.to_string())?;

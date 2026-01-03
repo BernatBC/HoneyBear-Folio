@@ -1,6 +1,6 @@
 use super::common::setup_db;
-use std::os::unix::fs::PermissionsExt;
 use std::fs::{self, File};
+use std::os::unix::fs::PermissionsExt;
 
 #[test]
 fn test_write_settings_to_readonly_dir_errors() {
@@ -12,7 +12,9 @@ fn test_write_settings_to_readonly_dir_errors() {
     perms.set_mode(0o444);
     fs::set_permissions(&dir_path, perms).unwrap();
 
-    let s = crate::AppSettings { db_path: Some("/tmp/some/path.db".to_string()) };
+    let s = crate::AppSettings {
+        db_path: Some("/tmp/some/path.db".to_string()),
+    };
     let res = crate::write_settings_to_dir(&dir_path, &s);
 
     // Should fail to write due to permissions
@@ -42,7 +44,13 @@ fn test_set_db_path_parent_creation_permission_error() {
     let target = readonly.join("child").join("test.db");
     let dir_path = dir.path().to_path_buf();
     // Write settings that point to target and then initializing DB at target should fail due to readonly parent
-    crate::write_settings_to_dir(&dir_path, &crate::AppSettings { db_path: Some(target.to_string_lossy().to_string()) }).unwrap();
+    crate::write_settings_to_dir(
+        &dir_path,
+        &crate::AppSettings {
+            db_path: Some(target.to_string_lossy().to_string()),
+        },
+    )
+    .unwrap();
     let res = crate::init_db_at_path(&target);
     assert!(res.is_err());
 
@@ -59,7 +67,7 @@ fn test_db_locked_write_fails() {
 
     // Open an exclusive transaction to lock DB for writes
     let conn = rusqlite::Connection::open(&db_path).unwrap();
-    conn.execute_batch("BEGIN EXCLUSIVE;") .unwrap();
+    conn.execute_batch("BEGIN EXCLUSIVE;").unwrap();
 
     // Attempts to create a new account should fail because DB is locked
     let res = crate::create_account_db(&db_path, "LockTest".to_string(), 10.0, "cash".to_string());

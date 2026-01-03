@@ -1,10 +1,11 @@
 use super::common::setup_db;
-use rusqlite::{Connection, params};
+use rusqlite::{params, Connection};
 
 #[test]
 fn test_delete_transaction() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Test".to_string(), 100.0, "cash".to_string()).unwrap();
+    let account =
+        crate::create_account_db(&db_path, "Test".to_string(), 100.0, "cash".to_string()).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
         account.id,
@@ -12,8 +13,9 @@ fn test_delete_transaction() {
         "Payee".to_string(),
         None,
         None,
-        -10.0
-    ).unwrap();
+        -10.0,
+    )
+    .unwrap();
 
     crate::delete_transaction_db(&db_path, tx.id).unwrap();
 
@@ -24,19 +26,32 @@ fn test_delete_transaction() {
 #[test]
 fn test_delete_transaction_deletes_linked_counterpart() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "A1".to_string(), 100.0, "cash".to_string()).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "A2".to_string(), 0.0, "cash".to_string()).unwrap();
+    let acc1 =
+        crate::create_account_db(&db_path, "A1".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc2 =
+        crate::create_account_db(&db_path, "A2".to_string(), 0.0, "cash".to_string()).unwrap();
 
     // Create a transfer via API which should link txs
-    let tx = crate::create_transaction_db(&db_path, acc1.id, "2023-01-01".to_string(), acc2.name.clone(), None, None, -30.0).unwrap();
+    let tx = crate::create_transaction_db(
+        &db_path,
+        acc1.id,
+        "2023-01-01".to_string(),
+        acc2.name.clone(),
+        None,
+        None,
+        -30.0,
+    )
+    .unwrap();
 
     // Inspect DB directly to find linked tx id
     let conn = Connection::open(&db_path).unwrap();
-    let linked_id_opt: Option<i32> = conn.query_row(
-        "SELECT linked_tx_id FROM transactions WHERE id = ?1",
-        params![tx.id],
-        |row| row.get(0),
-    ).unwrap();
+    let linked_id_opt: Option<i32> = conn
+        .query_row(
+            "SELECT linked_tx_id FROM transactions WHERE id = ?1",
+            params![tx.id],
+            |row| row.get(0),
+        )
+        .unwrap();
 
     assert!(linked_id_opt.is_some());
 
@@ -62,8 +77,16 @@ fn test_delete_transaction_deletes_linked_counterpart() {
     }
 
     let accounts_after = crate::get_accounts_db(&db_path).unwrap();
-    let a1_after = accounts_after.iter().find(|a| a.id == acc1.id).unwrap().balance;
-    let a2_after = accounts_after.iter().find(|a| a.id == acc2.id).unwrap().balance;
+    let a1_after = accounts_after
+        .iter()
+        .find(|a| a.id == acc1.id)
+        .unwrap()
+        .balance;
+    let a2_after = accounts_after
+        .iter()
+        .find(|a| a.id == acc2.id)
+        .unwrap()
+        .balance;
 
     assert_eq!(a1_after, 100.0);
     assert_eq!(a2_after, 0.0);
@@ -72,8 +95,10 @@ fn test_delete_transaction_deletes_linked_counterpart() {
 #[test]
 fn test_delete_transaction_fallback_by_notes() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
+    let acc1 =
+        crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc2 =
+        crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
 
     // Insert two transactions manually with matching notes but no linked_tx_id
     let conn = Connection::open(&db_path).unwrap();
@@ -93,11 +118,13 @@ fn test_delete_transaction_fallback_by_notes() {
     conn.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
         params![-20.0, acc1.id],
-    ).unwrap();
+    )
+    .unwrap();
     conn.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
         params![20.0, acc2.id],
-    ).unwrap();
+    )
+    .unwrap();
 
     // Now delete tx1 (it has no linked_tx_id but notes match), delete should remove both
     crate::delete_transaction_db(&db_path, tx1_id).unwrap();
@@ -109,8 +136,16 @@ fn test_delete_transaction_fallback_by_notes() {
     assert!(txs2.iter().all(|t| t.id != tx2_id));
 
     let accounts_after = crate::get_accounts_db(&db_path).unwrap();
-    let a1_after = accounts_after.iter().find(|a| a.id == acc1.id).unwrap().balance;
-    let a2_after = accounts_after.iter().find(|a| a.id == acc2.id).unwrap().balance;
+    let a1_after = accounts_after
+        .iter()
+        .find(|a| a.id == acc1.id)
+        .unwrap()
+        .balance;
+    let a2_after = accounts_after
+        .iter()
+        .find(|a| a.id == acc2.id)
+        .unwrap()
+        .balance;
 
     assert_eq!(a1_after, 100.0);
     assert_eq!(a2_after, 0.0);
@@ -126,8 +161,15 @@ fn test_delete_transaction_missing_id_should_error() {
 #[test]
 fn test_delete_brokerage_transaction_deletes_linked_cash_counterpart() {
     let (_dir, db_path) = setup_db();
-    let cash_acc = crate::create_account_db(&db_path, "Cash".to_string(), 500.0, "cash".to_string()).unwrap();
-    let brokerage_acc = crate::create_account_db(&db_path, "Broker".to_string(), 1000.0, "investment".to_string()).unwrap();
+    let cash_acc =
+        crate::create_account_db(&db_path, "Cash".to_string(), 500.0, "cash".to_string()).unwrap();
+    let brokerage_acc = crate::create_account_db(
+        &db_path,
+        "Broker".to_string(),
+        1000.0,
+        "investment".to_string(),
+    )
+    .unwrap();
 
     let args = crate::CreateBrokerageTransactionArgs {
         brokerage_account_id: brokerage_acc.id,
@@ -146,7 +188,9 @@ fn test_delete_brokerage_transaction_deletes_linked_cash_counterpart() {
     let brokerage_txs = crate::get_transactions_db(&db_path, brokerage_acc.id).unwrap();
     let cash_txs = crate::get_transactions_db(&db_path, cash_acc.id).unwrap();
     assert!(brokerage_txs.len() >= 1);
-    assert!(cash_txs.iter().any(|t| t.category.as_deref() == Some("Transfer")));
+    assert!(cash_txs
+        .iter()
+        .any(|t| t.category.as_deref() == Some("Transfer")));
 
     // Delete the brokerage transaction
     crate::delete_transaction_db(&db_path, created.id).unwrap();
@@ -156,12 +200,22 @@ fn test_delete_brokerage_transaction_deletes_linked_cash_counterpart() {
 
     // Both should be gone (except opening balances)
     assert!(brokerage_txs_after.iter().all(|t| t.id != created.id));
-    assert!(cash_txs_after.iter().all(|t| t.category.as_deref() != Some("Transfer")));
+    assert!(cash_txs_after
+        .iter()
+        .all(|t| t.category.as_deref() != Some("Transfer")));
 
     // Balances restored
     let accounts_after = crate::get_accounts_db(&db_path).unwrap();
-    let cash_after = accounts_after.iter().find(|a| a.id == cash_acc.id).unwrap().balance;
-    let broker_after = accounts_after.iter().find(|a| a.id == brokerage_acc.id).unwrap().balance;
+    let cash_after = accounts_after
+        .iter()
+        .find(|a| a.id == cash_acc.id)
+        .unwrap()
+        .balance;
+    let broker_after = accounts_after
+        .iter()
+        .find(|a| a.id == brokerage_acc.id)
+        .unwrap()
+        .balance;
 
     assert_eq!(cash_after, 500.0);
     assert_eq!(broker_after, 1000.0);

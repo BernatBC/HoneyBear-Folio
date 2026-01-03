@@ -3,11 +3,22 @@ use super::common::setup_db;
 #[test]
 fn test_update_transaction_move_between_accounts() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "From".to_string(), 100.0, "cash".to_string()).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "To".to_string(), 50.0, "cash".to_string()).unwrap();
+    let acc1 =
+        crate::create_account_db(&db_path, "From".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc2 =
+        crate::create_account_db(&db_path, "To".to_string(), 50.0, "cash".to_string()).unwrap();
 
     // Create a simple non-transfer transaction in acc1
-    let tx = crate::create_transaction_db(&db_path, acc1.id, "2023-01-01".to_string(), "Payee".to_string(), None, None, -20.0).unwrap();
+    let tx = crate::create_transaction_db(
+        &db_path,
+        acc1.id,
+        "2023-01-01".to_string(),
+        "Payee".to_string(),
+        None,
+        None,
+        -20.0,
+    )
+    .unwrap();
 
     // Move transaction to acc2 using update_transaction_db
     let args = crate::UpdateTransactionArgs {
@@ -41,10 +52,20 @@ fn test_update_transaction_move_between_accounts() {
 #[test]
 fn test_create_transaction_payee_same_account_name_no_transfer_created() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(&db_path, "SelfAcc".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc = crate::create_account_db(&db_path, "SelfAcc".to_string(), 100.0, "cash".to_string())
+        .unwrap();
 
     // Create transaction where payee equals the same account name - should NOT create transfer
-    let tx = crate::create_transaction_db(&db_path, acc.id, "2023-01-01".to_string(), acc.name.clone(), None, None, -10.0).unwrap();
+    let tx = crate::create_transaction_db(
+        &db_path,
+        acc.id,
+        "2023-01-01".to_string(),
+        acc.name.clone(),
+        None,
+        None,
+        -10.0,
+    )
+    .unwrap();
     assert_eq!(tx.category, None);
 
     // Ensure no counterpart created

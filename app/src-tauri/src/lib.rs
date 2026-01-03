@@ -75,7 +75,7 @@ struct Transaction {
     shares: Option<f64>,
     price_per_share: Option<f64>,
     fee: Option<f64>,
-} 
+}
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 struct AppSettings {
@@ -117,12 +117,8 @@ mod test_helpers;
 
 #[cfg(test)]
 pub(crate) use test_helpers::{
-    write_settings_to_dir,
-    read_settings_from_dir,
-    get_db_path_for_dir,
-    init_db_at_path,
-    create_account_in_dir,
-    create_transaction_in_dir,
+    create_account_in_dir, create_transaction_in_dir, get_db_path_for_dir, init_db_at_path,
+    read_settings_from_dir, write_settings_to_dir,
 };
 
 fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
@@ -1029,7 +1025,13 @@ fn update_brokerage_transaction_db(
             .query_row(
                 "SELECT id, amount, account_id FROM transactions WHERE id = ?1",
                 params![linked_id_opt],
-                |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+                |row| {
+                    Ok((
+                        row.get::<_, i32>(0)?,
+                        row.get::<_, f64>(1)?,
+                        row.get::<_, i32>(2)?,
+                    ))
+                },
             )
             .optional()
             .map_err(|e| e.to_string())?
@@ -1054,7 +1056,11 @@ fn update_brokerage_transaction_db(
     }
 
     if let Some((cash_id, old_cash_amount, cash_account_id)) = cash_row_opt {
-        let new_cash_amount = if is_buy { -(total_price + fee) } else { total_price - fee };
+        let new_cash_amount = if is_buy {
+            -(total_price + fee)
+        } else {
+            total_price - fee
+        };
         let cash_diff: f64 = new_cash_amount - old_cash_amount;
 
         tx.execute(
@@ -1240,11 +1246,20 @@ fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
 #[tauri::command]
 async fn search_ticker(query: String) -> Result<Vec<YahooSearchQuote>, String> {
     // Delegate to the test-injectable helper that accepts a client and base url
-    search_ticker_with_client(reqwest::Client::new(), "https://query1.finance.yahoo.com".to_string(), query).await
+    search_ticker_with_client(
+        reqwest::Client::new(),
+        "https://query1.finance.yahoo.com".to_string(),
+        query,
+    )
+    .await
 }
 
 // Helper allowing tests to inject client and base URL
-async fn search_ticker_with_client(client: reqwest::Client, base_url: String, query: String) -> Result<Vec<YahooSearchQuote>, String> {
+async fn search_ticker_with_client(
+    client: reqwest::Client,
+    base_url: String,
+    query: String,
+) -> Result<Vec<YahooSearchQuote>, String> {
     let url = format!("{}/v1/finance/search?q={}", base_url, query);
     let res = client
         .get(&url)
@@ -1265,7 +1280,15 @@ async fn get_stock_quotes(
     tickers: Vec<String>,
 ) -> Result<Vec<YahooQuote>, String> {
     // Delegate to helper that allows injecting a client and base URL for tests
-    get_stock_quotes_with_client(reqwest::Client::builder().build().map_err(|e| e.to_string())?, "https://query1.finance.yahoo.com".to_string(), app_handle, tickers).await
+    get_stock_quotes_with_client(
+        reqwest::Client::builder()
+            .build()
+            .map_err(|e| e.to_string())?,
+        "https://query1.finance.yahoo.com".to_string(),
+        app_handle,
+        tickers,
+    )
+    .await
 }
 
 async fn get_stock_quotes_with_client(

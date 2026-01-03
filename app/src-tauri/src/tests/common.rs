@@ -1,6 +1,6 @@
 use rusqlite::Connection;
-use tempfile::tempdir;
 use std::path::PathBuf;
+use tempfile::tempdir;
 
 pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
     let dir = tempdir().unwrap();
@@ -16,7 +16,8 @@ pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
             kind TEXT DEFAULT 'cash'
         )",
         [],
-    ).unwrap();
+    )
+    .unwrap();
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS transactions (
@@ -35,7 +36,8 @@ pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
             FOREIGN KEY(account_id) REFERENCES accounts(id)
         )",
         [],
-    ).unwrap();
+    )
+    .unwrap();
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS stock_prices (
@@ -44,7 +46,8 @@ pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
             last_updated TEXT NOT NULL
         )",
         [],
-    ).unwrap();
+    )
+    .unwrap();
 
     (dir, db_path)
 }

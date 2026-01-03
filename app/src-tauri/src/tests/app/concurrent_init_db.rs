@@ -19,6 +19,12 @@ fn test_concurrent_init_db_is_idempotent() {
 
     // Ensure linked_tx_id column exists
     let conn = rusqlite::Connection::open(&db_path).unwrap();
-    let has_linked_after: bool = conn.prepare("PRAGMA table_info(transactions)").unwrap().query_map([], |row| row.get::<_, String>(1)).unwrap().flatten().any(|c| c=="linked_tx_id");
+    let has_linked_after: bool = conn
+        .prepare("PRAGMA table_info(transactions)")
+        .unwrap()
+        .query_map([], |row| row.get::<_, String>(1))
+        .unwrap()
+        .flatten()
+        .any(|c| c == "linked_tx_id");
     assert!(has_linked_after);
 }

@@ -12,8 +12,13 @@ fn test_randomized_balance_invariants() {
     // Create some accounts with random initial balances
     let mut accounts = Vec::new();
     for i in 0..3 {
-        let bal = if i == 2 { 0.0 } else { rng.gen_range(0..500) as f64 };
-        let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal, "cash".to_string()).unwrap();
+        let bal = if i == 2 {
+            0.0
+        } else {
+            rng.gen_range(0..500) as f64
+        };
+        let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal, "cash".to_string())
+            .unwrap();
         accounts.push(acc);
     }
 
@@ -27,8 +32,18 @@ fn test_randomized_balance_invariants() {
             // create transaction
             let acc_idx = rng.gen_range(0..accounts.len());
             let amount = rng.gen_range(-200..200) as f64;
-            if amount == 0.0 { continue; }
-            let res = crate::create_transaction_db(&db_path, accounts[acc_idx].id, "2023-01-01".to_string(), "RandPay".to_string(), None, None, amount);
+            if amount == 0.0 {
+                continue;
+            }
+            let res = crate::create_transaction_db(
+                &db_path,
+                accounts[acc_idx].id,
+                "2023-01-01".to_string(),
+                "RandPay".to_string(),
+                None,
+                None,
+                amount,
+            );
             if let Ok(tx) = res {
                 tx_ids.push(tx.id);
             }
@@ -36,7 +51,15 @@ fn test_randomized_balance_invariants() {
             // create a transfer by using another account's name as payee
             let a = rng.gen_range(0..accounts.len());
             let b = (a + 1) % accounts.len();
-            let res = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), accounts[b].name.clone(), Some("XFER".to_string()), None, -rng.gen_range(1..150) as f64);
+            let res = crate::create_transaction_db(
+                &db_path,
+                accounts[a].id,
+                "2023-01-01".to_string(),
+                accounts[b].name.clone(),
+                Some("XFER".to_string()),
+                None,
+                -rng.gen_range(1..150) as f64,
+            );
             if let Ok(tx) = res {
                 tx_ids.push(tx.id);
             }
@@ -92,18 +115,35 @@ fn test_randomized_balance_invariants() {
         let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
         let sum: f64 = txs.iter().map(|t| t.amount).sum();
         // Floating point small errors allowed
-        assert!((acc.balance - sum).abs() < 1e-6, "Balance mismatch for account {}: {} != {}", acc.id, acc.balance, sum);
+        assert!(
+            (acc.balance - sum).abs() < 1e-6,
+            "Balance mismatch for account {}: {} != {}",
+            acc.id,
+            acc.balance,
+            sum
+        );
     }
-
 
     // Check linked tx invariants explicitly
     let conn = Connection::open(&db_path).unwrap();
-    let mut stmt = conn.prepare("SELECT id, linked_tx_id FROM transactions WHERE linked_tx_id IS NOT NULL").unwrap();
-    let iter = stmt.query_map([], |row: &rusqlite::Row| Ok((row.get::<_, i32>(0)?, row.get::<_, i32>(1)?))).unwrap();
+    let mut stmt = conn
+        .prepare("SELECT id, linked_tx_id FROM transactions WHERE linked_tx_id IS NOT NULL")
+        .unwrap();
+    let iter = stmt
+        .query_map([], |row: &rusqlite::Row| {
+            Ok((row.get::<_, i32>(0)?, row.get::<_, i32>(1)?))
+        })
+        .unwrap();
     for res in iter {
         let (id, linked) = res.unwrap();
         // counterpart should exist and point back
-        let back: Option<i32> = conn.query_row("SELECT linked_tx_id FROM transactions WHERE id = ?1", rusqlite::params![linked], |r: &rusqlite::Row| r.get::<_, Option<i32>>(0)).unwrap();
+        let back: Option<i32> = conn
+            .query_row(
+                "SELECT linked_tx_id FROM transactions WHERE id = ?1",
+                rusqlite::params![linked],
+                |r: &rusqlite::Row| r.get::<_, Option<i32>>(0),
+            )
+            .unwrap();
         assert_eq!(back.unwrap(), id);
     }
 }

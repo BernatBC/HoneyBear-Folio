@@ -3,8 +3,15 @@ use super::common::setup_db;
 #[test]
 fn test_brokerage_transaction() {
     let (_dir, db_path) = setup_db();
-    let cash_acc = crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
-    let brokerage_acc = crate::create_account_db(&db_path, "Brokerage".to_string(), 0.0, "investment".to_string()).unwrap();
+    let cash_acc =
+        crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
+    let brokerage_acc = crate::create_account_db(
+        &db_path,
+        "Brokerage".to_string(),
+        0.0,
+        "investment".to_string(),
+    )
+    .unwrap();
 
     let args = crate::CreateBrokerageTransactionArgs {
         brokerage_account_id: brokerage_acc.id,
@@ -39,8 +46,15 @@ fn test_brokerage_transaction() {
 #[test]
 fn test_brokerage_transaction_sell() {
     let (_dir, db_path) = setup_db();
-    let cash_acc = crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
-    let brokerage_acc = crate::create_account_db(&db_path, "Brokerage".to_string(), 0.0, "investment".to_string()).unwrap();
+    let cash_acc =
+        crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
+    let brokerage_acc = crate::create_account_db(
+        &db_path,
+        "Brokerage".to_string(),
+        0.0,
+        "investment".to_string(),
+    )
+    .unwrap();
 
     let args = crate::CreateBrokerageTransactionArgs {
         brokerage_account_id: brokerage_acc.id,
@@ -72,7 +86,8 @@ fn test_brokerage_transaction_sell() {
 #[test]
 fn test_create_brokerage_transaction_missing_brokerage_account_should_error() {
     let (_dir, db_path) = setup_db();
-    let cash_acc = crate::create_account_db(&db_path, "Cash".to_string(), 100.0, "cash".to_string()).unwrap();
+    let cash_acc =
+        crate::create_account_db(&db_path, "Cash".to_string(), 100.0, "cash".to_string()).unwrap();
 
     let args = crate::CreateBrokerageTransactionArgs {
         brokerage_account_id: -999,

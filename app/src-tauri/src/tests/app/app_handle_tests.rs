@@ -1,5 +1,5 @@
-use tempfile::tempdir;
 use std::path::Path;
+use tempfile::tempdir;
 
 #[test]
 fn test_app_handle_db_path_set_and_reset() {
@@ -16,7 +16,13 @@ fn test_app_handle_db_path_set_and_reset() {
     // set_db_path should write settings and create the parent directory; simulate via helpers
     let nested = dir_path.join("nested").join("test.db");
     let nested_str = nested.to_string_lossy().to_string();
-    crate::write_settings_to_dir(&dir_path, &crate::AppSettings { db_path: Some(nested_str.clone()) }).unwrap();
+    crate::write_settings_to_dir(
+        &dir_path,
+        &crate::AppSettings {
+            db_path: Some(nested_str.clone()),
+        },
+    )
+    .unwrap();
     crate::init_db_at_path(&nested).unwrap();
 
     // Ensure settings reflect override
