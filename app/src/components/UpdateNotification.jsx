@@ -153,7 +153,9 @@ export default function UpdateNotification() {
                   h3: ({ node: _node, ...props }) => (
                     <h3 className="text-sm font-bold mt-1 mb-1" {...props} />
                   ),
-                  p: ({ node: _node, ...props }) => <p className="mb-1" {...props} />,
+                  p: ({ node: _node, ...props }) => (
+                    <p className="mb-1" {...props} />
+                  ),
                 }}
               >
                 {updateInfo.body}
