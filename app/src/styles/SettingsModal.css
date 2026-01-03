@@ -115,11 +115,11 @@
 
   /* Footer and reset button styles */
   .modal-footer {
-    @apply mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 mt-6 flex justify-start bg-white dark:bg-slate-900 z-10 shadow-sm;
+    @apply mt-auto border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-start z-10;
   }
 
   .reset-button {
-    @apply text-sm font-medium px-3 py-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm;
+    @apply text-sm font-medium px-3 py-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors;
   }
 
   .reset-button:hover {
