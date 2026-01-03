@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useFormatNumber, useParseNumber } from "../utils/format";
 import NumberInput from "./NumberInput";
+import { t } from "../i18n/i18n";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);
@@ -556,7 +557,7 @@ export default function AccountDetails({ account, onUpdate }) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search transactions..."
+              placeholder={t("account.search_transactions")}
               className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 text-slate-900 dark:text-slate-100"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -605,7 +606,9 @@ export default function AccountDetails({ account, onUpdate }) {
                 className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                <span className="hidden sm:inline">Add Transaction</span>
+                <span className="hidden sm:inline">
+                  {t("account.add_transaction")}
+                </span>
               </button>
             ) : (
               <button
@@ -613,7 +616,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center gap-2 px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
               >
                 <X className="w-5 h-5" />
-                <span className="hidden sm:inline">Cancel</span>
+                <span className="hidden sm:inline">{t("account.cancel")}</span>
               </button>
             )}
           </div>
@@ -1016,7 +1019,9 @@ export default function AccountDetails({ account, onUpdate }) {
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
                 >
                   <Check className="w-4 h-4" />
-                  <span className="text-white">Save Transaction</span>
+                  <span className="text-white">
+                    {t("account.save_transaction")}
+                  </span>
                 </button>
               </div>
             </form>
@@ -1076,12 +1081,12 @@ export default function AccountDetails({ account, onUpdate }) {
                         <Search className="w-8 h-8 text-slate-300 dark:text-slate-500" />
                       </div>
                       <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                        No transactions found
+                        {t("account.no_transactions_found")}
                       </p>
                       <p className="text-sm text-slate-400 dark:text-slate-500">
                         {searchQuery
-                          ? "Try adjusting your search terms."
-                          : "Add a new transaction to get started."}
+                          ? t("account.search_try_adjust")
+                          : t("account.add_transaction_get_started")}
                       </p>
                     </div>
                   </td>

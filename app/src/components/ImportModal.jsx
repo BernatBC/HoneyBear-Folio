@@ -16,6 +16,7 @@ import CustomSelect from "./CustomSelect";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { parseNumberWithLocale } from "../utils/format";
+import { t } from "../i18n/i18n";
 
 export default function ImportModal({ onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
@@ -184,7 +185,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
       !mapping.account &&
       !(file && file.name && file.name.endsWith(".json"))
     ) {
-      alert("Please indicate the account column in the mapping");
+      alert(t("error.no_account_mapping"));
       return;
     }
 
@@ -378,7 +379,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
         <div className="modal-header border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h2 className="modal-title">
             <Upload className="w-5 h-5 text-blue-500" />
-            Import Transactions
+            {t("import.title")}
           </h2>
           <button onClick={onClose} className="modal-close-button">
             <X className="w-5 h-5" />
@@ -397,10 +398,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
                 <FileSpreadsheet className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
               )}
               <p className="text-slate-600 dark:text-slate-300 font-medium">
-                Click to upload CSV, Excel or JSON file
+                {t("import.click_to_upload")}
               </p>
               <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
-                Supports .csv, .xlsx, .xls, .json
+                {t("import.supports")}
               </p>
               <input
                 type="file"
@@ -423,7 +424,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   onClick={() => setFile(null)}
                   className="text-slate-500 dark:text-slate-400 hover:text-red-400 text-sm"
                 >
-                  Change File
+                  {t("import.change_file")}
                 </button>
               </div>
 
@@ -437,11 +438,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  Map Columns
+                  {t("import.map_columns")}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
-                  Be sure to map the <strong>account</strong> column so the
-                  importer can assign each row to the right account.
+                  {t("import.be_sure_map_account")}
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {Object.keys(mapping).map((field) => (
@@ -456,13 +456,13 @@ export default function ImportModal({ onClose, onImportComplete }) {
                             setMapping({ ...mapping, [field]: v })
                           }
                           options={[
-                            { value: "", label: "Skip" },
+                            { value: "", label: t("import.skip") },
                             ...columns.map((col) => ({
                               value: col,
                               label: col,
                             })),
                           ]}
-                          placeholder={"Select column"}
+                          placeholder={t("import.select_column")}
                         />
                       </div>
                     </div>
@@ -517,7 +517,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500">No preview available</p>
+                  <p className="text-sm text-slate-500">
+                    {t("import.no_preview")}
+                  </p>
                 )}
               </div>
 
@@ -563,7 +565,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
             className="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             disabled={importing}
           >
-            Cancel
+            {t("export.cancel")}
           </button>
           <button
             onClick={handleImport}
@@ -576,7 +578,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <span className="text-white">
-              {importing ? "Importing..." : "Start Import"}
+              {importing ? t("import.importing") : t("import.start_import")}
             </span>
           </button>
         </div>

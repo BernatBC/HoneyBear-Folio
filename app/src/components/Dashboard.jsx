@@ -18,6 +18,7 @@ import "../styles/Dashboard.css";
 import PropTypes from "prop-types";
 import { computeNetWorth } from "../utils/networth";
 import { useFormatNumber } from "../utils/format";
+import { t } from "../i18n/i18n";
 
 ChartJS.register(
   CategoryScale,
@@ -427,7 +428,7 @@ export default function Dashboard({
     <div className="dashboard-container">
       <div className="dashboard-header">
         <div>
-          <h2 className="dashboard-title">Dashboard</h2>
+          <h2 className="dashboard-title">{t("dashboard.title")}</h2>
           <p className="dashboard-subtitle">
             Overview of your financial performance
           </p>
@@ -455,7 +456,9 @@ export default function Dashboard({
       {/* Summary Cards */}
       <div className="summary-cards-grid">
         <div className="summary-card group">
-          <h3 className="summary-card-title">Current Net Worth</h3>
+          <h3 className="summary-card-title">
+            {t("dashboard.current_net_worth")}
+          </h3>
           <p className="summary-card-value">
             {formatNumber(computeNetWorth(accounts, marketValues), {
               style: "currency",
@@ -463,18 +466,22 @@ export default function Dashboard({
           </p>
         </div>
         <div className="summary-card group">
-          <h3 className="summary-card-title">Total Accounts</h3>
+          <h3 className="summary-card-title">
+            {t("dashboard.total_accounts")}
+          </h3>
           <p className="summary-card-value">{accounts.length}</p>
         </div>
         <div className="summary-card group">
-          <h3 className="summary-card-title">Total Transactions</h3>
+          <h3 className="summary-card-title">
+            {t("dashboard.total_transactions")}
+          </h3>
           <p className="summary-card-value">{transactions.length}</p>
         </div>
       </div>
 
       <div className="chart-container">
         <div className="chart-header">
-          <h3 className="chart-title">Net Worth Evolution</h3>
+          <h3 className="chart-title">{t("dashboard.networth_evolution")}</h3>
           <p className="chart-subtitle">
             Track your financial growth over time
           </p>
@@ -486,7 +493,9 @@ export default function Dashboard({
             <div className="loading-container">
               <div className="loading-content">
                 <div className="loading-spinner"></div>
-                <span className="loading-text">Loading data...</span>
+                <span className="loading-text">
+                  {t("loading.loading_data")}
+                </span>
               </div>
             </div>
           )}
@@ -502,7 +511,9 @@ export default function Dashboard({
             <div className="loading-container">
               <div className="loading-content">
                 <div className="loading-spinner"></div>
-                <span className="loading-text">Loading data...</span>
+                <span className="loading-text">
+                  {t("loading.loading_data")}
+                </span>
               </div>
             </div>
           )}
@@ -530,7 +541,9 @@ export default function Dashboard({
             <div className="loading-container">
               <div className="loading-content">
                 <div className="loading-spinner"></div>
-                <span className="loading-text">Loading data...</span>
+                <span className="loading-text">
+                  {t("loading.loading_data")}
+                </span>
               </div>
             </div>
           )}

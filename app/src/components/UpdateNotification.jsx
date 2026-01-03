@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, Download, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import "../styles/Modal.css";
+import { t } from "../i18n/i18n";
 
 // Set this to true to test the popup without a real update server
 const TEST_MODE = false;
@@ -86,7 +87,7 @@ export default function UpdateNotification() {
       setDownloaded(true);
     } catch (err) {
       console.error("Failed to install update:", err);
-      setError(err.message || "Failed to update");
+      setError(err.message || t('update.failed_update'));
       setDownloading(false);
     }
   };
@@ -96,7 +97,7 @@ export default function UpdateNotification() {
       await relaunch();
     } catch (err) {
       console.error("Failed to relaunch:", err);
-      setError("Failed to relaunch application");
+      setError(t('update.failed_relaunch'));
     }
   };
 
@@ -111,8 +112,13 @@ export default function UpdateNotification() {
       <div className="modal-container w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-            Update Available
-          </h2>
+            {t('update.title')}
+          </h2>  
+
+          <div className="mb-6">
+          <p className="text-slate-600 dark:text-slate-300 mb-2">
+            {t('update.available_text', { version: updateInfo?.version })}
+          </p>
           <button
             onClick={handleClose}
             className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -172,7 +178,7 @@ export default function UpdateNotification() {
           {downloading && (
             <div className="mb-4">
               <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400 mb-1">
-                <span>Downloading...</span>
+                <span>{t('update.downloading')}</span>
                 <span>{progress}%</span>
               </div>
               <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
@@ -193,7 +199,7 @@ export default function UpdateNotification() {
                 className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                 disabled={downloading}
               >
-                Later
+                {t('update.later')}
               </button>
               <button
                 onClick={handleUpdate}
@@ -203,12 +209,12 @@ export default function UpdateNotification() {
                 {downloading ? (
                   <>
                     <RefreshCw className="animate-spin" size={18} />
-                    Updating...
+                    {t('update.updating')}
                   </>
                 ) : (
                   <>
                     <Download size={18} />
-                    Update Now
+                    {t('update.update_now')}
                   </>
                 )}
               </button>
@@ -219,7 +225,7 @@ export default function UpdateNotification() {
               className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors w-full justify-center"
             >
               <RefreshCw size={18} />
-              Restart to Apply Update
+              {t('update.restart_apply')}
             </button>
           )}
         </div>

@@ -6,6 +6,7 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
 import { X, Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import * as XLSX from "xlsx";
+import { t } from "../i18n/i18n";
 import "../styles/Modal.css";
 import "../styles/ExportModal.css";
 import { formatNumberForExport } from "../utils/format";
@@ -146,21 +147,21 @@ export default function ExportModal({ onClose }) {
           typeof filePath === "string" ? filePath : JSON.stringify(filePath);
 
         if (showToast) {
-          showToast(`Export successful — saved to ${filePathStr}`, {
+          showToast(t('export.success_saved', { path: filePathStr }), {
             type: "success",
           });
         } else {
           // Fallback when toast system isn't available
-          alert("Export successful — saved to " + filePathStr);
+          alert(t('export.success_saved', { path: filePathStr }));
         }
 
         onClose();
       } catch (e) {
         console.error("Export failed:", e);
         if (showToast) {
-          showToast("Export failed: " + String(e), { type: "error" });
+          showToast(t('export.failed', { error: String(e) }), { type: "error" });
         } else {
-          alert("Export failed: " + e);
+          alert(t('export.failed', { error: String(e) }));
         }
       } finally {
         setExporting(false);
@@ -168,9 +169,9 @@ export default function ExportModal({ onClose }) {
     } catch (e) {
       console.error("Export failed:", e);
       if (showToast) {
-        showToast("Export failed: " + String(e), { type: "error" });
+        showToast(t('export.failed', { error: String(e) }), { type: "error" });
       } else {
-        alert("Export failed: " + e);
+        alert(t('export.failed', { error: String(e) }));
       }
     } finally {
       // Ensure exporting flag is cleared even if an outer error occurs
@@ -184,15 +185,18 @@ export default function ExportModal({ onClose }) {
         <div className="modal-header">
           <h2 className="modal-title">
             <Download className="w-5 h-5 text-brand-500" />
-            Export Data
+            {t('export.title')}
           </h2>
           <button onClick={onClose} className="modal-close-button">
             <X className="w-5 h-5" />
           </button>
-        </div>
+        </div>  
 
         <div className="modal-body">
-          <label className="modal-label">Select Format</label>
+          <label className="modal-label">{t('export.select_format')}</label>
+
+        <div className="modal-body">
+          <label className="modal-label">{t('export.select_format')}</label>
           <div className="format-grid">
             <button
               onClick={() => setFormat("json")}
@@ -203,7 +207,7 @@ export default function ExportModal({ onClose }) {
               }`}
             >
               <FileJson className="w-6 h-6 mb-2" />
-              <span className="text-xs font-medium">JSON</span>
+              <span className="text-xs font-medium">{t('export.format.json')}</span>
             </button>
             <button
               onClick={() => setFormat("csv")}
@@ -214,7 +218,7 @@ export default function ExportModal({ onClose }) {
               }`}
             >
               <FileText className="w-6 h-6 mb-2" />
-              <span className="text-xs font-medium">CSV</span>
+              <span className="text-xs font-medium">{t('export.format.csv')}</span>
             </button>
             <button
               onClick={() => setFormat("xlsx")}
@@ -225,7 +229,7 @@ export default function ExportModal({ onClose }) {
               }`}
             >
               <FileSpreadsheet className="w-6 h-6 mb-2" />
-              <span className="text-xs font-medium">Excel</span>
+              <span className="text-xs font-medium">{t('export.format.xlsx')}</span>
             </button>
           </div>
         </div>
@@ -236,7 +240,7 @@ export default function ExportModal({ onClose }) {
             className="modal-cancel-button"
             disabled={exporting}
           >
-            Cancel
+            {t('export.cancel')}
           </button>
           <button
             onClick={handleExport}
@@ -244,7 +248,7 @@ export default function ExportModal({ onClose }) {
             className="modal-export-button"
           >
             <span className="text-white">
-              {exporting ? "Exporting..." : "Select Location & Export"}
+              {exporting ? t('export.exporting') : t('export.select_location_export')}
             </span>
           </button>
         </div>

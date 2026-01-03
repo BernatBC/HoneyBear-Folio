@@ -18,7 +18,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
-
+import { t } from "../i18n/i18n";
 export default function SettingsModal({ onClose }) {
   const { locale, setLocale, currency, setCurrency } = useNumberFormat();
   const { theme, setTheme } = useTheme();
@@ -143,7 +143,7 @@ export default function SettingsModal({ onClose }) {
           <div className="modal-header">
             <h2 className="modal-title">
               <Settings className="w-6 h-6 text-brand-400" />
-              Settings
+              {t("settings.title")}
             </h2>
             <div className="flex items-center gap-2">
               <button
@@ -169,7 +169,7 @@ export default function SettingsModal({ onClose }) {
                 className={`settings-tab ${activeTab === "general" ? "settings-tab-active" : ""}`}
               >
                 <SlidersHorizontal className="w-4 h-4 text-slate-400" />
-                <span>General</span>
+                <span>{t("settings.general")}</span>
               </button>
               <button
                 role="tab"
@@ -178,14 +178,16 @@ export default function SettingsModal({ onClose }) {
                 className={`settings-tab ${activeTab === "formats" ? "settings-tab-active" : ""}`}
               >
                 <Globe className="w-4 h-4 text-slate-400" />
-                <span>Formats</span>
+                <span>{t("settings.formats")}</span>
               </button>
             </div>
 
             <div className="modal-body flex-1">
               <div className="settings-section-title">
                 <h3 className="settings-section-heading">
-                  {activeTab === "general" ? "General" : "Formats"}
+                  {activeTab === "general"
+                    ? t("settings.general")
+                    : t("settings.formats")}
                 </h3>
               </div>
               {activeTab === "general" && (
@@ -208,7 +210,9 @@ export default function SettingsModal({ onClose }) {
                           aria-hidden="true"
                         />
                       </span>
-                      <label className="modal-label">Theme</label>
+                      <label className="modal-label">
+                        {t("settings.theme")}
+                      </label>
                     </div>
                   </div>
                   <div className="relative settings-select">
@@ -216,11 +220,11 @@ export default function SettingsModal({ onClose }) {
                       value={theme}
                       onChange={(v) => setTheme(v)}
                       options={[
-                        { value: "light", label: "Light" },
-                        { value: "dark", label: "Dark" },
-                        { value: "system", label: "System" },
+                        { value: "light", label: t("settings.theme.light") },
+                        { value: "dark", label: t("settings.theme.dark") },
+                        { value: "system", label: t("settings.theme.system") },
                       ]}
-                      placeholder={"Select theme"}
+                      placeholder={t("settings.select_theme_placeholder")}
                       fullWidth={false}
                     />
                   </div>
@@ -243,7 +247,9 @@ export default function SettingsModal({ onClose }) {
                           aria-hidden="true"
                         />
                       </span>
-                      <label className="modal-label">Database file</label>
+                      <label className="modal-label">
+                        {t("settings.database_file")}
+                      </label>
                     </div>
                   </div>
                   <div className="relative">
@@ -252,8 +258,8 @@ export default function SettingsModal({ onClose }) {
                         type="button"
                         className="bg-white dark:bg-slate-700 text-slate-700 dark:text-white text-sm py-1 px-2 rounded w-full sm:w-[20rem] max-w-full text-left overflow-hidden truncate border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
                         onClick={handleSelectDb}
-                        data-tooltip={dbPath || "Select DB file"}
-                        aria-label={dbPath || "Select DB file"}
+                        data-tooltip={dbPath || t("settings.select_db_file")}
+                        aria-label={dbPath || t("settings.select_db_file")}
                         onMouseEnter={showTooltip}
                         onFocus={showTooltip}
                         onMouseLeave={hideTooltip}
@@ -261,7 +267,7 @@ export default function SettingsModal({ onClose }) {
                       >
                         {dbPath && dbPath.length > 0
                           ? dbPath
-                          : "Select DB file"}
+                          : t("settings.select_db_file")}
                       </button>
                     </div>
                   </div>
@@ -286,7 +292,7 @@ export default function SettingsModal({ onClose }) {
                         />
                       </span>
                       <label className="modal-label">
-                        Transaction row height
+                        {t("settings.transaction_row_height")}
                       </label>
                     </div>
                     <div className="text-sm text-slate-500">
@@ -302,7 +308,7 @@ export default function SettingsModal({ onClose }) {
                       value={txRowPadding}
                       onChange={(e) => setTxRowPadding(Number(e.target.value))}
                       className="w-full"
-                      aria-label="Transaction row height"
+                      aria-label={t("settings.transaction_row_height")}
                     />
                   </div>
                 </>
@@ -328,7 +334,9 @@ export default function SettingsModal({ onClose }) {
                           aria-hidden="true"
                         />
                       </span>
-                      <label className="modal-label">Currency</label>
+                      <label className="modal-label">
+                        {t("settings.currency")}
+                      </label>
                     </div>
                   </div>
                   <div className="relative settings-select">
@@ -339,7 +347,7 @@ export default function SettingsModal({ onClose }) {
                         value: c.code,
                         label: `${c.code} - ${c.name} (${c.symbol})`,
                       }))}
-                      placeholder={"Select currency"}
+                      placeholder={t("settings.select_currency_placeholder")}
                       fullWidth={false}
                     />
                   </div>
@@ -362,7 +370,9 @@ export default function SettingsModal({ onClose }) {
                           aria-hidden="true"
                         />
                       </span>
-                      <label className="modal-label">Number format</label>
+                      <label className="modal-label">
+                        {t("settings.number_format")}
+                      </label>
                     </div>
                   </div>
 
@@ -377,11 +387,13 @@ export default function SettingsModal({ onClose }) {
                         { value: "de-CH", label: "1'234.56" },
                         { value: "en-IN", label: "1,23,456.78" },
                       ]}
-                      placeholder={"Select format"}
+                      placeholder={t("settings.select_format_placeholder")}
                       fullWidth={false}
                     />
                   </div>
-                  <p className="text-slate-400 mt-3">Example: {example}</p>
+                  <p className="text-slate-400 mt-3">
+                    {t("settings.example", { example })}
+                  </p>
                 </>
               )}
             </div>

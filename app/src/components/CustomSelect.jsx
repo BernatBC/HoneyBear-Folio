@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
+import { t } from "../i18n/i18n";
 
 export default function CustomSelect({
   value,
@@ -228,13 +229,15 @@ export default function CustomSelect({
                   setHighlighted(0);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search..."
+                placeholder={t("customselect.search_placeholder")}
                 className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1 text-sm text-slate-900 dark:text-slate-100"
               />
             </li>
 
             {filteredOptions.length === 0 && (
-              <li className="px-3 py-2 text-slate-500">No results</li>
+              <li className="px-3 py-2 text-slate-500">
+                {t("customselect.no_results")}
+              </li>
             )}
 
             {filteredOptions.map((opt, i) => {

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { getDisplayVersion, IS_RELEASE } from "../utils/version";
 import { computeNetWorth } from "../utils/networth";
+import { t } from "../i18n/i18n";
 import "../styles/Sidebar.css";
 import { useFormatNumber, useParseNumber } from "../utils/format";
 import { usePrivacy } from "../contexts/privacy";
@@ -80,8 +81,8 @@ export default function Sidebar({
             <Wallet className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="sidebar-title">HoneyBear Folio</h1>
-            <p className="sidebar-subtitle">Portfolio Tracker</p>
+            <h1 className="sidebar-title">{t("sidebar.title")}</h1>
+            <p className="sidebar-subtitle">{t("sidebar.subtitle")}</p>
           </div>
         </div>
 
@@ -90,12 +91,16 @@ export default function Sidebar({
           <div className="flex items-center justify-between mb-2">
             <div className="net-worth-label !mb-0">
               <TrendingUp className="w-3.5 h-3.5" />
-              Net Worth
+              {t("sidebar.net_worth")}
             </div>
             <button
               onClick={togglePrivacyMode}
               className="text-slate-400 hover:text-white transition-colors p-1 rounded-md hover:bg-slate-700/50"
-              title={isPrivacyMode ? "Show values" : "Hide values"}
+              title={
+                isPrivacyMode
+                  ? t("sidebar.show_values")
+                  : t("sidebar.hide_values")
+              }
             >
               {isPrivacyMode ? (
                 <EyeOff className="w-4 h-4" />
@@ -113,7 +118,7 @@ export default function Sidebar({
       {/* Navigation */}
       <div className="sidebar-nav">
         <div>
-          <h2 className="sidebar-section-title">Overview</h2>
+          <h2 className="sidebar-section-title">{t("nav.overview")}</h2>
           <div className="space-y-1">
             <button
               onClick={() => handleSelect("dashboard")}
@@ -126,7 +131,7 @@ export default function Sidebar({
               <LayoutDashboard
                 className={`sidebar-nav-icon ${selectedId === "dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
               />
-              <span className="font-medium">Dashboard</span>
+              <span className="font-medium">{t("nav.dashboard")}</span>
             </button>
 
             <button
@@ -140,7 +145,7 @@ export default function Sidebar({
               <PieChart
                 className={`sidebar-nav-icon ${selectedId === "investment-dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
               />
-              <span className="font-medium">Investments</span>
+              <span className="font-medium">{t("nav.investments")}</span>
             </button>
 
             <button
@@ -154,7 +159,7 @@ export default function Sidebar({
               <Calculator
                 className={`sidebar-nav-icon ${selectedId === "fire-calculator" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
               />
-              <span className="font-medium">FIRE Calculator</span>
+              <span className="font-medium">{t("nav.fire_calculator")}</span>
             </button>
 
             <button
@@ -168,7 +173,7 @@ export default function Sidebar({
               <List
                 className={`sidebar-nav-icon ${selectedId === "all" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
               />
-              <span className="font-medium">All Transactions</span>
+              <span className="font-medium">{t("nav.all_transactions")}</span>
             </button>
           </div>
         </div>
@@ -176,7 +181,9 @@ export default function Sidebar({
         {/* Cash Accounts */}
         <div>
           <div className="sidebar-section-header">
-            <h2 className="sidebar-section-title-inline">Cash Accounts</h2>
+            <h2 className="sidebar-section-title-inline">
+              {t("accounts.cash")}
+            </h2>
             <button
               onClick={() => {
                 setIsAdding(true);
@@ -222,7 +229,9 @@ export default function Sidebar({
         {/* Brokerage Accounts */}
         <div>
           <div className="sidebar-section-header">
-            <h2 className="sidebar-section-title-inline">Brokerage Accounts</h2>
+            <h2 className="sidebar-section-title-inline">
+              {t("accounts.brokerage")}
+            </h2>
             <button
               onClick={() => {
                 setIsAdding(true);
@@ -317,26 +326,26 @@ export default function Sidebar({
             className="sidebar-footer-button"
           >
             <Upload className="w-4 h-4" />
-            <span className="text-xs font-medium">Import</span>
+            <span className="text-xs font-medium">{t("footer.import")}</span>
           </button>
           <button
             onClick={() => setShowExportModal(true)}
             className="sidebar-footer-button"
           >
             <Download className="w-4 h-4" />
-            <span className="text-xs font-medium">Export</span>
+            <span className="text-xs font-medium">{t("footer.export")}</span>
           </button>
           <button
             onClick={() => setShowSettingsModal(true)}
             className="sidebar-footer-button"
           >
             <Settings className="w-4 h-4" />
-            <span className="text-xs font-medium">Settings</span>
+            <span className="text-xs font-medium">{t("footer.settings")}</span>
           </button>
         </div>
         <div className="sidebar-version">
           {IS_RELEASE ? `v${getDisplayVersion()}` : getDisplayVersion()} •
-          HoneyBear Folio
+          {t("footer.version_suffix")}
         </div>
       </div>
 

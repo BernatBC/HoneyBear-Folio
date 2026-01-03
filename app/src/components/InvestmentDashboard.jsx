@@ -5,6 +5,7 @@ import { RefreshCw } from "lucide-react";
 import { useFormatNumber } from "../utils/format";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { t } from "../i18n/i18n";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -200,7 +201,7 @@ export default function InvestmentDashboard() {
               </svg>
             </div>
             <div>
-              <div className="font-bold">Error loading data</div>
+              <div className="font-bold">{t("investment.error_loading")}</div>
               <div className="text-sm text-rose-600 dark:text-rose-400">
                 {error}
               </div>
