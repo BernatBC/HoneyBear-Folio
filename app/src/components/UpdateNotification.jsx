@@ -130,13 +130,13 @@ export default function UpdateNotification() {
             <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 max-h-32 overflow-y-auto mb-4">
               <ReactMarkdown
                 components={{
-                  ul: ({ node, ...props }) => (
+                  ul: ({ node: _node, ...props }) => (
                     <ul className="list-disc pl-4" {...props} />
                   ),
-                  ol: ({ node, ...props }) => (
+                  ol: ({ node: _node, ...props }) => (
                     <ol className="list-decimal pl-4" {...props} />
                   ),
-                  a: ({ node, ...props }) => (
+                  a: ({ node: _node, ...props }) => (
                     <a
                       className="text-blue-500 hover:underline"
                       target="_blank"
@@ -144,16 +144,16 @@ export default function UpdateNotification() {
                       {...props}
                     />
                   ),
-                  h1: ({ node, ...props }) => (
+                  h1: ({ node: _node, ...props }) => (
                     <h1 className="text-lg font-bold mt-2 mb-1" {...props} />
                   ),
-                  h2: ({ node, ...props }) => (
+                  h2: ({ node: _node, ...props }) => (
                     <h2 className="text-base font-bold mt-2 mb-1" {...props} />
                   ),
-                  h3: ({ node, ...props }) => (
+                  h3: ({ node: _node, ...props }) => (
                     <h3 className="text-sm font-bold mt-1 mb-1" {...props} />
                   ),
-                  p: ({ node, ...props }) => <p className="mb-1" {...props} />,
+                  p: ({ node: _node, ...props }) => <p className="mb-1" {...props} />,
                 }}
               >
                 {updateInfo.body}
