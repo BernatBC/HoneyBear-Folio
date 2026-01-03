@@ -81,10 +81,13 @@ export function useFormatNumber() {
       if (finalOptions.style === "currency") {
         // Keep currency symbol visible but mask the numeric amount with
         // as many bullets as the localized numeric string length.
-        const currencyDef =
-          CURRENCIES.find((c) => c.code === finalOptions.currency) ||
-          CURRENCIES.find((c) => c.code === currency) ||
-          { symbol: finalOptions.currency || "¤", position: "left" };
+        const currencyDef = CURRENCIES.find(
+          (c) => c.code === finalOptions.currency,
+        ) ||
+          CURRENCIES.find((c) => c.code === currency) || {
+            symbol: finalOptions.currency || "¤",
+            position: "left",
+          };
         const symbol = currencyDef.symbol || finalOptions.currency || "¤";
         const isNegative = Number(value) < 0;
         const sign = isNegative ? "-" : "";
@@ -95,7 +98,11 @@ export function useFormatNumber() {
         delete decimalOptions.currencyDisplay;
 
         // Use the localized formatter to determine the visible numeric length
-        let formattedNumeric = formatNumberWithLocale(value, locale, decimalOptions);
+        let formattedNumeric = formatNumberWithLocale(
+          value,
+          locale,
+          decimalOptions,
+        );
         // Remove any leading sign characters that may be present
         formattedNumeric = String(formattedNumeric).replace(/^[+-]/, "");
         const len = Math.max(formattedNumeric.length, 1);
