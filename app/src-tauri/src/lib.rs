@@ -121,6 +121,8 @@ pub(crate) use test_helpers::{
     read_settings_from_dir,
     get_db_path_for_dir,
     init_db_at_path,
+    create_account_in_dir,
+    create_transaction_in_dir,
 };
 
 fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {

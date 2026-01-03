@@ -126,3 +126,28 @@ pub(crate) fn init_db_at_path(db_path: &PathBuf) -> Result<(), String> {
 
     Ok(())
 }
+
+pub(crate) fn create_account_in_dir(
+    dir: &PathBuf,
+    name: String,
+    balance: f64,
+    kind: String,
+) -> Result<super::Account, String> {
+    let db_path = get_db_path_for_dir(dir)?;
+    init_db_at_path(&db_path)?;
+    super::create_account_db(&db_path, name, balance, kind)
+}
+
+pub(crate) fn create_transaction_in_dir(
+    dir: &PathBuf,
+    account_id: i32,
+    date: String,
+    payee: String,
+    notes: Option<String>,
+    category: Option<String>,
+    amount: f64,
+) -> Result<super::Transaction, String> {
+    let db_path = get_db_path_for_dir(dir)?;
+    init_db_at_path(&db_path)?;
+    super::create_transaction_db(&db_path, account_id, date, payee, notes, category, amount)
+}
