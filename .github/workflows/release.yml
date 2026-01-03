@@ -50,7 +50,8 @@ jobs:
         if: startsWith(matrix.platform, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -94,3 +95,26 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Build and upload Flatpak (Ubuntu only)
+        if: startsWith(matrix.platform, 'ubuntu')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Install runtime/sdk
+          flatpak install -y --user flathub org.gnome.Platform//46 org.gnome.Sdk//46
+          
+          # Extract target from args
+          ARGS="${{ matrix.args }}"
+          TARGET=$(echo $ARGS | sed -n 's/.*--target \([^ ]*\).*/\1/p')
+          
+          # Build Flatpak
+          chmod +x ./app/scripts/build-flatpak.sh
+          ./app/scripts/build-flatpak.sh "$TARGET"
+          
+          # Upload
+          OUTPUT_NAME="honeybear-folio"
+          if [ -n "$TARGET" ]; then
+              OUTPUT_NAME="honeybear-folio-${TARGET}"
+          fi
+          gh release upload ${{ github.ref_name }} ${OUTPUT_NAME}.flatpak

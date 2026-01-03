@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=HoneyBear-Folio
+Comment=Cross-platform personal finance desktop app.
+Exec=honeybear-folio
+Icon=com.bernatbc.honeybearfolio
+Categories=Finance;Office;
