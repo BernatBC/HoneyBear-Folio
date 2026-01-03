@@ -5,17 +5,17 @@
   /* .modal-overlay moved to ./Modal.css */
 
   .modal-container {
-    @apply bg-white dark:bg-slate-900 w-[min(95vw,900px)] max-w-[900px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-y-auto overflow-x-hidden;
+    @apply bg-white dark:bg-slate-900 w-[min(95vw,720px)] max-w-[720px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-y-auto overflow-x-hidden;
   }
 
   /* Ensure settings modal width cannot be overridden by other modal styles */
   .modal-container.settings-modal-container {
-    @apply w-[min(95vw,900px)] max-w-[900px] overflow-x-visible; /* allow internal content to lay out but avoid horizontal scrollbar */
+    @apply w-[min(95vw,720px)] max-w-[720px] overflow-x-visible; /* allow internal content to lay out but avoid horizontal scrollbar */
   }
 
   /* Narrow select triggers within settings modal */
   .settings-modal-container .settings-select .custom-select-trigger {
-    @apply w-[20rem] max-w-full;
+    @apply w-[18rem] max-w-full;
   }
 
   @media (max-width: 640px) {
@@ -43,7 +43,7 @@
 
   /* Tabs */
   .settings-tabs {
-    @apply flex flex-col gap-2 items-start border-r border-slate-100 dark:border-slate-800 pr-4 mr-6 min-w-[14rem];
+    @apply flex flex-col gap-2 items-start border-r border-slate-100 dark:border-slate-800 pr-4 mr-6 min-w-[12rem];
   }
 
   .settings-tab {
