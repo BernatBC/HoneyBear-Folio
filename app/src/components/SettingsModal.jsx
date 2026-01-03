@@ -21,7 +21,7 @@ export default function SettingsModal({ onClose }) {
     try {
       const v = localStorage.getItem("hb_tx_row_padding");
       return v ? parseInt(v, 10) : 12;
-    } catch (e) {
+    } catch {
       return 12;
     }
   });
