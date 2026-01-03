@@ -105,13 +105,11 @@ export default function CustomSelect({
   useEffect(() => {
     if (!open) return;
     // focus input when menu opens
-    setTimeout(() => searchRef.current?.focus(), 0);
-    // set initial highlighted item to selected index inside filtered options
-    const idx = filteredOptions.findIndex(
-      (o) => String(o.value) === String(value),
-    );
-    setHighlighted(idx >= 0 ? idx : filteredOptions.length > 0 ? 0 : -1);
+    const timer = setTimeout(() => searchRef.current?.focus(), 0);
+    return () => clearTimeout(timer);
   }, [open]);
+
+
 
   const toggle = () => {
     if (!open && containerRef.current) {
@@ -124,6 +122,17 @@ export default function CustomSelect({
         width: rect.width,
         height: rect.height,
       });
+
+      // compute initial highlighted index from the current filtered options
+      const currentFiltered = options.filter((opt) => {
+        const label = opt.label ? String(opt.label) : String(opt.value);
+        return label.toLowerCase().includes(search.toLowerCase());
+      });
+      const idx = currentFiltered.findIndex(
+        (o) => String(o.value) === String(value),
+      );
+      setHighlighted(idx >= 0 ? idx : currentFiltered.length > 0 ? 0 : -1);
+
       setOpen(true);
     } else {
       setOpen(false);
