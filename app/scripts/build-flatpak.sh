@@ -10,9 +10,9 @@ TARGET_TRIPLE=$1
 # So ../src-tauri/target/... is correct.
 
 if [ -z "$TARGET_TRIPLE" ]; then
-  BINARY_REL_PATH="../src-tauri/target/release/honeybear-folio"
+  BINARY_REL_PATH="../src-tauri/target/release/HoneyBear-Folio"
 else
-  BINARY_REL_PATH="../src-tauri/target/$TARGET_TRIPLE/release/honeybear-folio"
+  BINARY_REL_PATH="../src-tauri/target/$TARGET_TRIPLE/release/HoneyBear-Folio"
 fi
 
 echo "Targeting binary at $BINARY_REL_PATH (relative to manifest)"
@@ -33,7 +33,7 @@ fi
 cp app/flatpak/com.bernatbc.honeybearfolio.yml app/flatpak/flatpak-build.yml
 # Escape slashes for sed
 ESCAPED_PATH=$(echo "$BINARY_REL_PATH" | sed 's/\//\\\//g')
-sed -i "s/path: ..\/src-tauri\/target\/release\/honeybear-folio/path: $ESCAPED_PATH/g" app/flatpak/flatpak-build.yml
+sed -i "s/path: ..\/src-tauri\/target\/release\/HoneyBear-Folio/path: $ESCAPED_PATH/g" app/flatpak/flatpak-build.yml
 
 echo "Building Flatpak..."
 
