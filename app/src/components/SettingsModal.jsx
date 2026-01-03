@@ -128,7 +128,7 @@ export default function SettingsModal({ onClose }) {
               </div>
               {activeTab === "general" && (
                 <>
-                  <div className="flex items-center justify-between mt-6">
+                  <div className="flex items-center justify-between">
                     <label className="modal-label">Theme</label>
                   </div>
                   <div className="relative settings-select">
@@ -145,7 +145,7 @@ export default function SettingsModal({ onClose }) {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between mt-6">
+                  <div className="flex items-center justify-between">
                     <label className="modal-label">Database file</label>
                   </div>
                   <div className="relative">
@@ -181,7 +181,7 @@ export default function SettingsModal({ onClose }) {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between mt-6">
+                  <div className="flex items-center justify-between">
                     <label className="modal-label">Number format</label>
                   </div>
 
