@@ -113,12 +113,7 @@ export default function UpdateNotification() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             {t('update.title')}
-          </h2>  
-
-          <div className="mb-6">
-          <p className="text-slate-600 dark:text-slate-300 mb-2">
-            {t('update.available_text', { version: updateInfo?.version })}
-          </p>
+          </h2>
           <button
             onClick={handleClose}
             className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -129,9 +124,9 @@ export default function UpdateNotification() {
 
         <div className="mb-6">
           <p className="text-slate-600 dark:text-slate-300 mb-2">
-            A new version of HoneyBear Folio is available:{" "}
-            <span className="font-semibold">{updateInfo?.version}</span>
+            {t('update.available_text', { version: updateInfo?.version })}
           </p>
+
           {updateInfo?.body && (
             <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 max-h-32 overflow-y-auto mb-4">
               <ReactMarkdown
@@ -231,6 +226,6 @@ export default function UpdateNotification() {
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

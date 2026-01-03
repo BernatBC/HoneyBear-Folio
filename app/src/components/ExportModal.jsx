@@ -194,9 +194,6 @@ export default function ExportModal({ onClose }) {
 
         <div className="modal-body">
           <label className="modal-label">{t('export.select_format')}</label>
-
-        <div className="modal-body">
-          <label className="modal-label">{t('export.select_format')}</label>
           <div className="format-grid">
             <button
               onClick={() => setFormat("json")}
