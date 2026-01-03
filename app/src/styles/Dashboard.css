@@ -98,14 +98,21 @@
     @apply lg:col-span-2;
   }
 
-  /* Compact transaction table: reduce cell padding so more rows fit the screen */
+  /* Transaction row sizing via CSS variables — controlled by user setting */
+  /* Default values live on :root so they can be overridden by JavaScript changes to document.documentElement */
+  :root {
+    --hb-tx-cell-py: 12px; /* default vertical padding (top and bottom each) */
+    --hb-tx-cell-px: 16px; /* default horizontal padding (left and right) */
+  }
+
   .account-transactions-table thead th {
-    @apply px-2 py-1 text-xs;
+    padding: var(--hb-tx-cell-py) var(--hb-tx-cell-px) !important;
+    font-size: 0.75rem !important; /* text-xs */
   }
 
   /* Use explicit padding + font-size to ensure we override utility classes in cells */
   .account-transactions-table tbody td {
-    padding: 0.25rem 0.5rem !important; /* py-1 px-2 */
+    padding: var(--hb-tx-cell-py) var(--hb-tx-cell-px) !important;
     font-size: 0.75rem !important; /* text-xs */
   }
 
