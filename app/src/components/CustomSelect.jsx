@@ -109,8 +109,6 @@ export default function CustomSelect({
     return () => clearTimeout(timer);
   }, [open]);
 
-
-
   const toggle = () => {
     if (!open && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
