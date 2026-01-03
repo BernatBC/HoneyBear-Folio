@@ -62,7 +62,7 @@ struct Account {
     kind: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 struct Transaction {
     id: i32,
     account_id: i32,
@@ -110,6 +110,16 @@ fn write_settings(app_handle: &AppHandle, settings: &AppSettings) -> Result<(), 
     fs::write(&settings_path, json).map_err(|e| e.to_string())?;
     Ok(())
 }
+
+// Test-only helpers to allow testing settings and init_db logic without an AppHandle
+#[cfg(test)]
+mod test_helpers;
+
+#[cfg(test)]
+pub(crate) use test_helpers::{
+    create_account_in_dir, create_transaction_in_dir, get_db_path_for_dir, init_db_at_path,
+    read_settings_from_dir, write_settings_to_dir,
+};
 
 fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     // If the user has configured an override, use it
@@ -186,12 +196,19 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             }
         }
         if !has_linked {
-            // Safe to ALTER TABLE to add the nullable column
-            conn.execute(
+            // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
+            match conn.execute(
                 "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
                 [],
-            )
-            .map_err(|e| e.to_string())?;
+            ) {
+                Ok(_) => {}
+                Err(e) => {
+                    let s = e.to_string();
+                    if !s.contains("duplicate column name") && !s.contains("already exists") {
+                        return Err(s);
+                    }
+                }
+            }
         }
     }
 
@@ -243,14 +260,12 @@ fn get_db_path_command(app_handle: AppHandle) -> Result<String, String> {
     Ok(pb.to_string_lossy().to_string())
 }
 
-#[tauri::command]
-fn create_account(
-    app_handle: AppHandle,
+fn create_account_db(
+    db_path: &PathBuf,
     name: String,
     balance: f64,
     kind: String,
 ) -> Result<Account, String> {
-    let db_path = get_db_path(&app_handle)?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -289,11 +304,20 @@ fn create_account(
 }
 
 #[tauri::command]
-fn rename_account(app_handle: AppHandle, id: i32, new_name: String) -> Result<Account, String> {
+fn create_account(
+    app_handle: AppHandle,
+    name: String,
+    balance: f64,
+    kind: String,
+) -> Result<Account, String> {
+    let db_path = get_db_path(&app_handle)?;
+    create_account_db(&db_path, name, balance, kind)
+}
+
+fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result<Account, String> {
     if new_name.trim().is_empty() {
         return Err("Account name cannot be empty or whitespace-only".to_string());
     }
-    let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     conn.execute(
@@ -321,8 +345,12 @@ fn rename_account(app_handle: AppHandle, id: i32, new_name: String) -> Result<Ac
 }
 
 #[tauri::command]
-fn delete_account(app_handle: AppHandle, id: i32) -> Result<(), String> {
+fn rename_account(app_handle: AppHandle, id: i32, new_name: String) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
+    rename_account_db(&db_path, id, new_name)
+}
+
+fn delete_account_db(db_path: &PathBuf, id: i32) -> Result<(), String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -344,8 +372,12 @@ fn delete_account(app_handle: AppHandle, id: i32) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
+fn delete_account(app_handle: AppHandle, id: i32) -> Result<(), String> {
     let db_path = get_db_path(&app_handle)?;
+    delete_account_db(&db_path, id)
+}
+
+fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -371,8 +403,13 @@ fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
 }
 
 #[tauri::command]
-fn create_transaction(
-    app_handle: AppHandle,
+fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    get_accounts_db(&db_path)
+}
+
+fn create_transaction_db(
+    db_path: &PathBuf,
     account_id: i32,
     date: String,
     payee: String,
@@ -380,7 +417,6 @@ fn create_transaction(
     category: Option<String>,
     amount: f64,
 ) -> Result<Transaction, String> {
-    let db_path = get_db_path(&app_handle)?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -469,8 +505,20 @@ fn create_transaction(
 }
 
 #[tauri::command]
-fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transaction>, String> {
+fn create_transaction(
+    app_handle: AppHandle,
+    account_id: i32,
+    date: String,
+    payee: String,
+    notes: Option<String>,
+    category: Option<String>,
+    amount: f64,
+) -> Result<Transaction, String> {
     let db_path = get_db_path(&app_handle)?;
+    create_transaction_db(&db_path, account_id, date, payee, notes, category, amount)
+}
+
+fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transaction>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
@@ -501,8 +549,12 @@ fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transa
 }
 
 #[tauri::command]
-fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, String> {
+fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transaction>, String> {
     let db_path = get_db_path(&app_handle)?;
+    get_transactions_db(&db_path, account_id)
+}
+
+fn get_all_transactions_db(db_path: &PathBuf) -> Result<Vec<Transaction>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
@@ -532,6 +584,12 @@ fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, Strin
     Ok(transactions)
 }
 
+#[tauri::command]
+fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    get_all_transactions_db(&db_path)
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct CreateBrokerageTransactionArgs {
@@ -557,9 +615,8 @@ struct UpdateTransactionArgs {
     amount: f64,
 }
 
-#[tauri::command]
-fn create_brokerage_transaction(
-    app_handle: AppHandle,
+fn create_brokerage_transaction_db(
+    db_path: &PathBuf,
     args: CreateBrokerageTransactionArgs,
 ) -> Result<Transaction, String> {
     let CreateBrokerageTransactionArgs {
@@ -573,7 +630,6 @@ fn create_brokerage_transaction(
         is_buy,
     } = args;
 
-    let db_path = get_db_path(&app_handle)?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -688,8 +744,16 @@ fn create_brokerage_transaction(
 }
 
 #[tauri::command]
-fn update_transaction(
+fn create_brokerage_transaction(
     app_handle: AppHandle,
+    args: CreateBrokerageTransactionArgs,
+) -> Result<Transaction, String> {
+    let db_path = get_db_path(&app_handle)?;
+    create_brokerage_transaction_db(&db_path, args)
+}
+
+fn update_transaction_db(
+    db_path: &PathBuf,
     args: UpdateTransactionArgs,
 ) -> Result<Transaction, String> {
     let UpdateTransactionArgs {
@@ -702,30 +766,45 @@ fn update_transaction(
         amount,
     } = args;
 
-    let db_path = get_db_path(&app_handle)?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    // Get old amount
-    let old_amount: f64 = tx
+    // Get old amount and account
+    let (old_amount, old_account_id): (f64, i32) = tx
         .query_row(
-            "SELECT amount FROM transactions WHERE id = ?1",
+            "SELECT amount, account_id FROM transactions WHERE id = ?1",
             params![id],
-            |row| row.get(0),
+            |row| Ok((row.get(0)?, row.get(1)?)),
         )
         .map_err(|e| e.to_string())?;
 
+    // Update transaction including account_id to support moving between accounts
     tx.execute(
-        "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5 WHERE id = ?6",
-        params![date, payee, notes, category, amount, id],
+        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6 WHERE id = ?7",
+        params![account_id, date, payee, notes, category, amount, id],
     ).map_err(|e| e.to_string())?;
 
-    let diff = amount - old_amount;
-    if diff.abs() > f64::EPSILON {
+    if old_account_id == account_id {
+        let diff = amount - old_amount;
+        if diff.abs() > f64::EPSILON {
+            tx.execute(
+                "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+                params![diff, account_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    } else {
+        // Moving transaction between accounts: revert old account and apply to new account
+        tx.execute(
+            "UPDATE accounts SET balance = balance - ?1 WHERE id = ?2",
+            params![old_amount, old_account_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         tx.execute(
             "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-            params![diff, account_id],
+            params![amount, account_id],
         )
         .map_err(|e| e.to_string())?;
     }
@@ -735,10 +814,11 @@ fn update_transaction(
         .query_row(
             "SELECT linked_tx_id FROM transactions WHERE id = ?1",
             params![id],
-            |row| row.get(0),
+            |row| row.get::<_, Option<i32>>(0),
         )
         .optional()
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?
+        .flatten();
 
     if counterpart_id_opt.is_none() {
         if let Some(ref n) = notes {
@@ -824,6 +904,15 @@ fn update_transaction(
     })
 }
 
+#[tauri::command]
+fn update_transaction(
+    app_handle: AppHandle,
+    args: UpdateTransactionArgs,
+) -> Result<Transaction, String> {
+    let db_path = get_db_path(&app_handle)?;
+    update_transaction_db(&db_path, args)
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct UpdateBrokerageTransactionArgs {
@@ -837,9 +926,8 @@ struct UpdateBrokerageTransactionArgs {
     is_buy: bool,
 }
 
-#[tauri::command]
-fn update_brokerage_transaction(
-    app_handle: AppHandle,
+fn update_brokerage_transaction_db(
+    db_path: &PathBuf,
     args: UpdateBrokerageTransactionArgs,
 ) -> Result<Transaction, String> {
     let UpdateBrokerageTransactionArgs {
@@ -853,17 +941,16 @@ fn update_brokerage_transaction(
         is_buy,
     } = args;
 
-    let db_path = get_db_path(&app_handle)?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    // Get old amount and notes to locate the corresponding cash transaction
-    let (old_amount, old_notes): (f64, String) = tx
+    // Get old amount, notes and account to locate the corresponding cash transaction and previous brokerage account
+    let (old_amount, old_notes, old_account_id): (f64, String, i32) = tx
         .query_row(
-            "SELECT amount, notes FROM transactions WHERE id = ?1",
+            "SELECT amount, notes, account_id FROM transactions WHERE id = ?1",
             params![id],
-            |row| Ok((row.get(0)?, row.get(1)?)),
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
         )
         .map_err(|e| e.to_string())?;
 
@@ -877,9 +964,11 @@ fn update_brokerage_transaction(
         ticker
     );
 
+    // Update transaction row (including account_id to support moving between brokerage accounts)
     tx.execute(
-        "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5, ticker = ?6, shares = ?7, price_per_share = ?8, fee = ?9 WHERE id = ?10",
+        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6, ticker = ?7, shares = ?8, price_per_share = ?9, fee = ?10 WHERE id = ?11",
         params![
+            brokerage_account_id,
             date,
             if is_buy { "Buy" } else { "Sell" },
             new_notes,
@@ -895,25 +984,83 @@ fn update_brokerage_transaction(
     .map_err(|e| e.to_string())?;
 
     let diff = brokerage_amount - old_amount;
-    if diff.abs() > f64::EPSILON {
+    if old_account_id == brokerage_account_id {
+        if diff.abs() > f64::EPSILON {
+            tx.execute(
+                "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+                params![diff, brokerage_account_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    } else {
+        // Move the brokerage transaction between accounts: revert old account effect and apply new amount to new account
+        tx.execute(
+            "UPDATE accounts SET balance = balance - ?1 WHERE id = ?2",
+            params![old_amount, old_account_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         tx.execute(
             "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-            params![diff, brokerage_account_id],
+            params![brokerage_amount, brokerage_account_id],
         )
         .map_err(|e| e.to_string())?;
     }
 
-    // Try to find matching cash (transfer) transaction by exact notes match
-    if let Some((cash_id, old_cash_amount, cash_account_id)) = tx
+    // Try to find matching cash (transfer) transaction by linked_tx_id first, fallback to exact notes match
+    let mut cash_row_opt: Option<(i32, f64, i32)> = None;
+
+    // linked_tx_id should have been set when the brokerage transaction was created
+    if let Some(linked_id_opt) = tx
         .query_row(
-            "SELECT id, amount, account_id FROM transactions WHERE notes = ?1 AND category = 'Transfer' LIMIT 1",
-            params![old_notes],
-            |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+            "SELECT linked_tx_id FROM transactions WHERE id = ?1",
+            params![id],
+            |row| row.get::<_, Option<i32>>(0),
         )
         .optional()
         .map_err(|e| e.to_string())?
+        .flatten()
     {
-        let new_cash_amount = if is_buy { -(total_price + fee) } else { total_price - fee };
+        if let Some(row) = tx
+            .query_row(
+                "SELECT id, amount, account_id FROM transactions WHERE id = ?1",
+                params![linked_id_opt],
+                |row| {
+                    Ok((
+                        row.get::<_, i32>(0)?,
+                        row.get::<_, f64>(1)?,
+                        row.get::<_, i32>(2)?,
+                    ))
+                },
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+        {
+            cash_row_opt = Some(row);
+        }
+    }
+
+    // Fallback to matching by notes if we didn't find a linked tx
+    if cash_row_opt.is_none() {
+        if let Some((cash_id, old_cash_amount, cash_account_id)) = tx
+            .query_row(
+                "SELECT id, amount, account_id FROM transactions WHERE notes = ?1 AND category = 'Transfer' LIMIT 1",
+                params![old_notes],
+                |row| Ok((row.get::<_, i32>(0)?, row.get::<_, f64>(1)?, row.get::<_, i32>(2)?)),
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+        {
+            cash_row_opt = Some((cash_id, old_cash_amount, cash_account_id));
+        }
+    }
+
+    if let Some((cash_id, old_cash_amount, cash_account_id)) = cash_row_opt {
+        let new_cash_amount = if is_buy {
+            -(total_price + fee)
+        } else {
+            total_price - fee
+        };
         let cash_diff: f64 = new_cash_amount - old_cash_amount;
 
         tx.execute(
@@ -965,8 +1112,15 @@ fn update_brokerage_transaction(
 }
 
 #[tauri::command]
-fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
+fn update_brokerage_transaction(
+    app_handle: AppHandle,
+    args: UpdateBrokerageTransactionArgs,
+) -> Result<Transaction, String> {
     let db_path = get_db_path(&app_handle)?;
+    update_brokerage_transaction_db(&db_path, args)
+}
+
+fn delete_transaction_db(db_path: &PathBuf, id: i32) -> Result<(), String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -1038,8 +1192,12 @@ fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_payees(app_handle: AppHandle) -> Result<Vec<String>, String> {
+fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
     let db_path = get_db_path(&app_handle)?;
+    delete_transaction_db(&db_path, id)
+}
+
+fn get_payees_db(db_path: &PathBuf) -> Result<Vec<String>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -1058,8 +1216,12 @@ fn get_payees(app_handle: AppHandle) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
+fn get_payees(app_handle: AppHandle) -> Result<Vec<String>, String> {
     let db_path = get_db_path(&app_handle)?;
+    get_payees_db(&db_path)
+}
+
+fn get_categories_db(db_path: &PathBuf) -> Result<Vec<String>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn.prepare("SELECT DISTINCT category FROM transactions WHERE category IS NOT NULL AND category != 'Transfer' ORDER BY category").map_err(|e| e.to_string())?;
@@ -1076,12 +1238,29 @@ fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    get_categories_db(&db_path)
+}
+
+#[tauri::command]
 async fn search_ticker(query: String) -> Result<Vec<YahooSearchQuote>, String> {
-    let url = format!(
-        "https://query1.finance.yahoo.com/v1/finance/search?q={}",
-        query
-    );
-    let client = reqwest::Client::new();
+    // Delegate to the test-injectable helper that accepts a client and base url
+    search_ticker_with_client(
+        reqwest::Client::new(),
+        "https://query1.finance.yahoo.com".to_string(),
+        query,
+    )
+    .await
+}
+
+// Helper allowing tests to inject client and base URL
+async fn search_ticker_with_client(
+    client: reqwest::Client,
+    base_url: String,
+    query: String,
+) -> Result<Vec<YahooSearchQuote>, String> {
+    let url = format!("{}/v1/finance/search?q={}", base_url, query);
     let res = client
         .get(&url)
         .header("User-Agent", "Mozilla/5.0")
@@ -1100,20 +1279,35 @@ async fn get_stock_quotes(
     app_handle: AppHandle,
     tickers: Vec<String>,
 ) -> Result<Vec<YahooQuote>, String> {
+    // Delegate to helper that allows injecting a client and base URL for tests
+    get_stock_quotes_with_client(
+        reqwest::Client::builder()
+            .build()
+            .map_err(|e| e.to_string())?,
+        "https://query1.finance.yahoo.com".to_string(),
+        app_handle,
+        tickers,
+    )
+    .await
+}
+
+async fn get_stock_quotes_with_client(
+    client: reqwest::Client,
+    base_url: String,
+    app_handle: AppHandle,
+    tickers: Vec<String>,
+) -> Result<Vec<YahooQuote>, String> {
     if tickers.is_empty() {
         return Ok(Vec::new());
     }
-
-    let client = reqwest::Client::builder()
-        .build()
-        .map_err(|e| e.to_string())?;
 
     let mut tasks = Vec::new();
 
     for ticker in tickers.clone() {
         let client = client.clone();
+        let base_url = base_url.clone();
         tasks.push(tokio::spawn(async move {
-            let url = format!("https://query1.finance.yahoo.com/v8/finance/chart/{}?interval=1d&range=1d", ticker);
+            let url = format!("{}/v8/finance/chart/{}?interval=1d&range=1d", base_url, ticker);
             let res = client.get(&url)
                 .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                 .send()
@@ -1218,6 +1412,128 @@ async fn get_stock_quotes(
     Ok(quotes)
 }
 
+// Variant that accepts a direct DB path so tests can call without needing an AppHandle
+#[allow(dead_code)]
+async fn get_stock_quotes_with_client_and_db(
+    client: reqwest::Client,
+    base_url: String,
+    db_path: &PathBuf,
+    tickers: Vec<String>,
+) -> Result<Vec<YahooQuote>, String> {
+    if tickers.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let mut tasks = Vec::new();
+
+    for ticker in tickers.clone() {
+        let client = client.clone();
+        let base_url = base_url.clone();
+        tasks.push(tokio::spawn(async move {
+            let url = format!("{}/v8/finance/chart/{}?interval=1d&range=1d", base_url.trim_end_matches('/'), ticker);
+            let res = client.get(&url)
+                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .send()
+                .await;
+
+            match res {
+                Ok(resp) => {
+                    if resp.status().is_success() {
+                        let text_res = resp.text().await;
+                        match text_res {
+                            Ok(text) => {
+                                let json: Result<YahooChartResponse, _> = serde_json::from_str(&text);
+                                match json {
+                                    Ok(data) => {
+                                        if let Some(results) = data.chart.result {
+                                            if let Some(item) = results.first() {
+                                                let price = item.meta.regular_market_price.unwrap_or(0.0);
+                                                let prev = item.meta.chart_previous_close
+                                                    .or(item.meta.previous_close)
+                                                    .unwrap_or(price);
+
+                                                let change_percent = if prev != 0.0 {
+                                                    ((price - prev) / prev) * 100.0
+                                                } else {
+                                                    0.0
+                                                };
+                                                return Some(YahooQuote {
+                                                    symbol: item.meta.symbol.clone(),
+                                                    price,
+                                                    change_percent
+                                                });
+                                            }
+                                        }
+                                    },
+                                    Err(e) => {
+                                        println!("Failed to parse JSON for {}: {}", ticker, e);
+                                    }
+                                }
+                            },
+                            Err(e) => println!("Failed to get text for {}: {}", ticker, e),
+                        }
+                    } else {
+                        println!("Request failed for {}: {}", ticker, resp.status());
+                    }
+                },
+                Err(e) => {
+                    println!("Request error for {}: {}", ticker, e);
+                }
+            }
+            None
+        }));
+    }
+
+    let mut quotes = Vec::new();
+    for task in tasks {
+        if let Ok(Some(quote)) = task.await {
+            quotes.push(quote);
+        }
+    }
+
+    // Update DB with new quotes
+    let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    {
+        let mut stmt = tx.prepare("INSERT OR REPLACE INTO stock_prices (ticker, price, last_updated) VALUES (?1, ?2, datetime('now'))").map_err(|e| e.to_string())?;
+        for quote in &quotes {
+            stmt.execute(params![quote.symbol, quote.price])
+                .map_err(|e| e.to_string())?;
+        }
+    }
+    tx.commit().map_err(|e| e.to_string())?;
+
+    // If we missed some tickers, try to fetch from DB
+    let found_symbols: Vec<String> = quotes.iter().map(|q| q.symbol.clone()).collect();
+    let missing_tickers: Vec<String> = tickers
+        .into_iter()
+        .filter(|t| !found_symbols.iter().any(|s| s.eq_ignore_ascii_case(t)))
+        .collect();
+
+    if !missing_tickers.is_empty() {
+        let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+        let mut stmt = conn
+            .prepare("SELECT ticker, price FROM stock_prices WHERE ticker = ?1 COLLATE NOCASE")
+            .map_err(|e| e.to_string())?;
+
+        for ticker in missing_tickers {
+            let res: Result<(String, f64), _> =
+                stmt.query_row(params![ticker], |row| Ok((row.get(0)?, row.get(1)?)));
+
+            if let Ok((symbol, price)) = res {
+                quotes.push(YahooQuote {
+                    symbol,
+                    price,
+                    change_percent: 0.0, // We don't store change percent in DB yet, could add it
+                });
+            }
+        }
+    }
+
+    Ok(quotes)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1253,3 +1569,6 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+#[cfg(test)]
+mod tests;

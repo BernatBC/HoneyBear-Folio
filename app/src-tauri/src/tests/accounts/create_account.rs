@@ -1,0 +1,64 @@
+use super::common::setup_db;
+
+#[test]
+fn test_create_account() {
+    let (_dir, db_path) = setup_db();
+    let account = crate::create_account_db(
+        &db_path,
+        "Test Account".to_string(),
+        100.0,
+        "cash".to_string(),
+    )
+    .unwrap();
+    assert_eq!(account.name, "Test Account");
+    assert_eq!(account.balance, 100.0);
+    assert_eq!(account.kind, "cash");
+
+    // Check initial transaction
+    let transactions = crate::get_transactions_db(&db_path, account.id).unwrap();
+    assert_eq!(transactions.len(), 1);
+    assert_eq!(transactions[0].amount, 100.0);
+    assert_eq!(transactions[0].payee, "Opening Balance");
+}
+
+#[test]
+fn test_create_account_zero_balance_no_initial_tx() {
+    let (_dir, db_path) = setup_db();
+    let account =
+        crate::create_account_db(&db_path, "Zero".to_string(), 0.0, "cash".to_string()).unwrap();
+    let txs = crate::get_transactions_db(&db_path, account.id).unwrap();
+    assert_eq!(txs.len(), 0);
+}
+
+#[test]
+fn test_create_account_negative_balance_creates_initial_tx() {
+    let (_dir, db_path) = setup_db();
+    let acc =
+        crate::create_account_db(&db_path, "Neg".to_string(), -50.0, "cash".to_string()).unwrap();
+    let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
+    assert_eq!(txs.len(), 1);
+    assert_eq!(txs[0].amount, -50.0);
+    assert_eq!(txs[0].payee, "Opening Balance");
+}
+
+#[test]
+fn test_create_account_initial_tx_details() {
+    let (_dir, db_path) = setup_db();
+    let account =
+        crate::create_account_db(&db_path, "Detail".to_string(), 200.0, "cash".to_string())
+            .unwrap();
+    let txs = crate::get_transactions_db(&db_path, account.id).unwrap();
+    assert_eq!(txs.len(), 1);
+    assert_eq!(txs[0].notes.as_deref(), Some("Initial Balance"));
+    assert_eq!(txs[0].category.as_deref(), Some("Income"));
+}
+
+#[test]
+fn test_get_accounts_returns_all() {
+    let (_dir, db_path) = setup_db();
+    crate::create_account_db(&db_path, "A".to_string(), 0.0, "cash".to_string()).unwrap();
+    crate::create_account_db(&db_path, "B".to_string(), 0.0, "cash".to_string()).unwrap();
+    let accounts = crate::get_accounts_db(&db_path).unwrap();
+    assert!(accounts.iter().any(|a| a.name == "A"));
+    assert!(accounts.iter().any(|a| a.name == "B"));
+}
