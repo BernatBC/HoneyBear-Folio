@@ -439,9 +439,6 @@ export default function SettingsModal({ onClose }) {
                       fullWidth={false}
                     />
                   </div>
-                  <p className="text-slate-400 mt-3">
-                    {t("settings.example_date", { example: formatDateForUI("2026-01-03", dateFormat, locale) })}
-                  </p>
                 </>
               )}
             </div>

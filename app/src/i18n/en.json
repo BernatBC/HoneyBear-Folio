@@ -86,7 +86,6 @@
   "settings.example": "Example: {example}",
   "settings.date_format": "Date format",
   "settings.select_date_format_placeholder": "Select date format",
-  "settings.example_date": "Example: {example}",
 
   "dashboard.title": "Dashboard",
   "dashboard.current_net_worth": "Current Net Worth",
