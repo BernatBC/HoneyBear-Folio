@@ -1,5 +1,6 @@
 use super::common::setup_db;
 use proptest::prelude::*;
+use rusqlite::OptionalExtension;
 use rand::rngs::StdRng;
 use rand::{SeedableRng, Rng};
 

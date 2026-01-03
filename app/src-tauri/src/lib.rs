@@ -62,7 +62,7 @@ struct Account {
     kind: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 struct Transaction {
     id: i32,
     account_id: i32,
@@ -75,7 +75,7 @@ struct Transaction {
     shares: Option<f64>,
     price_per_share: Option<f64>,
     fee: Option<f64>,
-}
+} 
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 struct AppSettings {

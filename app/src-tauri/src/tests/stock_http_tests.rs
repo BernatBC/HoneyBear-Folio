@@ -49,10 +49,8 @@ async fn test_get_stock_quotes_with_partial_fail_and_db_fallback() {
     let conn = rusqlite::Connection::open(&db_path).unwrap();
     conn.execute("INSERT OR REPLACE INTO stock_prices (ticker, price, last_updated) VALUES (?1, ?2, datetime('now'))", rusqlite::params!["BAA", 42.0]).unwrap();
 
-    let app_handle = tauri::AppHandle::from(tauri::generate_context!(".").expect("ctx"));
-
     let client = reqwest::Client::new();
-    let quotes = crate::get_stock_quotes_with_client(client, server.base_url(), app_handle.handle(), vec!["FOO".to_string(), "BAA".to_string()]).await.unwrap();
+    let quotes = crate::get_stock_quotes_with_client_and_db(client, server.base_url(), &db_path, vec!["FOO".to_string(), "BAA".to_string()]).await.unwrap();
 
     // FOO should be present with price 110, BAA should come from DB with price 42
     assert!(quotes.iter().any(|q| q.symbol == "FOO" && (q.price - 110.0).abs() < 1e-6));

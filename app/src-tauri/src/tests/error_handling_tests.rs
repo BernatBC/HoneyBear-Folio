@@ -39,14 +39,12 @@ fn test_set_db_path_parent_creation_permission_error() {
     perms.set_mode(0o555); // read and exec only
     fs::set_permissions(&readonly, perms).unwrap();
 
-    // Build a Tauri app handle
-    let context = tauri::generate_context!();
-    let app = tauri::Builder::default().build(context).unwrap();
-    let handle = app.handle();
-
-    // Attempt to set db path under readonly/child/test.db which should trigger parent creation and fail
+    // Attempting to set db path under readonly/child/test.db should trigger parent creation and fail; simulate via helpers
     let target = readonly.join("child").join("test.db");
-    let res = crate::set_db_path(handle.clone(), target.to_string_lossy().to_string());
+    let dir_path = dir.path().to_path_buf();
+    // Write settings that point to target and then initializing DB at target should fail due to readonly parent
+    crate::write_settings_to_dir(&dir_path, &crate::AppSettings { db_path: Some(target.to_string_lossy().to_string()) }).unwrap();
+    let res = crate::init_db_at_path(&target);
     assert!(res.is_err());
 
     // Restore permissions

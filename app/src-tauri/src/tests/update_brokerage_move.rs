@@ -25,7 +25,8 @@ fn test_update_brokerage_transaction_move_between_broker_accounts() {
     let accounts = crate::get_accounts_db(&db_path).unwrap();
     let cash_after = accounts.iter().find(|a| a.id == cash_acc.id).unwrap().balance;
     let a_after = accounts.iter().find(|a| a.id == broker_a.id).unwrap().balance;
-    assert_eq!(cash_after, -201.0); // 1000 - (2*100 + 1) = 1000 - 201 = 799? Wait, initial math: 2*100=200, cash becomes 1000 - (200+1)=799, but create_brokerage_transaction_db uses cash_amount = -(total_price+fee) so should be -201 applied to cash, starting 1000 => 799
+    // cash should be 1000 - (2*100 + 1) = 799
+    assert_eq!(cash_after, 799.0);
     assert_eq!(a_after, 200.0);
 
     // Move brokerage transaction to BrokerB using update (same amounts)
