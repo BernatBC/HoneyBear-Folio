@@ -1564,15 +1564,16 @@ struct DailyPrice {
     price: f64,
 }
 
-#[tauri::command]
-async fn update_daily_stock_prices(app_handle: AppHandle, tickers: Vec<String>) -> Result<(), String> {
+// Internal helper that performs the main fetching & DB insertion logic. Extracted to make testing easier.
+async fn update_daily_stock_prices_with_client_and_base(
+    db_path: &std::path::Path,
+    client: &reqwest::Client,
+    base_url: &str,
+    tickers: Vec<String>,
+) -> Result<(), String> {
     if tickers.is_empty() {
         return Ok(());
     }
-
-    let db_path = get_db_path(&app_handle)?;
-    let client = reqwest::Client::new();
-    let base_url = "https://query1.finance.yahoo.com".to_string();
 
     for ticker in tickers {
         // 1. Get last date from DB
@@ -1608,10 +1609,14 @@ async fn update_daily_stock_prices(app_handle: AppHandle, tickers: Vec<String>) 
         // 2. Fetch from Yahoo
         let url = format!(
             "{}/v8/finance/chart/{}?period1={}&period2={}&interval=1d",
-            base_url, ticker, start_timestamp, end_timestamp
+            base_url,
+            ticker,
+            start_timestamp,
+            end_timestamp
         );
 
-        let res = client.get(&url)
+        let res = client
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await
@@ -1637,7 +1642,8 @@ async fn update_daily_stock_prices(app_handle: AppHandle, tickers: Vec<String>) 
                                 {
                                     let mut stmt = tx.prepare(
                                         "INSERT OR REPLACE INTO daily_stock_prices (ticker, date, price) VALUES (?1, ?2, ?3)"
-                                    ).map_err(|e| e.to_string())?;
+                                    )
+                                    .map_err(|e| e.to_string())?;
 
                                     for (i, ts) in timestamps.iter().enumerate() {
                                         if let Some(price) = closes.get(i).and_then(|p| *p) {
@@ -1659,25 +1665,41 @@ async fn update_daily_stock_prices(app_handle: AppHandle, tickers: Vec<String>) 
 }
 
 #[tauri::command]
-fn get_daily_stock_prices(app_handle: AppHandle, ticker: String) -> Result<Vec<DailyPrice>, String> {
+async fn update_daily_stock_prices(app_handle: AppHandle, tickers: Vec<String>) -> Result<(), String> {
+    // Allow overriding base URL via env var for testing
+    let base_url = std::env::var("YAHOO_BASE_URL").unwrap_or_else(|_| "https://query1.finance.yahoo.com".to_string());
     let db_path = get_db_path(&app_handle)?;
+
+    let client = reqwest::Client::new();
+    update_daily_stock_prices_with_client_and_base(&std::path::Path::new(&db_path), &client, &base_url, tickers).await
+}
+
+// Helper to make `get_daily_stock_prices` testable without an AppHandle
+fn get_daily_stock_prices_from_path(db_path: &std::path::Path, ticker: String) -> Result<Vec<DailyPrice>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    let mut stmt = conn.prepare(
-        "SELECT date, price FROM daily_stock_prices WHERE ticker = ?1 ORDER BY date ASC"
-    ).map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT date, price FROM daily_stock_prices WHERE ticker = ?1 ORDER BY date ASC")
+        .map_err(|e| e.to_string())?;
 
-    let prices = stmt.query_map(params![ticker], |row| {
-        Ok(DailyPrice {
-            date: row.get(0)?,
-            price: row.get(1)?,
+    let prices = stmt
+        .query_map(params![ticker], |row| {
+            Ok(DailyPrice {
+                date: row.get(0)?,
+                price: row.get(1)?,
+            })
         })
-    })
-    .map_err(|e| e.to_string())?
-    .collect::<Result<Vec<_>, _>>()
-    .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| e.to_string())?;
 
     Ok(prices)
+}
+
+#[tauri::command]
+fn get_daily_stock_prices(app_handle: AppHandle, ticker: String) -> Result<Vec<DailyPrice>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    get_daily_stock_prices_from_path(&std::path::Path::new(&db_path), ticker)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

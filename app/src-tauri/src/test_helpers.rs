@@ -134,6 +134,18 @@ pub(crate) fn init_db_at_path(db_path: &PathBuf) -> Result<(), String> {
     )
     .map_err(|e| e.to_string())?;
 
+    // Ensure daily_stock_prices exists for tests that exercise daily valuations
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS daily_stock_prices (
+            ticker TEXT NOT NULL,
+            date TEXT NOT NULL,
+            price REAL NOT NULL,
+            PRIMARY KEY (ticker, date)
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
