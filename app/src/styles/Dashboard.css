@@ -128,4 +128,60 @@
   .account-transactions-table .p-2 {
     padding: 0.25rem !important;
   }
+
+  .account-visibility .account-item {
+    @apply cursor-pointer;
+  }
+
+  .account-visibility .account-dot {
+    @apply inline-block;
+  }
+
+  /* Custom checkbox for account visibility */
+  .account-visibility .account-checkbox {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    border: 2px solid rgba(148, 163, 184, 0.4);
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    transition: all 120ms ease;
+    margin-right: 6px;
+    flex: 0 0 auto;
+  }
+
+  .account-visibility .account-checkbox::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 120ms ease-in-out;
+  }
+
+  .account-visibility .account-checkbox:checked {
+    background: var(--hb-account-color, rgb(59, 130, 246));
+    border-color: transparent;
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.08);
+  }
+
+  .account-visibility .account-checkbox:checked::after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  .account-visibility .account-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.16);
+  }
+
+  .account-visibility .toggle-all {
+    @apply text-sm font-medium text-slate-600 dark:text-slate-300 underline hover:no-underline;
+  }
 }
