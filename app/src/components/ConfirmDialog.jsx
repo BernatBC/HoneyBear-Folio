@@ -81,12 +81,12 @@ function ConfirmDialog({
 
   return createPortal(
     <div className="modal-overlay">
-      <div className="modal-container w-full max-w-md">
+      <div className="modal-container w-auto max-w-md">
         <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
           {title}
         </h2>
         <p className="mb-6 text-slate-600 dark:text-slate-300">{message}</p>
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 mt-auto">
           {showCancel && (
             <button
               onClick={onCancel}

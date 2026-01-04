@@ -5,7 +5,7 @@
   /* .modal-overlay moved to ./Modal.css */
 
   .modal-container {
-    @apply flex flex-col bg-white dark:bg-slate-900 w-[min(95vw,720px)] max-w-[720px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[600px] overflow-hidden overflow-x-hidden;
+    @apply flex flex-col bg-white dark:bg-slate-900 w-[min(95vw,720px)] max-w-[720px] rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[98vh] min-h-[320px] overflow-hidden overflow-x-hidden;
   }
 
   /* Ensure settings modal width cannot be overridden by other modal styles */
@@ -115,7 +115,7 @@
 
   /* Footer and reset button styles */
   .modal-footer {
-    @apply mt-auto border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-start z-10;
+    @apply mt-4 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-start z-10;
   }
 
   .reset-button {

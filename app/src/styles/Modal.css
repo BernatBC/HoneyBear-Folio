@@ -11,7 +11,7 @@
   }
 
   .modal-container {
-    @apply relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[90vh] overflow-y-auto;
+    @apply relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl px-6 py-4 max-h-[90vh] overflow-y-auto flex flex-col;
     z-index: 10002;
   }
 }
