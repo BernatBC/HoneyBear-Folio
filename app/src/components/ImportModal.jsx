@@ -122,9 +122,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
               // Unsupported JSON shape
               setColumns([]);
               setPreviewRows([]);
-              setParseError(
-                "Unsupported JSON structure — expected an array of objects or an object with a 'transactions' or 'data' array.",
-              );
+              setParseError(t("import.error.unsupported_json_structure"));
               autoMapColumns([]);
               return;
             }
@@ -143,7 +141,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
             autoMapColumns(cols);
           } catch (e) {
             console.error("Failed to parse JSON import file:", e);
-            setParseError("Failed to parse JSON file: " + (e.message || e));
+            setParseError(
+              t("import.error.failed_parse_json", { error: e.message || String(e) }),
+            );
             setColumns([]);
             setPreviewRows([]);
           }
@@ -202,7 +202,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
         parseFile(fileObj);
       } catch (err) {
         console.error("Failed to read dropped file:", err);
-        setParseError("Failed to read dropped file: " + (err.message || err));
+        setParseError(
+          t("import.error.failed_read_dropped", { error: err.message || String(err) }),
+        );
       }
     },
     [parseFile],
@@ -403,7 +405,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
       try {
         const dateStr = row[mapping.date];
         const amountStr = row[mapping.amount];
-        const payee = row[mapping.payee] || "Unknown";
+        const payee = row[mapping.payee] || t("import.unknown_payee");
 
         // Basic date parsing (YYYY-MM-DD preferred, but try others)
         let date = new Date(dateStr).toISOString().split("T")[0];
@@ -476,7 +478,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
         }
 
         if (!accountId)
-          throw new Error("No target account specified for imported row");
+          throw new Error(t("import.error.no_account_for_row"));
 
         await invoke("create_transaction", {
           accountId,
@@ -588,9 +590,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
               <div className="mb-2">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Indicate which column contains the account name or ID in the
-                  mappings below — this will be used to assign each imported row
-                  to the correct account.
+                  {t("import.indicate_account_column")}
                 </p>
               </div>
 
@@ -605,7 +605,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   {Object.keys(mapping).map((field) => (
                     <div key={field}>
                       <label className="block text-xs font-medium text-slate-600 dark:text-slate-500 mb-1 capitalize">
-                        {field}
+                        {t(`import.field.${field}`)}
                       </label>
                       <div className="relative">
                         <CustomSelect
@@ -631,10 +631,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
               <div className="mb-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                    Preview
+                    {t("import.preview")}
                   </h3>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
-                    Showing first 5 rows
+                    {t("import.showing_first_rows")}
                   </span>
                 </div>
 
@@ -685,7 +685,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                 <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-slate-700 dark:text-slate-300">
-                      Importing...
+                      {t("import.importing")}
                     </span>
                     <span className="text-slate-500 dark:text-slate-400">
                       {progress.current} / {progress.total}
@@ -704,11 +704,11 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   <div className="flex gap-4 text-xs">
                     <span className="text-green-400 flex items-center gap-1">
                       <CheckCircle className="w-3 h-3" /> {progress.success}{" "}
-                      Success
+                      {t("import.success")}
                     </span>
                     <span className="text-red-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {progress.failed}{" "}
-                      Failed
+                      <AlertCircle className="w-3 h-3" /> {progress.failed} 
+                      {t("import.failed")}
                     </span>
                   </div>
                 </div>
