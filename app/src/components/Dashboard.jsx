@@ -68,7 +68,7 @@ export default function Dashboard({
   const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
   const [dailyPrices, setDailyPrices] = useState({});
-  const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, 1Y, ALL
+  const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, YTD, 1Y, ALL
   const isDark = useIsDark();
 
   const formatNumber = useFormatNumber();
@@ -148,6 +148,7 @@ export default function Dashboard({
     if (timeRange === "1M") cutoffDate.setMonth(now.getMonth() - 1);
     else if (timeRange === "3M") cutoffDate.setMonth(now.getMonth() - 3);
     else if (timeRange === "6M") cutoffDate.setMonth(now.getMonth() - 6);
+    else if (timeRange === "YTD") cutoffDate = new Date(now.getFullYear(), 0, 1);
     else if (timeRange === "1Y") cutoffDate.setFullYear(now.getFullYear() - 1);
     else cutoffDate = new Date(0); // ALL
 
@@ -185,7 +186,13 @@ export default function Dashboard({
     d.setHours(0, 0, 0, 0);
 
     while (d <= today) {
-      sortedDates.push(d.toISOString().split("T")[0]);
+      // Use local date components to avoid UTC conversion issues that can
+      // shift the date to the previous day for users in negative timezones.
+      const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+        2,
+        "0",
+      )}-${String(d.getDate()).padStart(2, "0")}`;
+      sortedDates.push(localDate);
       d.setDate(d.getDate() + 1);
     }
 
@@ -503,6 +510,7 @@ export default function Dashboard({
       let monthsCount = 6; // default
       if (timeRange === "3M") monthsCount = 3;
       else if (timeRange === "6M") monthsCount = 6;
+      else if (timeRange === "YTD") monthsCount = now.getMonth() + 1;
       else if (timeRange === "1Y") monthsCount = 12;
       else if (timeRange === "ALL") {
         const txDates = transactions.map((t) => t.date).sort();
@@ -818,7 +826,7 @@ export default function Dashboard({
 
         <div className="flex items-center gap-3">
           <div className="time-range-selector">
-            {["1M", "3M", "6M", "1Y", "ALL"].map((range) => (
+            {["1M", "3M", "6M", "1Y", "YTD", "ALL"].map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
