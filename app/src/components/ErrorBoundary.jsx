@@ -30,14 +30,16 @@ export default class ErrorBoundary extends React.Component {
 
           {/* Expandable error details so users can see stack traces without devtools */}
           <details className="mt-3 bg-white dark:bg-slate-800 p-3 rounded border border-slate-100 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
-            <summary className="cursor-pointer">{t("error.show_details")}</summary>
+            <summary className="cursor-pointer">
+              {t("error.show_details")}
+            </summary>
             <pre className="mt-2 whitespace-pre-wrap break-words text-xs">
               {this.state.error && this.state.error.stack
                 ? this.state.error.stack
                 : String(this.state.error)}
               {this.state.info && (
                 <>
-                  {'\n\n'}Component Stack:\n
+                  {"\n\n"}Component Stack:\n
                   {this.state.info}
                 </>
               )}
