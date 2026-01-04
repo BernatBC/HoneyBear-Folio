@@ -148,7 +148,8 @@ export default function Dashboard({
     if (timeRange === "1M") cutoffDate.setMonth(now.getMonth() - 1);
     else if (timeRange === "3M") cutoffDate.setMonth(now.getMonth() - 3);
     else if (timeRange === "6M") cutoffDate.setMonth(now.getMonth() - 6);
-    else if (timeRange === "YTD") cutoffDate = new Date(now.getFullYear(), 0, 1);
+    else if (timeRange === "YTD")
+      cutoffDate = new Date(now.getFullYear(), 0, 1);
     else if (timeRange === "1Y") cutoffDate.setFullYear(now.getFullYear() - 1);
     else cutoffDate = new Date(0); // ALL
 
