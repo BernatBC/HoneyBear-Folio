@@ -620,7 +620,7 @@ export default function Dashboard({
                 });
               }
               return label;
-            }
+            },
           },
         },
       },
@@ -740,15 +740,30 @@ export default function Dashboard({
 
           <div className="account-visibility mt-4">
             <div className="flex items-center gap-3 mb-2">
-              <button className="toggle-all text-sm" onClick={() => setAllAccountsVisibility(true)}>Show all</button>
-              <button className="toggle-all text-sm" onClick={() => setAllAccountsVisibility(false)}>Hide all</button>
+              <button
+                className="toggle-all text-sm"
+                onClick={() => setAllAccountsVisibility(true)}
+              >
+                Show all
+              </button>
+              <button
+                className="toggle-all text-sm"
+                onClick={() => setAllAccountsVisibility(false)}
+              >
+                Hide all
+              </button>
             </div>
             <div className="account-list flex flex-wrap gap-3">
               {accounts.map((acc) => {
-                const ds = chartData?.datasets.find((d) => d.accountId === acc.id);
+                const ds = chartData?.datasets.find(
+                  (d) => d.accountId === acc.id,
+                );
                 const color = ds?._color || "rgb(148, 163, 184)";
                 return (
-                  <label key={acc.id} className="account-item inline-flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-sm">
+                  <label
+                    key={acc.id}
+                    className="account-item inline-flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                  >
                     <input
                       type="checkbox"
                       className="account-checkbox"
@@ -757,9 +772,14 @@ export default function Dashboard({
                       aria-label={acc.name}
                       style={{ ["--hb-account-color"]: color }}
                     />
-                    <span className="account-dot w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                    <span
+                      className="account-dot w-3 h-3 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
                     <span className="account-name">{acc.name}</span>
-                    <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">{formatNumber(acc.balance, {style: "currency"})}</span>
+                    <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">
+                      {formatNumber(acc.balance, { style: "currency" })}
+                    </span>
                   </label>
                 );
               })}
