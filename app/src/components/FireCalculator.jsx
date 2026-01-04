@@ -10,6 +10,13 @@ import {
   RotateCw,
 } from "lucide-react";
 import { useFormatNumber } from "../utils/format";
+import useIsDark from "../hooks/useIsDark";
+import {
+  buildHoldingsFromTransactions,
+  mergeHoldingsWithQuotes,
+  computePortfolioTotals,
+  computeNetWorthMarketValues,
+} from "../utils/investments";
 import NumberInput from "./NumberInput";
 import {
   Chart as ChartJS,
@@ -64,6 +71,7 @@ export default function FireCalculator() {
     savedState?.annualSavings ?? 20000,
   );
   const [loading, setLoading] = useState(!savedState);
+  const isDark = useIsDark();
 
   // Track which fields the user has manually edited during the session so
   // computed backend updates don't overwrite them while the app is open. We
@@ -84,119 +92,29 @@ export default function FireCalculator() {
       const accounts = await invoke("get_accounts");
       const transactions = await invoke("get_all_transactions");
 
-      // --- 1. Calculate Net Worth & Expected Return ---
+      // Build holdings and first trade date
+      const { currentHoldings, firstTradeDate } =
+        buildHoldingsFromTransactions(transactions);
 
-      // Group holdings and calculate cost basis
-      const holdingMap = {};
-      let firstTradeDate = null;
+      // Fetch quotes for holdings once
+      const tickers = currentHoldings.map((h) => h.ticker);
+      let quotes = [];
+      if (tickers.length > 0) {
+        quotes = await invoke("get_stock_quotes", { tickers });
+      }
 
-      // Sort transactions by date
-      transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+      // Compute portfolio totals
+      const finalHoldings = mergeHoldingsWithQuotes(currentHoldings, quotes);
+      const {
+        totalValue: totalPortfolioValue,
+        totalCostBasis: totalPortfolioCostBasis,
+      } = computePortfolioTotals(finalHoldings);
 
-      transactions.forEach((tx) => {
-        if (tx.ticker && tx.shares) {
-          if (!firstTradeDate) firstTradeDate = new Date(tx.date);
-
-          if (!holdingMap[tx.ticker]) {
-            holdingMap[tx.ticker] = {
-              shares: 0,
-              costBasis: 0,
-            };
-          }
-
-          if (tx.shares > 0) {
-            // Buy
-            holdingMap[tx.ticker].shares += tx.shares;
-            // Use total amount for cost basis (price * shares + fee)
-            // Note: tx.amount is negative for buys, so we take abs(amount) or calculate from price/fee
-            // In InvestmentDashboard it uses price_per_share * shares + fee.
-            // Let's try to use tx.amount if available and negative, otherwise reconstruct.
-            // Actually InvestmentDashboard logic:
-            // holdingMap[tx.ticker].costBasis += (tx.price_per_share || 0) * tx.shares + (tx.fee || 0);
-            // Let's stick to that for consistency.
-            const cost = (tx.price_per_share || 0) * tx.shares + (tx.fee || 0);
-            holdingMap[tx.ticker].costBasis += cost;
-          } else {
-            // Sell
-            const currentShares = holdingMap[tx.ticker].shares;
-            const currentCost = holdingMap[tx.ticker].costBasis;
-            const avgCost = currentShares > 0 ? currentCost / currentShares : 0;
-            const sharesSold = Math.abs(tx.shares);
-
-            holdingMap[tx.ticker].shares -= sharesSold;
-            holdingMap[tx.ticker].costBasis -= sharesSold * avgCost;
-          }
-        }
-      });
-
-      const allTickers = Object.keys(holdingMap).filter(
-        (t) => holdingMap[t].shares > 0.0001,
+      // Compute market values per account used for net worth (re-uses quotes fetched earlier)
+      const netWorthMarketValues = computeNetWorthMarketValues(
+        transactions,
+        quotes,
       );
-      let totalPortfolioValue = 0;
-      let totalPortfolioCostBasis = 0;
-
-      if (allTickers.length > 0) {
-        const quotes = await invoke("get_stock_quotes", {
-          tickers: allTickers,
-        });
-        const quoteMap = {};
-        quotes.forEach((q) => {
-          quoteMap[q.symbol] = q.regularMarketPrice;
-        });
-
-        allTickers.forEach((ticker) => {
-          const h = holdingMap[ticker];
-          const price = quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
-          const value = h.shares * price;
-
-          totalPortfolioValue += value;
-          totalPortfolioCostBasis += h.costBasis;
-
-          // For net worth calculation (per account)
-          // We need to map this back to accounts, but we already have totalPortfolioValue.
-          // The previous net worth logic summed up account balances + market values.
-          // Let's keep the previous logic for Net Worth to be safe about account mapping.
-        });
-      }
-
-      // Re-calculate Net Worth using the previous logic for account mapping
-      // (Or just use totalPortfolioValue + cash balances)
-      // Let's stick to the previous logic for Net Worth to ensure we handle multiple accounts correctly
-      const accountHoldings = {};
-      const tickersForNetWorth = new Set();
-      transactions.forEach((tx) => {
-        if (tx.ticker && tx.shares) {
-          if (!accountHoldings[tx.account_id])
-            accountHoldings[tx.account_id] = {};
-          if (!accountHoldings[tx.account_id][tx.ticker])
-            accountHoldings[tx.account_id][tx.ticker] = 0;
-          accountHoldings[tx.account_id][tx.ticker] += tx.shares;
-          tickersForNetWorth.add(tx.ticker);
-        }
-      });
-
-      let netWorthMarketValues = {};
-      if (tickersForNetWorth.size > 0) {
-        const quotes = await invoke("get_stock_quotes", {
-          tickers: Array.from(tickersForNetWorth),
-        });
-        const quoteMap = {};
-        quotes.forEach((q) => {
-          quoteMap[q.symbol] = q.regularMarketPrice;
-        });
-
-        for (const [accountId, holdings] of Object.entries(accountHoldings)) {
-          let val = 0;
-          for (const [ticker, shares] of Object.entries(holdings)) {
-            if (shares > 0.0001) {
-              val +=
-                shares *
-                (quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0);
-            }
-          }
-          netWorthMarketValues[accountId] = val;
-        }
-      }
 
       const totalBalance = accounts.reduce((sum, acc) => {
         if (acc.kind === "brokerage") {
@@ -223,24 +141,11 @@ export default function FireCalculator() {
         const yearsInvested = Math.max(
           (now - firstTradeDate) / (1000 * 60 * 60 * 24 * 365.25),
           0.1,
-        ); // Min 0.1 years to avoid infinity
-
-        // CAGR = (End Value / Start Value)^(1/n) - 1
-        // Here Start Value is Cost Basis (approximation)
-        // A better approximation for irregular cashflows is IRR, but CAGR on total cost basis is a simple proxy.
-        // Or just annualized simple return?
-        // Let's use CAGR of the aggregate: (CurrentValue / CostBasis)^(1/years) - 1
-        // This assumes all capital was invested at the beginning, which is wrong.
-        // A better simple metric might be just the current ROI?
-        // "Expected Annual Return" usually implies long term average.
-        // Let's use the simple ROI annualized: (1 + ROI)^(1/years) - 1
+        );
 
         let annualizedReturn =
           (Math.pow(1 + totalReturnRate, 1 / yearsInvested) - 1) * 100;
 
-        // Sanity check: if years < 1, the exponent is > 1, amplifying short term gains/losses.
-        // If years < 1, maybe just show the simple return? Or cap it?
-        // Let's just set it.
         if (
           isFinite(annualizedReturn) &&
           !userModified.current.expectedReturn
@@ -627,11 +532,7 @@ export default function FireCalculator() {
                     legend: {
                       position: "top",
                       labels: {
-                        color: document.documentElement.classList.contains(
-                          "dark",
-                        )
-                          ? "#cbd5e1"
-                          : "#475569",
+                        color: isDark ? "#cbd5e1" : "#475569",
                       },
                     },
                     tooltip: {
@@ -673,18 +574,10 @@ export default function FireCalculator() {
                     y: {
                       beginAtZero: true,
                       grid: {
-                        color: document.documentElement.classList.contains(
-                          "dark",
-                        )
-                          ? "#334155"
-                          : "#e2e8f0",
+                        color: isDark ? "#334155" : "#e2e8f0",
                       },
                       ticks: {
-                        color: document.documentElement.classList.contains(
-                          "dark",
-                        )
-                          ? "#94a3b8"
-                          : "#64748b",
+                        color: isDark ? "#94a3b8" : "#64748b",
                         callback: function (value) {
                           const num = Number(value);
                           if (Number.isNaN(num)) return value;
@@ -698,18 +591,10 @@ export default function FireCalculator() {
                     },
                     x: {
                       grid: {
-                        color: document.documentElement.classList.contains(
-                          "dark",
-                        )
-                          ? "#334155"
-                          : "#e2e8f0",
+                        color: isDark ? "#334155" : "#e2e8f0",
                       },
                       ticks: {
-                        color: document.documentElement.classList.contains(
-                          "dark",
-                        )
-                          ? "#94a3b8"
-                          : "#64748b",
+                        color: isDark ? "#94a3b8" : "#64748b",
                       },
                     },
                   },
