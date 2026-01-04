@@ -2,15 +2,16 @@ import { useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { ConfirmContext } from "../contexts/confirm";
+import { t } from "../i18n/i18n";
 import "../styles/Modal.css";
 
 export function ConfirmDialogProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState({
     message: "",
-    title: "",
-    okLabel: "OK",
-    cancelLabel: "Cancel",
+    title: t("confirm.title"),
+    okLabel: t("confirm.ok"),
+    cancelLabel: t("confirm.cancel"),
     kind: "info", // info, warning, error
   });
   const resolveRef = useRef(null);
@@ -19,9 +20,9 @@ export function ConfirmDialogProvider({ children }) {
     return new Promise((resolve) => {
       setOptions({
         message,
-        title: opts.title || "Confirm",
-        okLabel: opts.okLabel || "OK",
-        cancelLabel: opts.cancelLabel || "Cancel",
+        title: opts.title || t("confirm.title"),
+        okLabel: opts.okLabel || t("confirm.ok"),
+        cancelLabel: opts.cancelLabel || t("confirm.cancel"),
         kind: opts.kind || "info",
         showCancel: opts.showCancel !== undefined ? opts.showCancel : true,
       });
