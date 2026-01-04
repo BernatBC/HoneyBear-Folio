@@ -1578,7 +1578,7 @@ async fn update_daily_stock_prices_with_client_and_base(
     for ticker in tickers {
         // 1. Get last date from DB
         let last_date_str: Option<String> = {
-            let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+            let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
             conn.query_row(
                 "SELECT MAX(date) FROM daily_stock_prices WHERE ticker = ?1",
                 params![ticker],
@@ -1642,7 +1642,7 @@ async fn update_daily_stock_prices_with_client_and_base(
                                     let mut stmt = tx.prepare(
                                         "INSERT OR REPLACE INTO daily_stock_prices (ticker, date, price) VALUES (?1, ?2, ?3)"
                                     )
-                                    .map_err(|e| e.to_string())?;
+                                    .map_err(|e: rusqlite::Error| e.to_string())?;
 
                                     for (i, ts) in timestamps.iter().enumerate() {
                                         if let Some(price) = closes.get(i).and_then(|p| *p) {
@@ -1656,7 +1656,7 @@ async fn update_daily_stock_prices_with_client_and_base(
                                         }
                                     }
                                 }
-                                tx.commit().map_err(|e| e.to_string())?;
+                                tx.commit().map_err(|e: rusqlite::Error| e.to_string())?;
                             }
                         }
                     }
@@ -1719,7 +1719,7 @@ fn get_daily_stock_prices(
     ticker: String,
 ) -> Result<Vec<DailyPrice>, String> {
     let db_path = get_db_path(&app_handle)?;
-    get_daily_stock_prices_from_path(&std::path::Path::new(&db_path), ticker)
+    get_daily_stock_prices_from_path(std::path::Path::new(&db_path), ticker)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

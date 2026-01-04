@@ -61,7 +61,7 @@ fn test_get_all_transactions() {
     // Both accounts had opening balance txs plus the two created txs => total 4
     assert_eq!(all.len(), 4);
     // There should be at least one transaction with date 2023-01-02
-    assert!(all.iter().any(|t| t.date == "2023-01-02".to_string()));
+    assert!(all.iter().any(|t| t.date == "2023-01-02"));
 }
 #[test]
 fn test_create_transaction_transfer_details() {

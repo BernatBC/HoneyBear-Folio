@@ -21,9 +21,9 @@ fn test_get_db_path_override_creates_parent_dir() {
     let s = crate::AppSettings {
         db_path: Some(nested.to_string_lossy().to_string()),
     };
-    crate::write_settings_to_dir(&dir.path().to_path_buf(), &s).unwrap();
+    crate::write_settings_to_dir(dir.path(), &s).unwrap();
 
-    let pb = crate::get_db_path_for_dir(&dir.path().to_path_buf()).unwrap();
+    let pb = crate::get_db_path_for_dir(dir.path()).unwrap();
     assert_eq!(pb, nested);
     assert!(nested.parent().unwrap().exists());
 }
