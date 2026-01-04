@@ -452,15 +452,7 @@ export default function Dashboard({
   );
 
   const barOptions = useMemo(() => {
-    const labelMap = {
-      "1M": "Last 1 Month",
-      "3M": "Last 3 Months",
-      "6M": "Last 6 Months",
-      "1Y": "Last 1 Year",
-      ALL: "All time",
-    };
-    const titleText = `Income vs Expenses (${labelMap[timeRange] || timeRange})`;
-
+  
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -545,7 +537,7 @@ export default function Dashboard({
         },
       },
     };
-  }, [timeRange, formatNumber, isDark]);
+  }, [formatNumber, isDark]);
 
   const options = useMemo(
     () => ({
