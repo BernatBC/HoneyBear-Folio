@@ -30,7 +30,8 @@
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "prop-types": "^15.8.1"
   },
   "optionalDependencies": {
     "@tauri-apps/cli-darwin-arm64": "^2.9.6",

@@ -3,39 +3,18 @@ import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import { RefreshCw } from "lucide-react";
 import { useFormatNumber } from "../utils/format";
+import {
+  buildHoldingsFromTransactions,
+  mergeHoldingsWithQuotes,
+} from "../utils/investments";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import { t } from "../i18n/i18n";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function useIsDark() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return document.documentElement.classList.contains("dark");
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class") {
-          setIsDark(document.documentElement.classList.contains("dark"));
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isDark;
-}
+// useIsDark moved to a shared hook at src/hooks/useIsDark.js
+import useIsDark from "../hooks/useIsDark";
 
 export default function InvestmentDashboard() {
   const [holdings, setHoldings] = useState([]);
@@ -52,50 +31,8 @@ export default function InvestmentDashboard() {
   async function fetchData() {
     setLoading(true);
     try {
-      // 1. Fetch all transactions
       const transactions = await invoke("get_all_transactions");
-
-      // 2. Calculate holdings
-      const holdingMap = {};
-
-      // Sort transactions by date to ensure correct order for average cost calculation
-      transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-      transactions.forEach((tx) => {
-        if (tx.ticker && tx.shares) {
-          if (!holdingMap[tx.ticker]) {
-            holdingMap[tx.ticker] = {
-              ticker: tx.ticker,
-              shares: 0,
-              costBasis: 0,
-            };
-          }
-
-          if (tx.shares > 0) {
-            // Buy
-            holdingMap[tx.ticker].shares += tx.shares;
-            holdingMap[tx.ticker].costBasis +=
-              (tx.price_per_share || 0) * tx.shares + (tx.fee || 0);
-          } else {
-            // Sell
-            const currentShares = holdingMap[tx.ticker].shares;
-            const currentCost = holdingMap[tx.ticker].costBasis;
-            const avgCost = currentShares > 0 ? currentCost / currentShares : 0;
-
-            const sharesSold = Math.abs(tx.shares);
-
-            // Update shares
-            holdingMap[tx.ticker].shares -= sharesSold;
-
-            // Reduce cost basis by the average cost of sold shares
-            holdingMap[tx.ticker].costBasis -= sharesSold * avgCost;
-          }
-        }
-      });
-
-      const currentHoldings = Object.values(holdingMap).filter(
-        (h) => h.shares > 0.0001,
-      );
+      const { currentHoldings } = buildHoldingsFromTransactions(transactions);
 
       if (currentHoldings.length === 0) {
         setHoldings([]);
@@ -103,30 +40,10 @@ export default function InvestmentDashboard() {
         return;
       }
 
-      // 3. Fetch quotes
       const tickers = currentHoldings.map((h) => h.ticker);
       const quotes = await invoke("get_stock_quotes", { tickers });
 
-      // 4. Merge data
-      const finalHoldings = currentHoldings.map((h) => {
-        const quote = quotes.find((q) => q.symbol === h.ticker);
-        const price = quote ? quote.regularMarketPrice : 0;
-        const currentValue = h.shares * price;
-        const roi =
-          h.costBasis > 0
-            ? ((currentValue - h.costBasis) / h.costBasis) * 100
-            : 0;
-
-        return {
-          ...h,
-          price,
-          currentValue,
-          roi,
-          changePercent: quote ? quote.regularMarketChangePercent : 0,
-        };
-      });
-
-      finalHoldings.sort((a, b) => b.currentValue - a.currentValue);
+      const finalHoldings = mergeHoldingsWithQuotes(currentHoldings, quotes);
       setHoldings(finalHoldings);
     } catch (e) {
       console.error("Error fetching investment data:", e);

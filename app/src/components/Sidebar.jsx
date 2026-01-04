@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import ImportModal from "./ImportModal";
 import ExportModal from "./ExportModal";
 import SettingsModal from "./SettingsModal";
+import AccountList from "./AccountList";
 import {
   Wallet,
   Plus,
@@ -195,35 +196,13 @@ export default function Sidebar({
             </button>
           </div>
 
-          <div className="space-y-1">
-            {accounts
-              .filter((acc) => acc.kind === "cash")
-              .map((account) => (
-                <button
-                  key={account.id}
-                  onClick={() => handleSelect(account.id)}
-                  className={`sidebar-nav-item justify-between group ${
-                    selectedId === account.id
-                      ? "sidebar-nav-item-active"
-                      : "sidebar-nav-item-inactive"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <CreditCard
-                      className={`sidebar-nav-icon ${selectedId === account.id ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
-                    />
-                    <span className="font-medium truncate max-w-[120px]">
-                      {account.name}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
-                  >
-                    {formatNumber(account.balance, { style: "currency" })}
-                  </span>
-                </button>
-              ))}
-          </div>
+          <AccountList
+            accounts={accounts}
+            kind="cash"
+            selectedId={selectedId}
+            onSelectAccount={onSelectAccount}
+            Icon={CreditCard}
+          />
         </div>
 
         {/* Brokerage Accounts */}
@@ -243,40 +222,14 @@ export default function Sidebar({
             </button>
           </div>
 
-          <div className="space-y-1">
-            {accounts
-              .filter((acc) => acc.kind === "brokerage")
-              .map((account) => (
-                <button
-                  key={account.id}
-                  onClick={() => handleSelect(account.id)}
-                  className={`sidebar-nav-item justify-between group ${
-                    selectedId === account.id
-                      ? "sidebar-nav-item-active"
-                      : "sidebar-nav-item-inactive"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <TrendingUp
-                      className={`sidebar-nav-icon ${selectedId === account.id ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
-                    />
-                    <span className="font-medium truncate max-w-[120px]">
-                      {account.name}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm font-medium ${selectedId === account.id ? "text-blue-100" : "text-slate-500 group-hover:text-slate-300"}`}
-                  >
-                    {formatNumber(
-                      marketValues[account.id] !== undefined
-                        ? marketValues[account.id]
-                        : account.balance,
-                      { style: "currency" },
-                    )}
-                  </span>
-                </button>
-              ))}
-          </div>
+          <AccountList
+            accounts={accounts}
+            kind="brokerage"
+            selectedId={selectedId}
+            onSelectAccount={onSelectAccount}
+            marketValues={marketValues}
+            Icon={TrendingUp}
+          />
         </div>
         {isAdding && (
           <div className="sidebar-form-container">
