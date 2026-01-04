@@ -221,28 +221,25 @@ export default function Dashboard({
     };
   }, [accounts, transactions, timeRange, marketValues, formatDate]);
 
-  // Visible accounts state: track which individual account series are shown
-  const [visibleAccounts, setVisibleAccounts] = useState(() => {
-    const map = {};
-    accounts.forEach((a) => (map[a.id] = false));
-    return map;
-  });
+  // Track user toggles for account visibility; derive the actual visibility from accounts + toggles
+  const [toggledAccounts, setToggledAccounts] = useState(() => ({}));
 
-  useEffect(() => {
-    // Reinitialize visibility when accounts list changes
+  const visibleAccounts = useMemo(() => {
     const map = {};
-    accounts.forEach((a) => (map[a.id] = false));
-    setVisibleAccounts(map);
-  }, [accounts]);
+    accounts.forEach((a) => {
+      map[a.id] = !!toggledAccounts[a.id];
+    });
+    return map;
+  }, [accounts, toggledAccounts]);
 
   const toggleAccountVisibility = (accountId) => {
-    setVisibleAccounts((prev) => ({ ...prev, [accountId]: !prev[accountId] }));
+    setToggledAccounts((prev) => ({ ...prev, [accountId]: !prev[accountId] }));
   };
 
   const setAllAccountsVisibility = (visible) => {
     const map = {};
     accounts.forEach((a) => (map[a.id] = visible));
-    setVisibleAccounts(map);
+    setToggledAccounts(map);
   };
 
   const chartDataVisible = useMemo(() => {
