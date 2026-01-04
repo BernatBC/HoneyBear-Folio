@@ -8,7 +8,14 @@ import { Check } from "lucide-react";
 import "../styles/Modal.css";
 
 export default function WelcomeWindow() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(() => {
+    try {
+      return !localStorage.getItem("hb_first_run_completed");
+    } catch {
+      // In environments where localStorage is unavailable, default to hidden
+      return false;
+    }
+  });
   const { theme, setTheme } = useTheme();
   const {
     locale,
@@ -18,13 +25,6 @@ export default function WelcomeWindow() {
     dateFormat,
     setDateFormat,
   } = useNumberFormat();
-
-  useEffect(() => {
-    const hasRun = localStorage.getItem("hb_first_run_completed");
-    if (!hasRun) {
-      setIsVisible(true);
-    }
-  }, []);
 
   const handleComplete = () => {
     localStorage.setItem("hb_first_run_completed", "true");
