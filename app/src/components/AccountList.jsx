@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useFormatNumber } from "../utils/format";
 
 export default function AccountList({
   accounts,
@@ -9,6 +10,7 @@ export default function AccountList({
   Icon,
 }) {
   const filtered = accounts.filter((acc) => acc.kind === kind);
+  const formatNumber = useFormatNumber();
 
   return (
     <div className="space-y-1">
@@ -41,19 +43,14 @@ export default function AccountList({
                 : "text-slate-500 group-hover:text-slate-300"
             }`}
           >
-            {kind === "brokerage"
-              ? new Intl.NumberFormat(undefined, {
-                  style: "currency",
-                  maximumFractionDigits: 0,
-                }).format(
-                  marketValues[account.id] !== undefined
-                    ? marketValues[account.id]
-                    : account.balance,
-                )
-              : new Intl.NumberFormat(undefined, {
-                  style: "currency",
-                  maximumFractionDigits: 0,
-                }).format(account.balance)}
+            {formatNumber(
+              kind === "brokerage"
+                ? marketValues && marketValues[account.id] !== undefined
+                  ? marketValues[account.id]
+                  : account.balance
+                : account.balance,
+              { style: "currency" },
+            )}
           </span>
         </button>
       ))}
