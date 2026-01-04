@@ -452,7 +452,6 @@ export default function Dashboard({
   );
 
   const barOptions = useMemo(() => {
-  
     return {
       responsive: true,
       maintainAspectRatio: false,
