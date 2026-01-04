@@ -92,6 +92,7 @@
   "dashboard.total_accounts": "Total Accounts",
   "dashboard.total_transactions": "Total Transactions",
   "dashboard.networth_evolution": "Net Worth Evolution",
+  "dashboard.accounts_breakdown": "Accounts",
   "loading.loading_data": "Loading data...",
 
   "investment.error_loading": "Error loading data",

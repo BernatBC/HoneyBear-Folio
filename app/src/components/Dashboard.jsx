@@ -588,6 +588,8 @@ export default function Dashboard({
           display: false,
         },
         tooltip: {
+          mode: "index",
+          intersect: false,
           backgroundColor: isDark
             ? "rgba(255, 255, 255, 0.9)"
             : "rgba(15, 23, 42, 0.9)",
@@ -618,7 +620,7 @@ export default function Dashboard({
                 });
               }
               return label;
-            },
+            }
           },
         },
       },
