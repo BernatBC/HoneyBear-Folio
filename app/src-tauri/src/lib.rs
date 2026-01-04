@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
+use chrono::{DateTime, NaiveDate, Utc, TimeZone};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct YahooQuote {
@@ -25,8 +26,20 @@ struct YahooChartMeta {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+struct YahooChartQuote {
+    close: Option<Vec<Option<f64>>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct YahooChartIndicators {
+    quote: Option<Vec<YahooChartQuote>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 struct YahooChartResult {
     meta: YahooChartMeta,
+    timestamp: Option<Vec<i64>>,
+    indicators: Option<YahooChartIndicators>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -217,6 +230,17 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             ticker TEXT PRIMARY KEY,
             price REAL NOT NULL,
             last_updated TEXT NOT NULL
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS daily_stock_prices (
+            ticker TEXT NOT NULL,
+            date TEXT NOT NULL,
+            price REAL NOT NULL,
+            PRIMARY KEY (ticker, date)
         )",
         [],
     )
@@ -1534,6 +1558,128 @@ async fn get_stock_quotes_with_client_and_db(
     Ok(quotes)
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct DailyPrice {
+    date: String,
+    price: f64,
+}
+
+#[tauri::command]
+async fn update_daily_stock_prices(app_handle: AppHandle, tickers: Vec<String>) -> Result<(), String> {
+    if tickers.is_empty() {
+        return Ok(());
+    }
+
+    let db_path = get_db_path(&app_handle)?;
+    let client = reqwest::Client::new();
+    let base_url = "https://query1.finance.yahoo.com".to_string();
+
+    for ticker in tickers {
+        // 1. Get last date from DB
+        let last_date_str: Option<String> = {
+            let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+            conn.query_row(
+                "SELECT MAX(date) FROM daily_stock_prices WHERE ticker = ?1",
+                params![ticker],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(|e| e.to_string())?
+            .flatten()
+        };
+
+        let start_timestamp = if let Some(date_str) = last_date_str {
+            // Parse date and add 1 day
+            let date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%d").map_err(|e| e.to_string())?;
+            let next_day = date.succ_opt().ok_or("Invalid date")?;
+            let datetime = next_day.and_hms_opt(0, 0, 0).unwrap();
+            datetime.and_utc().timestamp()
+        } else {
+            // Default to 10 years ago
+            Utc::now().timestamp() - 10 * 365 * 24 * 60 * 60
+        };
+
+        let end_timestamp = Utc::now().timestamp();
+
+        if start_timestamp >= end_timestamp {
+            continue;
+        }
+
+        // 2. Fetch from Yahoo
+        let url = format!(
+            "{}/v8/finance/chart/{}?period1={}&period2={}&interval=1d",
+            base_url, ticker, start_timestamp, end_timestamp
+        );
+
+        let res = client.get(&url)
+            .header("User-Agent", "Mozilla/5.0")
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        if !res.status().is_success() {
+            println!("Failed to fetch history for {}: {}", ticker, res.status());
+            continue;
+        }
+
+        let text = res.text().await.map_err(|e| e.to_string())?;
+        let json: YahooChartResponse = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+
+        // 3. Insert into DB
+        if let Some(result) = json.chart.result {
+            if let Some(data) = result.first() {
+                if let (Some(timestamps), Some(indicators)) = (&data.timestamp, &data.indicators) {
+                    if let Some(quotes) = &indicators.quote {
+                        if let Some(quote) = quotes.first() {
+                            if let Some(closes) = &quote.close {
+                                let mut conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+                                let tx = conn.transaction().map_err(|e| e.to_string())?;
+                                {
+                                    let mut stmt = tx.prepare(
+                                        "INSERT OR REPLACE INTO daily_stock_prices (ticker, date, price) VALUES (?1, ?2, ?3)"
+                                    ).map_err(|e| e.to_string())?;
+
+                                    for (i, ts) in timestamps.iter().enumerate() {
+                                        if let Some(price) = closes.get(i).and_then(|p| *p) {
+                                            let date_str = Utc.timestamp_opt(*ts, 0).unwrap().format("%Y-%m-%d").to_string();
+                                            stmt.execute(params![ticker, date_str, price]).map_err(|e| e.to_string())?;
+                                        }
+                                    }
+                                }
+                                tx.commit().map_err(|e| e.to_string())?;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+fn get_daily_stock_prices(app_handle: AppHandle, ticker: String) -> Result<Vec<DailyPrice>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    let mut stmt = conn.prepare(
+        "SELECT date, price FROM daily_stock_prices WHERE ticker = ?1 ORDER BY date ASC"
+    ).map_err(|e| e.to_string())?;
+
+    let prices = stmt.query_map(params![ticker], |row| {
+        Ok(DailyPrice {
+            date: row.get(0)?,
+            price: row.get(1)?,
+        })
+    })
+    .map_err(|e| e.to_string())?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|e| e.to_string())?;
+
+    Ok(prices)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1558,6 +1704,8 @@ pub fn run() {
             create_brokerage_transaction,
             update_brokerage_transaction,
             get_stock_quotes,
+            update_daily_stock_prices,
+            get_daily_stock_prices,
             search_ticker,
             rename_account,
             delete_account,

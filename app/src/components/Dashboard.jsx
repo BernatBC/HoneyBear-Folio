@@ -67,6 +67,7 @@ export default function Dashboard({
 }) {
   const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
+  const [dailyPrices, setDailyPrices] = useState({});
   const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, 1Y, ALL
   const isDark = useIsDark();
 
@@ -90,6 +91,43 @@ export default function Dashboard({
     fetchData();
   }, [propAccounts]);
 
+  useEffect(() => {
+    const fetchDailyPrices = async () => {
+      const tickers = new Set();
+      transactions.forEach((t) => {
+        if (t.ticker) tickers.add(t.ticker);
+      });
+
+      if (tickers.size === 0) return;
+
+      try {
+        // Trigger update first
+        await invoke("update_daily_stock_prices", {
+          tickers: Array.from(tickers),
+        });
+
+        // Then fetch
+        const pricesMap = {};
+        for (const ticker of tickers) {
+          const prices = await invoke("get_daily_stock_prices", { ticker });
+          // Convert to map for faster lookup: date -> price
+          const priceByDate = {};
+          prices.forEach((p) => {
+            priceByDate[p.date] = p.price;
+          });
+          pricesMap[ticker] = { list: prices, map: priceByDate };
+        }
+        setDailyPrices(pricesMap);
+      } catch (e) {
+        console.error("Failed to fetch daily prices:", e);
+      }
+    };
+
+    if (transactions.length > 0) {
+      fetchDailyPrices();
+    }
+  }, [transactions]);
+
   const chartData = useMemo(() => {
     if (accounts.length === 0) return null;
 
@@ -104,14 +142,6 @@ export default function Dashboard({
     });
 
     // 2. Collect all relevant dates
-    const allDates = new Set();
-    const today = new Date().toISOString().split("T")[0];
-    allDates.add(today);
-    transactions.forEach((t) => allDates.add(t.date));
-
-    let sortedDates = Array.from(allDates).sort();
-
-    // Filter dates based on timeRange
     const now = new Date();
     let cutoffDate = new Date();
     if (timeRange === "1M") cutoffDate.setMonth(now.getMonth() - 1);
@@ -120,12 +150,44 @@ export default function Dashboard({
     else if (timeRange === "1Y") cutoffDate.setFullYear(now.getFullYear() - 1);
     else cutoffDate = new Date(0); // ALL
 
-    sortedDates = sortedDates.filter((d) => new Date(d) >= cutoffDate);
+    // If ALL, find the first transaction date
+    if (timeRange === "ALL" && transactions.length > 0) {
+      const firstTxDate = new Date(
+        transactions.reduce(
+          (min, t) => (t.date < min ? t.date : min),
+          transactions[0].date,
+        ),
+      );
+      cutoffDate = firstTxDate;
+    } else if (timeRange === "ALL") {
+      cutoffDate.setFullYear(now.getFullYear() - 1); // Default to 1Y if no txs
+    }
 
-    // Ensure we have at least the cutoff date (or first transaction date) if it's not in the list
-    // But for simplicity, we just use the transaction dates + today.
-    // If the range starts before the first transaction, we should ideally show a flat line.
-    // Let's just stick to the dates we have for now.
+    const sortedDates = [];
+    let d = new Date(cutoffDate);
+    const today = new Date();
+    // Normalize today to midnight to match date strings
+    today.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+
+    while (d <= today) {
+      sortedDates.push(d.toISOString().split("T")[0]);
+      d.setDate(d.getDate() + 1);
+    }
+
+    // Helper to get price
+    const getPrice = (ticker, date) => {
+      if (!dailyPrices[ticker]) return 0;
+      const { list, map } = dailyPrices[ticker];
+      if (map[date]) return map[date];
+      // Find last available price
+      let lastPrice = 0;
+      for (const p of list) {
+        if (p.date > date) break;
+        lastPrice = p.price;
+      }
+      return lastPrice;
+    };
 
     // 3. Calculate balances for each date
     // We need a map of date -> balance for each account and total.
@@ -148,12 +210,37 @@ export default function Dashboard({
     const totalData = sortedDates.map((date) => {
       let total = 0;
       accounts.forEach((acc) => {
-        const initial = accountInitialBalances[acc.id];
-        const accTxs = transactions.filter(
-          (t) => t.account_id === acc.id && t.date <= date,
-        );
-        const change = accTxs.reduce((sum, t) => sum + t.amount, 0);
-        total += initial + change;
+        if (acc.kind === "brokerage") {
+          const initial = accountInitialBalances[acc.id];
+          const accTxs = transactions.filter(
+            (t) => t.account_id === acc.id && t.date <= date,
+          );
+          const cashChange = accTxs.reduce((sum, t) => sum + t.amount, 0);
+          const cashBalance = initial + cashChange;
+
+          const holdings = {};
+          accTxs.forEach((t) => {
+            if (t.ticker && t.shares) {
+              holdings[t.ticker] = (holdings[t.ticker] || 0) + t.shares;
+            }
+          });
+
+          let stockValue = 0;
+          for (const [ticker, shares] of Object.entries(holdings)) {
+            if (Math.abs(shares) > 0.0001) {
+              const price = getPrice(ticker, date);
+              stockValue += shares * price;
+            }
+          }
+          total += cashBalance + stockValue;
+        } else {
+          const initial = accountInitialBalances[acc.id];
+          const accTxs = transactions.filter(
+            (t) => t.account_id === acc.id && t.date <= date,
+          );
+          const change = accTxs.reduce((sum, t) => sum + t.amount, 0);
+          total += initial + change;
+        }
       });
       return total;
     });
@@ -188,12 +275,37 @@ export default function Dashboard({
     // Individual Account Datasets
     accounts.forEach((acc, index) => {
       const accData = sortedDates.map((date) => {
-        const initial = accountInitialBalances[acc.id];
-        const accTxs = transactions.filter(
-          (t) => t.account_id === acc.id && t.date <= date,
-        );
-        const change = accTxs.reduce((sum, t) => sum + t.amount, 0);
-        return initial + change;
+        if (acc.kind === "brokerage") {
+          const initial = accountInitialBalances[acc.id];
+          const accTxs = transactions.filter(
+            (t) => t.account_id === acc.id && t.date <= date,
+          );
+          const cashChange = accTxs.reduce((sum, t) => sum + t.amount, 0);
+          const cashBalance = initial + cashChange;
+
+          const holdings = {};
+          accTxs.forEach((t) => {
+            if (t.ticker && t.shares) {
+              holdings[t.ticker] = (holdings[t.ticker] || 0) + t.shares;
+            }
+          });
+
+          let stockValue = 0;
+          for (const [ticker, shares] of Object.entries(holdings)) {
+            if (Math.abs(shares) > 0.0001) {
+              const price = getPrice(ticker, date);
+              stockValue += shares * price;
+            }
+          }
+          return cashBalance + stockValue;
+        } else {
+          const initial = accountInitialBalances[acc.id];
+          const accTxs = transactions.filter(
+            (t) => t.account_id === acc.id && t.date <= date,
+          );
+          const change = accTxs.reduce((sum, t) => sum + t.amount, 0);
+          return initial + change;
+        }
       });
 
       const color = colors[index % colors.length];
