@@ -845,90 +845,78 @@ export default function Dashboard({
         </div>
       </div>
 
-      <div className="chart-container">
-        <div className="chart-header">
-          <h3 className="chart-title">{t("dashboard.networth_evolution")}</h3>
-          <p className="chart-subtitle">
-            Track your financial growth over time
-          </p>
+      {transactions.length === 0 ? null : (
+        <div className="chart-container">
+          <div className="chart-header">
+            <h3 className="chart-title">{t("dashboard.networth_evolution")}</h3>
+            <p className="chart-subtitle">
+              Track your financial growth over time
+            </p>
 
-          <div className="account-visibility mt-4">
-            <div className="flex items-center gap-3 mb-2">
-              <button
-                className="toggle-all text-sm"
-                onClick={() => setAllAccountsVisibility(true)}
-              >
-                Show all
-              </button>
-              <button
-                className="toggle-all text-sm"
-                onClick={() => setAllAccountsVisibility(false)}
-              >
-                Hide all
-              </button>
-            </div>
-            <div className="account-list flex flex-wrap gap-3">
-              {accounts.map((acc) => {
-                const ds = chartData?.datasets.find(
-                  (d) => d.accountId === acc.id,
-                );
-                const color = ds?._color || "rgb(148, 163, 184)";
-                return (
-                  <label
-                    key={acc.id}
-                    className="account-item inline-flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      className="account-checkbox"
-                      checked={!!visibleAccounts[acc.id]}
-                      onChange={() => toggleAccountVisibility(acc.id)}
-                      aria-label={acc.name}
-                      style={{ ["--hb-account-color"]: color }}
-                    />
-                    <span
-                      className="account-dot w-3 h-3 rounded-full"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span className="account-name">{acc.name}</span>
-                    <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">
-                      {formatNumber(acc.balance, { style: "currency" })}
-                    </span>
-                  </label>
-                );
-              })}
+            <div className="account-visibility mt-4">
+              <div className="flex items-center gap-3 mb-2">
+                <button
+                  className="toggle-all text-sm"
+                  onClick={() => setAllAccountsVisibility(true)}
+                >
+                  Show all
+                </button>
+                <button
+                  className="toggle-all text-sm"
+                  onClick={() => setAllAccountsVisibility(false)}
+                >
+                  Hide all
+                </button>
+              </div>
+              <div className="account-list flex flex-wrap gap-3">
+                {accounts.map((acc) => {
+                  const ds = chartData?.datasets.find(
+                    (d) => d.accountId === acc.id,
+                  );
+                  const color = ds?._color || "rgb(148, 163, 184)";
+                  return (
+                    <label
+                      key={acc.id}
+                      className="account-item inline-flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        className="account-checkbox"
+                        checked={!!visibleAccounts[acc.id]}
+                        onChange={() => toggleAccountVisibility(acc.id)}
+                        aria-label={acc.name}
+                        style={{ ["--hb-account-color"]: color }}
+                      />
+                      <span
+                        className="account-dot w-3 h-3 rounded-full"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span className="account-name">{acc.name}</span>
+                      <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">
+                        {formatNumber(acc.balance, { style: "currency" })}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="chart-wrapper">
-          {transactions.length === 0 ? (
-            <div className="no-data-placeholder flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-12">
-              <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-2xl mb-4">
-                <svg className="w-16 h-16 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+          <div className="chart-wrapper">
+            {chartDataVisible ? (
+              <Line options={options} data={chartDataVisible} />
+            ) : (
+              <div className="loading-container">
+                <div className="loading-content">
+                  <div className="loading-spinner"></div>
+                  <span className="loading-text">
+                    {t("loading.loading_data")}
+                  </span>
+                </div>
               </div>
-              <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                {t("dashboard.no_transactions_title")}
-              </p>
-              <p className="text-sm text-slate-400 dark:text-slate-500">
-                {t("dashboard.no_transactions_body")}
-              </p>
-            </div>
-          ) : chartDataVisible ? (
-            <Line options={options} data={chartDataVisible} />
-          ) : (
-            <div className="loading-container">
-              <div className="loading-content">
-                <div className="loading-spinner"></div>
-                <span className="loading-text">
-                  {t("loading.loading_data")}
-                </span>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="charts-grid">
         {transactions.length === 0 ? (
@@ -939,10 +927,10 @@ export default function Dashboard({
               </svg>
             </div>
             <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              {t("dashboard.no_transactions_grid_title")}
+              {t("dashboard.no_transactions_title")}
             </p>
             <p className="text-sm text-slate-400 dark:text-slate-500">
-              {t("dashboard.no_transactions_grid_body")}
+              {t("dashboard.no_transactions_body")}
             </p>
           </div>
         ) : (

@@ -103,8 +103,6 @@
   "dashboard.accounts_breakdown": "Accounts",
   "dashboard.no_transactions_title": "No transactions found",
   "dashboard.no_transactions_body": "Add transactions to start tracking your finances and populate charts.",
-  "dashboard.no_transactions_grid_title": "No transactions yet",
-  "dashboard.no_transactions_grid_body": "Start by adding transactions to view Income/Expense charts, Asset Allocation and more.",
   "loading.loading_data": "Loading data...",
   "investment.error_loading": "Error loading data",
   "account.add_transaction": "Add Transaction",
