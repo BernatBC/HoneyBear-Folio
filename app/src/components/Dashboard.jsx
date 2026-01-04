@@ -901,7 +901,21 @@ export default function Dashboard({
           </div>
         </div>
         <div className="chart-wrapper">
-          {chartDataVisible ? (
+          {transactions.length === 0 ? (
+            <div className="no-data-placeholder flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-12">
+              <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-2xl mb-4">
+                <svg className="w-16 h-16 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                {t("dashboard.no_transactions_title")}
+              </p>
+              <p className="text-sm text-slate-400 dark:text-slate-500">
+                {t("dashboard.no_transactions_body")}
+              </p>
+            </div>
+          ) : chartDataVisible ? (
             <Line options={options} data={chartDataVisible} />
           ) : (
             <div className="loading-container">
@@ -917,51 +931,69 @@ export default function Dashboard({
       </div>
 
       <div className="charts-grid">
-        {/* Income vs Expenses */}
-        <div className="chart-card chart-card-full">
-          {incomeVsExpensesData ? (
-            <Bar options={barOptions} data={incomeVsExpensesData} />
-          ) : (
-            <div className="loading-container">
-              <div className="loading-content">
-                <div className="loading-spinner"></div>
-                <span className="loading-text">
-                  {t("loading.loading_data")}
-                </span>
-              </div>
+        {transactions.length === 0 ? (
+          <div className="col-span-full flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-16">
+            <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-2xl mb-4">
+              <svg className="w-16 h-16 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
             </div>
-          )}
-        </div>
+            <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-2">
+              {t("dashboard.no_transactions_grid_title")}
+            </p>
+            <p className="text-sm text-slate-400 dark:text-slate-500">
+              {t("dashboard.no_transactions_grid_body")}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Income vs Expenses */}
+            <div className="chart-card chart-card-full">
+              {incomeVsExpensesData ? (
+                <Bar options={barOptions} data={incomeVsExpensesData} />
+              ) : (
+                <div className="loading-container">
+                  <div className="loading-content">
+                    <div className="loading-spinner"></div>
+                    <span className="loading-text">
+                      {t("loading.loading_data")}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
 
-        {/* Asset Allocation */}
-        <div className="chart-card">
-          {doughnutData ? (
-            <Doughnut options={doughnutOptions} data={doughnutData} />
-          ) : (
-            <div className="loading-container">
-              <div className="loading-content">
-                <div className="loading-spinner"></div>
-                <span className="loading-text">Loading data...</span>
-              </div>
+            {/* Asset Allocation */}
+            <div className="chart-card">
+              {doughnutData ? (
+                <Doughnut options={doughnutOptions} data={doughnutData} />
+              ) : (
+                <div className="loading-container">
+                  <div className="loading-content">
+                    <div className="loading-spinner"></div>
+                    <span className="loading-text">Loading data...</span>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Expenses by Category */}
-        <div className="chart-card">
-          {expensesByCategoryData ? (
-            <Doughnut options={expensesOptions} data={expensesByCategoryData} />
-          ) : (
-            <div className="loading-container">
-              <div className="loading-content">
-                <div className="loading-spinner"></div>
-                <span className="loading-text">
-                  {t("loading.loading_data")}
-                </span>
-              </div>
+            {/* Expenses by Category */}
+            <div className="chart-card">
+              {expensesByCategoryData ? (
+                <Doughnut options={expensesOptions} data={expensesByCategoryData} />
+              ) : (
+                <div className="loading-container">
+                  <div className="loading-content">
+                    <div className="loading-spinner"></div>
+                    <span className="loading-text">
+                      {t("loading.loading_data")}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
