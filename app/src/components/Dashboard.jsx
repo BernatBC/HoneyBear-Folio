@@ -210,6 +210,8 @@ export default function Dashboard({
         pointHoverRadius: 4,
         borderDash: [5, 5], // Dashed lines for individual accounts to reduce noise
         hidden: true, // Hide individual accounts by default to keep it clean
+        accountId: acc.id,
+        _color: color, // helper for legend rendering
       });
     });
 
@@ -218,6 +220,42 @@ export default function Dashboard({
       datasets: datasets,
     };
   }, [accounts, transactions, timeRange, marketValues, formatDate]);
+
+  // Visible accounts state: track which individual account series are shown
+  const [visibleAccounts, setVisibleAccounts] = useState(() => {
+    const map = {};
+    accounts.forEach((a) => (map[a.id] = false));
+    return map;
+  });
+
+  useEffect(() => {
+    // Reinitialize visibility when accounts list changes
+    const map = {};
+    accounts.forEach((a) => (map[a.id] = false));
+    setVisibleAccounts(map);
+  }, [accounts]);
+
+  const toggleAccountVisibility = (accountId) => {
+    setVisibleAccounts((prev) => ({ ...prev, [accountId]: !prev[accountId] }));
+  };
+
+  const setAllAccountsVisibility = (visible) => {
+    const map = {};
+    accounts.forEach((a) => (map[a.id] = visible));
+    setVisibleAccounts(map);
+  };
+
+  const chartDataVisible = useMemo(() => {
+    if (!chartData) return null;
+    const datasets = chartData.datasets.map((ds) => {
+      if (ds.accountId) {
+        const isVisible = !!visibleAccounts[ds.accountId];
+        return { ...ds, hidden: !isVisible };
+      }
+      return ds;
+    });
+    return { ...chartData, datasets };
+  }, [chartData, visibleAccounts]);
 
   const doughnutData = useMemo(() => {
     if (accounts.length === 0) return null;
@@ -697,10 +735,31 @@ export default function Dashboard({
           <p className="chart-subtitle">
             Track your financial growth over time
           </p>
+
+          <div className="account-visibility mt-4">
+            <div className="flex items-center gap-3 mb-2">
+              <button className="toggle-all text-sm" onClick={() => setAllAccountsVisibility(true)}>Show all</button>
+              <button className="toggle-all text-sm" onClick={() => setAllAccountsVisibility(false)}>Hide all</button>
+            </div>
+            <div className="account-list flex flex-wrap gap-3">
+              {accounts.map((acc) => {
+                const ds = chartData?.datasets.find((d) => d.accountId === acc.id);
+                const color = ds?._color || "rgb(148, 163, 184)";
+                return (
+                  <label key={acc.id} className="account-item inline-flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-sm">
+                    <input type="checkbox" checked={!!visibleAccounts[acc.id]} onChange={() => toggleAccountVisibility(acc.id)} />
+                    <span className="account-dot w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                    <span className="account-name">{acc.name}</span>
+                    <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">{formatNumber(acc.balance, {style: "currency"})}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
         </div>
         <div className="chart-wrapper">
-          {chartData ? (
-            <Line options={options} data={chartData} />
+          {chartDataVisible ? (
+            <Line options={options} data={chartDataVisible} />
           ) : (
             <div className="loading-container">
               <div className="loading-content">

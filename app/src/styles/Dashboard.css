@@ -128,4 +128,16 @@
   .account-transactions-table .p-2 {
     padding: 0.25rem !important;
   }
+
+  .account-visibility .account-item {
+    @apply cursor-pointer;
+  }
+
+  .account-visibility .account-dot {
+    @apply inline-block;
+  }
+
+  .account-visibility .toggle-all {
+    @apply text-sm font-medium text-slate-600 dark:text-slate-300 underline hover:no-underline;
+  }
 }
