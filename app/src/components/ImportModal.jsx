@@ -70,7 +70,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
           // Check if it's a supported file type
           const validExtensions = [".csv", ".xlsx", ".xls", ".json"];
           const hasValidExtension = validExtensions.some((ext) =>
-            filePath.toLowerCase().endsWith(ext)
+            filePath.toLowerCase().endsWith(ext),
           );
           if (hasValidExtension) {
             // Read the file from the path using fetch with file:// protocol
@@ -178,7 +178,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
       const fileName = droppedFile.name.toLowerCase();
       const validExtensions = [".csv", ".xlsx", ".xls", ".json"];
       const hasValidExtension = validExtensions.some((ext) =>
-        fileName.endsWith(ext)
+        fileName.endsWith(ext),
       );
 
       if (hasValidExtension) {
@@ -525,10 +525,11 @@ export default function ImportModal({ onClose, onImportComplete }) {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragging
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                : "border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50"
-                }`}
+              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all group ${
+                isDragging
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                  : "border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+              }`}
             >
               {isDragging ? (
                 <>
@@ -560,7 +561,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                 className="hidden"
               />
             </div>
-          ) : ( step === 1 ? (
+          ) : step === 1 ? (
             <div className="space-y-6">
               <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-3">
@@ -715,17 +716,21 @@ export default function ImportModal({ onClose, onImportComplete }) {
                   </span>
                 </div>
                 <button
-                  onClick={() => { setFile(null); setStep(0); }}
+                  onClick={() => {
+                    setFile(null);
+                    setStep(0);
+                  }}
                   className="text-slate-500 dark:text-slate-400 hover:text-red-400 text-sm"
                 >
                   {t("import.change_file")}
                 </button>
               </div>
               <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300">
-                {t("import.file_loaded_review") || "File loaded — click Next to review mappings and preview"}
+                {t("import.file_loaded_review") ||
+                  "File loaded — click Next to review mappings and preview"}
               </div>
             </div>
-          ) )}
+          )}
         </div>
 
         <div className="p-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
