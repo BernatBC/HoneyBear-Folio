@@ -512,10 +512,10 @@ export default function Dashboard({
         },
         tooltip: {
           backgroundColor: isDark
-            ? "rgba(255, 255, 255, 0.9)"
-            : "rgba(15, 23, 42, 0.9)",
-          titleColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
-          bodyColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
+          titleColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          bodyColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
           padding: 12,
           cornerRadius: 8,
           titleFont: {
@@ -591,10 +591,10 @@ export default function Dashboard({
           mode: "index",
           intersect: false,
           backgroundColor: isDark
-            ? "rgba(255, 255, 255, 0.9)"
-            : "rgba(15, 23, 42, 0.9)",
-          titleColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
-          bodyColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
+          titleColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          bodyColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
           padding: 12,
           cornerRadius: 8,
           titleFont: {
