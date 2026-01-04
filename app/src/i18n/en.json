@@ -1,7 +1,6 @@
 {
   "error.something_went_wrong": "Something went wrong rendering this view.",
   "error.check_console": "Check the developer console for details.",
-
   "export.title": "Export Data",
   "export.select_format": "Select Format",
   "export.format.json": "JSON",
@@ -12,9 +11,10 @@
   "export.select_location_export": "Select Location & Export",
   "export.success_saved": "Export successful — saved to {path}",
   "export.failed": "Export failed: {error}",
-
   "import.title": "Import Transactions",
   "import.click_to_upload": "Click to upload CSV, Excel or JSON file",
+  "import.drag_or_click": "Drag and drop or click to select file",
+  "import.drop_file_here": "Drop file here",
   "import.supports": "Supports .csv, .xlsx, .xls, .json",
   "import.change_file": "Change File",
   "import.indicate_account_column": "Indicate which column contains the account name or ID in the mappings below — this will be used to assign each imported row to the correct account.",
@@ -29,7 +29,6 @@
   "import.failed": "Failed",
   "import.start_import": "Start Import",
   "import.skip": "Skip",
-
   "update.title": "Update Available",
   "update.available_text": "A new version of HoneyBear Folio is available: {version}",
   "update.downloading": "Downloading...",
@@ -39,7 +38,6 @@
   "update.restart_apply": "Restart to Apply Update",
   "update.failed_update": "Failed to update",
   "update.failed_relaunch": "Failed to relaunch application",
-
   "sidebar.title": "HoneyBear Folio",
   "sidebar.subtitle": "Portfolio Tracker",
   "sidebar.net_worth": "Net Worth",
@@ -61,12 +59,9 @@
   "footer.export": "Export",
   "footer.settings": "Settings",
   "footer.version_suffix": "HoneyBear Folio",
-
   "customselect.search_placeholder": "Search...",
   "customselect.no_results": "No results",
-
   "error.no_account_mapping": "Please indicate the account column in the mapping",
-
   "settings.title": "Settings",
   "settings.general": "General",
   "settings.formats": "Formats",
@@ -86,7 +81,6 @@
   "settings.example": "Example: {example}",
   "settings.date_format": "Date format",
   "settings.select_date_format_placeholder": "Select date format",
-
   "dashboard.title": "Dashboard",
   "dashboard.current_net_worth": "Current Net Worth",
   "dashboard.total_accounts": "Total Accounts",
@@ -94,9 +88,7 @@
   "dashboard.networth_evolution": "Net Worth Evolution",
   "dashboard.accounts_breakdown": "Accounts",
   "loading.loading_data": "Loading data...",
-
   "investment.error_loading": "Error loading data",
-
   "account.add_transaction": "Add Transaction",
   "account.cancel": "Cancel",
   "account.save_transaction": "Save Transaction",
@@ -107,7 +99,6 @@
   "account.notes": "Notes",
   "account.notes_placeholder": "What was this for?",
   "account.no_notes": "No notes",
-
   "confirm.title": "Confirm",
   "confirm.ok": "OK",
   "confirm.cancel": "Cancel",

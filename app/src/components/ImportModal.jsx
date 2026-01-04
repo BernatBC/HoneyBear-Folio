@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import {
   X,
   Upload,
@@ -43,6 +44,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
   const [previewRows, setPreviewRows] = useState([]);
   const [parseError, setParseError] = useState(null);
   const fileInputRef = useRef(null);
+  const dropZoneRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     // Fetch accounts on mount
@@ -52,11 +55,137 @@ export default function ImportModal({ onClose, onImportComplete }) {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    // Listen for Tauri's native file drop events (works reliably on Linux)
+    let unlistenDrop = null;
+    let unlistenHover = null;
+    let unlistenLeave = null;
+
+    const setupListeners = async () => {
+      // Listen for file drop
+      unlistenDrop = await listen("tauri://drag-drop", (event) => {
+        const paths = event.payload?.paths;
+        if (paths && paths.length > 0) {
+          const filePath = paths[0];
+          // Check if it's a supported file type
+          const validExtensions = [".csv", ".xlsx", ".xls", ".json"];
+          const hasValidExtension = validExtensions.some((ext) =>
+            filePath.toLowerCase().endsWith(ext)
+          );
+          if (hasValidExtension) {
+            // Read the file from the path using fetch with file:// protocol
+            handleFileFromPath(filePath);
+          }
+        }
+        setIsDragging(false);
+      });
+
+      // Listen for drag hover (file is being dragged over window)
+      unlistenHover = await listen("tauri://drag-over", () => {
+        setIsDragging(true);
+      });
+
+      // Listen for drag leave
+      unlistenLeave = await listen("tauri://drag-leave", () => {
+        setIsDragging(false);
+      });
+    };
+
+    setupListeners();
+
     return () => {
       // Restore previous overflow setting on unmount
       document.body.style.overflow = prevOverflow || "";
+      // Cleanup Tauri event listeners
+      if (unlistenDrop) unlistenDrop();
+      if (unlistenHover) unlistenHover();
+      if (unlistenLeave) unlistenLeave();
     };
   }, []);
+
+  // Handle file dropped via Tauri's native drag-drop (receives file path)
+  const handleFileFromPath = async (filePath) => {
+    try {
+      // Import Tauri's file system API
+      const { readFile } = await import("@tauri-apps/plugin-fs");
+
+      // Read the file contents as bytes
+      const contents = await readFile(filePath);
+
+      // Extract file name from path
+      const fileName = filePath.split(/[\\/]/).pop();
+
+      // Create a File object from the contents
+      const blob = new Blob([contents]);
+      const fileObj = new File([blob], fileName, {
+        type: getMimeType(fileName),
+      });
+
+      setFile(fileObj);
+      parseFile(fileObj);
+    } catch (err) {
+      console.error("Failed to read dropped file:", err);
+      setParseError("Failed to read dropped file: " + (err.message || err));
+    }
+  };
+
+  // Get MIME type based on file extension
+  const getMimeType = (fileName) => {
+    const ext = fileName.toLowerCase().split(".").pop();
+    const mimeTypes = {
+      csv: "text/csv",
+      json: "application/json",
+      xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      xls: "application/vnd.ms-excel",
+    };
+    return mimeTypes[ext] || "application/octet-stream";
+  };
+
+  // Browser-based drag event handlers (works on Linux GNOME)
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Ensure the drop effect is shown
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set isDragging to false if we're leaving the drop zone entirely
+    // Check if we're leaving to a child element
+    if (e.currentTarget.contains(e.relatedTarget)) {
+      return;
+    }
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const droppedFile = files[0];
+      const fileName = droppedFile.name.toLowerCase();
+      const validExtensions = [".csv", ".xlsx", ".xls", ".json"];
+      const hasValidExtension = validExtensions.some((ext) =>
+        fileName.endsWith(ext)
+      );
+
+      if (hasValidExtension) {
+        setFile(droppedFile);
+        parseFile(droppedFile);
+      }
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -389,20 +518,39 @@ export default function ImportModal({ onClose, onImportComplete }) {
         <div className="modal-body overflow-y-auto flex-1">
           {!file ? (
             <div
+              ref={dropZoneRef}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group"
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragging
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                : "border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                }`}
             >
-              {file && file.name && file.name.endsWith(".json") ? (
-                <FileJson className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+              {isDragging ? (
+                <>
+                  <Upload className="w-12 h-12 text-blue-500 mb-4 animate-pulse" />
+                  <p className="text-blue-600 dark:text-blue-400 font-medium">
+                    {t("import.drop_file_here") || "Drop file here"}
+                  </p>
+                </>
               ) : (
-                <FileSpreadsheet className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+                <>
+                  {file && file.name && file.name.endsWith(".json") ? (
+                    <FileJson className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+                  ) : (
+                    <FileSpreadsheet className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+                  )}
+                  <p className="text-slate-600 dark:text-slate-300 font-medium">
+                    {t("import.drag_or_click") || t("import.click_to_upload")}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
+                    {t("import.supports")}
+                  </p>
+                </>
               )}
-              <p className="text-slate-600 dark:text-slate-300 font-medium">
-                {t("import.click_to_upload")}
-              </p>
-              <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
-                {t("import.supports")}
-              </p>
               <input
                 type="file"
                 ref={fileInputRef}

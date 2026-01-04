@@ -2,18 +2,23 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "dialog:default",
     "fs:default",
+    "fs:allow-read-file",
     "fs:allow-write-text-file",
     "fs:allow-write-file",
     "updater:default",
     "process:allow-restart",
     {
       "identifier": "fs:scope",
-      "allow": ["$HOME/**"]
+      "allow": [
+        "**"
+      ]
     }
   ]
 }
