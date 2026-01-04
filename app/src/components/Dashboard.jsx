@@ -138,11 +138,22 @@ export default function Dashboard({
     datasets.push({
       label: "Total Net Worth",
       data: totalData,
-      borderColor: "rgb(15, 23, 42)", // slate-900
-      backgroundColor: "rgba(15, 23, 42, 0.1)",
+      borderColor: "rgb(37, 99, 235)", // brand-600
+      backgroundColor: (context) => {
+        const ctx = context.chart.ctx;
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, "rgba(37, 99, 235, 0.2)");
+        gradient.addColorStop(1, "rgba(37, 99, 235, 0)");
+        return gradient;
+      },
       borderWidth: 3,
-      tension: 0.1,
-      fill: false,
+      tension: 0.4,
+      fill: true,
+      pointRadius: 0,
+      pointHoverRadius: 6,
+      pointHoverBackgroundColor: "rgb(37, 99, 235)",
+      pointHoverBorderColor: "#fff",
+      pointHoverBorderWidth: 2,
     });
 
     // Individual Account Datasets
@@ -162,10 +173,14 @@ export default function Dashboard({
         label: acc.name,
         data: accData,
         borderColor: color,
-        backgroundColor: color.replace("rgb", "rgba").replace(")", ", 0.1)"),
+        backgroundColor: "transparent",
         borderWidth: 2,
-        tension: 0.1,
+        tension: 0.4,
         fill: false,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        borderDash: [5, 5], // Dashed lines for individual accounts to reduce noise
+        hidden: true, // Hide individual accounts by default to keep it clean
       });
     });
 
@@ -202,14 +217,14 @@ export default function Dashboard({
     const data = Object.values(assetTypes);
 
     const colors = [
-      "rgb(59, 130, 246)", // blue
-      "rgb(16, 185, 129)", // green
-      "rgb(245, 158, 11)", // amber
-      "rgb(239, 68, 68)", // red
-      "rgb(139, 92, 246)", // violet
-      "rgb(236, 72, 153)", // pink
-      "rgb(14, 165, 233)", // sky
-      "rgb(249, 115, 22)", // orange
+      "rgb(59, 130, 246)", // blue-500
+      "rgb(16, 185, 129)", // emerald-500
+      "rgb(245, 158, 11)", // amber-500
+      "rgb(244, 63, 94)", // rose-500
+      "rgb(139, 92, 246)", // violet-500
+      "rgb(6, 182, 212)", // cyan-500
+      "rgb(99, 102, 241)", // indigo-500
+      "rgb(249, 115, 22)", // orange-500
     ];
 
     return {
@@ -218,8 +233,9 @@ export default function Dashboard({
         {
           data: data,
           backgroundColor: labels.map((_, i) => colors[i % colors.length]),
-          borderColor: "#ffffff",
-          borderWidth: 2,
+          borderColor: "transparent",
+          borderWidth: 0,
+          hoverOffset: 4,
         },
       ],
     };
@@ -243,14 +259,14 @@ export default function Dashboard({
     );
 
     const colors = [
-      "rgb(239, 68, 68)", // red
-      "rgb(249, 115, 22)", // orange
-      "rgb(245, 158, 11)", // amber
-      "rgb(16, 185, 129)", // green
-      "rgb(14, 165, 233)", // sky
-      "rgb(59, 130, 246)", // blue
-      "rgb(139, 92, 246)", // violet
-      "rgb(236, 72, 153)", // pink
+      "rgb(244, 63, 94)", // rose-500
+      "rgb(249, 115, 22)", // orange-500
+      "rgb(245, 158, 11)", // amber-500
+      "rgb(16, 185, 129)", // emerald-500
+      "rgb(6, 182, 212)", // cyan-500
+      "rgb(59, 130, 246)", // blue-500
+      "rgb(139, 92, 246)", // violet-500
+      "rgb(236, 72, 153)", // pink-500
     ];
 
     return {
@@ -261,8 +277,9 @@ export default function Dashboard({
           backgroundColor: sortedCategories.map(
             (_, i) => colors[i % colors.length],
           ),
-          borderColor: "#ffffff",
-          borderWidth: 2,
+          borderColor: "transparent",
+          borderWidth: 0,
+          hoverOffset: 4,
         },
       ],
     };
@@ -332,14 +349,18 @@ export default function Dashboard({
         {
           label: "Income",
           data: incomeData,
-          backgroundColor: "rgba(16, 185, 129, 0.7)", // green
-          borderRadius: 4,
+          backgroundColor: "rgb(16, 185, 129)", // emerald-500
+          borderRadius: 6,
+          barPercentage: 0.6,
+          categoryPercentage: 0.8,
         },
         {
           label: "Expenses",
           data: expenseData,
-          backgroundColor: "rgba(239, 68, 68, 0.7)", // red
-          borderRadius: 4,
+          backgroundColor: "rgb(244, 63, 94)", // rose-500
+          borderRadius: 6,
+          barPercentage: 0.6,
+          categoryPercentage: 0.8,
         },
       ],
     };
@@ -348,13 +369,23 @@ export default function Dashboard({
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    cutout: "75%",
+    borderRadius: 8,
     plugins: {
       legend: {
         position: "right",
+        labels: {
+          usePointStyle: true,
+          boxWidth: 8,
+          padding: 20,
+          font: {
+            family: "Inter",
+            size: 12,
+          },
+        },
       },
       title: {
-        display: true,
-        text: "Asset Allocation",
+        display: false,
       },
     },
   };
@@ -362,13 +393,23 @@ export default function Dashboard({
   const expensesOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    cutout: "75%",
+    borderRadius: 8,
     plugins: {
       legend: {
         position: "right",
+        labels: {
+          usePointStyle: true,
+          boxWidth: 8,
+          padding: 20,
+          font: {
+            family: "Inter",
+            size: 12,
+          },
+        },
       },
       title: {
-        display: true,
-        text: "Expenses by Category",
+        display: false,
       },
     },
   };
@@ -389,19 +430,51 @@ export default function Dashboard({
       plugins: {
         legend: {
           position: "top",
+          align: "end",
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            font: {
+              family: "Inter",
+              size: 12,
+            },
+          },
         },
         title: {
-          display: true,
-          text: titleText,
+          display: false,
+        },
+        tooltip: {
+          backgroundColor: "rgba(15, 23, 42, 0.9)",
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: {
+            family: "Inter",
+            size: 13,
+          },
+          bodyFont: {
+            family: "Inter",
+            size: 12,
+          },
         },
       },
       scales: {
         y: {
           beginAtZero: true,
+          border: {
+            display: false,
+          },
           grid: {
-            color: "rgba(0, 0, 0, 0.05)",
+            color: "rgba(226, 232, 240, 0.6)",
+            borderDash: [4, 4],
+            drawBorder: false,
           },
           ticks: {
+            font: {
+              family: "Inter",
+              size: 11,
+            },
+            color: "rgb(100, 116, 139)",
+            padding: 10,
             callback: function (value) {
               const num = Number(value);
               if (Number.isNaN(num)) return value;
@@ -416,6 +489,14 @@ export default function Dashboard({
         x: {
           grid: {
             display: false,
+            drawBorder: false,
+          },
+          ticks: {
+            font: {
+              family: "Inter",
+              size: 11,
+            },
+            color: "rgb(100, 116, 139)",
           },
         },
       },
@@ -427,21 +508,60 @@ export default function Dashboard({
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: "top",
-        display: false, // Hide default title since we added a custom one
+        display: false,
       },
       title: {
-        display: false, // Hide default title since we added a custom one
-        text: "Net Worth Evolution",
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "rgba(15, 23, 42, 0.9)",
+        padding: 12,
+        cornerRadius: 8,
+        titleFont: {
+          family: "Inter",
+          size: 13,
+        },
+        bodyFont: {
+          family: "Inter",
+          size: 12,
+        },
+        displayColors: false,
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += formatNumber(context.parsed.y, {
+                style: "currency",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              });
+            }
+            return label;
+          },
+        },
       },
     },
     scales: {
       y: {
         beginAtZero: false,
+        border: {
+          display: false,
+        },
         grid: {
-          color: "rgba(0, 0, 0, 0.05)",
+          color: "rgba(226, 232, 240, 0.6)",
+          borderDash: [4, 4],
+          drawBorder: false,
         },
         ticks: {
+          font: {
+            family: "Inter",
+            size: 11,
+          },
+          color: "rgb(100, 116, 139)",
+          padding: 10,
           callback: function (value) {
             const num = Number(value);
             if (Number.isNaN(num)) return value;
@@ -456,6 +576,17 @@ export default function Dashboard({
       x: {
         grid: {
           display: false,
+          drawBorder: false,
+        },
+        ticks: {
+          font: {
+            family: "Inter",
+            size: 11,
+          },
+          color: "rgb(100, 116, 139)",
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: 8,
         },
       },
     },
