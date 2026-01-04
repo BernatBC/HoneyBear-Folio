@@ -747,7 +747,14 @@ export default function Dashboard({
                 const color = ds?._color || "rgb(148, 163, 184)";
                 return (
                   <label key={acc.id} className="account-item inline-flex items-center gap-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-sm">
-                    <input type="checkbox" checked={!!visibleAccounts[acc.id]} onChange={() => toggleAccountVisibility(acc.id)} />
+                    <input
+                      type="checkbox"
+                      className="account-checkbox"
+                      checked={!!visibleAccounts[acc.id]}
+                      onChange={() => toggleAccountVisibility(acc.id)}
+                      aria-label={acc.name}
+                      style={{ ["--hb-account-color"]: color }}
+                    />
                     <span className="account-dot w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
                     <span className="account-name">{acc.name}</span>
                     <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">{formatNumber(acc.balance, {style: "currency"})}</span>
