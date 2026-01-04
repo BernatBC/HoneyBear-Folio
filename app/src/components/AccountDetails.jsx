@@ -441,15 +441,12 @@ export default function AccountDetails({ account, onUpdate }) {
   }
 
   async function deleteTransaction(id) {
-    const confirmed = await confirm(
-      t("confirm.delete_transaction"),
-      {
-        title: t("confirm.transaction_title"),
-        kind: "warning",
-        okLabel: t("confirm.delete"),
-        cancelLabel: t("confirm.cancel"),
-      },
-    );
+    const confirmed = await confirm(t("confirm.delete_transaction"), {
+      title: t("confirm.transaction_title"),
+      kind: "warning",
+      okLabel: t("confirm.delete"),
+      cancelLabel: t("confirm.cancel"),
+    });
     if (!confirmed) return;
     try {
       await invoke("delete_transaction", { id });

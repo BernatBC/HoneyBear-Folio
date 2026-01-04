@@ -89,10 +89,7 @@ function ConfirmDialog({
         <p className="mb-6 text-slate-600 dark:text-slate-300">{message}</p>
         <div className="modal-footer">
           {showCancel && (
-            <button
-              onClick={onCancel}
-              className="modal-cancel-button"
-            >
+            <button onClick={onCancel} className="modal-cancel-button">
               {cancelLabel}
             </button>
           )}
@@ -105,7 +102,7 @@ function ConfirmDialog({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
