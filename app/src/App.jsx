@@ -9,6 +9,7 @@ import FireCalculator from "./components/FireCalculator";
 import { Wallet } from "lucide-react";
 import "./styles/App.css";
 import { ToastProvider } from "./components/Toast";
+import { ConfirmDialogProvider } from "./components/ConfirmDialog";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { NumberFormatProvider } from "./contexts/NumberFormatContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -185,9 +186,10 @@ function App() {
       <ThemeProvider>
         <PrivacyProvider>
           <ToastProvider>
-            <ErrorBoundary>
-              <ChartNumberFormatSync />
-              <UpdateNotification />
+            <ConfirmDialogProvider>
+              <ErrorBoundary>
+                <ChartNumberFormatSync />
+                <UpdateNotification />
               <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
                 <Sidebar
                   accounts={accounts}
@@ -264,6 +266,7 @@ function App() {
               )}
             </ErrorBoundary>
             <WelcomeWindow />
+            </ConfirmDialogProvider>
           </ToastProvider>{" "}
         </PrivacyProvider>
       </ThemeProvider>{" "}
