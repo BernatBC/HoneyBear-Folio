@@ -4,21 +4,27 @@
   <img src="img/icon.png" alt="HoneyBear Folio icon" width="160" />
 </p>
 
-HoneyBear Folio is a cross-platform personal finance desktop application built with Tauri (Rust backend), React (frontend), and SQLite (local database). It focuses on fast local data management (transactions, categories, budgets), clear dashboards and charts, portfolio tracking via Yahoo Finance market data, and import/export to common formats.
+HoneyBear Folio is a cross-platform personal finance desktop application built with Tauri (Rust backend), React (frontend), and SQLite (local database). It focuses on fast local data management (transactions, categories), clear dashboards and charts, secure local storage and privacy mode, portfolio tracking (quotes & historical prices), and robust import/export workflows.
 
 ![HoneyBear Folio overview](img/overview.png)
 
 ## Features
 
-- Local user management (no server-side auth required today)
-- Dashboard + data visualization (spending, balances, trends)
-- Transaction management (add/edit/view)
-- Financial reports (summaries, budget overviews)
-- Local storage in SQLite
-- Portfolio tracking (positions + quotes/historical data via Yahoo Finance)
-- FIRE calculator (FI number, years to FI, projections)
-- Import/Export: CSV, JSON, XLSX (transactions, categories, budgets, portfolio holdings)
-- Backup/export: SQLite file backup
+- Local-first data: all data stored in a local SQLite database (no remote server or required account).
+- Account types: support for Cash and Brokerage accounts, create/rename/delete accounts with confirmation.
+- Transaction management: add, edit, duplicate, and delete transactions (cash and brokerage flows supported including automatic cash leg for trades).
+- Import: CSV, JSON and XLSX imports with preview, column mapping, auto-mapping heuristics, per-row progress and reporting, and automatic account creation when needed.
+- Export: JSON, CSV and XLSX exports (CSV uses dot decimal for numeric fields; XLSX preserves numeric types), plus SQLite database backup via file save dialog.
+- Portfolio tracking: holdings calculation (shares, cost basis), real-time quotes and change percent via Yahoo Finance, daily historical price fetch for charts and valuation.
+- Investment UI: portfolio allocation chart, holdings table (ROI & cost basis), and a treemap "heatmap" visualization of holdings.
+- Dashboards & charts: net worth evolution (custom time ranges + per-account visibility), income vs expenses, expenses by category, and asset allocation breakdown.
+- FIRE Calculator: computes a FIRE target and projects years to retirement using historic defaults derived from your accounts and transactions.
+- Onboarding: first-run welcome window to set preferences (theme, currency, number/date formats).
+- Settings: select theme (light/dark/system), default currency, number & date formats, transaction row height, and choose/reset a custom SQLite DB path.
+- Privacy mode: hide/mask numeric values (keeps currency symbol visible while masking amounts).
+- Update notifications: integrated auto-update support (check, download, install) and an option to relaunch to apply updates.
+- Localization: UI text is internationalized (English strings available; additional locales can be added).
+- Developer-friendly Tauri commands: rich backend API exposed (accounts, transactions, payees, categories, ticker search, quotes, daily prices, DB path control, and more) for integration and tests.
 
 ## Tech Stack
 
@@ -86,11 +92,20 @@ Useful scripts (from `app/package.json`):
 ## Import / Export Notes
 
 - Supported formats: CSV, JSON, XLSX.
-- Intended scope: transactions, categories, budgets, and portfolio holdings.
-- Security/robustness expectations:
-  - Validate and sanitize imported data (schema, types, size limits).
-  - Restrict disk access to user-selected paths.
-  - Do not execute macros in XLSX; sanitize strings to mitigate formula injection (cells starting with `=`, `+`, `-`, `@`).
+- Import highlights:
+  - File preview and column mapping UI (first 5 rows are shown) plus auto-mapping heuristics for common column names (date, payee/description, amount, category, notes, account).
+  - JSON import accepts an array of objects or an object with `transactions` or `data` arrays.
+  - For CSV/XLSX imports you are asked to indicate which column maps to an account; the importer can also create accounts automatically when an account name is present in the file.
+  - Progress reporting and per-row success/failure counts are shown during long imports.
+  - Numeric parsing respects locale settings when possible; import best-effort parses amounts using a conservative normalization strategy.
+- Export highlights:
+  - Export to JSON, CSV (dot decimal numeric format), and XLSX (numeric cells where possible) using the OS save dialog.
+  - A SQLite file backup can be saved via the settings or export workflow.
+- Security & robustness:
+  - Imported data is validated and sanitized; we avoid executing spreadsheet macros and sanitize cells to mitigate formula injection (do not open untrusted XLSX macros).
+  - Disk access is limited to user-selected paths via the system save dialog.
+
+Note: Budgets are a planned feature and are not implemented at present.
 
 ## Data Storage
 
