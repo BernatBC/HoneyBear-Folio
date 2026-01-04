@@ -1,15 +1,15 @@
 use rusqlite::Connection;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 // Test-only helpers to allow testing settings and init_db logic without an AppHandle
 
-pub(crate) fn settings_file_path_for_dir(dir: &PathBuf) -> PathBuf {
+pub(crate) fn settings_file_path_for_dir(dir: &Path) -> PathBuf {
     dir.join("settings.json")
 }
 
 pub(crate) fn write_settings_to_dir(
-    dir: &PathBuf,
+    dir: &Path,
     settings: &super::AppSettings,
 ) -> Result<(), String> {
     let settings_path = settings_file_path_for_dir(dir);
@@ -18,7 +18,7 @@ pub(crate) fn write_settings_to_dir(
     Ok(())
 }
 
-pub(crate) fn read_settings_from_dir(dir: &PathBuf) -> Result<super::AppSettings, String> {
+pub(crate) fn read_settings_from_dir(dir: &Path) -> Result<super::AppSettings, String> {
     let settings_path = settings_file_path_for_dir(dir);
     if settings_path.exists() {
         let contents = fs::read_to_string(&settings_path).map_err(|e| e.to_string())?;
@@ -29,7 +29,7 @@ pub(crate) fn read_settings_from_dir(dir: &PathBuf) -> Result<super::AppSettings
     }
 }
 
-pub(crate) fn get_db_path_for_dir(dir: &PathBuf) -> Result<PathBuf, String> {
+pub(crate) fn get_db_path_for_dir(dir: &Path) -> Result<PathBuf, String> {
     // If the user has configured an override, use it
     if let Ok(settings) = read_settings_from_dir(dir) {
         if let Some(ref p) = settings.db_path {
@@ -47,12 +47,12 @@ pub(crate) fn get_db_path_for_dir(dir: &PathBuf) -> Result<PathBuf, String> {
     // Default path
     let app_dir = dir;
     if !app_dir.exists() {
-        fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
+        fs::create_dir_all(app_dir).map_err(|e| e.to_string())?;
     }
     Ok(app_dir.join("honeybear.db"))
 }
 
-pub(crate) fn init_db_at_path(db_path: &PathBuf) -> Result<(), String> {
+pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
     // Ensure parent dir exists
     if let Some(parent) = db_path.parent() {
         if !parent.exists() {
@@ -134,11 +134,23 @@ pub(crate) fn init_db_at_path(db_path: &PathBuf) -> Result<(), String> {
     )
     .map_err(|e| e.to_string())?;
 
+    // Ensure daily_stock_prices exists for tests that exercise daily valuations
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS daily_stock_prices (
+            ticker TEXT NOT NULL,
+            date TEXT NOT NULL,
+            price REAL NOT NULL,
+            PRIMARY KEY (ticker, date)
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
 pub(crate) fn create_account_in_dir(
-    dir: &PathBuf,
+    dir: &Path,
     name: String,
     balance: f64,
     kind: String,
@@ -149,7 +161,7 @@ pub(crate) fn create_account_in_dir(
 }
 
 pub(crate) fn create_transaction_in_dir(
-    dir: &PathBuf,
+    dir: &Path,
     account_id: i32,
     date: String,
     payee: String,

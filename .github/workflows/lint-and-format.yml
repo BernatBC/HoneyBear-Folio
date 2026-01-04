@@ -66,4 +66,4 @@ jobs:
 
     - name: Lint Backend (Clippy)
       working-directory: ./app/src-tauri
-      run: cargo clippy -- -D warnings
+      run: cargo clippy --all-targets -- -D warnings

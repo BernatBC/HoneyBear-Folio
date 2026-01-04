@@ -187,11 +187,10 @@ fn test_delete_brokerage_transaction_deletes_linked_cash_counterpart() {
     // Confirm both transactions exist
     let brokerage_txs = crate::get_transactions_db(&db_path, brokerage_acc.id).unwrap();
     let cash_txs = crate::get_transactions_db(&db_path, cash_acc.id).unwrap();
-    assert!(brokerage_txs.len() >= 1);
+    assert!(!brokerage_txs.is_empty());
     assert!(cash_txs
         .iter()
         .any(|t| t.category.as_deref() == Some("Transfer")));
-
     // Delete the brokerage transaction
     crate::delete_transaction_db(&db_path, created.id).unwrap();
 

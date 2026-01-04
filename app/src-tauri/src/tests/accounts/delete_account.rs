@@ -28,7 +28,7 @@ fn test_delete_account_with_transactions() {
     )
     .unwrap();
     let txs_before = crate::get_transactions_db(&db_path, account.id).unwrap();
-    assert!(txs_before.len() >= 1);
+    assert!(!txs_before.is_empty());
 
     crate::delete_account_db(&db_path, account.id).unwrap();
 
