@@ -55,7 +55,7 @@ export default class ErrorBoundary extends React.Component {
                       String(this.state.error) ||
                       "";
                     navigator.clipboard && navigator.clipboard.writeText(text);
-                  } catch (e) {
+                  } catch {
                     /* ignore clipboard failures */
                   }
                 }}
