@@ -9,10 +9,39 @@ import { t } from "../i18n/i18n";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+function useIsDark() {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark");
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          setIsDark(document.documentElement.classList.contains("dark"));
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
 export default function InvestmentDashboard() {
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isDark = useIsDark();
 
   const formatNumber = useFormatNumber();
 
@@ -137,29 +166,33 @@ export default function InvestmentDashboard() {
     };
   }, [holdings]);
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: "75%",
-    borderRadius: 8,
-    plugins: {
-      legend: {
-        position: "right",
-        labels: {
-          usePointStyle: true,
-          boxWidth: 8,
-          padding: 20,
-          font: {
-            family: "Inter",
-            size: 12,
+  const chartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "75%",
+      borderRadius: 8,
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            padding: 20,
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
+            font: {
+              family: "Inter",
+              size: 12,
+            },
           },
         },
+        title: {
+          display: false,
+        },
       },
-      title: {
-        display: false,
-      },
-    },
-  };
+    }),
+    [isDark],
+  );
 
   return (
     <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
@@ -313,7 +346,11 @@ export default function InvestmentDashboard() {
                 Visual representation of holdings by size and performance
               </p>
               <div className="flex-1 min-h-0 border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-inner">
-                <TreeMap items={holdings} totalValue={totalValue} />
+                <TreeMap
+                  items={holdings}
+                  totalValue={totalValue}
+                  isDark={isDark}
+                />
               </div>
             </div>
           </div>
@@ -410,7 +447,7 @@ export default function InvestmentDashboard() {
   );
 }
 
-function TreeMap({ items, totalValue }) {
+function TreeMap({ items, totalValue, isDark }) {
   // Recursive binary split treemap
   return (
     <div className="w-full h-full relative">
@@ -421,12 +458,13 @@ function TreeMap({ items, totalValue }) {
         w={100}
         h={100}
         totalValue={totalValue}
+        isDark={isDark}
       />
     </div>
   );
 }
 
-function TreeMapNode({ items, x, y, w, h, totalValue }) {
+function TreeMapNode({ items, x, y, w, h, totalValue, isDark }) {
   const formatNumber = useFormatNumber();
 
   if (items.length === 0) return null;
@@ -468,7 +506,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
           width: `${w}%`,
           height: `${h}%`,
           backgroundColor: bgColor,
-          border: "1px solid white",
+          border: isDark ? "1px solid rgb(30, 41, 59)" : "1px solid white",
           overflow: "hidden",
         }}
         className="flex flex-col items-center justify-center p-1 text-xs text-center transition-all hover:opacity-90 hover:z-10 hover:scale-[1.02] cursor-pointer"
@@ -547,6 +585,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
         w={wA}
         h={hA}
         totalValue={totalValue}
+        isDark={isDark}
       />
       <TreeMapNode
         items={groupB}
@@ -555,6 +594,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue }) {
         w={wB}
         h={hB}
         totalValue={totalValue}
+        isDark={isDark}
       />
     </>
   );
@@ -569,6 +609,7 @@ TreeMap.propTypes = {
     }),
   ).isRequired,
   totalValue: PropTypes.number.isRequired,
+  isDark: PropTypes.bool,
 };
 
 TreeMapNode.propTypes = {
@@ -584,4 +625,5 @@ TreeMapNode.propTypes = {
   w: PropTypes.number.isRequired,
   h: PropTypes.number.isRequired,
   totalValue: PropTypes.number.isRequired,
+  isDark: PropTypes.bool,
 };

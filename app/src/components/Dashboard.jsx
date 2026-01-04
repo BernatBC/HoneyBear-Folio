@@ -33,6 +33,34 @@ ChartJS.register(
   BarElement,
 );
 
+function useIsDark() {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark");
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          setIsDark(document.documentElement.classList.contains("dark"));
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
 export default function Dashboard({
   accounts: propAccounts = [],
   marketValues = {},
@@ -40,6 +68,7 @@ export default function Dashboard({
   const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
   const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, 1Y, ALL
+  const isDark = useIsDark();
 
   const formatNumber = useFormatNumber();
   const formatDate = useFormatDate();
@@ -366,53 +395,61 @@ export default function Dashboard({
     };
   }, [transactions, timeRange, formatDate]);
 
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: "75%",
-    borderRadius: 8,
-    plugins: {
-      legend: {
-        position: "right",
-        labels: {
-          usePointStyle: true,
-          boxWidth: 8,
-          padding: 20,
-          font: {
-            family: "Inter",
-            size: 12,
+  const doughnutOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "75%",
+      borderRadius: 8,
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            padding: 20,
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
+            font: {
+              family: "Inter",
+              size: 12,
+            },
           },
         },
+        title: {
+          display: false,
+        },
       },
-      title: {
-        display: false,
-      },
-    },
-  };
+    }),
+    [isDark],
+  );
 
-  const expensesOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: "75%",
-    borderRadius: 8,
-    plugins: {
-      legend: {
-        position: "right",
-        labels: {
-          usePointStyle: true,
-          boxWidth: 8,
-          padding: 20,
-          font: {
-            family: "Inter",
-            size: 12,
+  const expensesOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "75%",
+      borderRadius: 8,
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            padding: 20,
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
+            font: {
+              family: "Inter",
+              size: 12,
+            },
           },
         },
+        title: {
+          display: false,
+        },
       },
-      title: {
-        display: false,
-      },
-    },
-  };
+    }),
+    [isDark],
+  );
 
   const barOptions = useMemo(() => {
     const labelMap = {
@@ -434,6 +471,7 @@ export default function Dashboard({
           labels: {
             usePointStyle: true,
             boxWidth: 8,
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
             font: {
               family: "Inter",
               size: 12,
@@ -444,7 +482,11 @@ export default function Dashboard({
           display: false,
         },
         tooltip: {
-          backgroundColor: "rgba(15, 23, 42, 0.9)",
+          backgroundColor: isDark
+            ? "rgba(255, 255, 255, 0.9)"
+            : "rgba(15, 23, 42, 0.9)",
+          titleColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
+          bodyColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
           padding: 12,
           cornerRadius: 8,
           titleFont: {
@@ -464,7 +506,9 @@ export default function Dashboard({
             display: false,
           },
           grid: {
-            color: "rgba(226, 232, 240, 0.6)",
+            color: isDark
+              ? "rgba(51, 65, 85, 0.6)"
+              : "rgba(226, 232, 240, 0.6)",
             borderDash: [4, 4],
             drawBorder: false,
           },
@@ -473,7 +517,7 @@ export default function Dashboard({
               family: "Inter",
               size: 11,
             },
-            color: "rgb(100, 116, 139)",
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
             padding: 10,
             callback: function (value) {
               const num = Number(value);
@@ -496,101 +540,110 @@ export default function Dashboard({
               family: "Inter",
               size: 11,
             },
-            color: "rgb(100, 116, 139)",
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
           },
         },
       },
     };
-  }, [timeRange, formatNumber]);
+  }, [timeRange, formatNumber, isDark]);
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      title: {
-        display: false,
-      },
-      tooltip: {
-        backgroundColor: "rgba(15, 23, 42, 0.9)",
-        padding: 12,
-        cornerRadius: 8,
-        titleFont: {
-          family: "Inter",
-          size: 13,
+  const options = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
         },
-        bodyFont: {
-          family: "Inter",
-          size: 12,
+        title: {
+          display: false,
         },
-        displayColors: false,
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += formatNumber(context.parsed.y, {
+        tooltip: {
+          backgroundColor: isDark
+            ? "rgba(255, 255, 255, 0.9)"
+            : "rgba(15, 23, 42, 0.9)",
+          titleColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
+          bodyColor: isDark ? "rgb(15, 23, 42)" : "rgb(255, 255, 255)",
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: {
+            family: "Inter",
+            size: 13,
+          },
+          bodyFont: {
+            family: "Inter",
+            size: 12,
+          },
+          displayColors: false,
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || "";
+              if (label) {
+                label += ": ";
+              }
+              if (context.parsed.y !== null) {
+                label += formatNumber(context.parsed.y, {
+                  style: "currency",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                });
+              }
+              return label;
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          border: {
+            display: false,
+          },
+          grid: {
+            color: isDark
+              ? "rgba(51, 65, 85, 0.6)"
+              : "rgba(226, 232, 240, 0.6)",
+            borderDash: [4, 4],
+            drawBorder: false,
+          },
+          ticks: {
+            font: {
+              family: "Inter",
+              size: 11,
+            },
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
+            padding: 10,
+            callback: function (value) {
+              const num = Number(value);
+              if (Number.isNaN(num)) return value;
+              return formatNumber(num, {
                 style: "currency",
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               });
-            }
-            return label;
+            },
+          },
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false,
+          },
+          ticks: {
+            font: {
+              family: "Inter",
+              size: 11,
+            },
+            color: isDark ? "rgb(148, 163, 184)" : "rgb(100, 116, 139)",
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 8,
           },
         },
       },
-    },
-    scales: {
-      y: {
-        beginAtZero: false,
-        border: {
-          display: false,
-        },
-        grid: {
-          color: "rgba(226, 232, 240, 0.6)",
-          borderDash: [4, 4],
-          drawBorder: false,
-        },
-        ticks: {
-          font: {
-            family: "Inter",
-            size: 11,
-          },
-          color: "rgb(100, 116, 139)",
-          padding: 10,
-          callback: function (value) {
-            const num = Number(value);
-            if (Number.isNaN(num)) return value;
-            return formatNumber(num, {
-              style: "currency",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            });
-          },
-        },
-      },
-      x: {
-        grid: {
-          display: false,
-          drawBorder: false,
-        },
-        ticks: {
-          font: {
-            family: "Inter",
-            size: 11,
-          },
-          color: "rgb(100, 116, 139)",
-          maxRotation: 0,
-          autoSkip: true,
-          maxTicksLimit: 8,
-        },
-      },
-    },
-  };
+    }),
+    [formatNumber, isDark],
+  );
 
   return (
     <div className="dashboard-container">
