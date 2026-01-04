@@ -129,7 +129,8 @@ export default function Dashboard({
   }, [transactions]);
 
   const chartData = useMemo(() => {
-    if (accounts.length === 0) return null;
+    // Require accounts and at least one transaction to render the net worth evolution chart
+    if (accounts.length === 0 || transactions.length === 0) return null;
 
     // 1. Calculate initial balances for each account
     // current_balance = initial_balance + sum(transactions)
@@ -161,6 +162,19 @@ export default function Dashboard({
       cutoffDate = firstTxDate;
     } else if (timeRange === "ALL") {
       cutoffDate.setFullYear(now.getFullYear() - 1); // Default to 1Y if no txs
+    }
+
+    // Ensure we never show dates earlier than the first transaction — start chart at firstTxDate
+    if (transactions.length > 0) {
+      const firstTxDate = new Date(
+        transactions.reduce(
+          (min, t) => (t.date < min ? t.date : min),
+          transactions[0].date,
+        ),
+      );
+      // Normalize to midnight for consistent comparisons
+      firstTxDate.setHours(0, 0, 0, 0);
+      if (firstTxDate > cutoffDate) cutoffDate = new Date(firstTxDate);
     }
 
     const sortedDates = [];
