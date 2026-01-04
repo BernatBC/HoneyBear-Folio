@@ -81,23 +81,23 @@ function ConfirmDialog({
 
   return createPortal(
     <div className="modal-overlay">
-      <div className="modal-container w-auto max-w-md">
+      <div className="modal-container w-auto max-w-md p-6 h-auto min-h-0">
         <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
           {title}
         </h2>
         <p className="mb-6 text-slate-600 dark:text-slate-300">{message}</p>
-        <div className="flex justify-end gap-3 mt-auto">
+        <div className="modal-footer">
           {showCancel && (
             <button
               onClick={onCancel}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="modal-cancel-button"
             >
               {cancelLabel}
             </button>
           )}
           <button
             onClick={onConfirm}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${getButtonClass()}`}
+            className={`modal-export-button ${getButtonClass()}`}
           >
             {okLabel}
           </button>
