@@ -1,9 +1,9 @@
+use chrono::{NaiveDate, TimeZone, Utc};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
-use chrono::{NaiveDate, Utc, TimeZone};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct YahooQuote {
@@ -1591,7 +1591,8 @@ async fn update_daily_stock_prices_with_client_and_base(
 
         let start_timestamp = if let Some(date_str) = last_date_str {
             // Parse date and add 1 day
-            let date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%d").map_err(|e| e.to_string())?;
+            let date =
+                NaiveDate::parse_from_str(&date_str, "%Y-%m-%d").map_err(|e| e.to_string())?;
             let next_day = date.succ_opt().ok_or("Invalid date")?;
             let datetime = next_day.and_hms_opt(0, 0, 0).unwrap();
             datetime.and_utc().timestamp()
@@ -1609,10 +1610,7 @@ async fn update_daily_stock_prices_with_client_and_base(
         // 2. Fetch from Yahoo
         let url = format!(
             "{}/v8/finance/chart/{}?period1={}&period2={}&interval=1d",
-            base_url,
-            ticker,
-            start_timestamp,
-            end_timestamp
+            base_url, ticker, start_timestamp, end_timestamp
         );
 
         let res = client
@@ -1637,7 +1635,8 @@ async fn update_daily_stock_prices_with_client_and_base(
                     if let Some(quotes) = &indicators.quote {
                         if let Some(quote) = quotes.first() {
                             if let Some(closes) = &quote.close {
-                                let mut conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+                                let mut conn =
+                                    Connection::open(&db_path).map_err(|e| e.to_string())?;
                                 let tx = conn.transaction().map_err(|e| e.to_string())?;
                                 {
                                     let mut stmt = tx.prepare(
@@ -1647,8 +1646,13 @@ async fn update_daily_stock_prices_with_client_and_base(
 
                                     for (i, ts) in timestamps.iter().enumerate() {
                                         if let Some(price) = closes.get(i).and_then(|p| *p) {
-                                            let date_str = Utc.timestamp_opt(*ts, 0).unwrap().format("%Y-%m-%d").to_string();
-                                            stmt.execute(params![ticker, date_str, price]).map_err(|e| e.to_string())?;
+                                            let date_str = Utc
+                                                .timestamp_opt(*ts, 0)
+                                                .unwrap()
+                                                .format("%Y-%m-%d")
+                                                .to_string();
+                                            stmt.execute(params![ticker, date_str, price])
+                                                .map_err(|e| e.to_string())?;
                                         }
                                     }
                                 }
@@ -1665,17 +1669,30 @@ async fn update_daily_stock_prices_with_client_and_base(
 }
 
 #[tauri::command]
-async fn update_daily_stock_prices(app_handle: AppHandle, tickers: Vec<String>) -> Result<(), String> {
+async fn update_daily_stock_prices(
+    app_handle: AppHandle,
+    tickers: Vec<String>,
+) -> Result<(), String> {
     // Allow overriding base URL via env var for testing
-    let base_url = std::env::var("YAHOO_BASE_URL").unwrap_or_else(|_| "https://query1.finance.yahoo.com".to_string());
+    let base_url = std::env::var("YAHOO_BASE_URL")
+        .unwrap_or_else(|_| "https://query1.finance.yahoo.com".to_string());
     let db_path = get_db_path(&app_handle)?;
 
     let client = reqwest::Client::new();
-    update_daily_stock_prices_with_client_and_base(&std::path::Path::new(&db_path), &client, &base_url, tickers).await
+    update_daily_stock_prices_with_client_and_base(
+        &std::path::Path::new(&db_path),
+        &client,
+        &base_url,
+        tickers,
+    )
+    .await
 }
 
 // Helper to make `get_daily_stock_prices` testable without an AppHandle
-fn get_daily_stock_prices_from_path(db_path: &std::path::Path, ticker: String) -> Result<Vec<DailyPrice>, String> {
+fn get_daily_stock_prices_from_path(
+    db_path: &std::path::Path,
+    ticker: String,
+) -> Result<Vec<DailyPrice>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -1697,7 +1714,10 @@ fn get_daily_stock_prices_from_path(db_path: &std::path::Path, ticker: String) -
 }
 
 #[tauri::command]
-fn get_daily_stock_prices(app_handle: AppHandle, ticker: String) -> Result<Vec<DailyPrice>, String> {
+fn get_daily_stock_prices(
+    app_handle: AppHandle,
+    ticker: String,
+) -> Result<Vec<DailyPrice>, String> {
     let db_path = get_db_path(&app_handle)?;
     get_daily_stock_prices_from_path(&std::path::Path::new(&db_path), ticker)
 }

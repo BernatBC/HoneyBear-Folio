@@ -19,21 +19,32 @@ async fn test_update_daily_stock_prices_inserts_prices() {
     });
 
     let client = reqwest::Client::builder().build().unwrap();
-    crate::update_daily_stock_prices_with_client_and_base(&db_path, &client, &server.base_url(), vec!["FOO".to_string()]).await.unwrap();
+    crate::update_daily_stock_prices_with_client_and_base(
+        &db_path,
+        &client,
+        &server.base_url(),
+        vec!["FOO".to_string()],
+    )
+    .await
+    .unwrap();
 
     let conn = Connection::open(&db_path).unwrap();
-    let price1: f64 = conn.query_row(
-        "SELECT price FROM daily_stock_prices WHERE ticker = ?1 AND date = ?2",
-        rusqlite::params!["FOO", "2021-01-01"],
-        |r| r.get(0),
-    ).unwrap();
+    let price1: f64 = conn
+        .query_row(
+            "SELECT price FROM daily_stock_prices WHERE ticker = ?1 AND date = ?2",
+            rusqlite::params!["FOO", "2021-01-01"],
+            |r| r.get(0),
+        )
+        .unwrap();
     assert!((price1 - 100.0).abs() < 1e-6);
 
-    let price2: f64 = conn.query_row(
-        "SELECT price FROM daily_stock_prices WHERE ticker = ?1 AND date = ?2",
-        rusqlite::params!["FOO", "2021-01-02"],
-        |r| r.get(0),
-    ).unwrap();
+    let price2: f64 = conn
+        .query_row(
+            "SELECT price FROM daily_stock_prices WHERE ticker = ?1 AND date = ?2",
+            rusqlite::params!["FOO", "2021-01-02"],
+            |r| r.get(0),
+        )
+        .unwrap();
     assert!((price2 - 110.0).abs() < 1e-6);
 }
 
@@ -46,7 +57,8 @@ async fn test_update_replaces_existing() {
     conn.execute(
         "INSERT INTO daily_stock_prices (ticker, date, price) VALUES (?1, ?2, ?3)",
         rusqlite::params!["FOO", "2021-01-01", 90.0],
-    ).unwrap();
+    )
+    .unwrap();
 
     let server = MockServer::start();
     let _m = server.mock(|when, then| {
@@ -57,13 +69,22 @@ async fn test_update_replaces_existing() {
     });
 
     let client = reqwest::Client::builder().build().unwrap();
-    crate::update_daily_stock_prices_with_client_and_base(&db_path, &client, &server.base_url(), vec!["FOO".to_string()]).await.unwrap();
+    crate::update_daily_stock_prices_with_client_and_base(
+        &db_path,
+        &client,
+        &server.base_url(),
+        vec!["FOO".to_string()],
+    )
+    .await
+    .unwrap();
 
-    let price: f64 = conn.query_row(
-        "SELECT price FROM daily_stock_prices WHERE ticker = ?1 AND date = ?2",
-        rusqlite::params!["FOO", "2021-01-01"],
-        |r| r.get(0),
-    ).unwrap();
+    let price: f64 = conn
+        .query_row(
+            "SELECT price FROM daily_stock_prices WHERE ticker = ?1 AND date = ?2",
+            rusqlite::params!["FOO", "2021-01-01"],
+            |r| r.get(0),
+        )
+        .unwrap();
     assert!((price - 100.0).abs() < 1e-6);
 }
 
@@ -76,15 +97,18 @@ fn test_get_daily_stock_prices_from_path_ordering() {
     conn.execute(
         "INSERT INTO daily_stock_prices (ticker, date, price) VALUES (?1, ?2, ?3)",
         rusqlite::params!["FOO", "2021-01-03", 30.0],
-    ).unwrap();
+    )
+    .unwrap();
     conn.execute(
         "INSERT INTO daily_stock_prices (ticker, date, price) VALUES (?1, ?2, ?3)",
         rusqlite::params!["FOO", "2021-01-01", 10.0],
-    ).unwrap();
+    )
+    .unwrap();
     conn.execute(
         "INSERT INTO daily_stock_prices (ticker, date, price) VALUES (?1, ?2, ?3)",
         rusqlite::params!["FOO", "2021-01-02", 20.0],
-    ).unwrap();
+    )
+    .unwrap();
 
     let prices = crate::get_daily_stock_prices_from_path(&db_path, "FOO".to_string()).unwrap();
     assert_eq!(prices.len(), 3);
