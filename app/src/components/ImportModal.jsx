@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
@@ -18,6 +18,18 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { parseNumberWithLocale } from "../utils/format";
 import { t } from "../i18n/i18n";
+
+// Get MIME type based on file extension
+const getMimeType = (fileName) => {
+  const ext = fileName.toLowerCase().split(".").pop();
+  const mimeTypes = {
+    csv: "text/csv",
+    json: "application/json",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    xls: "application/vnd.ms-excel",
+  };
+  return mimeTypes[ext] || "application/octet-stream";
+};
 
 export default function ImportModal({ onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
@@ -47,6 +59,154 @@ export default function ImportModal({ onClose, onImportComplete }) {
   const dropZoneRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [step, setStep] = useState(0); // 0 = select file, 1 = map/review
+
+  const autoMapColumns = useCallback((cols) => {
+    setMapping((prevMapping) => {
+      const newMapping = { ...prevMapping };
+      cols.forEach((col) => {
+        const lower = col.toLowerCase();
+        if (lower.includes("date")) newMapping.date = col;
+        else if (
+          lower.includes("payee") ||
+          lower.includes("description") ||
+          lower.includes("merchant")
+        )
+          newMapping.payee = col;
+        else if (lower.includes("amount") || lower.includes("value"))
+          newMapping.amount = col;
+        else if (lower.includes("category")) newMapping.category = col;
+        else if (lower.includes("note") || lower.includes("memo"))
+          newMapping.notes = col;
+        else if (lower.includes("account") || lower.includes("acc"))
+          newMapping.account = col;
+      });
+      return newMapping;
+    });
+  }, []);
+
+  const parseFile = useCallback(
+    (file) => {
+      // Reset previous parse state
+      setParseError(null);
+      setPreviewRows([]);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = e.target.result;
+
+        if (file.name.endsWith(".csv")) {
+          Papa.parse(data, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              setColumns(results.meta.fields || []);
+              setPreviewRows((results.data || []).slice(0, 5));
+              autoMapColumns(results.meta.fields || []);
+            },
+          });
+        } else if (file.name.endsWith(".json")) {
+          try {
+            const parsed = JSON.parse(data);
+            let rows = [];
+
+            if (Array.isArray(parsed)) {
+              rows = parsed;
+            } else if (
+              parsed.transactions &&
+              Array.isArray(parsed.transactions)
+            ) {
+              rows = parsed.transactions;
+            } else if (parsed.data && Array.isArray(parsed.data)) {
+              rows = parsed.data;
+            } else {
+              // Unsupported JSON shape
+              setColumns([]);
+              setPreviewRows([]);
+              setParseError(
+                "Unsupported JSON structure — expected an array of objects or an object with a 'transactions' or 'data' array.",
+              );
+              autoMapColumns([]);
+              return;
+            }
+
+            // Collect union of keys as columns
+            const cols = Array.from(
+              rows.reduce((acc, row) => {
+                Object.keys(row || {}).forEach((k) => acc.add(k));
+                return acc;
+              }, new Set()),
+            );
+
+            setColumns(cols);
+            setPreviewRows(rows.slice(0, 5));
+            setParseError(null);
+            autoMapColumns(cols);
+          } catch (e) {
+            console.error("Failed to parse JSON import file:", e);
+            setParseError("Failed to parse JSON file: " + (e.message || e));
+            setColumns([]);
+            setPreviewRows([]);
+          }
+        } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+          const workbook = XLSX.read(data, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+          if (json.length > 0) {
+            const headers = json[0];
+            const rows = json.slice(1).map((row) => {
+              const obj = {};
+              headers.forEach((header, index) => {
+                obj[header] = row[index];
+              });
+              return obj;
+            });
+
+            setColumns(headers);
+            setPreviewRows(rows.slice(0, 5));
+            autoMapColumns(headers);
+          }
+        }
+      };
+
+      if (file.name.endsWith(".csv") || file.name.endsWith(".json")) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsBinaryString(file);
+      }
+    },
+    [autoMapColumns],
+  );
+
+  // Handle file dropped via Tauri's native drag-drop (receives file path)
+  const handleFileFromPath = useCallback(
+    async (filePath) => {
+      try {
+        // Import Tauri's file system API
+        const { readFile } = await import("@tauri-apps/plugin-fs");
+
+        // Read the file contents as bytes
+        const contents = await readFile(filePath);
+
+        // Extract file name from path
+        const fileName = filePath.split(/[\\/]/).pop();
+
+        // Create a File object from the contents
+        const blob = new Blob([contents]);
+        const fileObj = new File([blob], fileName, {
+          type: getMimeType(fileName),
+        });
+
+        setFile(fileObj);
+        parseFile(fileObj);
+      } catch (err) {
+        console.error("Failed to read dropped file:", err);
+        setParseError("Failed to read dropped file: " + (err.message || err));
+      }
+    },
+    [parseFile],
+  );
 
   useEffect(() => {
     // Fetch accounts on mount
@@ -101,45 +261,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
       if (unlistenHover) unlistenHover();
       if (unlistenLeave) unlistenLeave();
     };
-  }, []);
-
-  // Handle file dropped via Tauri's native drag-drop (receives file path)
-  const handleFileFromPath = async (filePath) => {
-    try {
-      // Import Tauri's file system API
-      const { readFile } = await import("@tauri-apps/plugin-fs");
-
-      // Read the file contents as bytes
-      const contents = await readFile(filePath);
-
-      // Extract file name from path
-      const fileName = filePath.split(/[\\/]/).pop();
-
-      // Create a File object from the contents
-      const blob = new Blob([contents]);
-      const fileObj = new File([blob], fileName, {
-        type: getMimeType(fileName),
-      });
-
-      setFile(fileObj);
-      parseFile(fileObj);
-    } catch (err) {
-      console.error("Failed to read dropped file:", err);
-      setParseError("Failed to read dropped file: " + (err.message || err));
-    }
-  };
-
-  // Get MIME type based on file extension
-  const getMimeType = (fileName) => {
-    const ext = fileName.toLowerCase().split(".").pop();
-    const mimeTypes = {
-      csv: "text/csv",
-      json: "application/json",
-      xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      xls: "application/vnd.ms-excel",
-    };
-    return mimeTypes[ext] || "application/octet-stream";
-  };
+  }, [handleFileFromPath]);
 
   // Browser-based drag event handlers (works on Linux GNOME)
   const handleDragEnter = (e) => {
@@ -193,120 +315,6 @@ export default function ImportModal({ onClose, onImportComplete }) {
     if (!selectedFile) return;
     setFile(selectedFile);
     parseFile(selectedFile);
-  };
-
-  const parseFile = (file) => {
-    // Reset previous parse state
-    setParseError(null);
-    setPreviewRows([]);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = e.target.result;
-
-      if (file.name.endsWith(".csv")) {
-        Papa.parse(data, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            setColumns(results.meta.fields || []);
-            setPreviewRows((results.data || []).slice(0, 5));
-            autoMapColumns(results.meta.fields || []);
-          },
-        });
-      } else if (file.name.endsWith(".json")) {
-        try {
-          const parsed = JSON.parse(data);
-          let rows = [];
-
-          if (Array.isArray(parsed)) {
-            rows = parsed;
-          } else if (
-            parsed.transactions &&
-            Array.isArray(parsed.transactions)
-          ) {
-            rows = parsed.transactions;
-          } else if (parsed.data && Array.isArray(parsed.data)) {
-            rows = parsed.data;
-          } else {
-            // Unsupported JSON shape
-            setColumns([]);
-            setPreviewRows([]);
-            setParseError(
-              "Unsupported JSON structure — expected an array of objects or an object with a 'transactions' or 'data' array.",
-            );
-            autoMapColumns([]);
-            return;
-          }
-
-          // Collect union of keys as columns
-          const cols = Array.from(
-            rows.reduce((acc, row) => {
-              Object.keys(row || {}).forEach((k) => acc.add(k));
-              return acc;
-            }, new Set()),
-          );
-
-          setColumns(cols);
-          setPreviewRows(rows.slice(0, 5));
-          setParseError(null);
-          autoMapColumns(cols);
-        } catch (e) {
-          console.error("Failed to parse JSON import file:", e);
-          setParseError("Failed to parse JSON file: " + (e.message || e));
-          setColumns([]);
-          setPreviewRows([]);
-        }
-      } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
-        const workbook = XLSX.read(data, { type: "binary" });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-        if (json.length > 0) {
-          const headers = json[0];
-          const rows = json.slice(1).map((row) => {
-            const obj = {};
-            headers.forEach((header, index) => {
-              obj[header] = row[index];
-            });
-            return obj;
-          });
-
-          setColumns(headers);
-          setPreviewRows(rows.slice(0, 5));
-          autoMapColumns(headers);
-        }
-      }
-    };
-
-    if (file.name.endsWith(".csv") || file.name.endsWith(".json")) {
-      reader.readAsText(file);
-    } else {
-      reader.readAsBinaryString(file);
-    }
-  };
-
-  const autoMapColumns = (cols) => {
-    const newMapping = { ...mapping };
-    cols.forEach((col) => {
-      const lower = col.toLowerCase();
-      if (lower.includes("date")) newMapping.date = col;
-      else if (
-        lower.includes("payee") ||
-        lower.includes("description") ||
-        lower.includes("merchant")
-      )
-        newMapping.payee = col;
-      else if (lower.includes("amount") || lower.includes("value"))
-        newMapping.amount = col;
-      else if (lower.includes("category")) newMapping.category = col;
-      else if (lower.includes("note") || lower.includes("memo"))
-        newMapping.notes = col;
-      else if (lower.includes("account") || lower.includes("acc"))
-        newMapping.account = col;
-    });
-    setMapping(newMapping);
   };
 
   const handleImport = async () => {
