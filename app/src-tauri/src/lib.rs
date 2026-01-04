@@ -1636,7 +1636,7 @@ async fn update_daily_stock_prices_with_client_and_base(
                         if let Some(quote) = quotes.first() {
                             if let Some(closes) = &quote.close {
                                 let mut conn =
-                                    Connection::open(&db_path).map_err(|e| e.to_string())?;
+                                    Connection::open(db_path).map_err(|e| e.to_string())?;
                                 let tx = conn.transaction().map_err(|e| e.to_string())?;
                                 {
                                     let mut stmt = tx.prepare(
@@ -1680,7 +1680,7 @@ async fn update_daily_stock_prices(
 
     let client = reqwest::Client::new();
     update_daily_stock_prices_with_client_and_base(
-        &std::path::Path::new(&db_path),
+        std::path::Path::new(&db_path),
         &client,
         &base_url,
         tickers,
