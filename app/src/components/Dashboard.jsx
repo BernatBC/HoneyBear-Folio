@@ -262,13 +262,13 @@ export default function Dashboard({
         {
           data: data,
           backgroundColor: labels.map((_, i) => colors[i % colors.length]),
-          borderColor: "transparent",
-          borderWidth: 0,
+          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
+          borderWidth: 4,
           hoverOffset: 4,
         },
       ],
     };
-  }, [accounts, marketValues]);
+  }, [accounts, marketValues, isDark]);
 
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;
@@ -306,13 +306,13 @@ export default function Dashboard({
           backgroundColor: sortedCategories.map(
             (_, i) => colors[i % colors.length],
           ),
-          borderColor: "transparent",
-          borderWidth: 0,
+          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
+          borderWidth: 4,
           hoverOffset: 4,
         },
       ],
     };
-  }, [transactions]);
+  }, [transactions, isDark]);
 
   const incomeVsExpensesData = useMemo(() => {
     if (transactions.length === 0) return null;
@@ -399,8 +399,8 @@ export default function Dashboard({
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "75%",
-      borderRadius: 8,
+      cutout: "65%",
+      borderRadius: 4,
       plugins: {
         legend: {
           position: "right",
@@ -427,8 +427,8 @@ export default function Dashboard({
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "75%",
-      borderRadius: 8,
+      cutout: "65%",
+      borderRadius: 4,
       plugins: {
         legend: {
           position: "right",

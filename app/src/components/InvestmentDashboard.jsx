@@ -158,20 +158,20 @@ export default function InvestmentDashboard() {
         {
           data: holdings.map((h) => h.currentValue),
           backgroundColor: holdings.map((_, i) => colors[i % colors.length]),
-          borderColor: "transparent",
-          borderWidth: 0,
+          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
+          borderWidth: 4,
           hoverOffset: 4,
         },
       ],
     };
-  }, [holdings]);
+  }, [holdings, isDark]);
 
   const chartOptions = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      cutout: "75%",
-      borderRadius: 8,
+      cutout: "65%",
+      borderRadius: 4,
       plugins: {
         legend: {
           position: "right",
