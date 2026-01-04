@@ -345,7 +345,14 @@ export default function Dashboard({
       labels: sortedDates.map((d) => formatDate(d)),
       datasets: datasets,
     };
-  }, [accounts, transactions, timeRange, marketValues, formatDate]);
+  }, [
+    accounts,
+    transactions,
+    timeRange,
+    marketValues,
+    formatDate,
+    dailyPrices,
+  ]);
 
   // Track user toggles for account visibility; derive the actual visibility from accounts + toggles
   const [toggledAccounts, setToggledAccounts] = useState(() => ({}));

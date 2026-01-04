@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
-use chrono::{DateTime, NaiveDate, Utc, TimeZone};
+use chrono::{NaiveDate, Utc, TimeZone};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct YahooQuote {
