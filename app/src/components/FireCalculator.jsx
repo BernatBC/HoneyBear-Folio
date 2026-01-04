@@ -583,8 +583,8 @@ export default function FireCalculator() {
                           if (Number.isNaN(num)) return value;
                           return formatNumber(num, {
                             style: "currency",
-                            notation: "compact",
-                            maximumFractionDigits: 1,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
                           });
                         },
                       },
