@@ -142,7 +142,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
           } catch (e) {
             console.error("Failed to parse JSON import file:", e);
             setParseError(
-              t("import.error.failed_parse_json", { error: e.message || String(e) }),
+              t("import.error.failed_parse_json", {
+                error: e.message || String(e),
+              }),
             );
             setColumns([]);
             setPreviewRows([]);
@@ -203,7 +205,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
       } catch (err) {
         console.error("Failed to read dropped file:", err);
         setParseError(
-          t("import.error.failed_read_dropped", { error: err.message || String(err) }),
+          t("import.error.failed_read_dropped", {
+            error: err.message || String(err),
+          }),
         );
       }
     },
@@ -477,8 +481,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
           }
         }
 
-        if (!accountId)
-          throw new Error(t("import.error.no_account_for_row"));
+        if (!accountId) throw new Error(t("import.error.no_account_for_row"));
 
         await invoke("create_transaction", {
           accountId,
@@ -707,7 +710,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                       {t("import.success")}
                     </span>
                     <span className="text-red-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {progress.failed} 
+                      <AlertCircle className="w-3 h-3" /> {progress.failed}
                       {t("import.failed")}
                     </span>
                   </div>
