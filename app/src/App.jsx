@@ -15,6 +15,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { PrivacyProvider } from "./contexts/PrivacyContext";
 import ChartNumberFormatSync from "./components/ChartNumberFormatSync";
 import UpdateNotification from "./components/UpdateNotification";
+import WelcomeWindow from "./components/WelcomeWindow";
 
 function App() {
   const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
@@ -262,6 +263,7 @@ function App() {
                 </div>
               )}
             </ErrorBoundary>
+            <WelcomeWindow />
           </ToastProvider>{" "}
         </PrivacyProvider>
       </ThemeProvider>{" "}
