@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTheme } from "../contexts/theme-core";
 import { useNumberFormat } from "../contexts/number-format";
 import { CURRENCIES } from "../utils/currencies";
