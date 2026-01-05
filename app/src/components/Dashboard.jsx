@@ -592,6 +592,15 @@ export default function Dashboard({
           display: false,
         },
         tooltip: {
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
+          titleColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          bodyColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { family: "Inter", size: 13 },
+          bodyFont: { family: "Inter", size: 12 },
           callbacks: {
             label: function (context) {
               const value = context.dataset.originalData
@@ -606,6 +615,30 @@ export default function Dashboard({
                 label += formatNumber(value, { style: "currency" });
               }
               return label;
+            },
+            labelColor: function (context) {
+              const dataset = context.dataset;
+              const index = context.dataIndex;
+              const tooltipBg = isDark
+                ? "rgba(15, 23, 42, 0.9)"
+                : "rgba(255, 255, 255, 0.9)";
+
+              const bg =
+                Array.isArray(dataset.backgroundColor) && dataset.backgroundColor[index] !== undefined
+                  ? dataset.backgroundColor[index]
+                  : dataset.backgroundColor;
+              const border =
+                Array.isArray(dataset.borderColor) && dataset.borderColor[index] !== undefined
+                  ? dataset.borderColor[index]
+                  : dataset.borderColor;
+
+              const backgroundColor = bg === "transparent" || bg === "rgba(0, 0, 0, 0)" ? tooltipBg : bg;
+
+              return {
+                borderColor: border,
+                backgroundColor,
+                borderWidth: 2,
+              };
             },
           },
         },
@@ -636,6 +669,48 @@ export default function Dashboard({
         },
         title: {
           display: false,
+        },
+        tooltip: {
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
+          titleColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          bodyColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { family: "Inter", size: 13 },
+          bodyFont: { family: "Inter", size: 12 },
+          callbacks: {
+            label: function (context) {
+              const value = context.raw ?? context.parsed ?? 0;
+
+              let label = context.label || "";
+              if (label) label += ": ";
+              label += formatNumber(Number(value) || 0, { style: "currency" });
+              return label;
+            },
+            labelColor: function (context) {
+              const dataset = context.dataset;
+              const index = context.dataIndex;
+              const tooltipBg = isDark
+                ? "rgba(15, 23, 42, 0.9)"
+                : "rgba(255, 255, 255, 0.9)";
+
+              const bg =
+                Array.isArray(dataset.backgroundColor) && dataset.backgroundColor[index] !== undefined
+                  ? dataset.backgroundColor[index]
+                  : dataset.backgroundColor;
+              const border = dataset.borderColor;
+
+              const backgroundColor = bg === "transparent" || bg === "rgba(0, 0, 0, 0)" ? tooltipBg : bg;
+
+              return {
+                borderColor: border,
+                backgroundColor,
+                borderWidth: 2,
+              };
+            },
+          },
         },
       },
     }),
