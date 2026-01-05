@@ -181,7 +181,10 @@ export default function AccountDetails({ account, onUpdate }) {
         // Attach account_name for display in the consolidated view
         txs = transactionsList.map((tx) => {
           const acc = accounts.find((a) => a.id === tx.account_id);
-          return { ...tx, account_name: acc ? acc.name : String(tx.account_id) };
+          return {
+            ...tx,
+            account_name: acc ? acc.name : String(tx.account_id),
+          };
         });
       } else {
         txs = await invoke("get_transactions", { accountId: account.id });
@@ -1109,7 +1112,15 @@ export default function AccountDetails({ account, onUpdate }) {
               {filteredTransactions.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={account.id === "all" ? (account.kind === "cash" ? "7" : "11") : (account.kind === "cash" ? "6" : "10")}
+                    colSpan={
+                      account.id === "all"
+                        ? account.kind === "cash"
+                          ? "7"
+                          : "11"
+                        : account.kind === "cash"
+                          ? "6"
+                          : "10"
+                    }
                     className="px-3 py-4 text-center"
                   >
                     <div className="flex flex-col items-center justify-center gap-3">
