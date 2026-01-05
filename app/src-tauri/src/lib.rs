@@ -294,15 +294,19 @@ fn create_account_db(
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
+    // For non-cash account kinds (e.g., brokerage), ignore any provided initial balance
+    let balance_to_set = if kind == "cash" { balance } else { 0.0 };
+
     tx.execute(
         "INSERT INTO accounts (name, balance, kind) VALUES (?1, ?2, ?3)",
-        params![name, balance, kind],
+        params![name, balance_to_set, kind],
     )
     .map_err(|e| e.to_string())?;
 
     let id = tx.last_insert_rowid() as i32;
 
-    if balance.abs() > f64::EPSILON {
+    // Only create an opening transaction for cash accounts with a non-zero balance
+    if kind == "cash" && balance.abs() > f64::EPSILON {
         // Create initial transaction
         tx.execute(
             "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, date('now'), ?2, ?3, ?4, ?5)",
@@ -311,7 +315,7 @@ fn create_account_db(
                 "Opening Balance",
                 "Initial Balance",
                 "Income",
-                balance
+                balance_to_set
             ],
         )
         .map_err(|e| e.to_string())?;
@@ -322,7 +326,7 @@ fn create_account_db(
     Ok(Account {
         id,
         name,
-        balance,
+        balance: balance_to_set,
         kind,
     })
 }

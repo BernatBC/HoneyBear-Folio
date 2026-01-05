@@ -53,7 +53,7 @@ export default function Sidebar({
   async function handleAddAccount(e) {
     e.preventDefault();
     try {
-      const balance = parseNumber(newAccountBalance) || 0.0;
+      const balance = newAccountType === "cash" ? (parseNumber(newAccountBalance) || 0.0) : 0.0;
       await invoke("create_account", {
         name: newAccountName,
         balance,
@@ -254,14 +254,16 @@ export default function Sidebar({
                 className="sidebar-input"
                 autoFocus
               />
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="Initial Balance"
-                value={newAccountBalance}
-                onChange={(e) => setNewAccountBalance(e.target.value)}
-                className="sidebar-input"
-              />
+              {newAccountType === "cash" && (
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Initial Balance"
+                  value={newAccountBalance}
+                  onChange={(e) => setNewAccountBalance(e.target.value)}
+                  className="sidebar-input"
+                />
+              )}
               <button type="submit" className="sidebar-submit-button">
                 <Check className="w-4 h-4" />
                 <span className="text-white">Create Account</span>
