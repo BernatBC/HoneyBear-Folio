@@ -190,3 +190,42 @@ fn test_create_transaction_preserves_nontransfer_category() {
     .unwrap();
     assert_eq!(tx.category.as_deref(), Some("Entertainment"));
 }
+
+#[test]
+fn test_create_transaction_with_ticker_shares_price_fee() {
+    let (_dir, db_path) = setup_db();
+    let acc = crate::create_account_db(&db_path, "Invest".to_string(), 1000.0, "cash".to_string()).unwrap();
+
+    let tx = crate::create_transaction_db(
+        &db_path,
+        acc.id,
+        "2023-01-03".to_string(),
+        "Broker".to_string(),
+        Some("Bought shares".to_string()),
+        Some("Investment".to_string()),
+        -1505.0,
+        Some("AAPL".to_string()),
+        Some(10.0),
+        Some(150.0),
+        Some(5.0),
+    )
+    .unwrap();
+
+    // Returned transaction has the investment fields set
+    assert_eq!(tx.ticker.as_deref(), Some("AAPL"));
+    assert_eq!(tx.shares, Some(10.0));
+    assert_eq!(tx.price_per_share, Some(150.0));
+    assert_eq!(tx.fee, Some(5.0));
+
+    // Persisted row should match
+    let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
+    let found = txs.iter().find(|t| t.id == tx.id).unwrap();
+    assert_eq!(found.ticker, tx.ticker);
+    assert_eq!(found.shares, tx.shares);
+    assert_eq!(found.price_per_share, tx.price_per_share);
+    assert_eq!(found.fee, tx.fee);
+
+    // Account balance updated accordingly
+    let account = crate::get_accounts_db(&db_path).unwrap().into_iter().find(|a| a.id == acc.id).unwrap();
+    assert!((account.balance - (-505.0)).abs() < 1e-6);
+}
