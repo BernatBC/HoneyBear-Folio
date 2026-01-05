@@ -15,7 +15,7 @@ fn test_randomized_balance_invariants() {
         let bal = if i == 2 {
             0.0
         } else {
-            rng.gen_range(0..500) as f64
+            rng.random_range(0..500) as f64
         };
         let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal, "cash".to_string())
             .unwrap();
@@ -27,11 +27,11 @@ fn test_randomized_balance_invariants() {
 
     // Run a deterministic sequence of operations
     for _ in 0..100 {
-        let op: f64 = rng.gen();
+        let op: f64 = rng.random();
         if op < 0.45 {
             // create transaction
-            let acc_idx = rng.gen_range(0..accounts.len());
-            let amount = rng.gen_range(-200..200) as f64;
+            let acc_idx = rng.random_range(0..accounts.len());
+            let amount = rng.random_range(-200..200) as f64;
             if amount == 0.0 {
                 continue;
             }
@@ -49,7 +49,7 @@ fn test_randomized_balance_invariants() {
             }
         } else if op < 0.65 {
             // create a transfer by using another account's name as payee
-            let a = rng.gen_range(0..accounts.len());
+            let a = rng.random_range(0..accounts.len());
             let b = (a + 1) % accounts.len();
             let res = crate::create_transaction_db(
                 &db_path,
@@ -58,35 +58,35 @@ fn test_randomized_balance_invariants() {
                 accounts[b].name.clone(),
                 Some("XFER".to_string()),
                 None,
-                -rng.gen_range(1..150) as f64,
+                -rng.random_range(1..150) as f64,
             );
             if let Ok(tx) = res {
                 tx_ids.push(tx.id);
             }
         } else if op < 0.85 {
             // create brokerage transaction
-            let brokerage_idx = rng.gen_range(0..accounts.len());
+            let brokerage_idx = rng.random_range(0..accounts.len());
             let cash_idx = (brokerage_idx + 1) % accounts.len();
             let args = crate::CreateBrokerageTransactionArgs {
                 brokerage_account_id: accounts[brokerage_idx].id,
                 cash_account_id: accounts[cash_idx].id,
                 date: "2023-01-01".to_string(),
                 ticker: "RND".to_string(),
-                shares: rng.gen_range(1..10) as f64,
-                price_per_share: rng.gen_range(1..50) as f64,
-                fee: rng.gen_range(0..5) as f64,
-                is_buy: rng.gen_bool(0.5),
+                shares: rng.random_range(1..10) as f64,
+                price_per_share: rng.random_range(1..50) as f64,
+                fee: rng.random_range(0..5) as f64,
+                is_buy: rng.random_bool(0.5),
             };
             let _ = crate::create_brokerage_transaction_db(&db_path, args);
         } else if op < 0.9 {
             // update a random tx
             if !tx_ids.is_empty() {
-                let idx = rng.gen_range(0..tx_ids.len());
+                let idx = rng.random_range(0..tx_ids.len());
                 let tx_id = tx_ids[idx];
                 // fetch tx to get account id
                 let txs = crate::get_all_transactions_db(&db_path).unwrap();
                 if let Some(tx) = txs.iter().find(|t| t.id == tx_id) {
-                    let new_amount = rng.gen_range(-300..300) as f64;
+                    let new_amount = rng.random_range(-300..300) as f64;
                     let args = crate::UpdateTransactionArgs {
                         id: tx.id,
                         account_id: tx.account_id,
@@ -102,7 +102,7 @@ fn test_randomized_balance_invariants() {
         } else {
             // delete a random tx
             if !tx_ids.is_empty() {
-                let idx = rng.gen_range(0..tx_ids.len());
+                let idx = rng.random_range(0..tx_ids.len());
                 let tx_id = tx_ids.remove(idx);
                 let _ = crate::delete_transaction_db(&db_path, tx_id);
             }
