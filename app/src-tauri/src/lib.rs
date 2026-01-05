@@ -1834,6 +1834,25 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             init_db(app.handle())?;
+
+            #[cfg(target_os = "linux")]
+            {
+                use tauri::Emitter;
+                let handle = app.handle().clone();
+                std::thread::spawn(move || {
+                    use std::time::Duration;
+                    let mut last = get_system_theme().unwrap_or_else(|_| "light".to_string());
+                    loop {
+                        std::thread::sleep(Duration::from_secs(2));
+                        let current = get_system_theme().unwrap_or_else(|_| "light".to_string());
+                        if current != last {
+                            last = current.clone();
+                            let _ = handle.emit("system-theme-changed", current);
+                        }
+                    }
+                });
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

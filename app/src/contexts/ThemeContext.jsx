@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ThemeContext } from "./theme-core";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
@@ -63,6 +64,16 @@ export function ThemeProvider({ children }) {
         }
       })();
 
+      let unlistenFn;
+      listen("system-theme-changed", (event) => {
+        const sys = event.payload;
+        if (sys === "dark" || sys === "light") {
+          applyTheme(sys);
+        }
+      }).then((fn) => {
+        unlistenFn = fn;
+      });
+
       return () => {
         if (mediaQuery && handleChange) {
           try {
@@ -75,6 +86,7 @@ export function ThemeProvider({ children }) {
             }
           }
         }
+        if (unlistenFn) unlistenFn();
       };
     } else {
       applyTheme(theme);
