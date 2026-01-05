@@ -53,7 +53,8 @@ export default function Sidebar({
   async function handleAddAccount(e) {
     e.preventDefault();
     try {
-      const balance = newAccountType === "cash" ? (parseNumber(newAccountBalance) || 0.0) : 0.0;
+      const balance =
+        newAccountType === "cash" ? parseNumber(newAccountBalance) || 0.0 : 0.0;
       await invoke("create_account", {
         name: newAccountName,
         balance,
