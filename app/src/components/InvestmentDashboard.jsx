@@ -147,15 +147,20 @@ export default function InvestmentDashboard() {
                 ? "rgba(15, 23, 42, 0.9)"
                 : "rgba(255, 255, 255, 0.9)";
               const bg =
-                Array.isArray(dataset.backgroundColor) && dataset.backgroundColor[index] !== undefined
+                Array.isArray(dataset.backgroundColor) &&
+                dataset.backgroundColor[index] !== undefined
                   ? dataset.backgroundColor[index]
                   : dataset.backgroundColor;
               const border =
-                Array.isArray(dataset.borderColor) && dataset.borderColor[index] !== undefined
+                Array.isArray(dataset.borderColor) &&
+                dataset.borderColor[index] !== undefined
                   ? dataset.borderColor[index]
                   : dataset.borderColor;
               // If the slice has a transparent background (negative sector), use tooltip bg so it blends in
-              const backgroundColor = bg === "transparent" || bg === "rgba(0, 0, 0, 0)" ? tooltipBg : bg;
+              const backgroundColor =
+                bg === "transparent" || bg === "rgba(0, 0, 0, 0)"
+                  ? tooltipBg
+                  : bg;
               return {
                 borderColor: border,
                 backgroundColor,
