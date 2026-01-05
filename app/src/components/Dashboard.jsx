@@ -401,7 +401,8 @@ export default function Dashboard({
     });
 
     const labels = Object.keys(assetTypes);
-    const data = Object.values(assetTypes);
+    const rawData = Object.values(assetTypes);
+    const data = rawData.map((v) => Math.abs(v));
 
     const colors = [
       "rgb(59, 130, 246)", // blue-500
@@ -419,14 +420,22 @@ export default function Dashboard({
       datasets: [
         {
           data: data,
-          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
-          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
-          borderWidth: 4,
+          originalData: rawData,
+          backgroundColor: rawData.map((v, i) => {
+            if (v < 0) return "transparent";
+            return colors[i % colors.length];
+          }),
+          borderColor: rawData.map((_, i) => colors[i % colors.length]),
+          borderWidth: 2,
+          borderDash: (ctx) => {
+            const val = rawData[ctx.dataIndex];
+            return val < 0 ? [5, 5] : [];
+          },
           hoverOffset: 4,
         },
       ],
     };
-  }, [accounts, marketValues, isDark]);
+  }, [accounts, marketValues]);
 
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;
@@ -582,9 +591,65 @@ export default function Dashboard({
         title: {
           display: false,
         },
+        tooltip: {
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
+          titleColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          bodyColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { family: "Inter", size: 13 },
+          bodyFont: { family: "Inter", size: 12 },
+          callbacks: {
+            label: function (context) {
+              const value = context.dataset.originalData
+                ? context.dataset.originalData[context.dataIndex]
+                : context.raw;
+
+              let label = context.label || "";
+              if (label) {
+                label += ": ";
+              }
+              if (value !== null && value !== undefined) {
+                label += formatNumber(value, { style: "currency" });
+              }
+              return label;
+            },
+            labelColor: function (context) {
+              const dataset = context.dataset;
+              const index = context.dataIndex;
+              const tooltipBg = isDark
+                ? "rgba(15, 23, 42, 0.9)"
+                : "rgba(255, 255, 255, 0.9)";
+
+              const bg =
+                Array.isArray(dataset.backgroundColor) &&
+                dataset.backgroundColor[index] !== undefined
+                  ? dataset.backgroundColor[index]
+                  : dataset.backgroundColor;
+              const border =
+                Array.isArray(dataset.borderColor) &&
+                dataset.borderColor[index] !== undefined
+                  ? dataset.borderColor[index]
+                  : dataset.borderColor;
+
+              const backgroundColor =
+                bg === "transparent" || bg === "rgba(0, 0, 0, 0)"
+                  ? tooltipBg
+                  : bg;
+
+              return {
+                borderColor: border,
+                backgroundColor,
+                borderWidth: 2,
+              };
+            },
+          },
+        },
       },
     }),
-    [isDark],
+    [isDark, formatNumber],
   );
 
   const expensesOptions = useMemo(
@@ -610,9 +675,55 @@ export default function Dashboard({
         title: {
           display: false,
         },
+        tooltip: {
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
+          titleColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          bodyColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { family: "Inter", size: 13 },
+          bodyFont: { family: "Inter", size: 12 },
+          callbacks: {
+            label: function (context) {
+              const value = context.raw ?? context.parsed ?? 0;
+
+              let label = context.label || "";
+              if (label) label += ": ";
+              label += formatNumber(Number(value) || 0, { style: "currency" });
+              return label;
+            },
+            labelColor: function (context) {
+              const dataset = context.dataset;
+              const index = context.dataIndex;
+              const tooltipBg = isDark
+                ? "rgba(15, 23, 42, 0.9)"
+                : "rgba(255, 255, 255, 0.9)";
+
+              const bg =
+                Array.isArray(dataset.backgroundColor) &&
+                dataset.backgroundColor[index] !== undefined
+                  ? dataset.backgroundColor[index]
+                  : dataset.backgroundColor;
+              const border = dataset.borderColor;
+
+              const backgroundColor =
+                bg === "transparent" || bg === "rgba(0, 0, 0, 0)"
+                  ? tooltipBg
+                  : bg;
+
+              return {
+                borderColor: border,
+                backgroundColor,
+                borderWidth: 2,
+              };
+            },
+          },
+        },
       },
     }),
-    [isDark],
+    [isDark, formatNumber],
   );
 
   const barOptions = useMemo(() => {

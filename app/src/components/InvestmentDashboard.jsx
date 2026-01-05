@@ -58,6 +58,9 @@ export default function InvestmentDashboard() {
   const allocationData = useMemo(() => {
     if (holdings.length === 0) return null;
 
+    const rawData = holdings.map((h) => h.currentValue);
+    const data = rawData.map((v) => Math.abs(v));
+
     const colors = [
       "rgb(59, 130, 246)", // blue-500
       "rgb(16, 185, 129)", // emerald-500
@@ -73,15 +76,23 @@ export default function InvestmentDashboard() {
       labels: holdings.map((h) => h.ticker),
       datasets: [
         {
-          data: holdings.map((h) => h.currentValue),
-          backgroundColor: holdings.map((_, i) => colors[i % colors.length]),
-          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
-          borderWidth: 4,
+          data: data,
+          originalData: rawData,
+          backgroundColor: rawData.map((v, i) => {
+            if (v < 0) return "transparent";
+            return colors[i % colors.length];
+          }),
+          borderColor: rawData.map((_, i) => colors[i % colors.length]),
+          borderWidth: 2,
+          borderDash: (ctx) => {
+            const val = rawData[ctx.dataIndex];
+            return val < 0 ? [5, 5] : [];
+          },
           hoverOffset: 4,
         },
       ],
     };
-  }, [holdings, isDark]);
+  }, [holdings]);
 
   const chartOptions = useMemo(
     () => ({
@@ -119,13 +130,42 @@ export default function InvestmentDashboard() {
           callbacks: {
             label: function (context) {
               const prefix = context.label ? context.label + ": " : "";
-              const value = context.raw ?? context.parsed ?? 0;
+              const value = context.dataset.originalData
+                ? context.dataset.originalData[context.dataIndex]
+                : (context.raw ?? context.parsed ?? 0);
               return (
                 prefix +
                 formatNumber(Number(value) || 0, {
                   style: "currency",
                 })
               );
+            },
+            labelColor: function (context) {
+              const dataset = context.dataset;
+              const index = context.dataIndex;
+              const tooltipBg = isDark
+                ? "rgba(15, 23, 42, 0.9)"
+                : "rgba(255, 255, 255, 0.9)";
+              const bg =
+                Array.isArray(dataset.backgroundColor) &&
+                dataset.backgroundColor[index] !== undefined
+                  ? dataset.backgroundColor[index]
+                  : dataset.backgroundColor;
+              const border =
+                Array.isArray(dataset.borderColor) &&
+                dataset.borderColor[index] !== undefined
+                  ? dataset.borderColor[index]
+                  : dataset.borderColor;
+              // If the slice has a transparent background (negative sector), use tooltip bg so it blends in
+              const backgroundColor =
+                bg === "transparent" || bg === "rgba(0, 0, 0, 0)"
+                  ? tooltipBg
+                  : bg;
+              return {
+                borderColor: border,
+                backgroundColor,
+                borderWidth: 2,
+              };
             },
           },
         },
