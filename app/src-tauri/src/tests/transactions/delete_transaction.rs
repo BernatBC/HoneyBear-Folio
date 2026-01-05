@@ -178,7 +178,7 @@ fn test_delete_brokerage_transaction_deletes_linked_cash_counterpart() {
     let brokerage_acc = crate::create_account_db(
         &db_path,
         "Broker".to_string(),
-        1000.0,
+        0.0,
         "investment".to_string(),
     )
     .unwrap();
@@ -229,5 +229,5 @@ fn test_delete_brokerage_transaction_deletes_linked_cash_counterpart() {
         .balance;
 
     assert_eq!(cash_after, 500.0);
-    assert_eq!(broker_after, 1000.0);
+    assert_eq!(broker_after, 0.0);
 }
