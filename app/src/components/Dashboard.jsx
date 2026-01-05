@@ -401,7 +401,8 @@ export default function Dashboard({
     });
 
     const labels = Object.keys(assetTypes);
-    const data = Object.values(assetTypes);
+    const rawData = Object.values(assetTypes);
+    const data = rawData.map((v) => Math.abs(v));
 
     const colors = [
       "rgb(59, 130, 246)", // blue-500
@@ -419,9 +420,17 @@ export default function Dashboard({
       datasets: [
         {
           data: data,
-          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
-          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
-          borderWidth: 4,
+          originalData: rawData,
+          backgroundColor: rawData.map((v, i) => {
+            if (v < 0) return "transparent";
+            return colors[i % colors.length];
+          }),
+          borderColor: rawData.map((_, i) => colors[i % colors.length]),
+          borderWidth: 2,
+          borderDash: (ctx) => {
+            const val = rawData[ctx.dataIndex];
+            return val < 0 ? [5, 5] : [];
+          },
           hoverOffset: 4,
         },
       ],
@@ -582,9 +591,27 @@ export default function Dashboard({
         title: {
           display: false,
         },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const value = context.dataset.originalData
+                ? context.dataset.originalData[context.dataIndex]
+                : context.raw;
+
+              let label = context.label || "";
+              if (label) {
+                label += ": ";
+              }
+              if (value !== null && value !== undefined) {
+                label += formatNumber(value, { style: "currency" });
+              }
+              return label;
+            },
+          },
+        },
       },
     }),
-    [isDark],
+    [isDark, formatNumber],
   );
 
   const expensesOptions = useMemo(
