@@ -16,10 +16,12 @@ fn test_update_transaction_move_between_accounts() {
         "Payee".to_string(),
         None,
         None,
-        -20.0,        None,
+        -20.0,
         None,
         None,
-        None,    )
+        None,
+        None,
+    )
     .unwrap();
 
     // Move transaction to acc2 using update_transaction_db
@@ -65,10 +67,12 @@ fn test_create_transaction_payee_same_account_name_no_transfer_created() {
         acc.name.clone(),
         None,
         None,
-        -10.0,        None,
+        -10.0,
         None,
         None,
-        None,    )
+        None,
+        None,
+    )
     .unwrap();
     assert_eq!(tx.category, None);
 

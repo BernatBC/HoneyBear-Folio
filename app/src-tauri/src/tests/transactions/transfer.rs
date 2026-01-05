@@ -17,10 +17,12 @@ fn test_transfer() {
         "Acc2".to_string(),
         None,
         None,
-        -50.0,        None,
+        -50.0,
         None,
         None,
-        None,    )
+        None,
+        None,
+    )
     .unwrap();
 
     let accounts = crate::get_accounts_db(&db_path).unwrap();

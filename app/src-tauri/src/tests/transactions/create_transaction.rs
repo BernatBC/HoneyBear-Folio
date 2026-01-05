@@ -194,7 +194,8 @@ fn test_create_transaction_preserves_nontransfer_category() {
 #[test]
 fn test_create_transaction_with_ticker_shares_price_fee() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(&db_path, "Invest".to_string(), 1000.0, "cash".to_string()).unwrap();
+    let acc = crate::create_account_db(&db_path, "Invest".to_string(), 1000.0, "cash".to_string())
+        .unwrap();
 
     let tx = crate::create_transaction_db(
         &db_path,
@@ -226,6 +227,10 @@ fn test_create_transaction_with_ticker_shares_price_fee() {
     assert_eq!(found.fee, tx.fee);
 
     // Account balance updated accordingly
-    let account = crate::get_accounts_db(&db_path).unwrap().into_iter().find(|a| a.id == acc.id).unwrap();
+    let account = crate::get_accounts_db(&db_path)
+        .unwrap()
+        .into_iter()
+        .find(|a| a.id == acc.id)
+        .unwrap();
     assert!((account.balance - (-505.0)).abs() < 1e-6);
 }
