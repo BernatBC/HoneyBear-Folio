@@ -106,6 +106,8 @@
   "dashboard.accounts_breakdown": "Accounts",
   "dashboard.no_transactions_title": "No transactions found",
   "dashboard.no_transactions_body": "Add transactions to start tracking your finances and populate charts.",
+  "dashboard.no_expenses_title": "No expenses recorded",
+  "dashboard.no_expenses_body": "There are no expenses to show. Add expense transactions to populate this chart.",
   "loading.loading_data": "Loading data...",
   "investment.error_loading": "Error loading data",
   "investment.portfolio_allocation": "Portfolio Allocation",

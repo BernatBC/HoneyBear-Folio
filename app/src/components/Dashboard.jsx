@@ -427,6 +427,11 @@ export default function Dashboard({
     const expenses = transactions.filter(
       (t) => t.amount < 0 && t.category !== "Transfer",
     );
+
+    // No expense transactions — return an explicit empty marker so the UI
+    // can show a friendly message instead of a blank chart
+    if (expenses.length === 0) return { empty: true };
+
     const categoryTotals = {};
 
     expenses.forEach((t) => {
@@ -1002,12 +1007,7 @@ export default function Dashboard({
                 <p className="chart-subtitle">Where your money goes</p>
               </div>
               <div className="chart-body">
-                {expensesByCategoryData ? (
-                  <Doughnut
-                    options={expensesOptions}
-                    data={expensesByCategoryData}
-                  />
-                ) : (
+                {expensesByCategoryData === null ? (
                   <div className="loading-container">
                     <div className="loading-content">
                       <div className="loading-spinner"></div>
@@ -1016,6 +1016,35 @@ export default function Dashboard({
                       </span>
                     </div>
                   </div>
+                ) : expensesByCategoryData.empty ? (
+                  <div className="col-span-full flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-8">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl mb-3">
+                      <svg
+                        className="w-12 h-12 text-slate-300 dark:text-slate-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m4 4v-4m-6 8h6a2 2 0 002-2V7a2 2 0 00-2-2h-6l-2 2v11a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      {t("dashboard.no_expenses_title")}
+                    </p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                      {t("dashboard.no_expenses_body")}
+                    </p>
+                  </div>
+                ) : (
+                  <Doughnut
+                    options={expensesOptions}
+                    data={expensesByCategoryData}
+                  />
                 )}
               </div>
             </div>
