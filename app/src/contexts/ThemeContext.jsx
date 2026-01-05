@@ -41,11 +41,11 @@ export function ThemeProvider({ children }) {
         };
         try {
           mediaQuery.addEventListener("change", handleChange);
-        } catch (e) {
+        } catch {
           // Some older webviews only support addListener
           try {
             mediaQuery.addListener(handleChange);
-          } catch (e2) {
+          } catch {
             /* ignore */
           }
         }
@@ -78,10 +78,10 @@ export function ThemeProvider({ children }) {
         if (mediaQuery && handleChange) {
           try {
             mediaQuery.removeEventListener("change", handleChange);
-          } catch (e) {
+          } catch {
             try {
               mediaQuery.removeListener(handleChange);
-            } catch (e2) {
+            } catch {
               /* ignore */
             }
           }
