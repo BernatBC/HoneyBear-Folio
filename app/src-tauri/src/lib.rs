@@ -1766,7 +1766,10 @@ fn get_system_theme() -> Result<String, String> {
     {
         use std::process::Command;
         // Try GNOME color-scheme
-        if let Ok(o) = Command::new("gsettings").args(["get", "org.gnome.desktop.interface", "color-scheme"]).output() {
+        if let Ok(o) = Command::new("gsettings")
+            .args(["get", "org.gnome.desktop.interface", "color-scheme"])
+            .output()
+        {
             if o.status.success() {
                 let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
                 if s.contains("prefer-dark") || s.contains("dark") {
@@ -1775,7 +1778,10 @@ fn get_system_theme() -> Result<String, String> {
             }
         }
         // Try GTK theme name
-        if let Ok(o) = Command::new("gsettings").args(["get", "org.gnome.desktop.interface", "gtk-theme"]).output() {
+        if let Ok(o) = Command::new("gsettings")
+            .args(["get", "org.gnome.desktop.interface", "gtk-theme"])
+            .output()
+        {
             if o.status.success() {
                 let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
                 if s.contains("dark") {
@@ -1784,7 +1790,10 @@ fn get_system_theme() -> Result<String, String> {
             }
         }
         // Env var fallback
-        if std::env::var("GTK_THEME").map(|v| v.to_lowercase().contains("dark")).unwrap_or(false) {
+        if std::env::var("GTK_THEME")
+            .map(|v| v.to_lowercase().contains("dark"))
+            .unwrap_or(false)
+        {
             return Ok("dark".to_string());
         }
         Ok("light".to_string())
@@ -1793,7 +1802,10 @@ fn get_system_theme() -> Result<String, String> {
     #[cfg(target_os = "macos")]
     {
         use std::process::Command;
-        if let Ok(o) = Command::new("defaults").args(["read", "-g", "AppleInterfaceStyle"]).output() {
+        if let Ok(o) = Command::new("defaults")
+            .args(["read", "-g", "AppleInterfaceStyle"])
+            .output()
+        {
             if o.status.success() {
                 let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
                 if s.contains("dark") {
@@ -1807,7 +1819,15 @@ fn get_system_theme() -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
         use std::process::Command;
-        if let Ok(o) = Command::new("reg").args(["query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme"]).output() {
+        if let Ok(o) = Command::new("reg")
+            .args([
+                "query",
+                "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                "/v",
+                "AppsUseLightTheme",
+            ])
+            .output()
+        {
             if o.status.success() {
                 let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
                 if s.contains("0x0") || s.contains("0x00000000") {
