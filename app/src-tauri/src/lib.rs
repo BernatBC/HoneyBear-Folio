@@ -455,86 +455,118 @@ fn create_transaction_db(
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    // Check if payee matches another account
-    let target_account_opt: Option<i32> = tx
+    // Get source account info
+    let (source_kind, source_name): (String, String) = tx
         .query_row(
-            "SELECT id FROM accounts WHERE name = ?1 AND id != ?2",
+            "SELECT kind, name FROM accounts WHERE id = ?1",
+            params![args.account_id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .map_err(|e| e.to_string())?;
+
+    // Check if payee matches another account
+    let target_account_info: Option<(i32, String)> = tx
+        .query_row(
+            "SELECT id, kind FROM accounts WHERE name = ?1 AND id != ?2",
             params![args.payee, args.account_id],
-            |row| row.get(0),
+            |row| Ok((row.get(0)?, row.get(1)?)),
         )
         .optional()
         .map_err(|e| e.to_string())?;
 
-    let final_category = if target_account_opt.is_some() {
+    let mut final_args = args.clone();
+    let mut final_target_id_opt = target_account_info.as_ref().map(|(id, _)| *id);
+    let mut skip_target_creation = false;
+
+    if let Some((target_id, ref target_kind)) = target_account_info {
+        if source_kind == "brokerage" && target_kind == "cash" {
+            // Swap: We want to record this as a transaction on the Cash account.
+            final_args.account_id = target_id;
+            final_args.payee = source_name.clone();
+            final_args.amount = -args.amount;
+
+            // The "target" for the purpose of the rest of the function (the counterpart)
+            // is now the Brokerage account (original source).
+            // But we want to SKIP creating it.
+            final_target_id_opt = Some(args.account_id);
+            skip_target_creation = true;
+        } else if source_kind == "cash" && target_kind == "brokerage" {
+            // Cash -> Brokerage.
+            // Create on Cash (Source). Skip Target (Brokerage).
+            skip_target_creation = true;
+        }
+    }
+
+    let final_category = if final_target_id_opt.is_some() {
         Some("Transfer".to_string())
     } else {
-        args.category.clone()
+        final_args.category.clone()
     };
 
     tx.execute(
         "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-        params![args.account_id, args.date, args.payee, args.notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee],
+        params![final_args.account_id, final_args.date, final_args.payee, final_args.notes, final_category, final_args.amount, final_args.ticker, final_args.shares, final_args.price_per_share, final_args.fee],
     ).map_err(|e| e.to_string())?;
 
     let id = tx.last_insert_rowid() as i32;
 
     tx.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-        params![args.amount, args.account_id],
+        params![final_args.amount, final_args.account_id],
     )
     .map_err(|e| e.to_string())?;
 
-    if let Some(target_id) = target_account_opt {
-        // Get source account name for the target transaction's payee
-        let source_name: String = tx
-            .query_row(
-                "SELECT name FROM accounts WHERE id = ?1",
-                params![args.account_id],
-                |row| row.get(0),
+    if let Some(target_id) = final_target_id_opt {
+        if !skip_target_creation {
+            // Get source account name for the target transaction's payee
+            // Note: If we swapped, final_args.payee is the original source name.
+            // But here we need the name of the account we just inserted into (final_args.account_id).
+            // Wait, the target transaction's payee should be the name of the source account.
+            // If we didn't swap, source is final_args.account_id.
+            // If we swapped, source is final_args.account_id (which is the Cash account).
+
+            // Insert target transaction
+            tx.execute(
+                "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![target_id, final_args.date, source_name, final_args.notes, "Transfer", -final_args.amount],
+            ).map_err(|e| e.to_string())?;
+
+            // Capture inserted target transaction id and link both transactions for future sync
+            let target_tx_id = tx.last_insert_rowid() as i32;
+            tx.execute(
+                "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+                params![target_tx_id, id],
+            )
+            .map_err(|e| e.to_string())?;
+            tx.execute(
+                "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
+                params![id, target_tx_id],
             )
             .map_err(|e| e.to_string())?;
 
-        // Insert target transaction
-        tx.execute(
-            "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-            params![target_id, args.date, source_name, args.notes, "Transfer", -args.amount],
-        ).map_err(|e| e.to_string())?;
-
-        // Capture inserted target transaction id and link both transactions for future sync
-        let target_tx_id = tx.last_insert_rowid() as i32;
-        tx.execute(
-            "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
-            params![target_tx_id, id],
-        )
-        .map_err(|e| e.to_string())?;
-        tx.execute(
-            "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
-            params![id, target_tx_id],
-        )
-        .map_err(|e| e.to_string())?;
-
-        // Update target account balance
-        tx.execute(
-            "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-            params![-args.amount, target_id],
-        )
-        .map_err(|e| e.to_string())?;
+            // Update target account balance
+            tx.execute(
+                "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
+                params![-final_args.amount, target_id],
+            )
+            .map_err(|e| e.to_string())?;
+        }
     }
 
     tx.commit().map_err(|e| e.to_string())?;
 
     Ok(Transaction {
         id,
-        account_id: args.account_id,
-        date: args.date,
-        payee: args.payee,
-        notes: args.notes,
+        account_id: final_args.account_id,
+        date: final_args.date,
+        payee: final_args.payee,
+        notes: final_args.notes,
         category: final_category,
-        amount: args.amount,
-        ticker: args.ticker,
-        shares: args.shares,
-        price_per_share: args.price_per_share,
-        fee: args.fee,
+        amount: final_args.amount,
+        ticker: final_args.ticker,
+        shares: final_args.shares,
+        price_per_share: final_args.price_per_share,
+        fee: final_args.fee,
     })
 }
 
