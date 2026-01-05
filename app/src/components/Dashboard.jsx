@@ -435,7 +435,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [accounts, marketValues, isDark]);
+  }, [accounts, marketValues]);
 
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;

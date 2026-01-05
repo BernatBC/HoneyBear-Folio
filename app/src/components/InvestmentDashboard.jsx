@@ -92,7 +92,7 @@ export default function InvestmentDashboard() {
         },
       ],
     };
-  }, [holdings, isDark]);
+  }, [holdings]);
 
   const chartOptions = useMemo(
     () => ({
