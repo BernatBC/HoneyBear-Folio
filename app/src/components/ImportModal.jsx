@@ -466,7 +466,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
     let processedCount = 0;
 
-    for (const [key, group] of rowsByAccount) {
+    for (const [, group] of rowsByAccount) {
       const { identifier, rows: groupRows } = group;
       let accountId = null;
 
