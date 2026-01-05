@@ -13,40 +13,40 @@ proptest! {
         // Create accounts
         let mut accounts = Vec::new();
         for i in 0..3 {
-            let bal = rng.gen_range(0..500) as f64;
+            let bal = rng.random_range(0..500) as f64;
             let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal, "cash".to_string()).unwrap();
             accounts.push(acc);
         }
 
         // Random operations
         for _ in 0..200 {
-            let op: f64 = rng.gen();
+            let op: f64 = rng.random();
             if op < 0.5 {
                 // create transaction (including potential transfers)
-                let a = rng.gen_range(0..accounts.len());
-                if rng.gen_bool(0.2) {
+                let a = rng.random_range(0..accounts.len());
+                if rng.random_bool(0.2) {
                     // transfer to another account
                     let b = (a + 1) % accounts.len();
-                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), accounts[b].name.clone(), Some("XFER".to_string()), None, -rng.gen_range(1..200) as f64);
+                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), accounts[b].name.clone(), Some("XFER".to_string()), None, -rng.random_range(1..200) as f64);
                 } else {
-                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), "Payee".to_string(), None, None, rng.gen_range(-200..200) as f64);
+                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), "Payee".to_string(), None, None, rng.random_range(-200..200) as f64);
                 }
             } else if op < 0.8 {
                 // create brokerage
-                let a = rng.gen_range(0..accounts.len());
+                let a = rng.random_range(0..accounts.len());
                 let b = (a+1)%accounts.len();
-                let args = crate::CreateBrokerageTransactionArgs{brokerage_account_id: accounts[a].id, cash_account_id: accounts[b].id, date: "2023-01-01".to_string(), ticker: "P".to_string(), shares: rng.gen_range(1..10) as f64, price_per_share: rng.gen_range(1..50) as f64, fee: rng.gen_range(0..5) as f64, is_buy: rng.gen_bool(0.5)};
+                let args = crate::CreateBrokerageTransactionArgs{brokerage_account_id: accounts[a].id, cash_account_id: accounts[b].id, date: "2023-01-01".to_string(), ticker: "P".to_string(), shares: rng.random_range(1..10) as f64, price_per_share: rng.random_range(1..50) as f64, fee: rng.random_range(0..5) as f64, is_buy: rng.random_bool(0.5)};
                 let _ = crate::create_brokerage_transaction_db(&db_path, args);
             } else {
                 // random update/delete
                 let all = crate::get_all_transactions_db(&db_path).unwrap();
                 if !all.is_empty() {
-                    if rng.gen_bool(0.5) {
-                        let tx = all[rng.gen_range(0..all.len())].clone();
-                        let args = crate::UpdateTransactionArgs{ id: tx.id, account_id: tx.account_id, date: tx.date.clone(), payee: tx.payee.clone(), notes: tx.notes.clone(), category: tx.category.clone(), amount: tx.amount * (1.0 + rng.gen_range(-50..50) as f64 / 100.0)};
+                    if rng.random_bool(0.5) {
+                        let tx = all[rng.random_range(0..all.len())].clone();
+                        let args = crate::UpdateTransactionArgs{ id: tx.id, account_id: tx.account_id, date: tx.date.clone(), payee: tx.payee.clone(), notes: tx.notes.clone(), category: tx.category.clone(), amount: tx.amount * (1.0 + rng.random_range(-50..50) as f64 / 100.0)};
                         let _ = crate::update_transaction_db(&db_path, args);
                     } else {
-                        let tx = all[rng.gen_range(0..all.len())].clone();
+                        let tx = all[rng.random_range(0..all.len())].clone();
                         let _ = crate::delete_transaction_db(&db_path, tx.id);
                     }
                 }
