@@ -43,6 +43,10 @@ fn test_randomized_balance_invariants() {
                 None,
                 None,
                 amount,
+                None,
+                None,
+                None,
+                None,
             );
             if let Ok(tx) = res {
                 tx_ids.push(tx.id);
@@ -59,6 +63,10 @@ fn test_randomized_balance_invariants() {
                 Some("XFER".to_string()),
                 None,
                 -rng.random_range(1..150) as f64,
+                None,
+                None,
+                None,
+                None,
             );
             if let Ok(tx) = res {
                 tx_ids.push(tx.id);

@@ -14,6 +14,10 @@ fn test_get_payees_and_categories() {
         None,
         Some("Food".to_string()),
         -10.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     crate::create_transaction_db(
@@ -24,6 +28,10 @@ fn test_get_payees_and_categories() {
         None,
         Some("Bills".to_string()),
         -20.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 
@@ -38,6 +46,10 @@ fn test_get_payees_and_categories() {
         Some("XFER".to_string()),
         None,
         -30.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 
@@ -75,6 +87,10 @@ fn test_payees_and_categories_sorted() {
         None,
         Some("ZCat".to_string()),
         -10.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     crate::create_transaction_db(
@@ -85,6 +101,10 @@ fn test_payees_and_categories_sorted() {
         None,
         Some("ACat".to_string()),
         -5.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 

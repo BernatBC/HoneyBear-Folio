@@ -14,6 +14,10 @@ fn test_update_transaction() {
         None,
         None,
         -10.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 
@@ -130,6 +134,10 @@ fn test_update_transaction_updates_counterpart_when_linked() {
         Some("X".to_string()),
         None,
         -40.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 
@@ -176,6 +184,10 @@ fn test_update_transaction_no_amount_change_doesnt_alter_balances() {
         None,
         None,
         -20.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 

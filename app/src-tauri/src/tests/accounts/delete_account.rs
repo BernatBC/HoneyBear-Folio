@@ -25,6 +25,10 @@ fn test_delete_account_with_transactions() {
         None,
         None,
         -20.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     let txs_before = crate::get_transactions_db(&db_path, account.id).unwrap();

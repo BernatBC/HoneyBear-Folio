@@ -19,6 +19,10 @@ fn test_create_transaction() {
         Some("Notes".to_string()),
         Some("Category".to_string()),
         -50.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 
@@ -44,6 +48,10 @@ fn test_get_all_transactions() {
         None,
         None,
         -10.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     crate::create_transaction_db(
@@ -54,6 +62,10 @@ fn test_get_all_transactions() {
         None,
         None,
         -20.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 
@@ -79,6 +91,10 @@ fn test_create_transaction_transfer_details() {
         None,
         None,
         -50.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     assert_eq!(tx.category.as_deref(), Some("Transfer"));
@@ -103,6 +119,10 @@ fn test_get_transactions_ordering() {
         None,
         None,
         -10.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     crate::create_transaction_db(
@@ -113,6 +133,10 @@ fn test_get_transactions_ordering() {
         None,
         None,
         -20.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
@@ -133,6 +157,10 @@ fn test_create_transaction_with_nonexistent_account_errors_due_to_foreign_key() 
         None,
         Some("Food".to_string()),
         -10.0,
+        None,
+        None,
+        None,
+        None,
     );
     assert!(res.is_err());
 
@@ -154,6 +182,10 @@ fn test_create_transaction_preserves_nontransfer_category() {
         None,
         Some("Entertainment".to_string()),
         -15.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
     assert_eq!(tx.category.as_deref(), Some("Entertainment"));

@@ -14,6 +14,10 @@ fn test_delete_transaction() {
         None,
         None,
         -10.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 
@@ -40,6 +44,10 @@ fn test_delete_transaction_deletes_linked_counterpart() {
         None,
         None,
         -30.0,
+        None,
+        None,
+        None,
+        None,
     )
     .unwrap();
 

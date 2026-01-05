@@ -27,9 +27,9 @@ proptest! {
                 if rng.random_bool(0.2) {
                     // transfer to another account
                     let b = (a + 1) % accounts.len();
-                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), accounts[b].name.clone(), Some("XFER".to_string()), None, -rng.random_range(1..200) as f64);
+                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), accounts[b].name.clone(), Some("XFER".to_string()), None, -rng.random_range(1..200) as f64, None, None, None, None);
                 } else {
-                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), "Payee".to_string(), None, None, rng.random_range(-200..200) as f64);
+                    let _ = crate::create_transaction_db(&db_path, accounts[a].id, "2023-01-01".to_string(), "Payee".to_string(), None, None, rng.random_range(-200..200) as f64, None, None, None, None);
                 }
             } else if op < 0.8 {
                 // create brokerage
