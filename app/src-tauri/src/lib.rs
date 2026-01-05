@@ -1759,6 +1759,72 @@ fn get_daily_stock_prices(
     get_daily_stock_prices_from_path(std::path::Path::new(&db_path), ticker)
 }
 
+#[tauri::command]
+fn get_system_theme() -> Result<String, String> {
+    // Return "dark" or "light" based on heuristics per-platform. Keep implementation small and robust.
+    #[cfg(target_os = "linux")]
+    {
+        use std::process::Command;
+        // Try GNOME color-scheme
+        if let Ok(o) = Command::new("gsettings").args(["get", "org.gnome.desktop.interface", "color-scheme"]).output() {
+            if o.status.success() {
+                let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
+                if s.contains("prefer-dark") || s.contains("dark") {
+                    return Ok("dark".to_string());
+                }
+            }
+        }
+        // Try GTK theme name
+        if let Ok(o) = Command::new("gsettings").args(["get", "org.gnome.desktop.interface", "gtk-theme"]).output() {
+            if o.status.success() {
+                let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
+                if s.contains("dark") {
+                    return Ok("dark".to_string());
+                }
+            }
+        }
+        // Env var fallback
+        if std::env::var("GTK_THEME").map(|v| v.to_lowercase().contains("dark")).unwrap_or(false) {
+            return Ok("dark".to_string());
+        }
+        Ok("light".to_string())
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+        if let Ok(o) = Command::new("defaults").args(["read", "-g", "AppleInterfaceStyle"]).output() {
+            if o.status.success() {
+                let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
+                if s.contains("dark") {
+                    return Ok("dark".to_string());
+                }
+            }
+        }
+        Ok("light".to_string())
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::process::Command;
+        if let Ok(o) = Command::new("reg").args(["query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme"]).output() {
+            if o.status.success() {
+                let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
+                if s.contains("0x0") || s.contains("0x00000000") {
+                    return Ok("dark".to_string());
+                }
+            }
+        }
+        Ok("light".to_string())
+    }
+
+    // Fallback for other targets
+    #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
+    {
+        Ok("light".to_string())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1792,6 +1858,8 @@ pub fn run() {
             set_db_path,
             reset_db_path,
             get_db_path_command,
+            // Desktop theme helper
+            get_system_theme,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

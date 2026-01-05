@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ThemeContext } from "./theme-core";
+import { invoke } from "@tauri-apps/api/core";
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
@@ -28,19 +29,53 @@ export function ThemeProvider({ children }) {
     };
 
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      applyTheme(systemTheme);
+      // First try the browser/media query (works on macOS/Windows and newer webviews)
+      let mediaQuery;
+      let handleChange;
+      if (typeof window.matchMedia === "function") {
+        mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        applyTheme(mediaQuery.matches ? "dark" : "light");
+        handleChange = (e) => {
+          applyTheme(e.matches ? "dark" : "light");
+        };
+        try {
+          mediaQuery.addEventListener("change", handleChange);
+        } catch (e) {
+          // Some older webviews only support addListener
+          try {
+            mediaQuery.addListener(handleChange);
+          } catch (e2) {
+            /* ignore */
+          }
+        }
+      }
 
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleChange = (e) => {
-        applyTheme(e.matches ? "dark" : "light");
+      // Also ask the backend for the system theme (Linux/older webviews may report wrong prefers-color-scheme)
+      (async () => {
+        try {
+          const sys = await invoke("get_system_theme");
+          if (sys === "dark" || sys === "light") {
+            applyTheme(sys);
+          }
+        } catch (err) {
+          // ignore failures and rely on media query
+          console.debug("get_system_theme failed:", err);
+        }
+      })();
+
+      return () => {
+        if (mediaQuery && handleChange) {
+          try {
+            mediaQuery.removeEventListener("change", handleChange);
+          } catch (e) {
+            try {
+              mediaQuery.removeListener(handleChange);
+            } catch (e2) {
+              /* ignore */
+            }
+          }
+        }
       };
-
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
     } else {
       applyTheme(theme);
     }
