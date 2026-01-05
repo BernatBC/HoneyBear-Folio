@@ -174,7 +174,18 @@ export default function AccountDetails({ account, onUpdate }) {
     try {
       let txs;
       if (account.id === "all") {
-        txs = await invoke("get_all_transactions");
+        const [transactionsList, accounts] = await Promise.all([
+          invoke("get_all_transactions"),
+          invoke("get_accounts"),
+        ]);
+        // Attach account_name for display in the consolidated view
+        txs = transactionsList.map((tx) => {
+          const acc = accounts.find((a) => a.id === tx.account_id);
+          return {
+            ...tx,
+            account_name: acc ? acc.name : String(tx.account_id),
+          };
+        });
       } else {
         txs = await invoke("get_transactions", { accountId: account.id });
       }
@@ -1061,6 +1072,11 @@ export default function AccountDetails({ account, onUpdate }) {
                 <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-32">
                   Date
                 </th>
+                {account.id === "all" && (
+                  <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-48">
+                    Account
+                  </th>
+                )}
                 <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
                   Payee
                 </th>
@@ -1096,7 +1112,15 @@ export default function AccountDetails({ account, onUpdate }) {
               {filteredTransactions.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={account.kind === "cash" ? "6" : "10"}
+                    colSpan={
+                      account.id === "all"
+                        ? account.kind === "cash"
+                          ? "7"
+                          : "11"
+                        : account.kind === "cash"
+                          ? "6"
+                          : "10"
+                    }
                     className="px-3 py-4 text-center"
                   >
                     <div className="flex flex-col items-center justify-center gap-3">
@@ -1140,6 +1164,14 @@ export default function AccountDetails({ account, onUpdate }) {
                             className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                           />
                         </td>
+
+                        {account.id === "all" && (
+                          <td className="px-6 py-3">
+                            <span className="text-sm text-slate-700 dark:text-slate-300">
+                              {editForm.account_name || editForm.account_id}
+                            </span>
+                          </td>
+                        )}
 
                         {/* If brokerage tx, show brokerage-specific editable fields (only for non-cash views) */}
                         {account.kind !== "cash" && editForm.ticker ? (
@@ -1403,6 +1435,16 @@ export default function AccountDetails({ account, onUpdate }) {
                         >
                           {formatDate(tx.date)}
                         </td>
+
+                        {account.id === "all" && (
+                          <td
+                            className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300"
+                            onClick={() => startEditing(tx)}
+                          >
+                            {tx.account_name || tx.account_id}
+                          </td>
+                        )}
+
                         <td
                           className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 dark:text-slate-100 cursor-pointer"
                           onClick={() => startEditing(tx)}
