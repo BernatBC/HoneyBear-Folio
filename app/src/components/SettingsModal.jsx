@@ -19,6 +19,8 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { t } from "../i18n/i18n";
+import { formatDateForUI } from "../utils/format";
+
 export default function SettingsModal({ onClose }) {
   const {
     locale,
@@ -144,6 +146,20 @@ export default function SettingsModal({ onClose }) {
   }
 
   const [activeTab, setActiveTab] = useState("general");
+
+  // Example labels that show the current date in each available date format
+  const _today = new Date();
+  const dateFormatOptions = [
+    { value: "YYYY-MM-DD", label: formatDateForUI(_today, "YYYY-MM-DD") },
+    { value: "YYYY/MM/DD", label: formatDateForUI(_today, "YYYY/MM/DD") },
+    { value: "MM/DD/YYYY", label: formatDateForUI(_today, "MM/DD/YYYY") },
+    { value: "DD/MM/YYYY", label: formatDateForUI(_today, "DD/MM/YYYY") },
+    { value: "DD-MM-YYYY", label: formatDateForUI(_today, "DD-MM-YYYY") },
+    { value: "DD.MM.YYYY", label: formatDateForUI(_today, "DD.MM.YYYY") },
+    { value: "DD MMM YYYY", label: formatDateForUI(_today, "DD MMM YYYY") },
+    { value: "MMM DD, YYYY", label: formatDateForUI(_today, "MMM DD, YYYY") },
+    { value: "MMMM D, YYYY", label: formatDateForUI(_today, "MMMM D, YYYY") },
+  ];
 
   const modal = (
     <div className="modal-overlay">
@@ -431,17 +447,7 @@ export default function SettingsModal({ onClose }) {
                     <CustomSelect
                       value={dateFormat}
                       onChange={(v) => setDateFormat(v)}
-                      options={[
-                        { value: "YYYY-MM-DD", label: "2026-01-03" },
-                        { value: "YYYY/MM/DD", label: "2026/01/03" },
-                        { value: "MM/DD/YYYY", label: "01/03/2026" },
-                        { value: "DD/MM/YYYY", label: "03/01/2026" },
-                        { value: "DD-MM-YYYY", label: "03-01-2026" },
-                        { value: "DD.MM.YYYY", label: "03.01.2026" },
-                        { value: "DD MMM YYYY", label: "03 Jan 2026" },
-                        { value: "MMM DD, YYYY", label: "Jan 03, 2026" },
-                        { value: "MMMM D, YYYY", label: "January 3, 2026" },
-                      ]}
+                      options={dateFormatOptions}
                       placeholder={t("settings.select_date_format_placeholder")}
                       fullWidth={false}
                     />

@@ -4,6 +4,7 @@ import { useNumberFormat } from "../contexts/number-format";
 import { CURRENCIES } from "../utils/currencies";
 import CustomSelect from "./CustomSelect";
 import { t } from "../i18n/i18n";
+import { formatDateForUI } from "../utils/format";
 import { Check } from "lucide-react";
 import "../styles/Modal.css";
 
@@ -25,6 +26,19 @@ export default function WelcomeWindow() {
     dateFormat,
     setDateFormat,
   } = useNumberFormat();
+
+  const _today = new Date();
+  const dateFormatOptions = [
+    { value: "YYYY-MM-DD", label: formatDateForUI(_today, "YYYY-MM-DD") },
+    { value: "YYYY/MM/DD", label: formatDateForUI(_today, "YYYY/MM/DD") },
+    { value: "MM/DD/YYYY", label: formatDateForUI(_today, "MM/DD/YYYY") },
+    { value: "DD/MM/YYYY", label: formatDateForUI(_today, "DD/MM/YYYY") },
+    { value: "DD-MM-YYYY", label: formatDateForUI(_today, "DD-MM-YYYY") },
+    { value: "DD.MM.YYYY", label: formatDateForUI(_today, "DD.MM.YYYY") },
+    { value: "DD MMM YYYY", label: formatDateForUI(_today, "DD MMM YYYY") },
+    { value: "MMM DD, YYYY", label: formatDateForUI(_today, "MMM DD, YYYY") },
+    { value: "MMMM D, YYYY", label: formatDateForUI(_today, "MMMM D, YYYY") },
+  ];
 
   const handleComplete = () => {
     localStorage.setItem("hb_first_run_completed", "true");
@@ -108,17 +122,7 @@ export default function WelcomeWindow() {
             <CustomSelect
               value={dateFormat}
               onChange={setDateFormat}
-              options={[
-                { value: "YYYY-MM-DD", label: "2026-01-03" },
-                { value: "YYYY/MM/DD", label: "2026/01/03" },
-                { value: "MM/DD/YYYY", label: "01/03/2026" },
-                { value: "DD/MM/YYYY", label: "03/01/2026" },
-                { value: "DD-MM-YYYY", label: "03-01-2026" },
-                { value: "DD.MM.YYYY", label: "03.01.2026" },
-                { value: "DD MMM YYYY", label: "03 Jan 2026" },
-                { value: "MMM DD, YYYY", label: "Jan 03, 2026" },
-                { value: "MMMM D, YYYY", label: "January 3, 2026" },
-              ]}
+              options={dateFormatOptions}
               placeholder={t("settings.select_date_format_placeholder")}
             />
           </div>
