@@ -11,14 +11,14 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         ref: ${{ github.head_ref }}
         fetch-depth: 0
 
     - name: Determine changed files
       id: changed
-      uses: dorny/paths-filter@v2
+      uses: dorny/paths-filter@v3
       with:
         filters: |
           app:
@@ -81,7 +81,7 @@ jobs:
 
     - name: Commit changes
       if: steps.changed.outputs.app == 'true'
-      uses: stefanzweifel/git-auto-commit-action@v5
+      uses: stefanzweifel/git-auto-commit-action@v7
       with:
         commit_message: "style: apply automatic linting and formatting fixes"
         branch: ${{ github.head_ref }}
