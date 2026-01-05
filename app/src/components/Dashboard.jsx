@@ -676,8 +676,6 @@ export default function Dashboard({
               if (Number.isNaN(num)) return value;
               return formatNumber(num, {
                 style: "currency",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
               });
             },
           },
@@ -738,8 +736,6 @@ export default function Dashboard({
               if (context.parsed.y !== null) {
                 label += formatNumber(context.parsed.y, {
                   style: "currency",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
                 });
               }
               return label;
@@ -772,8 +768,6 @@ export default function Dashboard({
               if (Number.isNaN(num)) return value;
               return formatNumber(num, {
                 style: "currency",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
               });
             },
           },

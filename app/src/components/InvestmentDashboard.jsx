@@ -124,7 +124,6 @@ export default function InvestmentDashboard() {
                 prefix +
                 formatNumber(Number(value) || 0, {
                   style: "currency",
-                  maximumFractionDigits: 0,
                 })
               );
             },

@@ -560,8 +560,6 @@ export default function FireCalculator() {
                           ) {
                             label += formatNumber(Number(value), {
                               style: "currency",
-                              maximumFractionDigits: 0,
-                              minimumFractionDigits: 0,
                             });
                           }
 
@@ -583,8 +581,6 @@ export default function FireCalculator() {
                           if (Number.isNaN(num)) return value;
                           return formatNumber(num, {
                             style: "currency",
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
                           });
                         },
                       },

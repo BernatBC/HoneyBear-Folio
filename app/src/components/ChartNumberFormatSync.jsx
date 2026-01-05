@@ -25,8 +25,6 @@ export default function ChartNumberFormatSync() {
         label +
         formatNumber(Number(value), {
           style: "currency",
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
         })
       );
     };
@@ -39,8 +37,6 @@ export default function ChartNumberFormatSync() {
         if (Number.isNaN(num)) return v;
         return formatNumber(num, {
           style: "currency",
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
         });
       };
     }
