@@ -19,16 +19,18 @@ fn test_delete_account_with_transactions() {
             .unwrap();
     crate::create_transaction_db(
         &db_path,
-        account.id,
-        "2023-01-02".to_string(),
-        "Payee".to_string(),
-        None,
-        None,
-        -20.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: account.id,
+            date: "2023-01-02".to_string(),
+            payee: "Payee".to_string(),
+            notes: None,
+            category: None,
+            amount: -20.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     let txs_before = crate::get_transactions_db(&db_path, account.id).unwrap();

@@ -432,18 +432,24 @@ fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
     get_accounts_db(&db_path)
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateTransactionArgs {
+    pub account_id: i32,
+    pub date: String,
+    pub payee: String,
+    pub notes: Option<String>,
+    pub category: Option<String>,
+    pub amount: f64,
+    pub ticker: Option<String>,
+    pub shares: Option<f64>,
+    pub price_per_share: Option<f64>,
+    pub fee: Option<f64>,
+}
+
 fn create_transaction_db(
     db_path: &PathBuf,
-    account_id: i32,
-    date: String,
-    payee: String,
-    notes: Option<String>,
-    category: Option<String>,
-    amount: f64,
-    ticker: Option<String>,
-    shares: Option<f64>,
-    price_per_share: Option<f64>,
-    fee: Option<f64>,
+    args: CreateTransactionArgs,
 ) -> Result<Transaction, String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
@@ -453,7 +459,7 @@ fn create_transaction_db(
     let target_account_opt: Option<i32> = tx
         .query_row(
             "SELECT id FROM accounts WHERE name = ?1 AND id != ?2",
-            params![payee, account_id],
+            params![args.payee, args.account_id],
             |row| row.get(0),
         )
         .optional()
@@ -462,19 +468,19 @@ fn create_transaction_db(
     let final_category = if target_account_opt.is_some() {
         Some("Transfer".to_string())
     } else {
-        category.clone()
+        args.category.clone()
     };
 
     tx.execute(
         "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-        params![account_id, date, payee, notes, final_category, amount, ticker, shares, price_per_share, fee],
+        params![args.account_id, args.date, args.payee, args.notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee],
     ).map_err(|e| e.to_string())?;
 
     let id = tx.last_insert_rowid() as i32;
 
     tx.execute(
         "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-        params![amount, account_id],
+        params![args.amount, args.account_id],
     )
     .map_err(|e| e.to_string())?;
 
@@ -483,7 +489,7 @@ fn create_transaction_db(
         let source_name: String = tx
             .query_row(
                 "SELECT name FROM accounts WHERE id = ?1",
-                params![account_id],
+                params![args.account_id],
                 |row| row.get(0),
             )
             .map_err(|e| e.to_string())?;
@@ -491,7 +497,7 @@ fn create_transaction_db(
         // Insert target transaction
         tx.execute(
             "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-            params![target_id, date, source_name, notes, "Transfer", -amount],
+            params![target_id, args.date, source_name, args.notes, "Transfer", -args.amount],
         ).map_err(|e| e.to_string())?;
 
         // Capture inserted target transaction id and link both transactions for future sync
@@ -510,7 +516,7 @@ fn create_transaction_db(
         // Update target account balance
         tx.execute(
             "UPDATE accounts SET balance = balance + ?1 WHERE id = ?2",
-            params![-amount, target_id],
+            params![-args.amount, target_id],
         )
         .map_err(|e| e.to_string())?;
     }
@@ -519,47 +525,26 @@ fn create_transaction_db(
 
     Ok(Transaction {
         id,
-        account_id,
-        date,
-        payee,
-        notes,
+        account_id: args.account_id,
+        date: args.date,
+        payee: args.payee,
+        notes: args.notes,
         category: final_category,
-        amount,
-        ticker,
-        shares,
-        price_per_share,
-        fee,
+        amount: args.amount,
+        ticker: args.ticker,
+        shares: args.shares,
+        price_per_share: args.price_per_share,
+        fee: args.fee,
     })
 }
 
 #[tauri::command]
 fn create_transaction(
     app_handle: AppHandle,
-    account_id: i32,
-    date: String,
-    payee: String,
-    notes: Option<String>,
-    category: Option<String>,
-    amount: f64,
-    ticker: Option<String>,
-    shares: Option<f64>,
-    price_per_share: Option<f64>,
-    fee: Option<f64>,
+    args: CreateTransactionArgs,
 ) -> Result<Transaction, String> {
     let db_path = get_db_path(&app_handle)?;
-    create_transaction_db(
-        &db_path,
-        account_id,
-        date,
-        payee,
-        notes,
-        category,
-        amount,
-        ticker,
-        shares,
-        price_per_share,
-        fee,
-    )
+    create_transaction_db(&db_path, args)
 }
 
 fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transaction>, String> {

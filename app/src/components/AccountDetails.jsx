@@ -366,12 +366,18 @@ export default function AccountDetails({ account, onUpdate }) {
         setFee("");
       } else {
         await invoke("create_transaction", {
-          accountId: target.id,
-          date,
-          payee,
-          category: category || null,
-          notes: notes || null,
-          amount: parseNumber(amount) || 0.0,
+          args: {
+            accountId: target.id,
+            date,
+            payee,
+            category: category || null,
+            notes: notes || null,
+            amount: parseNumber(amount) || 0.0,
+            ticker: null,
+            shares: null,
+            pricePerShare: null,
+            fee: null,
+          },
         });
 
         setPayee("");
@@ -461,12 +467,18 @@ export default function AccountDetails({ account, onUpdate }) {
   async function duplicateTransaction(tx) {
     try {
       await invoke("create_transaction", {
-        accountId: tx.account_id,
-        date: tx.date,
-        payee: tx.payee,
-        category: tx.category,
-        notes: tx.notes,
-        amount: tx.amount,
+        args: {
+          accountId: tx.account_id,
+          date: tx.date,
+          payee: tx.payee,
+          category: tx.category,
+          notes: tx.notes,
+          amount: tx.amount,
+          ticker: tx.ticker || null,
+          shares: tx.shares || null,
+          pricePerShare: tx.price_per_share || null,
+          fee: tx.fee || null,
+        },
       });
       setMenuOpenId(null);
       fetchTransactions();

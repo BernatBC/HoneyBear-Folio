@@ -8,16 +8,18 @@ fn test_update_transaction() {
         crate::create_account_db(&db_path, "Test".to_string(), 100.0, "cash".to_string()).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
-        account.id,
-        "2023-01-01".to_string(),
-        "Payee".to_string(),
-        None,
-        None,
-        -10.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: account.id,
+            date: "2023-01-01".to_string(),
+            payee: "Payee".to_string(),
+            notes: None,
+            category: None,
+            amount: -10.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 
@@ -128,16 +130,18 @@ fn test_update_transaction_updates_counterpart_when_linked() {
     // Create transfer via API which should link txs
     let tx = crate::create_transaction_db(
         &db_path,
-        acc1.id,
-        "2023-01-01".to_string(),
-        acc2.name.clone(),
-        Some("X".to_string()),
-        None,
-        -40.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc1.id,
+            date: "2023-01-01".to_string(),
+            payee: acc2.name.clone(),
+            notes: Some("X".to_string()),
+            category: None,
+            amount: -40.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 
@@ -178,16 +182,18 @@ fn test_update_transaction_no_amount_change_doesnt_alter_balances() {
         crate::create_account_db(&db_path, "T".to_string(), 100.0, "cash".to_string()).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
-        account.id,
-        "2023-01-01".to_string(),
-        "Payee".to_string(),
-        None,
-        None,
-        -20.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: account.id,
+            date: "2023-01-01".to_string(),
+            payee: "Payee".to_string(),
+            notes: None,
+            category: None,
+            amount: -20.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 

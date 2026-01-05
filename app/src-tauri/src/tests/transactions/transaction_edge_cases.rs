@@ -11,16 +11,18 @@ fn test_update_transaction_move_between_accounts() {
     // Create a simple non-transfer transaction in acc1
     let tx = crate::create_transaction_db(
         &db_path,
-        acc1.id,
-        "2023-01-01".to_string(),
-        "Payee".to_string(),
-        None,
-        None,
-        -20.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc1.id,
+            date: "2023-01-01".to_string(),
+            payee: "Payee".to_string(),
+            notes: None,
+            category: None,
+            amount: -20.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 
@@ -62,16 +64,18 @@ fn test_create_transaction_payee_same_account_name_no_transfer_created() {
     // Create transaction where payee equals the same account name - should NOT create transfer
     let tx = crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-01".to_string(),
-        acc.name.clone(),
-        None,
-        None,
-        -10.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-01".to_string(),
+            payee: acc.name.clone(),
+            notes: None,
+            category: None,
+            amount: -10.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     assert_eq!(tx.category, None);

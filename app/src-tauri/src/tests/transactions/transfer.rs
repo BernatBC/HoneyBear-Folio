@@ -12,16 +12,18 @@ fn test_transfer() {
     // Payee should be "Acc2"
     crate::create_transaction_db(
         &db_path,
-        acc1.id,
-        "2023-01-01".to_string(),
-        "Acc2".to_string(),
-        None,
-        None,
-        -50.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc1.id,
+            date: "2023-01-01".to_string(),
+            payee: "Acc2".to_string(),
+            notes: None,
+            category: None,
+            amount: -50.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 

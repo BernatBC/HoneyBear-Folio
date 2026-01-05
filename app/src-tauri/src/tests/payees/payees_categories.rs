@@ -8,30 +8,34 @@ fn test_get_payees_and_categories() {
 
     crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-01".to_string(),
-        "Payee1".to_string(),
-        None,
-        Some("Food".to_string()),
-        -10.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-01".to_string(),
+            payee: "Payee1".to_string(),
+            notes: None,
+            category: Some("Food".to_string()),
+            amount: -10.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-02".to_string(),
-        "Payee2".to_string(),
-        None,
-        Some("Bills".to_string()),
-        -20.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-02".to_string(),
+            payee: "Payee2".to_string(),
+            notes: None,
+            category: Some("Bills".to_string()),
+            amount: -20.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 
@@ -40,16 +44,18 @@ fn test_get_payees_and_categories() {
         crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
     crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-03".to_string(),
-        acc2.name.clone(),
-        Some("XFER".to_string()),
-        None,
-        -30.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-03".to_string(),
+            payee: acc2.name.clone(),
+            notes: Some("XFER".to_string()),
+            category: None,
+            amount: -30.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 
@@ -81,30 +87,34 @@ fn test_payees_and_categories_sorted() {
     let acc = crate::create_account_db(&db_path, "A".to_string(), 0.0, "cash".to_string()).unwrap();
     crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-03".to_string(),
-        "ZPay".to_string(),
-        None,
-        Some("ZCat".to_string()),
-        -10.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-03".to_string(),
+            payee: "ZPay".to_string(),
+            notes: None,
+            category: Some("ZCat".to_string()),
+            amount: -10.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-02".to_string(),
-        "APay".to_string(),
-        None,
-        Some("ACat".to_string()),
-        -5.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-02".to_string(),
+            payee: "APay".to_string(),
+            notes: None,
+            category: Some("ACat".to_string()),
+            amount: -5.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 

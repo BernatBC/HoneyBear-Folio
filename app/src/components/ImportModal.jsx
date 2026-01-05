@@ -635,16 +635,18 @@ export default function ImportModal({ onClose, onImportComplete }) {
           if (!ticker) ticker = null;
 
           await invoke("create_transaction", {
-            accountId,
-            date,
-            payee,
-            notes: row[mapping.notes] || "",
-            category: row[mapping.category] || "Uncategorized",
-            amount,
-            ticker,
-            shares,
-            pricePerShare: price,
-            fee,
+            args: {
+              accountId,
+              date,
+              payee,
+              notes: row[mapping.notes] || "",
+              category: row[mapping.category] || "Uncategorized",
+              amount,
+              ticker,
+              shares,
+              pricePerShare: price,
+              fee,
+            },
           });
           successCount++;
         } catch (e) {

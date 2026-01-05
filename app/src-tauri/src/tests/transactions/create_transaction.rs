@@ -13,16 +13,18 @@ fn test_create_transaction() {
 
     let tx = crate::create_transaction_db(
         &db_path,
-        account.id,
-        "2023-01-01".to_string(),
-        "Payee".to_string(),
-        Some("Notes".to_string()),
-        Some("Category".to_string()),
-        -50.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: account.id,
+            date: "2023-01-01".to_string(),
+            payee: "Payee".to_string(),
+            notes: Some("Notes".to_string()),
+            category: Some("Category".to_string()),
+            amount: -50.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 
@@ -42,30 +44,34 @@ fn test_get_all_transactions() {
 
     crate::create_transaction_db(
         &db_path,
-        acc1.id,
-        "2023-01-01".to_string(),
-        "P1".to_string(),
-        None,
-        None,
-        -10.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc1.id,
+            date: "2023-01-01".to_string(),
+            payee: "P1".to_string(),
+            notes: None,
+            category: None,
+            amount: -10.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     crate::create_transaction_db(
         &db_path,
-        acc2.id,
-        "2023-01-02".to_string(),
-        "P2".to_string(),
-        None,
-        None,
-        -20.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc2.id,
+            date: "2023-01-02".to_string(),
+            payee: "P2".to_string(),
+            notes: None,
+            category: None,
+            amount: -20.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
 
@@ -85,16 +91,18 @@ fn test_create_transaction_transfer_details() {
 
     let tx = crate::create_transaction_db(
         &db_path,
-        acc1.id,
-        "2023-01-05".to_string(),
-        acc2.name.clone(),
-        None,
-        None,
-        -50.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc1.id,
+            date: "2023-01-05".to_string(),
+            payee: acc2.name.clone(),
+            notes: None,
+            category: None,
+            amount: -50.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     assert_eq!(tx.category.as_deref(), Some("Transfer"));
@@ -113,30 +121,34 @@ fn test_get_transactions_ordering() {
         crate::create_account_db(&db_path, "Ord".to_string(), 0.0, "cash".to_string()).unwrap();
     crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-01".to_string(),
-        "P1".to_string(),
-        None,
-        None,
-        -10.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-01".to_string(),
+            payee: "P1".to_string(),
+            notes: None,
+            category: None,
+            amount: -10.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-02-01".to_string(),
-        "P2".to_string(),
-        None,
-        None,
-        -20.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-02-01".to_string(),
+            payee: "P2".to_string(),
+            notes: None,
+            category: None,
+            amount: -20.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
@@ -151,16 +163,18 @@ fn test_create_transaction_with_nonexistent_account_errors_due_to_foreign_key() 
     // creating a transaction with a non-existent account id should fail due to FK constraint
     let res = crate::create_transaction_db(
         &db_path,
-        -999,
-        "2023-01-01".to_string(),
-        "Someone".to_string(),
-        None,
-        Some("Food".to_string()),
-        -10.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: -999,
+            date: "2023-01-01".to_string(),
+            payee: "Someone".to_string(),
+            notes: None,
+            category: Some("Food".to_string()),
+            amount: -10.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     );
     assert!(res.is_err());
 
@@ -176,16 +190,18 @@ fn test_create_transaction_preserves_nontransfer_category() {
         crate::create_account_db(&db_path, "A".to_string(), 100.0, "cash".to_string()).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-02".to_string(),
-        "NonAccountPayee".to_string(),
-        None,
-        Some("Entertainment".to_string()),
-        -15.0,
-        None,
-        None,
-        None,
-        None,
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-02".to_string(),
+            payee: "NonAccountPayee".to_string(),
+            notes: None,
+            category: Some("Entertainment".to_string()),
+            amount: -15.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+        },
     )
     .unwrap();
     assert_eq!(tx.category.as_deref(), Some("Entertainment"));
@@ -199,16 +215,18 @@ fn test_create_transaction_with_ticker_shares_price_fee() {
 
     let tx = crate::create_transaction_db(
         &db_path,
-        acc.id,
-        "2023-01-03".to_string(),
-        "Broker".to_string(),
-        Some("Bought shares".to_string()),
-        Some("Investment".to_string()),
-        -1505.0,
-        Some("AAPL".to_string()),
-        Some(10.0),
-        Some(150.0),
-        Some(5.0),
+        crate::CreateTransactionArgs {
+            account_id: acc.id,
+            date: "2023-01-03".to_string(),
+            payee: "Broker".to_string(),
+            notes: Some("Bought shares".to_string()),
+            category: Some("Investment".to_string()),
+            amount: -1505.0,
+            ticker: Some("AAPL".to_string()),
+            shares: Some(10.0),
+            price_per_share: Some(150.0),
+            fee: Some(5.0),
+        },
     )
     .unwrap();
 
