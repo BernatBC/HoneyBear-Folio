@@ -422,7 +422,8 @@ export default function AccountDetails({ account, onUpdate }) {
         const feeVal = parseNumber(editForm.fee) || 0.0;
         const isBuy =
           editForm.payee === "Buy" ||
-          (editForm.payee !== "Sell" && (parseNumber(editForm.shares) || 0) > 0);
+          (editForm.payee !== "Sell" &&
+            (parseNumber(editForm.shares) || 0) > 0);
 
         await invoke("update_brokerage_transaction", {
           args: {
