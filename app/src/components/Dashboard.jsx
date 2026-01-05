@@ -212,7 +212,9 @@ export default function Dashboard({
           const accTxs = transactions.filter(
             (t) => t.account_id === acc.id && t.date <= date,
           );
-          const cashChange = accTxs.reduce((sum, t) => sum + t.amount, 0);
+          // Exclude trade transactions (ticker with shares) when computing cash balance
+          const cashTxs = accTxs.filter((t) => !(t.ticker && t.shares));
+          const cashChange = cashTxs.reduce((sum, t) => sum + t.amount, 0);
           const cashBalance = initial + cashChange;
 
           const holdings = {};
@@ -277,7 +279,9 @@ export default function Dashboard({
           const accTxs = transactions.filter(
             (t) => t.account_id === acc.id && t.date <= date,
           );
-          const cashChange = accTxs.reduce((sum, t) => sum + t.amount, 0);
+          // Exclude trade transactions (ticker with shares) when computing cash balance
+          const cashTxs = accTxs.filter((t) => !(t.ticker && t.shares));
+          const cashChange = cashTxs.reduce((sum, t) => sum + t.amount, 0);
           const cashBalance = initial + cashChange;
 
           const holdings = {};
@@ -898,7 +902,14 @@ export default function Dashboard({
                       />
                       <span className="account-name">{acc.name}</span>
                       <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">
-                        {formatNumber(acc.balance, { style: "currency" })}
+                        {formatNumber(
+                          acc.kind === "brokerage" &&
+                            marketValues &&
+                            marketValues[acc.id] !== undefined
+                            ? marketValues[acc.id]
+                            : acc.balance || 0,
+                          { style: "currency" },
+                        )}
                       </span>
                     </label>
                   );
