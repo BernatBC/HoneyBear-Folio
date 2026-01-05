@@ -440,6 +440,10 @@ fn create_transaction_db(
     notes: Option<String>,
     category: Option<String>,
     amount: f64,
+    ticker: Option<String>,
+    shares: Option<f64>,
+    price_per_share: Option<f64>,
+    fee: Option<f64>,
 ) -> Result<Transaction, String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
@@ -462,8 +466,8 @@ fn create_transaction_db(
     };
 
     tx.execute(
-        "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-        params![account_id, date, payee, notes, final_category, amount],
+        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+        params![account_id, date, payee, notes, final_category, amount, ticker, shares, price_per_share, fee],
     ).map_err(|e| e.to_string())?;
 
     let id = tx.last_insert_rowid() as i32;
@@ -521,10 +525,10 @@ fn create_transaction_db(
         notes,
         category: final_category,
         amount,
-        ticker: None,
-        shares: None,
-        price_per_share: None,
-        fee: None,
+        ticker,
+        shares,
+        price_per_share,
+        fee,
     })
 }
 
@@ -537,9 +541,13 @@ fn create_transaction(
     notes: Option<String>,
     category: Option<String>,
     amount: f64,
+    ticker: Option<String>,
+    shares: Option<f64>,
+    price_per_share: Option<f64>,
+    fee: Option<f64>,
 ) -> Result<Transaction, String> {
     let db_path = get_db_path(&app_handle)?;
-    create_transaction_db(&db_path, account_id, date, payee, notes, category, amount)
+    create_transaction_db(&db_path, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee)
 }
 
 fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transaction>, String> {

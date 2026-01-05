@@ -171,5 +171,5 @@ pub(crate) fn create_transaction_in_dir(
 ) -> Result<super::Transaction, String> {
     let db_path = get_db_path_for_dir(dir)?;
     init_db_at_path(&db_path)?;
-    super::create_transaction_db(&db_path, account_id, date, payee, notes, category, amount)
+    super::create_transaction_db(&db_path, account_id, date, payee, notes, category, amount, None, None, None, None)
 }

@@ -32,9 +32,19 @@ export default function ExportModal({ onClose }) {
       let filters = [];
 
       if (format === "json") {
+        // Replace transaction account IDs with account names for easier interoperability
+        const transactionsWithAccountNames = transactions.map((tx) => {
+          const acc = accounts.find((a) => a.id === tx.account_id);
+          const { account_id, ...rest } = tx;
+          return {
+            ...rest,
+            account: acc ? acc.name : account_id,
+          };
+        });
+
         const data = {
           accounts,
-          transactions,
+          transactions: transactionsWithAccountNames,
           exportDate: new Date().toISOString(),
         };
         content = JSON.stringify(data, null, 2);

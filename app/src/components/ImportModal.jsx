@@ -18,6 +18,7 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { parseNumberWithLocale } from "../utils/format";
 import { t } from "../i18n/i18n";
+import { useToast } from "../contexts/toast";
 
 // Get MIME type based on file extension
 const getMimeType = (fileName) => {
@@ -41,6 +42,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
     category: "",
     notes: "",
     account: "",
+    ticker: "",
+    shares: "",
+    price: "",
+    fee: "",
   });
 
   /* Modal JSX moved to end of function to avoid referencing refs/state before initialization */
@@ -59,6 +64,11 @@ export default function ImportModal({ onClose, onImportComplete }) {
   const dropZoneRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [step, setStep] = useState(0); // 0 = select file, 1 = map/review
+  const { showToast } = useToast();
+
+  // Import result details for user review
+  const [importErrorsState, setImportErrorsState] = useState([]);
+  const [showImportSummary, setShowImportSummary] = useState(false);
 
   const autoMapColumns = useCallback((cols) => {
     setMapping((prevMapping) => {
@@ -79,6 +89,17 @@ export default function ImportModal({ onClose, onImportComplete }) {
           newMapping.notes = col;
         else if (lower.includes("account") || lower.includes("acc"))
           newMapping.account = col;
+        else if (lower.includes("ticker") || lower.includes("symbol"))
+          newMapping.ticker = col;
+        else if (
+          lower.includes("shares") ||
+          lower.includes("quantity") ||
+          lower.includes("qty")
+        )
+          newMapping.shares = col;
+        else if (lower.includes("price")) newMapping.price = col;
+        else if (lower.includes("fee") || lower.includes("commission"))
+          newMapping.fee = col;
       });
       return newMapping;
     });
@@ -397,6 +418,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
   const processRows = async (rows) => {
     let successCount = 0;
     let failCount = 0;
+    const importErrors = [];
 
     setProgress({ current: 0, total: rows.length, success: 0, failed: 0 });
 
@@ -404,114 +426,271 @@ export default function ImportModal({ onClose, onImportComplete }) {
     // repeatedly create duplicates due to async React state updates.
     let localAccounts = [...accounts];
 
+    // Group rows by account identifier to determine account type before creation
+    const rowsByAccount = new Map();
+    const rowIndices = new Map();
+
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
-      try {
-        const dateStr = row[mapping.date];
-        const amountStr = row[mapping.amount];
-        const payee = row[mapping.payee] || t("import.unknown_payee");
+      const mappedAccountValue = mapping.account
+        ? row[mapping.account]
+        : undefined;
+      const accountField =
+        mappedAccountValue ??
+        row.account_id ??
+        row.accountId ??
+        row.account ??
+        row.account_name ??
+        row.accountName;
 
-        // Basic date parsing (YYYY-MM-DD preferred, but try others)
-        let date = new Date(dateStr).toISOString().split("T")[0];
-        if (date === "Invalid Date")
-          date = new Date().toISOString().split("T")[0]; // Fallback
-
-        // Amount parsing — import files are read using American format (dot as decimal separator)
-        let amount = parseNumberWithLocale(amountStr, "en-US");
-        if (isNaN(amount)) amount = 0;
-
-        // Determine account id for this row. Priority:
-        // 1) explicit mapping column selected by user
-        // 2) explicit numeric account_id or accountId field in row
-        // 3) account name in row matched to existing accounts (create if missing)
-        let accountId = null;
-        const mappedAccountValue = mapping.account
-          ? row[mapping.account]
-          : undefined;
-        const accountField =
-          mappedAccountValue ??
-          row.account_id ??
-          row.accountId ??
-          row.account ??
-          row.account_name ??
-          row.accountName;
-
-        if (accountField) {
-          if (typeof accountField === "number") {
-            accountId = accountField;
-          } else if (!isNaN(parseInt(accountField))) {
-            accountId = parseInt(accountField);
-          } else if (typeof accountField === "string") {
-            const name = accountField.trim();
-            // Do a case-insensitive, trimmed comparison to avoid duplicates
-            let match = localAccounts.find(
-              (a) =>
-                a.name && a.name.trim().toLowerCase() === name.toLowerCase(),
-            );
-            if (!match) {
-              // Determine account kind: if row contains trade-like fields treat as brokerage
-              const lowerKeys = Object.keys(row || {}).map((k) =>
-                String(k).toLowerCase(),
-              );
-              const isBrokerage = lowerKeys.some((k) =>
-                [
-                  "ticker",
-                  "shares",
-                  "symbol",
-                  "quantity",
-                  "price",
-                  "price_per_share",
-                ].some((s) => k.includes(s)),
-              );
-              const kind = isBrokerage ? "brokerage" : "cash";
-              try {
-                const created = await invoke("create_account", {
-                  name,
-                  balance: 0.0,
-                  kind,
-                });
-                // push to local cache (we'll update React state after the import completes)
-                localAccounts.push(created);
-                match = created;
-              } catch (e) {
-                console.error("Failed to create account for import:", e);
-              }
-            }
-            if (match) accountId = match.id;
-          }
+      if (accountField) {
+        const key =
+          typeof accountField === "string"
+            ? accountField.trim().toLowerCase()
+            : String(accountField);
+        if (!rowsByAccount.has(key)) {
+          rowsByAccount.set(key, { identifier: accountField, rows: [] });
         }
-
-        if (!accountId) throw new Error(t("import.error.no_account_for_row"));
-
-        await invoke("create_transaction", {
-          accountId,
-          date,
-          payee,
-          notes: row[mapping.notes] || "",
-          category: row[mapping.category] || "Uncategorized",
-          amount,
-        });
-        successCount++;
-      } catch (e) {
-        console.error("Row import failed:", e);
-        failCount++;
+        rowsByAccount.get(key).rows.push(row);
+        if (!rowIndices.has(row)) rowIndices.set(row, i);
+      } else {
+        // Rows without account info
+        const key = "undefined_account";
+        if (!rowsByAccount.has(key)) {
+          rowsByAccount.set(key, { identifier: null, rows: [] });
+        }
+        rowsByAccount.get(key).rows.push(row);
+        if (!rowIndices.has(row)) rowIndices.set(row, i);
       }
-      setProgress({
-        current: i + 1,
-        total: rows.length,
-        success: successCount,
-        failed: failCount,
-      });
+    }
+
+    let processedCount = 0;
+
+    for (const [key, group] of rowsByAccount) {
+      const { identifier, rows: groupRows } = group;
+      let accountId = null;
+
+      if (identifier !== null) {
+        if (typeof identifier === "number") {
+          accountId = identifier;
+        } else if (!isNaN(parseInt(identifier))) {
+          accountId = parseInt(identifier);
+        } else if (typeof identifier === "string") {
+          const name = identifier.trim();
+          // Do a case-insensitive, trimmed comparison to avoid duplicates
+          let match = localAccounts.find(
+            (a) =>
+              a.name && a.name.trim().toLowerCase() === name.toLowerCase(),
+          );
+          if (!match) {
+            // Determine account kind: scan ALL rows in this group
+            let isBrokerage = false;
+            for (const row of groupRows) {
+              // Check mapped fields
+              if (
+                mapping.ticker &&
+                row[mapping.ticker] &&
+                String(row[mapping.ticker]).trim() !== ""
+              ) {
+                isBrokerage = true;
+                break;
+              }
+              if (
+                mapping.shares &&
+                row[mapping.shares] &&
+                String(row[mapping.shares]).trim() !== ""
+              ) {
+                isBrokerage = true;
+                break;
+              }
+              // Check heuristics
+              const keys = Object.keys(row || {});
+              for (const k of keys) {
+                const lowerKey = String(k).toLowerCase();
+                if (
+                  [
+                    "ticker",
+                    "shares",
+                    "symbol",
+                    "quantity",
+                    "price_per_share",
+                  ].some((s) => lowerKey.includes(s))
+                ) {
+                  const val = row[k];
+                  if (
+                    val !== undefined &&
+                    val !== null &&
+                    String(val).trim() !== ""
+                  ) {
+                    isBrokerage = true;
+                    break;
+                  }
+                }
+              }
+              if (isBrokerage) break;
+            }
+
+            const kind = isBrokerage ? "brokerage" : "cash";
+            try {
+              const created = await invoke("create_account", {
+                name,
+                balance: 0.0,
+                kind,
+              });
+              // push to local cache (we'll update React state after the import completes)
+              localAccounts.push(created);
+              match = created;
+            } catch (e) {
+              console.error("Failed to create account for import:", e);
+              // Fail all rows for this account
+              for (const row of groupRows) {
+                const idx = rowIndices.get(row);
+                importErrors.push({
+                  row: idx,
+                  error: `Failed to create account '${name}': ${String(e)}`,
+                });
+                failCount++;
+                processedCount++;
+              }
+              continue;
+            }
+          }
+          if (match) accountId = match.id;
+        }
+      }
+
+      for (const row of groupRows) {
+        const i = rowIndices.get(row);
+        try {
+          if (!accountId) throw new Error(t("import.error.no_account_for_row"));
+
+          const dateStr = row[mapping.date];
+          const amountStr = row[mapping.amount];
+          const payee = row[mapping.payee] || t("import.unknown_payee");
+
+          // Robust date parsing: try JS Date, then attempt common dd/mm/yyyy or dd-mm-yyyy forms, otherwise fallback to today
+          let date;
+          if (dateStr === undefined || dateStr === null || dateStr === "") {
+            date = new Date().toISOString().split("T")[0];
+          } else {
+            const parsedDate = new Date(String(dateStr));
+            if (isNaN(parsedDate.getTime())) {
+              // Try to normalize common separators and formats
+              const normalized = String(dateStr)
+                .replace(/\./g, "/")
+                .replace(/-/g, "/");
+              const parts = normalized.split("/");
+              let altDate = null;
+              if (parts.length === 3) {
+                if (parts[0].length === 4) {
+                  // yyyy/mm/dd
+                  altDate = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+                } else {
+                  // dd/mm/yyyy -> yyyy-mm-dd
+                  altDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                }
+              }
+              if (altDate && !isNaN(altDate.getTime())) {
+                date = altDate.toISOString().split("T")[0];
+              } else {
+                console.warn(`Invalid date for row ${i}:`, dateStr);
+                date = new Date().toISOString().split("T")[0];
+              }
+            } else {
+              date = parsedDate.toISOString().split("T")[0];
+            }
+          }
+
+          // Amount parsing — import files are read using American format (dot as decimal separator)
+          let amount = parseNumberWithLocale(amountStr, "en-US");
+          if (isNaN(amount)) amount = 0;
+
+          // Brokerage fields
+          let ticker = mapping.ticker
+            ? row[mapping.ticker]
+            : row.ticker || row.symbol || row.Ticker || row.Symbol;
+          let shares = mapping.shares
+            ? row[mapping.shares]
+            : row.shares ||
+              row.quantity ||
+              row.qty ||
+              row.Shares ||
+              row.Quantity;
+          let price = mapping.price
+            ? row[mapping.price]
+            : row.price || row.price_per_share || row.Price;
+          let fee = mapping.fee
+            ? row[mapping.fee]
+            : row.fee || row.commission || row.Fee;
+
+          if (typeof shares === "string")
+            shares = parseNumberWithLocale(shares, "en-US");
+          if (typeof price === "string")
+            price = parseNumberWithLocale(price, "en-US");
+          if (typeof fee === "string")
+            fee = parseNumberWithLocale(fee, "en-US");
+
+          if (isNaN(shares)) shares = null;
+          if (isNaN(price)) price = null;
+          if (isNaN(fee)) fee = null;
+          if (!ticker) ticker = null;
+
+          await invoke("create_transaction", {
+            accountId,
+            date,
+            payee,
+            notes: row[mapping.notes] || "",
+            category: row[mapping.category] || "Uncategorized",
+            amount,
+            ticker,
+            shares,
+            pricePerShare: price,
+            fee,
+          });
+          successCount++;
+        } catch (e) {
+          console.error(`Row ${i} import failed:`, e);
+          importErrors.push({ row: i, error: String(e) });
+          failCount++;
+        }
+        processedCount++;
+        setProgress({
+          current: processedCount,
+          total: rows.length,
+          success: successCount,
+          failed: failCount,
+        });
+      }
     }
 
     // Update React state to include any accounts we created during the import
     setAccounts(localAccounts);
 
     setImporting(false);
-    setTimeout(() => {
-      onImportComplete();
-      onClose();
-    }, 1500);
+    setImportErrorsState(importErrors);
+
+    if (showToast) {
+      if (failCount > 0) {
+        showToast(
+          `Import completed: ${successCount} succeeded, ${failCount} failed`,
+          { type: "error" },
+        );
+        console.error("Import errors:", importErrors);
+      } else {
+        showToast(`${successCount} transactions imported`, { type: "success" });
+      }
+    }
+
+    // Always refresh app data so created accounts/transactions appear, but keep modal open
+    // when some rows failed so the user can inspect errors.
+    onImportComplete();
+    if (failCount === 0) {
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } else {
+      setShowImportSummary(true);
+    }
   };
 
   // If SSR or tests, avoid touching document
@@ -713,6 +892,24 @@ export default function ImportModal({ onClose, onImportComplete }) {
                       <AlertCircle className="w-3 h-3" /> {progress.failed}
                       {t("import.failed")}
                     </span>
+                  </div>
+                </div>
+              )}
+
+              {showImportSummary && importErrorsState && importErrorsState.length > 0 && (
+                <div className="mt-4 p-4 rounded bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
+                  <h3 className="text-sm font-semibold mb-2">{t("import.error_summary") || "Import errors"}</h3>
+                  <p className="text-xs mb-2">
+                    {t("import.error_summary_instructions") || "Some rows failed to import. Review the first errors below and fix your file or retry."}
+                  </p>
+                  <div className="max-h-40 overflow-auto text-sm">
+                    <ul>
+                      {importErrorsState.map((err, idx) => (
+                        <li key={idx} className="mb-1">
+                          <span className="font-semibold">Row {err.row + 1}:</span> {err.error}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               )}
