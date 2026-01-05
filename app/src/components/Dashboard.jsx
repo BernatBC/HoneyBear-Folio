@@ -950,7 +950,9 @@ export default function Dashboard({
             {/* Income vs Expenses */}
             <div className="chart-card chart-card-full">
               <div className="chart-header">
-                <h3 className="chart-title">{t("dashboard.income_vs_expenses")}</h3>
+                <h3 className="chart-title">
+                  {t("dashboard.income_vs_expenses")}
+                </h3>
                 <p className="chart-subtitle">Monthly income vs expenses</p>
               </div>
               <div className="chart-body">
@@ -972,7 +974,9 @@ export default function Dashboard({
             {/* Asset Allocation */}
             <div className="chart-card">
               <div className="chart-header">
-                <h3 className="chart-title">{t("dashboard.asset_allocation")}</h3>
+                <h3 className="chart-title">
+                  {t("dashboard.asset_allocation")}
+                </h3>
                 <p className="chart-subtitle">Distribution of your assets</p>
               </div>
               <div className="chart-body">
@@ -987,12 +991,14 @@ export default function Dashboard({
                   </div>
                 )}
               </div>
-            </div>  
+            </div>
 
             {/* Expenses by Category */}
             <div className="chart-card">
               <div className="chart-header">
-                <h3 className="chart-title">{t("dashboard.expenses_by_category")}</h3>
+                <h3 className="chart-title">
+                  {t("dashboard.expenses_by_category")}
+                </h3>
                 <p className="chart-subtitle">Where your money goes</p>
               </div>
               <div className="chart-body">
