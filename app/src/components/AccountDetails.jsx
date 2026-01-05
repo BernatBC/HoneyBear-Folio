@@ -421,7 +421,8 @@ export default function AccountDetails({ account, onUpdate }) {
         const pricePerShare = parseNumber(editForm.price_per_share) || 0.0;
         const feeVal = parseNumber(editForm.fee) || 0.0;
         const isBuy =
-          editForm.payee === "Buy" || (parseNumber(editForm.shares) || 0) > 0;
+          editForm.payee === "Buy" ||
+          (editForm.payee !== "Sell" && (parseNumber(editForm.shares) || 0) > 0);
 
         await invoke("update_brokerage_transaction", {
           args: {
@@ -1184,7 +1185,8 @@ export default function AccountDetails({ account, onUpdate }) {
                                     name={`txType-${tx.id}`}
                                     checked={
                                       editForm.payee === "Buy" ||
-                                      (parseNumber(editForm.shares) || 0) > 0
+                                      (editForm.payee !== "Sell" &&
+                                        (parseNumber(editForm.shares) || 0) > 0)
                                     }
                                     onChange={() =>
                                       setEditForm({ ...editForm, payee: "Buy" })
@@ -1201,7 +1203,8 @@ export default function AccountDetails({ account, onUpdate }) {
                                     name={`txType-${tx.id}`}
                                     checked={
                                       editForm.payee === "Sell" ||
-                                      (parseNumber(editForm.shares) || 0) < 0
+                                      (editForm.payee !== "Buy" &&
+                                        (parseNumber(editForm.shares) || 0) < 0)
                                     }
                                     onChange={() =>
                                       setEditForm({
@@ -1300,14 +1303,10 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <input
                                 type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none cursor-not-allowed"
                                 value={editForm.notes || ""}
-                                onChange={(e) =>
-                                  setEditForm({
-                                    ...editForm,
-                                    notes: e.target.value,
-                                  })
-                                }
+                                disabled
+                                readOnly
                               />
                             </td>
 
