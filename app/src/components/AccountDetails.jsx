@@ -497,7 +497,7 @@ export default function AccountDetails({ account, onUpdate }) {
   return (
     <div className="max-w-full pb-8">
       {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
+      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow duration-200">
         <div>
           {isRenamingAccount ? (
             <form
