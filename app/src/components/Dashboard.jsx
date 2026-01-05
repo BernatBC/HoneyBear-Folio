@@ -902,18 +902,20 @@ export default function Dashboard({
             </div>
           </div>
           <div className="chart-wrapper">
-            {chartDataVisible ? (
-              <Line options={options} data={chartDataVisible} />
-            ) : (
-              <div className="loading-container">
-                <div className="loading-content">
-                  <div className="loading-spinner"></div>
-                  <span className="loading-text">
-                    {t("loading.loading_data")}
-                  </span>
+            <div className="chart-body">
+              {chartDataVisible ? (
+                <Line options={options} data={chartDataVisible} />
+              ) : (
+                <div className="loading-container">
+                  <div className="loading-content">
+                    <div className="loading-spinner"></div>
+                    <span className="loading-text">
+                      {t("loading.loading_data")}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -947,51 +949,69 @@ export default function Dashboard({
           <>
             {/* Income vs Expenses */}
             <div className="chart-card chart-card-full">
-              {incomeVsExpensesData ? (
-                <Bar options={barOptions} data={incomeVsExpensesData} />
-              ) : (
-                <div className="loading-container">
-                  <div className="loading-content">
-                    <div className="loading-spinner"></div>
-                    <span className="loading-text">
-                      {t("loading.loading_data")}
-                    </span>
+              <div className="chart-header">
+                <h3 className="chart-title">{t("dashboard.income_vs_expenses")}</h3>
+                <p className="chart-subtitle">Monthly income vs expenses</p>
+              </div>
+              <div className="chart-body">
+                {incomeVsExpensesData ? (
+                  <Bar options={barOptions} data={incomeVsExpensesData} />
+                ) : (
+                  <div className="loading-container">
+                    <div className="loading-content">
+                      <div className="loading-spinner"></div>
+                      <span className="loading-text">
+                        {t("loading.loading_data")}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Asset Allocation */}
             <div className="chart-card">
-              {doughnutData ? (
-                <Doughnut options={doughnutOptions} data={doughnutData} />
-              ) : (
-                <div className="loading-container">
-                  <div className="loading-content">
-                    <div className="loading-spinner"></div>
-                    <span className="loading-text">Loading data...</span>
+              <div className="chart-header">
+                <h3 className="chart-title">{t("dashboard.asset_allocation")}</h3>
+                <p className="chart-subtitle">Distribution of your assets</p>
+              </div>
+              <div className="chart-body">
+                {doughnutData ? (
+                  <Doughnut options={doughnutOptions} data={doughnutData} />
+                ) : (
+                  <div className="loading-container">
+                    <div className="loading-content">
+                      <div className="loading-spinner"></div>
+                      <span className="loading-text">Loading data...</span>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </div>  
 
             {/* Expenses by Category */}
             <div className="chart-card">
-              {expensesByCategoryData ? (
-                <Doughnut
-                  options={expensesOptions}
-                  data={expensesByCategoryData}
-                />
-              ) : (
-                <div className="loading-container">
-                  <div className="loading-content">
-                    <div className="loading-spinner"></div>
-                    <span className="loading-text">
-                      {t("loading.loading_data")}
-                    </span>
+              <div className="chart-header">
+                <h3 className="chart-title">{t("dashboard.expenses_by_category")}</h3>
+                <p className="chart-subtitle">Where your money goes</p>
+              </div>
+              <div className="chart-body">
+                {expensesByCategoryData ? (
+                  <Doughnut
+                    options={expensesOptions}
+                    data={expensesByCategoryData}
+                  />
+                ) : (
+                  <div className="loading-container">
+                    <div className="loading-content">
+                      <div className="loading-spinner"></div>
+                      <span className="loading-text">
+                        {t("loading.loading_data")}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </>
         )}

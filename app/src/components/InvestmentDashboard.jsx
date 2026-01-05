@@ -239,19 +239,25 @@ export default function InvestmentDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Portfolio Allocation */}
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 h-[400px] hover:shadow-lg transition-shadow duration-300">
-              {allocationData ? (
-                <Doughnut options={chartOptions} data={allocationData} />
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 border-4 border-brand-200 dark:border-brand-800 border-t-brand-600 dark:border-t-brand-400 rounded-full animate-spin"></div>
-                    <span className="text-slate-400 dark:text-slate-500 font-medium">
-                      Loading data...
-                    </span>
+            <div className="chart-card">
+              <div className="chart-header">
+                <h3 className="chart-title">{t("investment.portfolio_allocation")}</h3>
+                <p className="chart-subtitle">Allocation by ticker</p>
+              </div>
+              <div className="chart-body">
+                {allocationData ? (
+                  <Doughnut options={chartOptions} data={allocationData} />
+                ) : (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 border-4 border-brand-200 dark:border-brand-800 border-t-brand-600 dark:border-t-brand-400 rounded-full animate-spin"></div>
+                      <span className="text-slate-400 dark:text-slate-500 font-medium">
+                        Loading data...
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* TreeMap */}
