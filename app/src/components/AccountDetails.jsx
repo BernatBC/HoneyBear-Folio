@@ -572,7 +572,7 @@ export default function AccountDetails({ account, onUpdate }) {
             />
           </div>
           <div className="flex items-center gap-3">
-            {account.id === "all" && (
+            {account.id === "all" && availableAccounts.length > 0 && (
               <div className="relative">
                 <select
                   value={addTargetAccount ? addTargetAccount.id : ""}
@@ -599,33 +599,35 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
             )}
 
-            {!isAdding ? (
-              <button
-                onClick={() => {
-                  if (
-                    account.id === "all" &&
-                    !addTargetAccount &&
-                    availableAccounts.length
-                  ) {
-                    setAddTargetAccount(availableAccounts[0]);
-                  }
-                  setIsAdding(true);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                <span className="hidden sm:inline">
-                  {t("account.add_transaction")}
-                </span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsAdding(false)}
-                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center gap-2 px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
-              >
-                <X className="w-5 h-5" />
-                <span className="hidden sm:inline">{t("account.cancel")}</span>
-              </button>
+            {!(account.id === "all" && availableAccounts.length === 0) && (
+              !isAdding ? (
+                <button
+                  onClick={() => {
+                    if (
+                      account.id === "all" &&
+                      !addTargetAccount &&
+                      availableAccounts.length
+                    ) {
+                      setAddTargetAccount(availableAccounts[0]);
+                    }
+                    setIsAdding(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="hidden sm:inline">
+                    {t("account.add_transaction")}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsAdding(false)}
+                  className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center gap-2 px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                  <span className="hidden sm:inline">{t("account.cancel")}</span>
+                </button>
+              )
             )}
           </div>
 
