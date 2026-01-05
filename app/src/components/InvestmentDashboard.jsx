@@ -107,7 +107,9 @@ export default function InvestmentDashboard() {
           display: false,
         },
         tooltip: {
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(255, 255, 255, 0.9)",
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(255, 255, 255, 0.9)",
           titleColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
           bodyColor: isDark ? "rgb(255, 255, 255)" : "rgb(15, 23, 42)",
           padding: 12,
@@ -116,9 +118,15 @@ export default function InvestmentDashboard() {
           bodyFont: { family: "Inter", size: 12 },
           callbacks: {
             label: function (context) {
-              const prefix = context.label ? context.label + ': ' : '';
+              const prefix = context.label ? context.label + ": " : "";
               const value = context.raw ?? context.parsed ?? 0;
-              return prefix + formatNumber(Number(value) || 0, { style: "currency", maximumFractionDigits: 0 });
+              return (
+                prefix +
+                formatNumber(Number(value) || 0, {
+                  style: "currency",
+                  maximumFractionDigits: 0,
+                })
+              );
             },
           },
         },
