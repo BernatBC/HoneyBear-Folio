@@ -132,7 +132,7 @@ export default function InvestmentDashboard() {
               const prefix = context.label ? context.label + ": " : "";
               const value = context.dataset.originalData
                 ? context.dataset.originalData[context.dataIndex]
-                : context.raw ?? context.parsed ?? 0;
+                : (context.raw ?? context.parsed ?? 0);
               return (
                 prefix +
                 formatNumber(Number(value) || 0, {
