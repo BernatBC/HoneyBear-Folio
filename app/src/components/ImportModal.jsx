@@ -479,8 +479,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
           const name = identifier.trim();
           // Do a case-insensitive, trimmed comparison to avoid duplicates
           let match = localAccounts.find(
-            (a) =>
-              a.name && a.name.trim().toLowerCase() === name.toLowerCase(),
+            (a) => a.name && a.name.trim().toLowerCase() === name.toLowerCase(),
           );
           if (!match) {
             // Determine account kind: scan ALL rows in this group
@@ -896,23 +895,31 @@ export default function ImportModal({ onClose, onImportComplete }) {
                 </div>
               )}
 
-              {showImportSummary && importErrorsState && importErrorsState.length > 0 && (
-                <div className="mt-4 p-4 rounded bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
-                  <h3 className="text-sm font-semibold mb-2">{t("import.error_summary") || "Import errors"}</h3>
-                  <p className="text-xs mb-2">
-                    {t("import.error_summary_instructions") || "Some rows failed to import. Review the first errors below and fix your file or retry."}
-                  </p>
-                  <div className="max-h-40 overflow-auto text-sm">
-                    <ul>
-                      {importErrorsState.map((err, idx) => (
-                        <li key={idx} className="mb-1">
-                          <span className="font-semibold">Row {err.row + 1}:</span> {err.error}
-                        </li>
-                      ))}
-                    </ul>
+              {showImportSummary &&
+                importErrorsState &&
+                importErrorsState.length > 0 && (
+                  <div className="mt-4 p-4 rounded bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
+                    <h3 className="text-sm font-semibold mb-2">
+                      {t("import.error_summary") || "Import errors"}
+                    </h3>
+                    <p className="text-xs mb-2">
+                      {t("import.error_summary_instructions") ||
+                        "Some rows failed to import. Review the first errors below and fix your file or retry."}
+                    </p>
+                    <div className="max-h-40 overflow-auto text-sm">
+                      <ul>
+                        {importErrorsState.map((err, idx) => (
+                          <li key={idx} className="mb-1">
+                            <span className="font-semibold">
+                              Row {err.row + 1}:
+                            </span>{" "}
+                            {err.error}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           ) : (
             <div className="space-y-6">

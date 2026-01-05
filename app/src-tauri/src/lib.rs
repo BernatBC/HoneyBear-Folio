@@ -547,7 +547,19 @@ fn create_transaction(
     fee: Option<f64>,
 ) -> Result<Transaction, String> {
     let db_path = get_db_path(&app_handle)?;
-    create_transaction_db(&db_path, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee)
+    create_transaction_db(
+        &db_path,
+        account_id,
+        date,
+        payee,
+        notes,
+        category,
+        amount,
+        ticker,
+        shares,
+        price_per_share,
+        fee,
+    )
 }
 
 fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transaction>, String> {
