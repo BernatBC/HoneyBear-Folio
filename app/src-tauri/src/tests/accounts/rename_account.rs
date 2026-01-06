@@ -25,3 +25,12 @@ fn test_rename_account_missing_id_should_error() {
     let res = crate::rename_account_db(&db_path, -999, "Name".to_string());
     assert!(res.is_err());
 }
+
+#[test]
+fn test_rename_account_duplicate_name_should_error() {
+    let (_dir, db_path) = setup_db();
+    let _a = crate::create_account_db(&db_path, "A".to_string(), 0.0, "cash".to_string()).unwrap();
+    let b = crate::create_account_db(&db_path, "B".to_string(), 0.0, "cash".to_string()).unwrap();
+    let res = crate::rename_account_db(&db_path, b.id, "A".to_string());
+    assert!(res.is_err());
+}

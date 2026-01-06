@@ -28,6 +28,7 @@ import { t } from "../i18n/i18n";
 import "../styles/Sidebar.css";
 import { useFormatNumber, useParseNumber } from "../utils/format";
 import { usePrivacy } from "../contexts/privacy";
+import { useToast } from "../contexts/toast";
 
 export default function Sidebar({
   accounts,
@@ -52,14 +53,35 @@ export default function Sidebar({
   });
   const parseNumber = useParseNumber();
   const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
+  const { showToast } = useToast();
 
   async function handleAddAccount(e) {
     e.preventDefault();
+    // Basic client-side validation: non-empty and no duplicate names
+    const nameTrimmed = newAccountName.trim();
+    if (nameTrimmed.length === 0) {
+      showToast(t("account.error.empty_name"), { type: "warning" });
+      return;
+    }
+
+    if (
+      accounts.some(
+        (acc) =>
+          acc.name &&
+          acc.name.trim().toLowerCase() === nameTrimmed.toLowerCase(),
+      )
+    ) {
+      showToast(t("error.account_exists", { name: nameTrimmed }), {
+        type: "warning",
+      });
+      return;
+    }
+
     try {
       const balance =
         newAccountType === "cash" ? parseNumber(newAccountBalance) || 0.0 : 0.0;
       await invoke("create_account", {
-        name: newAccountName,
+        name: nameTrimmed,
         balance,
         kind: newAccountType,
       });
@@ -69,6 +91,14 @@ export default function Sidebar({
       setIsAdding(false);
       onUpdate();
     } catch (e) {
+      const msg = String(e || "");
+      if (msg.includes("already exists")) {
+        showToast(t("error.account_exists", { name: nameTrimmed }), {
+          type: "warning",
+        });
+      } else {
+        showToast(t("error.something_went_wrong"), { type: "danger" });
+      }
       console.error("Failed to create account:", e);
     }
   }
