@@ -60,6 +60,7 @@ fn test_update_brokerage_transaction_move_between_broker_accounts() {
         price_per_share: 100.0,
         fee: 1.0,
         is_buy: true,
+        notes: None,
     };
 
     crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();

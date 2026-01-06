@@ -68,6 +68,7 @@ fn test_update_brokerage_transaction_when_counterpart_missing() {
         price_per_share: 120.0,
         fee: 2.0,
         is_buy: true,
+        notes: None,
     };
 
     let updated = crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();

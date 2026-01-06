@@ -1027,6 +1027,7 @@ struct UpdateBrokerageTransactionArgs {
     price_per_share: f64,
     fee: f64,
     is_buy: bool,
+    notes: Option<String>,
 }
 
 fn update_brokerage_transaction_db(
@@ -1042,6 +1043,7 @@ fn update_brokerage_transaction_db(
         price_per_share,
         fee,
         is_buy,
+        notes,
     } = args;
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -1060,12 +1062,15 @@ fn update_brokerage_transaction_db(
     let total_price = shares * price_per_share;
     let brokerage_amount = if is_buy { total_price } else { -total_price };
     let brokerage_shares_signed = if is_buy { shares } else { -shares };
-    let new_notes = format!(
+    let new_notes_auto = format!(
         "{} {} shares of {}",
         if is_buy { "Bought" } else { "Sold" },
         shares,
         ticker
     );
+
+    // If caller provided a custom notes value, preserve it; otherwise use generated notes
+    let final_notes = notes.clone().unwrap_or_else(|| new_notes_auto.clone());
 
     // Update transaction row (including account_id to support moving between brokerage accounts)
     tx.execute(
@@ -1074,7 +1079,7 @@ fn update_brokerage_transaction_db(
             brokerage_account_id,
             date,
             if is_buy { "Buy" } else { "Sell" },
-            new_notes,
+            final_notes,
             "Investment",
             brokerage_amount,
             ticker,
@@ -1172,6 +1177,13 @@ fn update_brokerage_transaction_db(
         )
         .map_err(|e| e.to_string())?;
 
+        // Also update the cash counterpart notes so future fallbacks can still match or reflect the user's custom note
+        tx.execute(
+            "UPDATE transactions SET notes = ?1 WHERE id = ?2",
+            params![final_notes, cash_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         // Ensure linkage between brokerage tx and cash tx
         tx.execute(
             "UPDATE transactions SET linked_tx_id = ?1 WHERE id = ?2",
@@ -1204,7 +1216,7 @@ fn update_brokerage_transaction_db(
         } else {
             "Sell".to_string()
         },
-        notes: Some(new_notes),
+        notes: Some(final_notes),
         category: Some("Investment".to_string()),
         amount: brokerage_amount,
         ticker: Some(ticker),

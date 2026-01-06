@@ -11,6 +11,7 @@ fn test_update_brokerage_transaction_missing_id_should_error() {
         price_per_share: 100.0,
         fee: 1.0,
         is_buy: true,
+        notes: None,
     };
 
     let res = crate::update_brokerage_transaction_db(&db_path, args);
@@ -68,6 +69,7 @@ fn test_update_brokerage_transaction_updates_cash_counterpart() {
         price_per_share: 200.0,
         fee: 1.0,
         is_buy: true,
+        notes: None,
     };
 
     crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();
@@ -158,6 +160,7 @@ fn test_update_brokerage_transaction_fallback_by_notes() {
         price_per_share: 200.0,
         fee: 1.0,
         is_buy: true,
+        notes: None,
     };
 
     crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();
@@ -185,6 +188,60 @@ fn test_update_brokerage_transaction_fallback_by_notes() {
 
     assert_eq!(brokerage_after, 1000.0);
     assert_eq!(cash_after, -1.0);
+}
+
+#[test]
+fn test_update_brokerage_transaction_custom_notes_updates_counterpart() {
+    let (_dir, db_path) = setup_db();
+    let cash_acc =
+        crate::create_account_db(&db_path, "Cash".to_string(), 1000.0, "cash".to_string()).unwrap();
+    let brokerage_acc = crate::create_account_db(
+        &db_path,
+        "Brokerage".to_string(),
+        0.0,
+        "investment".to_string(),
+    )
+    .unwrap();
+
+    // Create initial buy
+    let args = crate::CreateBrokerageTransactionArgs {
+        brokerage_account_id: brokerage_acc.id,
+        cash_account_id: cash_acc.id,
+        date: "2023-01-01".to_string(),
+        ticker: "FOO".to_string(),
+        shares: 10.0,
+        price_per_share: 100.0,
+        fee: 2.0,
+        is_buy: true,
+    };
+
+    let created = crate::create_brokerage_transaction_db(&db_path, args).unwrap();
+
+    // Update with custom notes
+    let custom_note = "CUSTOM NOTE 123".to_string();
+    let update_args = crate::UpdateBrokerageTransactionArgs {
+        id: created.id,
+        brokerage_account_id: brokerage_acc.id,
+        date: "2023-01-02".to_string(),
+        ticker: "FOO".to_string(),
+        shares: 5.0,
+        price_per_share: 200.0,
+        fee: 1.0,
+        is_buy: true,
+        notes: Some(custom_note.clone()),
+    };
+
+    crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();
+
+    // Verify brokerage tx note
+    let brokerage_txs = crate::get_transactions_db(&db_path, brokerage_acc.id).unwrap();
+    let brokerage_tx = brokerage_txs.iter().find(|t| t.id == created.id).expect("Brokerage tx not found");
+    assert_eq!(brokerage_tx.notes.as_deref(), Some(custom_note.as_str()));
+
+    // Verify cash counterpart note updated
+    let cash_txs = crate::get_transactions_db(&db_path, cash_acc.id).unwrap();
+    let transfer_tx = cash_txs.iter().find(|t| t.category.as_deref() == Some("Transfer")).expect("Transfer tx not found");
+    assert_eq!(transfer_tx.notes.as_deref(), Some(custom_note.as_str()));
 }
 
 #[test]
@@ -224,6 +281,7 @@ fn test_update_brokerage_transaction_sell_changes_amounts() {
         price_per_share: 100.0,
         fee: 2.0,
         is_buy: false,
+        notes: None,
     };
 
     crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();
@@ -293,6 +351,7 @@ fn test_update_brokerage_transaction_no_change_when_same_values() {
         price_per_share: 200.0,
         fee: 1.0,
         is_buy: true,
+        notes: None,
     };
 
     crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();
@@ -370,6 +429,7 @@ fn test_update_brokerage_transaction_no_cash_counterpart_does_not_change_cash_ac
         price_per_share: 10.0,
         fee: 1.0,
         is_buy: true,
+        notes: None,
     };
 
     crate::update_brokerage_transaction_db(&db_path, update_args).unwrap();

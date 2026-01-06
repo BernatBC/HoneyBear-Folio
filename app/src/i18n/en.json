@@ -140,5 +140,7 @@
   "confirm.invalid_cash_account": "Please select a valid Cash Account.",
   "confirm.delete_transaction": "Are you sure you want to delete this transaction?",
   "confirm.transaction_title": "Transaction",
-  "confirm.invalid_input_title": "Invalid Input"
+  "confirm.invalid_input_title": "Invalid Input",
+  "confirm.edit_automated_notes_title": "Edit Automated Note",
+  "confirm.edit_automated_notes": "This note was automatically generated for a brokerage transaction. Do you want to continue?"
 }

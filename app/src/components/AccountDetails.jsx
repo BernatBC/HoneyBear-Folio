@@ -55,6 +55,8 @@ export default function AccountDetails({ account, onUpdate }) {
   const [menuOpenId, setMenuOpenId] = useState(null);
   // Coordinates/state for portal menu (so it can render above scrollable containers)
   const [menuCoords, setMenuCoords] = useState(null);
+  // Keep track of original notes value when editing (used to warn about modifying auto-generated brokerage notes)
+  const [originalNotes, setOriginalNotes] = useState("");
 
   // Account actions state
   const [isRenamingAccount, setIsRenamingAccount] = useState(false);
@@ -410,6 +412,7 @@ export default function AccountDetails({ account, onUpdate }) {
   function startEditing(tx) {
     setEditingId(tx.id);
     setEditForm({ ...tx });
+    setOriginalNotes(tx.notes || "");
     setMenuOpenId(null);
   }
 
@@ -425,6 +428,23 @@ export default function AccountDetails({ account, onUpdate }) {
           (editForm.payee !== "Sell" &&
             (parseNumber(editForm.shares) || 0) > 0);
 
+        // If user modified notes on a brokerage transaction, show a warning before proceeding
+        const prev = originalNotes || "";
+        const current = editForm.notes || "";
+        if (prev !== current) {
+          const confirmed = await confirm(
+            t("confirm.edit_automated_notes"),
+            {
+              title: t("confirm.edit_automated_notes_title"),
+              kind: "warning",
+              okLabel: t("confirm.ok"),
+              cancelLabel: t("confirm.cancel"),
+            },
+          );
+
+          if (!confirmed) return;
+        }
+
         await invoke("update_brokerage_transaction", {
           args: {
             id: editForm.id,
@@ -435,6 +455,7 @@ export default function AccountDetails({ account, onUpdate }) {
             pricePerShare: pricePerShare,
             fee: feeVal,
             isBuy: isBuy,
+            notes: editForm.notes || null,
           },
         });
       } else {
@@ -1304,10 +1325,12 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <input
                                 type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none cursor-not-allowed"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                                 value={editForm.notes || ""}
-                                disabled
-                                readOnly
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, notes: e.target.value })
+                                }
+                                placeholder={t("account.notes_placeholder")}
                               />
                             </td>
 
