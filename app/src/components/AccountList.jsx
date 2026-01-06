@@ -21,9 +21,10 @@ export default function AccountList({
               ? marketValues[account.id]
               : account.balance
             : account.balance;
-        
+
         const formattedValue = formatNumber(value, { style: "currency" });
-        const finalFormattedValue = formattedValue === "NaN" ? "" : formattedValue;
+        const finalFormattedValue =
+          formattedValue === "NaN" ? "" : formattedValue;
 
         return (
           <button
@@ -43,13 +44,13 @@ export default function AccountList({
                     : "sidebar-nav-icon-inactive"
                 }`}
               />
-              <span className="font-medium truncate">
-                {account.name}
-              </span>
+              <span className="font-medium truncate">{account.name}</span>
             </div>
             <span
               className={`font-medium shrink-0 ml-2 ${
-                finalFormattedValue && finalFormattedValue.length > 14 ? "text-xs" : "text-sm"
+                finalFormattedValue && finalFormattedValue.length > 14
+                  ? "text-xs"
+                  : "text-sm"
               } ${
                 selectedId === account.id
                   ? "text-blue-100"

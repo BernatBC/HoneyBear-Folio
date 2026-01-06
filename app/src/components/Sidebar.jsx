@@ -47,7 +47,9 @@ export default function Sidebar({
   // Compute total balance using helper so logic is shared with Dashboard/App
   const totalBalance = computeNetWorth(accounts, marketValues);
   const formatNumber = useFormatNumber();
-  const formattedTotalBalance = formatNumber(totalBalance, { style: "currency" });
+  const formattedTotalBalance = formatNumber(totalBalance, {
+    style: "currency",
+  });
   const parseNumber = useParseNumber();
   const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
 
