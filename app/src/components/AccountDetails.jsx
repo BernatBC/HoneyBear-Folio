@@ -1360,6 +1360,33 @@ export default function AccountDetails({ account, onUpdate }) {
                                 }
                               />
                             </td>
+
+                            {/* If the table includes brokerage columns (non-cash views), insert placeholders so columns stay aligned */}
+                            {account.kind !== "cash" && (
+                              <>
+                                <td className="px-6 py-3">
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
+                                </td>
+                                <td className="px-6 py-3 text-right">
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
+                                </td>
+                                <td className="px-6 py-3 text-right">
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
+                                </td>
+                                <td className="px-6 py-3 text-right">
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
+                                </td>
+                              </>
+                            )}
+
                             <td className="px-6 py-3">
                               <AutocompleteInput
                                 suggestions={categorySuggestions}
