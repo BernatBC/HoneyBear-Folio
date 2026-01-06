@@ -64,8 +64,16 @@ export default function Sidebar({
       return;
     }
 
-    if (accounts.some((acc) => acc.name && acc.name.trim().toLowerCase() === nameTrimmed.toLowerCase())) {
-      showToast(t("error.account_exists", { name: nameTrimmed }), { type: "warning" });
+    if (
+      accounts.some(
+        (acc) =>
+          acc.name &&
+          acc.name.trim().toLowerCase() === nameTrimmed.toLowerCase(),
+      )
+    ) {
+      showToast(t("error.account_exists", { name: nameTrimmed }), {
+        type: "warning",
+      });
       return;
     }
 
@@ -85,7 +93,9 @@ export default function Sidebar({
     } catch (e) {
       const msg = String(e || "");
       if (msg.includes("already exists")) {
-        showToast(t("error.account_exists", { name: nameTrimmed }), { type: "warning" });
+        showToast(t("error.account_exists", { name: nameTrimmed }), {
+          type: "warning",
+        });
       } else {
         showToast(t("error.something_went_wrong"), { type: "danger" });
       }

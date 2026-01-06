@@ -73,7 +73,7 @@ fn test_create_account_duplicate_should_error() {
     // Case-insensitive check
     let res2 = crate::create_account_db(&db_path, "dup".to_string(), 0.0, "cash".to_string());
     assert!(res2.is_err());
-} 
+}
 
 #[test]
 fn test_create_duplicate_account_should_error() {
