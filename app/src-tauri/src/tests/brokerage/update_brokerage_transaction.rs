@@ -235,12 +235,18 @@ fn test_update_brokerage_transaction_custom_notes_updates_counterpart() {
 
     // Verify brokerage tx note
     let brokerage_txs = crate::get_transactions_db(&db_path, brokerage_acc.id).unwrap();
-    let brokerage_tx = brokerage_txs.iter().find(|t| t.id == created.id).expect("Brokerage tx not found");
+    let brokerage_tx = brokerage_txs
+        .iter()
+        .find(|t| t.id == created.id)
+        .expect("Brokerage tx not found");
     assert_eq!(brokerage_tx.notes.as_deref(), Some(custom_note.as_str()));
 
     // Verify cash counterpart note updated
     let cash_txs = crate::get_transactions_db(&db_path, cash_acc.id).unwrap();
-    let transfer_tx = cash_txs.iter().find(|t| t.category.as_deref() == Some("Transfer")).expect("Transfer tx not found");
+    let transfer_tx = cash_txs
+        .iter()
+        .find(|t| t.category.as_deref() == Some("Transfer"))
+        .expect("Transfer tx not found");
     assert_eq!(transfer_tx.notes.as_deref(), Some(custom_note.as_str()));
 }
 
