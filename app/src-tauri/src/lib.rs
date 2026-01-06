@@ -292,6 +292,26 @@ fn create_account_db(
 ) -> Result<Account, String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
+    // Trim name and validate non-empty
+    let name_trimmed = name.trim().to_string();
+    if name_trimmed.is_empty() {
+        return Err("Account name cannot be empty or whitespace-only".to_string());
+    }
+
+    // Check for duplicates (case-insensitive)
+    {
+        let mut stmt = conn
+            .prepare("SELECT id FROM accounts WHERE LOWER(name) = LOWER(?1) LIMIT 1")
+            .map_err(|e| e.to_string())?;
+        let dup: Option<i32> = stmt
+            .query_row(params![name_trimmed], |row| row.get(0))
+            .optional()
+            .map_err(|e| e.to_string())?;
+        if dup.is_some() {
+            return Err("Account name already exists".to_string());
+        }
+    }
+
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
     // For non-cash account kinds (e.g., brokerage), ignore any provided initial balance
@@ -299,7 +319,7 @@ fn create_account_db(
 
     tx.execute(
         "INSERT INTO accounts (name, balance, kind) VALUES (?1, ?2, ?3)",
-        params![name, balance_to_set, kind],
+        params![name_trimmed, balance_to_set, kind],
     )
     .map_err(|e| e.to_string())?;
 
@@ -325,7 +345,7 @@ fn create_account_db(
 
     Ok(Account {
         id,
-        name,
+        name: name_trimmed,
         balance: balance_to_set,
         kind,
     })
@@ -343,14 +363,32 @@ fn create_account(
 }
 
 fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result<Account, String> {
-    if new_name.trim().is_empty() {
+    let new_trim = new_name.trim().to_string();
+    if new_trim.is_empty() {
         return Err("Account name cannot be empty or whitespace-only".to_string());
     }
+
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // Check for duplicate name (case-insensitive) excluding this account id
+    {
+        let mut stmt_check = conn
+            .prepare("SELECT id FROM accounts WHERE LOWER(name) = LOWER(?1) LIMIT 1")
+            .map_err(|e| e.to_string())?;
+        let dup: Option<i32> = stmt_check
+            .query_row(params![new_trim], |row| row.get(0))
+            .optional()
+            .map_err(|e| e.to_string())?;
+        if let Some(existing_id) = dup {
+            if existing_id != id {
+                return Err("Account name already exists".to_string());
+            }
+        }
+    }
 
     conn.execute(
         "UPDATE accounts SET name = ?1 WHERE id = ?2",
-        params![new_name, id],
+        params![new_trim, id],
     )
     .map_err(|e| e.to_string())?;
 

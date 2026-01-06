@@ -62,3 +62,31 @@ fn test_get_accounts_returns_all() {
     assert!(accounts.iter().any(|a| a.name == "A"));
     assert!(accounts.iter().any(|a| a.name == "B"));
 }
+
+#[test]
+fn test_create_account_duplicate_should_error() {
+    let (_dir, db_path) = setup_db();
+    crate::create_account_db(&db_path, "Dup".to_string(), 0.0, "cash".to_string()).unwrap();
+    let res = crate::create_account_db(&db_path, "Dup".to_string(), 0.0, "cash".to_string());
+    assert!(res.is_err());
+
+    // Case-insensitive check
+    let res2 = crate::create_account_db(&db_path, "dup".to_string(), 0.0, "cash".to_string());
+    assert!(res2.is_err());
+} 
+
+#[test]
+fn test_create_duplicate_account_should_error() {
+    let (_dir, db_path) = setup_db();
+    crate::create_account_db(&db_path, "Dup".to_string(), 0.0, "cash".to_string()).unwrap();
+    let res = crate::create_account_db(&db_path, "Dup".to_string(), 0.0, "cash".to_string());
+    assert!(res.is_err());
+}
+
+#[test]
+fn test_create_duplicate_account_case_insensitive_should_error() {
+    let (_dir, db_path) = setup_db();
+    crate::create_account_db(&db_path, "FooBar".to_string(), 0.0, "cash".to_string()).unwrap();
+    let res = crate::create_account_db(&db_path, "foobar".to_string(), 0.0, "cash".to_string());
+    assert!(res.is_err());
+}

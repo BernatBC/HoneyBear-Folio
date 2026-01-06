@@ -1,6 +1,7 @@
 {
   "error.something_went_wrong": "Something went wrong rendering this view.",
   "error.check_console": "Check the developer console for details.",
+  "error.account_exists": "An account named \"{name}\" already exists.",
   "export.title": "Export Data",
   "export.select_format": "Select Format",
   "export.format.json": "JSON",
@@ -75,6 +76,8 @@
   "placeholder.account_name": "Account Name",
   "placeholder.initial_balance": "Initial Balance",
   "account.create": "Create Account",
+  "account.error.duplicate_name": "An account with this name already exists.",
+  "account.error.empty_name": "Account name cannot be empty.",
   "footer.import": "Import",
   "footer.export": "Export",
   "footer.settings": "Settings",
