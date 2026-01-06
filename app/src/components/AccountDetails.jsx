@@ -1365,16 +1365,24 @@ export default function AccountDetails({ account, onUpdate }) {
                             {account.kind !== "cash" && (
                               <>
                                 <td className="px-6 py-3">
-                                  <span className="text-slate-400 dark:text-slate-500">-</span>
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
                                 </td>
                                 <td className="px-6 py-3 text-right">
-                                  <span className="text-slate-400 dark:text-slate-500">-</span>
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
                                 </td>
                                 <td className="px-6 py-3 text-right">
-                                  <span className="text-slate-400 dark:text-slate-500">-</span>
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
                                 </td>
                                 <td className="px-6 py-3 text-right">
-                                  <span className="text-slate-400 dark:text-slate-500">-</span>
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    -
+                                  </span>
                                 </td>
                               </>
                             )}
