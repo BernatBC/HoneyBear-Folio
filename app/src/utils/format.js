@@ -42,7 +42,7 @@ export function formatNumberWithLocale(value, locale, options = {}) {
         return `${sign}${symbol}${formattedValue}`;
       } else {
         // Right: -10.00 € or 10.00 €
-        return `${sign}${formattedValue} ${symbol}`;
+        return `${sign}${formattedValue}\u00A0${symbol}`;
       }
     }
   }
@@ -111,7 +111,7 @@ export function useFormatNumber() {
         if (currencyDef.position === "left") {
           return `${sign}${symbol}${masked}`;
         } else {
-          return `${sign}${masked} ${symbol}`;
+          return `${sign}${masked}\u00A0${symbol}`;
         }
       }
 
