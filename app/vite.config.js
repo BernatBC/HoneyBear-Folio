@@ -69,9 +69,11 @@ export default defineConfig(async () => ({
             "@tauri-apps/api",
             "@tauri-apps/plugin-dialog",
             "@tauri-apps/plugin-fs",
+            "@tauri-apps/plugin-process",
+            "@tauri-apps/plugin-updater",
           ],
-          // Split UI icons into their own chunk
-          "ui-vendor": ["lucide-react"],
+          // Split UI icons and components into their own chunk
+          "ui-vendor": ["lucide-react", "react-datepicker", "react-markdown"],
         },
       },
     },
