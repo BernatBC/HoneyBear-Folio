@@ -38,6 +38,12 @@ export default function Sidebar({
   onSelectAccount,
   onUpdate,
   onClose,
+  // optional resize props
+  sidebarWidth,
+  containerRef,
+  onResizeCommit,
+  maxWidth = 520,
+  hideThreshold = 96,
 }) {
   const [isAdding, setIsAdding] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -56,6 +62,109 @@ export default function Sidebar({
   const parseNumber = useParseNumber();
   const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
   const { showToast } = useToast();
+
+  // Resizing state & handlers
+  const [isDragging, setIsDragging] = useState(false);
+
+  function startDrag(e) {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth =
+      sidebarWidth || containerRef?.current?.offsetWidth || 320;
+    setIsDragging(true);
+    if (containerRef?.current) containerRef.current.classList.add("resizing");
+    document.body.style.userSelect = "none";
+
+    let lastW = startWidth;
+    let rafId = null;
+
+    function onMove(ev) {
+      const currentX = ev.clientX;
+      const delta = currentX - startX;
+      let newW = Math.round(startWidth + delta);
+      if (typeof maxWidth === "number") newW = Math.min(newW, maxWidth);
+      // Clamp to minimum instead of hiding
+      if (newW < (hideThreshold || 96)) {
+        newW = hideThreshold || 96;
+      }
+      lastW = newW;
+      if (containerRef?.current) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          containerRef.current.style.width = `${newW}px`;
+          containerRef.current.style.minWidth = `${newW}px`;
+        });
+      }
+    }
+
+    function onUp() {
+      cleanup();
+      if (typeof onResizeCommit === "function") onResizeCommit(lastW);
+    }
+
+    function cleanup() {
+      setIsDragging(false);
+      document.body.style.userSelect = "";
+      if (containerRef?.current) containerRef.current.classList.remove("resizing");
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    }
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }
+
+  function startTouch(e) {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const startX = touch.clientX;
+    const startWidth =
+      sidebarWidth || containerRef?.current?.offsetWidth || 320;
+    setIsDragging(true);
+    if (containerRef?.current) containerRef.current.classList.add("resizing");
+    document.body.style.userSelect = "none";
+
+    let lastW = startWidth;
+    let rafId = null;
+
+    function onMove(ev) {
+      const t = ev.touches[0];
+      if (!t) return;
+      const delta = t.clientX - startX;
+      let newW = Math.round(startWidth + delta);
+      if (typeof maxWidth === "number") newW = Math.min(newW, maxWidth);
+      // Clamp to minimum instead of hiding
+      if (newW < (hideThreshold || 96)) {
+        newW = hideThreshold || 96;
+      }
+      lastW = newW;
+      if (containerRef?.current) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          containerRef.current.style.width = `${newW}px`;
+          containerRef.current.style.minWidth = `${newW}px`;
+        });
+      }
+    }
+
+    function onEnd() {
+      cleanup();
+      if (typeof onResizeCommit === "function") onResizeCommit(lastW);
+    }
+
+    function cleanup() {
+      setIsDragging(false);
+      document.body.style.userSelect = "";
+      if (containerRef?.current) containerRef.current.classList.remove("resizing");
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onEnd);
+    }
+
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onEnd);
+  }
 
   async function handleAddAccount(e) {
     e.preventDefault();
@@ -373,6 +482,17 @@ export default function Sidebar({
       {showSettingsModal && (
         <SettingsModal onClose={() => setShowSettingsModal(false)} />
       )}
+
+      {/* Resize handle */}
+      <div
+        className={`sidebar-resizer ${isDragging ? "dragging" : ""}`}
+        onMouseDown={startDrag}
+        onTouchStart={startTouch}
+        title="Resize sidebar"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize sidebar"
+      />
     </div>
   );
 }
@@ -392,4 +512,10 @@ Sidebar.propTypes = {
   onSelectAccount: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  // optional resizing props
+  sidebarWidth: PropTypes.number,
+  containerRef: PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
+  onResizeCommit: PropTypes.func,
+  maxWidth: PropTypes.number,
+  hideThreshold: PropTypes.number,
 };

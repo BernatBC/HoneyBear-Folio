@@ -3,7 +3,48 @@
 
 @layer components {
   .sidebar-container {
-    @apply w-80 bg-slate-900 dark:bg-slate-950 text-slate-300 h-screen flex flex-col border-r border-slate-800 dark:border-slate-900 shadow-2xl z-10;
+    @apply bg-slate-900 dark:bg-slate-950 text-slate-300 h-screen flex flex-col border-r border-slate-800 dark:border-slate-900 shadow-2xl z-10 relative w-full;
+    width: 100%;
+  }
+
+  .sidebar-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 10px;
+    cursor: col-resize;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-resizer::before {
+    content: '';
+    width: 3px;
+    height: 40px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    transition: background .12s ease, transform .08s ease;
+    transform: translateX(1px);
+  }
+
+  .sidebar-resizer:hover::before,
+  .sidebar-resizer.dragging::before {
+    background: rgba(255,255,255,0.12);
+    transform: scaleX(1.2);
+  }
+
+  @media (max-width: 640px) {
+    .sidebar-resizer {
+      display: none;
+    }
+  }
+
+  /* When an ancestor has the 'resizing' class we want to disable width transitions for performance */
+  .resizing {
+    transition: none !important;
   }
 
   .sidebar-header {

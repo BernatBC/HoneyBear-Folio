@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import Sidebar from "./components/Sidebar";
 import { computeNetWorth } from "./utils/networth";
@@ -127,6 +127,31 @@ function App() {
     }
   }, []);
 
+  // Sidebar sizing state
+  const DEFAULT_SIDEBAR_WIDTH = 320;
+  const MAX_SIDEBAR_WIDTH = 520;
+  const HIDE_THRESHOLD = 96;
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    try {
+      const stored = localStorage.getItem("hb_sidebar_width");
+      const parsed = stored ? parseInt(stored, 10) : DEFAULT_SIDEBAR_WIDTH;
+      return Math.max(parsed, HIDE_THRESHOLD);
+    } catch (e) {
+      return DEFAULT_SIDEBAR_WIDTH;
+    }
+  });
+
+  // Reference to wrapper so Sidebar can update width directly while dragging
+  const sidebarContainerRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("hb_sidebar_width", String(sidebarWidth));
+    } catch (e) {
+      // ignore
+    }
+  }, [sidebarWidth]);
+
   // Calculate total balance
 
   const totalBalance = computeNetWorth(accounts, marketValues);
@@ -193,18 +218,30 @@ function App() {
                 <UpdateNotification />
                 <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
                   <div
-                    className={`transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 ${
-                      isSidebarOpen ? "w-80" : "w-0"
-                    }`}
+                    ref={sidebarContainerRef}
+                    className={`transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0`}
+                    style={{
+                      width: isSidebarOpen ? `${sidebarWidth}px` : 0,
+                      minWidth: isSidebarOpen ? `${sidebarWidth}px` : 0,
+                    }}
                   >
-                    <div className="w-80 h-full">
+                    <div className="h-full w-full">
                       <Sidebar
                         accounts={accounts}
                         marketValues={marketValues}
                         selectedId={selectedAccountId}
                         onSelectAccount={setSelectedAccountId}
                         onUpdate={handleAccountUpdate}
+                        sidebarWidth={sidebarWidth}
+                        containerRef={sidebarContainerRef}
+                        onResizeCommit={(w) =>
+                          setSidebarWidth(
+                            Math.max(Math.min(w, MAX_SIDEBAR_WIDTH), HIDE_THRESHOLD),
+                          )
+                        }
                         onClose={() => setIsSidebarOpen(false)}
+                        maxWidth={MAX_SIDEBAR_WIDTH}
+                        hideThreshold={HIDE_THRESHOLD}
                       />
                     </div>
                   </div>
