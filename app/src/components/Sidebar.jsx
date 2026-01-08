@@ -391,4 +391,5 @@ Sidebar.propTypes = {
     .isRequired,
   onSelectAccount: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
