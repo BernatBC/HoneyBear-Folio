@@ -135,13 +135,15 @@
 
   .account-transactions-table thead th {
     padding: var(--hb-tx-cell-py) var(--hb-tx-cell-px) !important;
-    font-size: 0.75rem !important; /* text-xs */
+    /* Make font-size grow up to 25% but never shrink below 1.0 */
+    font-size: calc(0.75rem * clamp(1.0, (var(--hb-tx-cell-py) / 12px), 1.25)) !important; /* text-xs scaled (1.0–1.2) */
   }
 
   /* Use explicit padding + font-size to ensure we override utility classes in cells */
   .account-transactions-table tbody td {
     padding: var(--hb-tx-cell-py) var(--hb-tx-cell-px) !important;
-    font-size: 0.75rem !important; /* text-xs */
+    /* Make font-size grow up to 25% but never shrink below 1.0 */
+    font-size: calc(0.75rem * clamp(1.0, (var(--hb-tx-cell-py) / 12px), 1.25)) !important; /* text-xs scaled (1.0–1.2) */
   }
 
   /* Make inputs and rounded controls inside table smaller */
@@ -149,7 +151,8 @@
   .account-transactions-table .rounded-lg,
   .account-transactions-table .p-2 {
     padding: 0.25rem !important; /* p-1 */
-    font-size: 0.75rem !important;
+    /* Scale control fonts with row padding too (grow up to 20%) */
+    font-size: calc(0.75rem * clamp(1.0, (var(--hb-tx-cell-py) / 12px), 1.25)) !important;
   }
 
   /* Slightly reduce padding for buttons/icons that use p-2 */
