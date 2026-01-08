@@ -6,7 +6,7 @@ import AccountDetails from "./components/AccountDetails";
 import Dashboard from "./components/Dashboard";
 import InvestmentDashboard from "./components/InvestmentDashboard";
 import FireCalculator from "./components/FireCalculator";
-import { Wallet } from "lucide-react";
+import { Wallet, PanelLeftOpen } from "lucide-react";
 import "./styles/App.css";
 import { ToastProvider } from "./components/Toast";
 import { ConfirmDialogProvider } from "./components/ConfirmDialog";
@@ -20,6 +20,7 @@ import WelcomeWindow from "./components/WelcomeWindow";
 
 function App() {
   const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [accounts, setAccounts] = useState([]);
   const [marketValues, setMarketValues] = useState({});
@@ -191,15 +192,40 @@ function App() {
                 <ChartNumberFormatSync />
                 <UpdateNotification />
                 <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
-                  <Sidebar
-                    accounts={accounts}
-                    marketValues={marketValues}
-                    selectedId={selectedAccountId}
-                    onSelectAccount={setSelectedAccountId}
-                    onUpdate={handleAccountUpdate}
-                  />
+                  <div
+                    className={`transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 ${
+                      isSidebarOpen ? "w-80" : "w-0"
+                    }`}
+                  >
+                    <div className="w-80 h-full">
+                      <Sidebar
+                        accounts={accounts}
+                        marketValues={marketValues}
+                        selectedId={selectedAccountId}
+                        onSelectAccount={setSelectedAccountId}
+                        onUpdate={handleAccountUpdate}
+                        onClose={() => setIsSidebarOpen(false)}
+                      />
+                    </div>
+                  </div>
 
-                  <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+                  <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-900 relative">
+                    <div
+                      className={`absolute top-4 left-4 z-20 transition-all duration-300 ${
+                        !isSidebarOpen
+                          ? "opacity-100 translate-x-0"
+                          : "opacity-0 -translate-x-4 pointer-events-none"
+                      }`}
+                    >
+                      <button
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="p-2 bg-white dark:bg-slate-800 text-slate-500 hover:text-brand-600 rounded-lg shadow-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                        title="Show Sidebar"
+                        aria-label="Show Sidebar"
+                      >
+                        <PanelLeftOpen size={20} />
+                      </button>
+                    </div>
                     <div className="max-w-7xl mx-auto">
                       {selectedAccountId === "dashboard" ? (
                         <Dashboard

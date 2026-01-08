@@ -21,6 +21,7 @@ import {
   Settings,
   Eye,
   EyeOff,
+  PanelLeftClose,
 } from "lucide-react";
 import { getDisplayVersion, IS_RELEASE } from "../utils/version";
 import { computeNetWorth } from "../utils/networth";
@@ -36,6 +37,7 @@ export default function Sidebar({
   selectedId,
   onSelectAccount,
   onUpdate,
+  onClose,
 }) {
   const [isAdding, setIsAdding] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -111,14 +113,23 @@ export default function Sidebar({
     <div className="sidebar-container">
       {/* Header */}
       <div className="sidebar-header">
-        <div className="sidebar-logo-container">
-          <div className="sidebar-logo-icon">
-            <Wallet className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="sidebar-logo-container mb-0">
+            <div className="sidebar-logo-icon">
+              <Wallet className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="sidebar-title">{t("sidebar.title")}</h1>
+              <p className="sidebar-subtitle">{t("sidebar.subtitle")}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="sidebar-title">{t("sidebar.title")}</h1>
-            <p className="sidebar-subtitle">{t("sidebar.subtitle")}</p>
-          </div>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+            title="Hide Sidebar"
+          >
+            <PanelLeftClose className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Net Worth Card */}
