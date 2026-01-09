@@ -3,24 +3,21 @@ import { useFormatNumber } from "../utils/format";
 
 export default function AccountList({
   accounts,
-  kind,
+
   selectedId,
   onSelectAccount,
   marketValues,
   Icon,
 }) {
-  const filtered = accounts.filter((acc) => acc.kind === kind);
   const formatNumber = useFormatNumber();
 
   return (
     <div className="space-y-1">
-      {filtered.map((account) => {
+      {accounts.map((account) => {
         const value =
-          kind === "brokerage"
-            ? marketValues && marketValues[account.id] !== undefined
-              ? marketValues[account.id]
-              : account.balance
-            : account.balance;
+          marketValues && marketValues[account.id] !== undefined
+            ? Number(account.balance) + Number(marketValues[account.id])
+            : Number(account.balance);
 
         const formattedValue = formatNumber(value, { style: "currency" });
         const finalFormattedValue =
@@ -68,7 +65,6 @@ export default function AccountList({
 
 AccountList.propTypes = {
   accounts: PropTypes.array.isRequired,
-  kind: PropTypes.string.isRequired,
   selectedId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
     .isRequired,
   onSelectAccount: PropTypes.func.isRequired,

@@ -18,7 +18,6 @@ import {
   FileText,
   ArrowRightLeft,
   User,
-  ChevronDown,
   Edit,
 } from "lucide-react";
 import {
@@ -30,6 +29,7 @@ import {
 import { useNumberFormat } from "../contexts/number-format";
 import { useConfirm } from "../contexts/confirm";
 import NumberInput from "./NumberInput";
+import CustomSelect from "./CustomSelect";
 import { t } from "../i18n/i18n";
 
 export default function AccountDetails({ account, onUpdate }) {
@@ -84,6 +84,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
   const [amount, setAmount] = useState("");
+  const [transactionType, setTransactionType] = useState("cash");
 
   // Brokerage Form State
   const [ticker, setTicker] = useState("");
@@ -91,9 +92,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const [pricePerShare, setPricePerShare] = useState("");
   const [totalPrice, setTotalPrice] = useState("");
   const [fee, setFee] = useState("");
-  const [cashAccountId, setCashAccountId] = useState("");
-  const [cashAccountName, setCashAccountName] = useState("");
-  const [cashAccountSuggestions, setCashAccountSuggestions] = useState([]);
+  // Removed cashAccountId/Name/Suggestions as we are unified now
   const [isBuy, setIsBuy] = useState(true);
 
   async function fetchSuggestions() {
@@ -155,18 +154,6 @@ export default function AccountDetails({ account, onUpdate }) {
           type: "category",
         })),
       );
-
-      // Set default cash account if available
-      const cashAcc = otherAccounts.find((a) => a.kind === "cash");
-      if (cashAcc) {
-        setCashAccountId(cashAcc.id);
-        setCashAccountName(cashAcc.name);
-      }
-
-      const cashOptions = otherAccounts
-        .filter((a) => a.kind === "cash")
-        .map((a) => ({ value: a.name, label: "Account", type: "account" }));
-      setCashAccountSuggestions(cashOptions);
     } catch (e) {
       console.error("Failed to fetch suggestions:", e);
     }
@@ -239,13 +226,16 @@ export default function AccountDetails({ account, onUpdate }) {
 
   // Auto-set category to Transfer if payee is an account
   useEffect(() => {
-    if (availableAccounts.includes(payee)) {
+    if (availableAccounts?.some((a) => a.name === payee)) {
       setCategory("Transfer");
     }
   }, [payee, availableAccounts]);
 
   useEffect(() => {
-    if (editForm.payee && availableAccounts.includes(editForm.payee)) {
+    if (
+      editForm.payee &&
+      availableAccounts?.some((a) => a.name === editForm.payee)
+    ) {
       setEditForm((prev) => ({ ...prev, category: "Transfer" }));
     }
   }, [editForm.payee, availableAccounts]);
@@ -350,19 +340,10 @@ export default function AccountDetails({ account, onUpdate }) {
         return;
       }
 
-      if (target.kind === "brokerage") {
-        if (!cashAccountId) {
-          await confirm(t("confirm.invalid_cash_account"), {
-            title: t("confirm.invalid_input_title"),
-            kind: "error",
-            showCancel: false,
-          });
-          return;
-        }
-        await invoke("create_brokerage_transaction", {
+      if (transactionType === "investment") {
+        await invoke("create_investment_transaction", {
           args: {
-            brokerageAccountId: target.id,
-            cashAccountId: parseInt(cashAccountId),
+            accountId: target.id,
             date,
             ticker,
             shares: parseNumber(shares),
@@ -418,7 +399,7 @@ export default function AccountDetails({ account, onUpdate }) {
 
   async function saveEdit() {
     try {
-      // If this is a brokerage transaction (has ticker), call the brokerage-specific update
+      // If this is a brokerage transaction (has ticker), call the investment-specific update
       if (editForm.ticker) {
         const shares = Math.abs(parseNumber(editForm.shares) || 0);
         const pricePerShare = parseNumber(editForm.price_per_share) || 0.0;
@@ -442,10 +423,10 @@ export default function AccountDetails({ account, onUpdate }) {
           if (!confirmed) return;
         }
 
-        await invoke("update_brokerage_transaction", {
+        await invoke("update_investment_transaction", {
           args: {
             id: editForm.id,
-            brokerageAccountId: editForm.account_id,
+            accountId: editForm.account_id,
             date: editForm.date,
             ticker: editForm.ticker,
             shares: shares,
@@ -531,11 +512,14 @@ export default function AccountDetails({ account, onUpdate }) {
     );
   });
 
+  const hasInvestment = useMemo(() => {
+    return transactions.some(
+      (tx) => tx.ticker || (tx.shares && tx.shares !== 0),
+    );
+  }, [transactions]);
+
   // When viewing the consolidated "All" view, allow adding to a selected account
   const effectiveAddTarget = account.id === "all" ? addTargetAccount : account;
-  const effectiveKind = effectiveAddTarget
-    ? effectiveAddTarget.kind
-    : account.kind;
 
   return (
     <div className="max-w-full pb-8">
@@ -616,29 +600,21 @@ export default function AccountDetails({ account, onUpdate }) {
           </div>
           <div className="flex items-center gap-3">
             {account.id === "all" && availableAccounts.length > 0 && (
-              <div className="relative">
-                <select
+              <div className="relative w-64">
+                <CustomSelect
                   value={addTargetAccount ? addTargetAccount.id : ""}
-                  onChange={(e) => {
+                  onChange={(val) => {
                     const selected = availableAccounts.find(
-                      (a) => String(a.id) === String(e.target.value),
+                      (a) => String(a.id) === String(val),
                     );
                     setAddTargetAccount(selected || null);
                   }}
-                  className="px-3 py-2 pr-10 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 appearance-none"
-                  aria-label="Select account to add transaction"
-                >
-                  {availableAccounts.map((a) => (
-                    <option
-                      key={a.id}
-                      value={a.id}
-                      className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                    >
-                      {a.name} ({a.kind})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-400 pointer-events-none" />
+                  options={availableAccounts.map((a) => ({
+                    value: a.id,
+                    label: a.name,
+                  }))}
+                  placeholder="Select Account"
+                />
               </div>
             )}
 
@@ -725,22 +701,51 @@ export default function AccountDetails({ account, onUpdate }) {
       {/* Add Transaction Form */}
       {isAdding && (
         <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 py-4 px-4 lg:px-6 rounded-2xl border-2 border-brand-200 dark:border-brand-800 shadow-xl mb-8 animate-slide-in">
-          <h3 className="text-lg font-bold mb-6 text-slate-900 dark:text-slate-100 flex items-center gap-3">
-            <div className="bg-brand-100 dark:bg-brand-900/30 p-2.5 rounded-xl">
-              <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-            </div>
-            New Transaction
-            {account.id === "all" && effectiveAddTarget && (
-              <span className="ml-3 text-sm text-slate-500 dark:text-slate-400">
-                for{" "}
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {effectiveAddTarget.name}
+          <div className="flex items-start justify-between mb-6">
+            <h3 className="text-lg font-bold mb-0 text-slate-900 dark:text-slate-100 flex items-center gap-3">
+              <div className="bg-brand-100 dark:bg-brand-900/30 p-2.5 rounded-xl">
+                <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+              </div>
+              New Transaction
+              {account.id === "all" && effectiveAddTarget && (
+                <span className="ml-3 text-sm text-slate-500 dark:text-slate-400">
+                  for{" "}
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {effectiveAddTarget.name}
+                  </span>
                 </span>
-              </span>
-            )}
-          </h3>
+              )}
+            </h3>
 
-          {effectiveKind === "brokerage" ? (
+            <div className="ml-4">
+              <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex">
+                <button
+                  type="button"
+                  onClick={() => setTransactionType("cash")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    transactionType === "cash"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                  }`}
+                >
+                  Cash
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTransactionType("investment")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    transactionType === "investment"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                  }`}
+                >
+                  Investment
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {transactionType === "investment" ? (
             <form
               onSubmit={handleAddTransaction}
               className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
@@ -801,31 +806,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                  Cash Account
-                </label>
-                <AutocompleteInput
-                  suggestions={cashAccountSuggestions}
-                  placeholder="Select Account"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  value={cashAccountName}
-                  required
-                  onChange={(val) => {
-                    setCashAccountName(val);
-                    const selected = availableAccounts.find(
-                      (a) => a.name === val && a.kind === "cash",
-                    );
-                    if (selected) {
-                      setCashAccountId(selected.id);
-                    } else {
-                      setCashAccountId("");
-                    }
-                  }}
-                />
-              </div>
-
-              <div className="md:col-span-4 relative">
+              <div className="md:col-span-2 relative">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Ticker
                 </label>
@@ -872,7 +853,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 )}
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
@@ -890,7 +871,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 />
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Price / Share
                 </label>
@@ -910,7 +891,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Total Price
                 </label>
@@ -950,13 +931,13 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-4 flex justify-end mt-2">
+              <div className="md:col-span-12 flex justify-end mt-2">
                 <button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
                 >
                   <Check className="w-4 h-4" />
-                  Save Transaction
+                  Save Investment
                 </button>
               </div>
             </form>
@@ -1019,13 +1000,13 @@ export default function AccountDetails({ account, onUpdate }) {
                     suggestions={categorySuggestions}
                     placeholder="Category"
                     className={`w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-600 ${
-                      availableAccounts.includes(payee)
+                      availableAccounts?.some((a) => a.name === payee)
                         ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                         : ""
                     }`}
                     value={category}
                     onChange={setCategory}
-                    disabled={availableAccounts.includes(payee)}
+                    disabled={availableAccounts?.some((a) => a.name === payee)}
                   />
                 </div>
               </div>
@@ -1100,7 +1081,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
                   Payee
                 </th>
-                {account.kind !== "cash" && (
+                {hasInvestment && (
                   <>
                     <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-48">
                       Ticker
@@ -1134,10 +1115,10 @@ export default function AccountDetails({ account, onUpdate }) {
                   <td
                     colSpan={
                       account.id === "all"
-                        ? account.kind === "cash"
+                        ? !hasInvestment
                           ? "7"
                           : "11"
-                        : account.kind === "cash"
+                        : !hasInvestment
                           ? "6"
                           : "10"
                     }
@@ -1194,7 +1175,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         )}
 
                         {/* If brokerage tx, show brokerage-specific editable fields (only for non-cash views) */}
-                        {account.kind !== "cash" && editForm.ticker ? (
+                        {hasInvestment && editForm.ticker ? (
                           <>
                             <td className="px-6 py-3">
                               <div className="flex items-center gap-3">
@@ -1385,7 +1366,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             </td>
 
                             {/* If the table includes brokerage columns (non-cash views), insert placeholders so columns stay aligned */}
-                            {account.kind !== "cash" && (
+                            {hasInvestment && (
                               <>
                                 <td className="px-6 py-3">
                                   <span className="text-slate-400 dark:text-slate-500">
@@ -1413,7 +1394,13 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <AutocompleteInput
                                 suggestions={categorySuggestions}
-                                className={`w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${availableAccounts.includes(editForm.payee) ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400" : ""}`}
+                                className={`w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${
+                                  availableAccounts?.some(
+                                    (a) => a.name === editForm.payee,
+                                  )
+                                    ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                    : ""
+                                }`}
                                 value={editForm.category || ""}
                                 onChange={(val) =>
                                   setEditForm({
@@ -1421,8 +1408,8 @@ export default function AccountDetails({ account, onUpdate }) {
                                     category: val,
                                   })
                                 }
-                                disabled={availableAccounts.includes(
-                                  editForm.payee,
+                                disabled={availableAccounts?.some(
+                                  (a) => a.name === editForm.payee,
                                 )}
                               />
                             </td>
@@ -1502,7 +1489,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           {tx.payee}
                         </td>
 
-                        {account.kind !== "cash" && (
+                        {hasInvestment && (
                           <>
                             <td
                               className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer text-slate-700 dark:text-slate-300"

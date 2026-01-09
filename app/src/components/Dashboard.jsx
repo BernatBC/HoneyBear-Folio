@@ -88,6 +88,9 @@ export default function Dashboard({
         const pricesMap = {};
         for (const ticker of tickers) {
           const prices = await invoke("get_daily_stock_prices", { ticker });
+          // Sort prices by date ascending to ensure getPrice binary search/linear scan works
+          prices.sort((a, b) => (a.date > b.date ? 1 : -1));
+
           // Convert to map for faster lookup: date -> price
           const priceByDate = {};
           prices.forEach((p) => {
@@ -210,39 +213,29 @@ export default function Dashboard({
     const totalData = sortedDates.map((date) => {
       let total = 0;
       accounts.forEach((acc) => {
-        if (acc.kind === "brokerage") {
-          const initial = accountInitialBalances[acc.id];
-          const accTxs = transactions.filter(
-            (t) => t.account_id === acc.id && t.date <= date,
-          );
-          // Exclude trade transactions (ticker with shares) when computing cash balance
-          const cashTxs = accTxs.filter((t) => !(t.ticker && t.shares));
-          const cashChange = cashTxs.reduce((sum, t) => sum + t.amount, 0);
-          const cashBalance = initial + cashChange;
+        const initial = accountInitialBalances[acc.id];
+        const accTxs = transactions.filter(
+          (t) => t.account_id === acc.id && t.date <= date,
+        );
+        // Include all transactions (even stock buys/sells) to get correct cash balance
+        const cashChange = accTxs.reduce((sum, t) => sum + t.amount, 0);
+        const cashBalance = initial + cashChange;
 
-          const holdings = {};
-          accTxs.forEach((t) => {
-            if (t.ticker && t.shares) {
-              holdings[t.ticker] = (holdings[t.ticker] || 0) + t.shares;
-            }
-          });
-
-          let stockValue = 0;
-          for (const [ticker, shares] of Object.entries(holdings)) {
-            if (Math.abs(shares) > 0.0001) {
-              const price = getPrice(ticker, date);
-              stockValue += shares * price;
-            }
+        const holdings = {};
+        accTxs.forEach((t) => {
+          if (t.ticker && t.shares) {
+            holdings[t.ticker] = (holdings[t.ticker] || 0) + t.shares;
           }
-          total += cashBalance + stockValue;
-        } else {
-          const initial = accountInitialBalances[acc.id];
-          const accTxs = transactions.filter(
-            (t) => t.account_id === acc.id && t.date <= date,
-          );
-          const change = accTxs.reduce((sum, t) => sum + t.amount, 0);
-          total += initial + change;
+        });
+
+        let stockValue = 0;
+        for (const [ticker, shares] of Object.entries(holdings)) {
+          if (Math.abs(shares) > 0.0001) {
+            const price = getPrice(ticker, date);
+            stockValue += shares * price;
+          }
         }
+        total += cashBalance + stockValue;
       });
       return total;
     });
@@ -277,39 +270,29 @@ export default function Dashboard({
     // Individual Account Datasets
     accounts.forEach((acc, index) => {
       const accData = sortedDates.map((date) => {
-        if (acc.kind === "brokerage") {
-          const initial = accountInitialBalances[acc.id];
-          const accTxs = transactions.filter(
-            (t) => t.account_id === acc.id && t.date <= date,
-          );
-          // Exclude trade transactions (ticker with shares) when computing cash balance
-          const cashTxs = accTxs.filter((t) => !(t.ticker && t.shares));
-          const cashChange = cashTxs.reduce((sum, t) => sum + t.amount, 0);
-          const cashBalance = initial + cashChange;
+        const initial = accountInitialBalances[acc.id];
+        const accTxs = transactions.filter(
+          (t) => t.account_id === acc.id && t.date <= date,
+        );
+        // Include all transactions (even stock buys/sells) to get correct cash balance
+        const cashChange = accTxs.reduce((sum, t) => sum + t.amount, 0);
+        const cashBalance = initial + cashChange;
 
-          const holdings = {};
-          accTxs.forEach((t) => {
-            if (t.ticker && t.shares) {
-              holdings[t.ticker] = (holdings[t.ticker] || 0) + t.shares;
-            }
-          });
-
-          let stockValue = 0;
-          for (const [ticker, shares] of Object.entries(holdings)) {
-            if (Math.abs(shares) > 0.0001) {
-              const price = getPrice(ticker, date);
-              stockValue += shares * price;
-            }
+        const holdings = {};
+        accTxs.forEach((t) => {
+          if (t.ticker && t.shares) {
+            holdings[t.ticker] = (holdings[t.ticker] || 0) + t.shares;
           }
-          return cashBalance + stockValue;
-        } else {
-          const initial = accountInitialBalances[acc.id];
-          const accTxs = transactions.filter(
-            (t) => t.account_id === acc.id && t.date <= date,
-          );
-          const change = accTxs.reduce((sum, t) => sum + t.amount, 0);
-          return initial + change;
+        });
+
+        let stockValue = 0;
+        for (const [ticker, shares] of Object.entries(holdings)) {
+          if (Math.abs(shares) > 0.0001) {
+            const price = getPrice(ticker, date);
+            stockValue += shares * price;
+          }
         }
+        return cashBalance + stockValue;
       });
 
       const color = colors[index % colors.length];
@@ -1011,10 +994,8 @@ export default function Dashboard({
                       <span className="account-name">{acc.name}</span>
                       <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">
                         {formatNumber(
-                          acc.kind === "brokerage" &&
-                            marketValues &&
-                            marketValues[acc.id] !== undefined
-                            ? marketValues[acc.id]
+                          marketValues && marketValues[acc.id] !== undefined
+                            ? (acc.balance || 0) + marketValues[acc.id]
                             : acc.balance || 0,
                           { style: "currency" },
                         )}

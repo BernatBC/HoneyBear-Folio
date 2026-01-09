@@ -3,8 +3,7 @@ use super::common::setup_db;
 #[test]
 fn test_get_payees_and_categories() {
     let (_dir, db_path) = setup_db();
-    let acc =
-        crate::create_account_db(&db_path, "A".to_string(), 100.0, "cash".to_string()).unwrap();
+    let acc = crate::create_account_db(&db_path, "A".to_string(), 100.0).unwrap();
 
     crate::create_transaction_db(
         &db_path,
@@ -40,8 +39,7 @@ fn test_get_payees_and_categories() {
     .unwrap();
 
     // Add a transfer (should be categorized as Transfer and not show as category)
-    let acc2 =
-        crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, "cash".to_string()).unwrap();
+    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0).unwrap();
     crate::create_transaction_db(
         &db_path,
         crate::CreateTransactionArgs {
@@ -84,7 +82,7 @@ fn test_get_payees_and_categories_empty() {
 fn test_payees_and_categories_sorted() {
     let (_dir, db_path) = setup_db();
     // Use zero opening balance to avoid the "Opening Balance" payee
-    let acc = crate::create_account_db(&db_path, "A".to_string(), 0.0, "cash".to_string()).unwrap();
+    let acc = crate::create_account_db(&db_path, "A".to_string(), 0.0).unwrap();
     crate::create_transaction_db(
         &db_path,
         crate::CreateTransactionArgs {

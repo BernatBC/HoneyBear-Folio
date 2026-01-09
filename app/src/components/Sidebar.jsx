@@ -44,8 +44,8 @@ export default function Sidebar({
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [newAccountName, setNewAccountName] = useState("");
+
   const [newAccountBalance, setNewAccountBalance] = useState("");
-  const [newAccountType, setNewAccountType] = useState("cash");
 
   // Compute total balance using helper so logic is shared with Dashboard/App
   const totalBalance = computeNetWorth(accounts, marketValues);
@@ -80,16 +80,13 @@ export default function Sidebar({
     }
 
     try {
-      const balance =
-        newAccountType === "cash" ? parseNumber(newAccountBalance) || 0.0 : 0.0;
+      const balance = parseNumber(newAccountBalance) || 0.0;
       await invoke("create_account", {
         name: nameTrimmed,
         balance,
-        kind: newAccountType,
       });
       setNewAccountName("");
       setNewAccountBalance("");
-      setNewAccountType("cash");
       setIsAdding(false);
       onUpdate();
     } catch (e) {
@@ -232,16 +229,15 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Cash Accounts */}
+        {/* Accounts */}
         <div>
           <div className="sidebar-section-header">
             <h2 className="sidebar-section-title-inline">
-              {t("accounts.cash")}
+              {t("accounts.accounts")}
             </h2>
             <button
               onClick={() => {
                 setIsAdding(true);
-                setNewAccountType("cash");
               }}
               className="sidebar-add-button"
             >
@@ -251,37 +247,10 @@ export default function Sidebar({
 
           <AccountList
             accounts={accounts}
-            kind="cash"
-            selectedId={selectedId}
-            onSelectAccount={onSelectAccount}
-            Icon={CreditCard}
-          />
-        </div>
-
-        {/* Brokerage Accounts */}
-        <div>
-          <div className="sidebar-section-header">
-            <h2 className="sidebar-section-title-inline">
-              {t("accounts.brokerage")}
-            </h2>
-            <button
-              onClick={() => {
-                setIsAdding(true);
-                setNewAccountType("brokerage");
-              }}
-              className="sidebar-add-button"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-
-          <AccountList
-            accounts={accounts}
-            kind="brokerage"
             selectedId={selectedId}
             onSelectAccount={onSelectAccount}
             marketValues={marketValues}
-            Icon={TrendingUp}
+            Icon={CreditCard}
           />
         </div>
         {isAdding && (
@@ -289,7 +258,7 @@ export default function Sidebar({
             <form onSubmit={handleAddAccount} className="sidebar-form">
               <div className="sidebar-form-header">
                 <span className="sidebar-form-title">
-                  New {newAccountType === "cash" ? "Cash" : "Brokerage"} Account
+                  {t("account.new_account")}
                 </span>
                 <button
                   type="button"
@@ -307,16 +276,14 @@ export default function Sidebar({
                 className="sidebar-input"
                 autoFocus
               />
-              {newAccountType === "cash" && (
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="Initial Balance"
-                  value={newAccountBalance}
-                  onChange={(e) => setNewAccountBalance(e.target.value)}
-                  className="sidebar-input"
-                />
-              )}
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="Initial Balance"
+                value={newAccountBalance}
+                onChange={(e) => setNewAccountBalance(e.target.value)}
+                className="sidebar-input"
+              />
               <button type="submit" className="sidebar-submit-button">
                 <Check className="w-4 h-4" />
                 <span className="text-white">Create Account</span>
