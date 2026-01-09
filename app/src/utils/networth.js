@@ -12,21 +12,14 @@ export function computeNetWorth(accounts = [], marketValues = {}) {
     if (!acc) return sum;
 
     const balanceNumeric = toNumeric(acc.balance);
-
-    if (acc.kind === "brokerage") {
-      const mv = toNumeric(marketValues?.[acc.id]);
-      // Prefer valid numeric market value; otherwise fall back to account balance (if numeric), otherwise 0
-      return (
-        sum +
-        (Number.isNaN(mv)
-          ? Number.isNaN(balanceNumeric)
-            ? 0
-            : balanceNumeric
-          : mv)
-      );
-    }
-
-    return sum + (Number.isNaN(balanceNumeric) ? 0 : balanceNumeric);
+    const mv = toNumeric(marketValues?.[acc.id]);
+    
+    // Always add market value if it exists, regardless of account 'kind' (which is deprecated/unified)
+    return (
+      sum +
+      (Number.isNaN(balanceNumeric) ? 0 : balanceNumeric) +
+      (Number.isNaN(mv) ? 0 : mv)
+    );
   }, 0);
 }
 

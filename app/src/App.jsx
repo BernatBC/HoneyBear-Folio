@@ -152,8 +152,8 @@ function App() {
         ...acc,
         balance:
           marketValues[acc.id] !== undefined
-            ? marketValues[acc.id]
-            : acc.balance,
+            ? Number(acc.balance) + Number(marketValues[acc.id])
+            : Number(acc.balance),
       };
     }
   }

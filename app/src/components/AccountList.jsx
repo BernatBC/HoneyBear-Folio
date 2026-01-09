@@ -16,8 +16,8 @@ export default function AccountList({
       {accounts.map((account) => {
         const value =
           marketValues && marketValues[account.id] !== undefined
-            ? marketValues[account.id]
-            : account.balance;
+            ? Number(account.balance) + Number(marketValues[account.id])
+            : Number(account.balance);
 
         const formattedValue = formatNumber(value, { style: "currency" });
         const finalFormattedValue =
