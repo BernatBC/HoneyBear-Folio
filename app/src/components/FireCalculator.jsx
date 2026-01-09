@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useFormatNumber } from "../utils/format";
 import useIsDark from "../hooks/useIsDark";
+import { t } from "../i18n/i18n";
 import {
   buildHoldingsFromTransactions,
   mergeHoldingsWithQuotes,
@@ -275,7 +276,7 @@ export default function FireCalculator() {
     };
   }, []);
 
-  const { fireNumber, yearsToFire, chartData } = useMemo(() => {
+  const { fireNumber, yearsToFire, chartData, neverReached } = useMemo(() => {
     const fireNum = annualExpenses / (withdrawalRate / 100);
 
     let years = 0;
@@ -297,7 +298,8 @@ export default function FireCalculator() {
 
     return {
       fireNumber: fireNum,
-      yearsToFire: years > 0 ? years : "> 50",
+      yearsToFire: years > 0 ? years : null,
+      neverReached: years === 0,
       chartData: {
         labels,
         datasets: [
@@ -504,9 +506,15 @@ export default function FireCalculator() {
                 <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">
                   Time to FIRE
                 </p>
-                <p className="text-3xl font-bold text-emerald-900 dark:text-emerald-100">
-                  {yearsToFire} Years
-                </p>
+                {neverReached ? (
+                  <p className="text-xl font-medium text-emerald-900 dark:text-emerald-100">
+                    {t("fire.never_retire")}
+                  </p>
+                ) : (
+                  <p className="text-3xl font-bold text-emerald-900 dark:text-emerald-100">
+                    {yearsToFire} Years
+                  </p>
+                )}
               </div>
               <div className="bg-emerald-500 dark:bg-emerald-600 p-4 rounded-2xl shadow-lg">
                 <Calendar className="w-8 h-8 text-white" />
