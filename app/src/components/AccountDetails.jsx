@@ -701,43 +701,46 @@ export default function AccountDetails({ account, onUpdate }) {
       {/* Add Transaction Form */}
       {isAdding && (
         <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 py-4 px-4 lg:px-6 rounded-2xl border-2 border-brand-200 dark:border-brand-800 shadow-xl mb-8 animate-slide-in">
-          <h3 className="text-lg font-bold mb-6 text-slate-900 dark:text-slate-100 flex items-center gap-3">
-            <div className="bg-brand-100 dark:bg-brand-900/30 p-2.5 rounded-xl">
-              <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-            </div>
-            New Transaction
-            {account.id === "all" && effectiveAddTarget && (
-              <span className="ml-3 text-sm text-slate-500 dark:text-slate-400">
-                for{" "}
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {effectiveAddTarget.name}
-                </span>
-              </span>
-            )}
-          </h3>
 
-          <div className="flex justify-center mb-6">
-            <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex">
-              <button
-                type="button"
-                onClick={() => setTransactionType("cash")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${transactionType === "cash"
-                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                  }`}
-              >
-                Cash
-              </button>
-              <button
-                type="button"
-                onClick={() => setTransactionType("investment")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${transactionType === "investment"
-                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                  }`}
-              >
-                Investment
-              </button>
+          <div className="flex items-start justify-between mb-6">
+            <h3 className="text-lg font-bold mb-0 text-slate-900 dark:text-slate-100 flex items-center gap-3">
+              <div className="bg-brand-100 dark:bg-brand-900/30 p-2.5 rounded-xl">
+                <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+              </div>
+              New Transaction
+              {account.id === "all" && effectiveAddTarget && (
+                <span className="ml-3 text-sm text-slate-500 dark:text-slate-400">
+                  for{" "}
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {effectiveAddTarget.name}
+                  </span>
+                </span>
+              )}
+            </h3>
+
+            <div className="ml-4">
+              <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex">
+                <button
+                  type="button"
+                  onClick={() => setTransactionType("cash")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${transactionType === "cash"
+                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    }`}
+                >
+                  Cash
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTransactionType("investment")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${transactionType === "investment"
+                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    }`}
+                >
+                  Investment
+                </button>
+              </div>
             </div>
           </div>
 
