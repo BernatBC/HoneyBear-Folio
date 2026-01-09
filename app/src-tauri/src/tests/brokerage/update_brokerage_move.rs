@@ -46,8 +46,16 @@ fn test_update_investment_transaction_move_between_accounts() {
     // A should revert the change (+201) -> 1000.
     // B should apply the change (-201) -> 799.
     let accounts_final = crate::get_accounts_db(&db_path).unwrap();
-    let a_final = accounts_final.iter().find(|a| a.id == acc_a.id).unwrap().balance;
-    let b_final = accounts_final.iter().find(|a| a.id == acc_b.id).unwrap().balance;
+    let a_final = accounts_final
+        .iter()
+        .find(|a| a.id == acc_a.id)
+        .unwrap()
+        .balance;
+    let b_final = accounts_final
+        .iter()
+        .find(|a| a.id == acc_b.id)
+        .unwrap()
+        .balance;
 
     assert_eq!(a_final, 1000.0);
     assert_eq!(b_final, 799.0);

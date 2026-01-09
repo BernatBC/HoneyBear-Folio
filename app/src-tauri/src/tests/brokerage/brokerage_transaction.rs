@@ -4,12 +4,7 @@ use super::common::setup_db;
 fn test_investment_transaction_buy() {
     let (_dir, db_path) = setup_db();
     // Unified account
-    let acc = crate::create_account_db(
-        &db_path,
-        "Investment Account".to_string(),
-        1000.0,
-    )
-    .unwrap();
+    let acc = crate::create_account_db(&db_path, "Investment Account".to_string(), 1000.0).unwrap();
 
     let args = crate::CreateInvestmentTransactionArgs {
         account_id: acc.id,
@@ -41,12 +36,7 @@ fn test_investment_transaction_buy() {
 #[test]
 fn test_investment_transaction_sell() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(
-        &db_path,
-        "Investment Account".to_string(),
-        0.0,
-    )
-    .unwrap();
+    let acc = crate::create_account_db(&db_path, "Investment Account".to_string(), 0.0).unwrap();
 
     let args = crate::CreateInvestmentTransactionArgs {
         account_id: acc.id,
@@ -78,7 +68,7 @@ fn test_investment_transaction_sell() {
 #[test]
 fn test_create_investment_transaction_missing_account_should_error() {
     let (_dir, db_path) = setup_db();
-    
+
     let args = crate::CreateInvestmentTransactionArgs {
         account_id: -999,
         date: "2023-01-01".to_string(),

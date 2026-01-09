@@ -6,10 +6,8 @@ fn test_create_account_and_transaction_via_helpers() {
     let dir_path = dir.path().to_path_buf();
 
     // Create two accounts via helper that simulates command-layer DB path logic
-    let acc1 = crate::create_account_in_dir(&dir_path, "A".to_string(), 100.0)
-        .unwrap();
-    let acc2 =
-        crate::create_account_in_dir(&dir_path, "B".to_string(), 0.0).unwrap();
+    let acc1 = crate::create_account_in_dir(&dir_path, "A".to_string(), 100.0).unwrap();
+    let acc2 = crate::create_account_in_dir(&dir_path, "B".to_string(), 0.0).unwrap();
 
     assert_eq!(acc1.balance, 100.0);
 

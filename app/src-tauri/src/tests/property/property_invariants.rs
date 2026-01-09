@@ -17,8 +17,7 @@ fn test_randomized_balance_invariants() {
         } else {
             rng.random_range(0..500) as f64
         };
-        let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal)
-            .unwrap();
+        let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal).unwrap();
         accounts.push(acc);
     }
 

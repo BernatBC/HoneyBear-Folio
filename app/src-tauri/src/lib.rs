@@ -283,11 +283,7 @@ fn get_db_path_command(app_handle: AppHandle) -> Result<String, String> {
     Ok(pb.to_string_lossy().to_string())
 }
 
-fn create_account_db(
-    db_path: &PathBuf,
-    name: String,
-    balance: f64,
-) -> Result<Account, String> {
+fn create_account_db(db_path: &PathBuf, name: String, balance: f64) -> Result<Account, String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     // Trim name and validate non-empty
@@ -351,11 +347,7 @@ fn create_account_db(
 }
 
 #[tauri::command]
-fn create_account(
-    app_handle: AppHandle,
-    name: String,
-    balance: f64,
-) -> Result<Account, String> {
+fn create_account(app_handle: AppHandle, name: String, balance: f64) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
     create_account_db(&db_path, name, balance)
 }
@@ -524,11 +516,13 @@ fn create_transaction_db(
 
     if let Some(target_id) = target_account_info {
         // Get source account name for the target transaction's payee
-        let source_name: String = tx.query_row(
-            "SELECT name FROM accounts WHERE id = ?1",
-            params![args.account_id],
-            |row| row.get(0)
-        ).map_err(|e| e.to_string())?;
+        let source_name: String = tx
+            .query_row(
+                "SELECT name FROM accounts WHERE id = ?1",
+                params![args.account_id],
+                |row| row.get(0),
+            )
+            .map_err(|e| e.to_string())?;
 
         // Insert target transaction
         tx.execute(
@@ -987,7 +981,12 @@ fn update_investment_transaction_db(
     let investment_shares = if is_buy { shares } else { -shares };
 
     let final_notes = notes.unwrap_or_else(|| {
-        format!("{} {} shares of {}", if is_buy { "Bought" } else { "Sold" }, shares, ticker)
+        format!(
+            "{} {} shares of {}",
+            if is_buy { "Bought" } else { "Sold" },
+            shares,
+            ticker
+        )
     });
 
     tx.execute(
