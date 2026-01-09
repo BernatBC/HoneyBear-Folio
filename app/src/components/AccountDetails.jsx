@@ -932,10 +932,10 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-7 flex justify-end mt-2">
+              <div className="md:col-span-12 flex justify-end mt-2">
                 <button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
                 >
                   <Check className="w-4 h-4" />
                   Save Investment
