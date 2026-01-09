@@ -3,23 +3,20 @@ import { useFormatNumber } from "../utils/format";
 
 export default function AccountList({
   accounts,
-  kind,
+
   selectedId,
   onSelectAccount,
   marketValues,
   Icon,
 }) {
-  const filtered = accounts.filter((acc) => acc.kind === kind);
   const formatNumber = useFormatNumber();
 
   return (
     <div className="space-y-1">
-      {filtered.map((account) => {
+      {accounts.map((account) => {
         const value =
-          kind === "brokerage"
-            ? marketValues && marketValues[account.id] !== undefined
-              ? marketValues[account.id]
-              : account.balance
+          marketValues && marketValues[account.id] !== undefined
+            ? marketValues[account.id]
             : account.balance;
 
         const formattedValue = formatNumber(value, { style: "currency" });
@@ -30,32 +27,28 @@ export default function AccountList({
           <button
             key={account.id}
             onClick={() => onSelectAccount(account.id)}
-            className={`sidebar-nav-item justify-between group ${
-              selectedId === account.id
-                ? "sidebar-nav-item-active"
-                : "sidebar-nav-item-inactive"
-            }`}
+            className={`sidebar-nav-item justify-between group ${selectedId === account.id
+              ? "sidebar-nav-item-active"
+              : "sidebar-nav-item-inactive"
+              }`}
           >
             <div className="flex items-center gap-3 min-w-0">
               <Icon
-                className={`sidebar-nav-icon shrink-0 ${
-                  selectedId === account.id
-                    ? "sidebar-nav-icon-active"
-                    : "sidebar-nav-icon-inactive"
-                }`}
+                className={`sidebar-nav-icon shrink-0 ${selectedId === account.id
+                  ? "sidebar-nav-icon-active"
+                  : "sidebar-nav-icon-inactive"
+                  }`}
               />
               <span className="font-medium truncate">{account.name}</span>
             </div>
             <span
-              className={`font-medium shrink-0 ml-2 ${
-                finalFormattedValue && finalFormattedValue.length > 14
-                  ? "text-xs"
-                  : "text-sm"
-              } ${
-                selectedId === account.id
+              className={`font-medium shrink-0 ml-2 ${finalFormattedValue && finalFormattedValue.length > 14
+                ? "text-xs"
+                : "text-sm"
+                } ${selectedId === account.id
                   ? "text-blue-100"
                   : "text-slate-500 group-hover:text-slate-300"
-              }`}
+                }`}
             >
               {finalFormattedValue}
             </span>
@@ -68,7 +61,6 @@ export default function AccountList({
 
 AccountList.propTypes = {
   accounts: PropTypes.array.isRequired,
-  kind: PropTypes.string.isRequired,
   selectedId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
     .isRequired,
   onSelectAccount: PropTypes.func.isRequired,

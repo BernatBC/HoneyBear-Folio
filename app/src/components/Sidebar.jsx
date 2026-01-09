@@ -44,8 +44,8 @@ export default function Sidebar({
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [newAccountName, setNewAccountName] = useState("");
+
   const [newAccountBalance, setNewAccountBalance] = useState("");
-  const [newAccountType, setNewAccountType] = useState("cash");
 
   // Compute total balance using helper so logic is shared with Dashboard/App
   const totalBalance = computeNetWorth(accounts, marketValues);
@@ -80,16 +80,13 @@ export default function Sidebar({
     }
 
     try {
-      const balance =
-        newAccountType === "cash" ? parseNumber(newAccountBalance) || 0.0 : 0.0;
+      const balance = parseNumber(newAccountBalance) || 0.0;
       await invoke("create_account", {
         name: nameTrimmed,
         balance,
-        kind: newAccountType,
       });
       setNewAccountName("");
       setNewAccountBalance("");
-      setNewAccountType("cash");
       setIsAdding(false);
       onUpdate();
     } catch (e) {
@@ -156,13 +153,12 @@ export default function Sidebar({
             </button>
           </div>
           <div
-            className={`net-worth-value ${
-              formattedTotalBalance.length > 20
-                ? "text-lg"
-                : formattedTotalBalance.length > 15
-                  ? "text-xl"
-                  : "text-2xl"
-            }`}
+            className={`net-worth-value ${formattedTotalBalance.length > 20
+              ? "text-lg"
+              : formattedTotalBalance.length > 15
+                ? "text-xl"
+                : "text-2xl"
+              }`}
           >
             {formattedTotalBalance}
           </div>
@@ -176,11 +172,10 @@ export default function Sidebar({
           <div className="space-y-1">
             <button
               onClick={() => handleSelect("dashboard")}
-              className={`sidebar-nav-item group ${
-                selectedId === "dashboard"
-                  ? "sidebar-nav-item-active"
-                  : "sidebar-nav-item-inactive"
-              }`}
+              className={`sidebar-nav-item group ${selectedId === "dashboard"
+                ? "sidebar-nav-item-active"
+                : "sidebar-nav-item-inactive"
+                }`}
             >
               <LayoutDashboard
                 className={`sidebar-nav-icon ${selectedId === "dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -190,11 +185,10 @@ export default function Sidebar({
 
             <button
               onClick={() => handleSelect("investment-dashboard")}
-              className={`sidebar-nav-item group ${
-                selectedId === "investment-dashboard"
-                  ? "sidebar-nav-item-active"
-                  : "sidebar-nav-item-inactive"
-              }`}
+              className={`sidebar-nav-item group ${selectedId === "investment-dashboard"
+                ? "sidebar-nav-item-active"
+                : "sidebar-nav-item-inactive"
+                }`}
             >
               <PieChart
                 className={`sidebar-nav-icon ${selectedId === "investment-dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -204,11 +198,10 @@ export default function Sidebar({
 
             <button
               onClick={() => handleSelect("fire-calculator")}
-              className={`sidebar-nav-item group ${
-                selectedId === "fire-calculator"
-                  ? "sidebar-nav-item-active"
-                  : "sidebar-nav-item-inactive"
-              }`}
+              className={`sidebar-nav-item group ${selectedId === "fire-calculator"
+                ? "sidebar-nav-item-active"
+                : "sidebar-nav-item-inactive"
+                }`}
             >
               <Calculator
                 className={`sidebar-nav-icon ${selectedId === "fire-calculator" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -218,11 +211,10 @@ export default function Sidebar({
 
             <button
               onClick={() => handleSelect("all")}
-              className={`sidebar-nav-item group ${
-                selectedId === "all"
-                  ? "sidebar-nav-item-active"
-                  : "sidebar-nav-item-inactive"
-              }`}
+              className={`sidebar-nav-item group ${selectedId === "all"
+                ? "sidebar-nav-item-active"
+                : "sidebar-nav-item-inactive"
+                }`}
             >
               <List
                 className={`sidebar-nav-icon ${selectedId === "all" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -232,16 +224,15 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Cash Accounts */}
+        {/* Accounts */}
         <div>
           <div className="sidebar-section-header">
             <h2 className="sidebar-section-title-inline">
-              {t("accounts.cash")}
+              {t("accounts.accounts")}
             </h2>
             <button
               onClick={() => {
                 setIsAdding(true);
-                setNewAccountType("cash");
               }}
               className="sidebar-add-button"
             >
@@ -251,46 +242,17 @@ export default function Sidebar({
 
           <AccountList
             accounts={accounts}
-            kind="cash"
-            selectedId={selectedId}
-            onSelectAccount={onSelectAccount}
-            Icon={CreditCard}
-          />
-        </div>
-
-        {/* Brokerage Accounts */}
-        <div>
-          <div className="sidebar-section-header">
-            <h2 className="sidebar-section-title-inline">
-              {t("accounts.brokerage")}
-            </h2>
-            <button
-              onClick={() => {
-                setIsAdding(true);
-                setNewAccountType("brokerage");
-              }}
-              className="sidebar-add-button"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-
-          <AccountList
-            accounts={accounts}
-            kind="brokerage"
             selectedId={selectedId}
             onSelectAccount={onSelectAccount}
             marketValues={marketValues}
-            Icon={TrendingUp}
+            Icon={CreditCard}
           />
         </div>
         {isAdding && (
           <div className="sidebar-form-container">
             <form onSubmit={handleAddAccount} className="sidebar-form">
               <div className="sidebar-form-header">
-                <span className="sidebar-form-title">
-                  New {newAccountType === "cash" ? "Cash" : "Brokerage"} Account
-                </span>
+                <span className="sidebar-form-title">{t("account.new_account")}</span>
                 <button
                   type="button"
                   onClick={() => setIsAdding(false)}
@@ -307,16 +269,14 @@ export default function Sidebar({
                 className="sidebar-input"
                 autoFocus
               />
-              {newAccountType === "cash" && (
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="Initial Balance"
-                  value={newAccountBalance}
-                  onChange={(e) => setNewAccountBalance(e.target.value)}
-                  className="sidebar-input"
-                />
-              )}
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="Initial Balance"
+                value={newAccountBalance}
+                onChange={(e) => setNewAccountBalance(e.target.value)}
+                className="sidebar-input"
+              />
               <button type="submit" className="sidebar-submit-button">
                 <Check className="w-4 h-4" />
                 <span className="text-white">Create Account</span>

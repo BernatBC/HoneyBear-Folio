@@ -153,11 +153,10 @@ pub(crate) fn create_account_in_dir(
     dir: &Path,
     name: String,
     balance: f64,
-    kind: String,
 ) -> Result<super::Account, String> {
     let db_path = get_db_path_for_dir(dir)?;
     init_db_at_path(&db_path)?;
-    super::create_account_db(&db_path, name, balance, kind)
+    super::create_account_db(&db_path, name, balance)
 }
 
 pub(crate) fn create_transaction_in_dir(
