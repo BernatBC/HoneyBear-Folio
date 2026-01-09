@@ -30,6 +30,7 @@ import {
 import { useNumberFormat } from "../contexts/number-format";
 import { useConfirm } from "../contexts/confirm";
 import NumberInput from "./NumberInput";
+import CustomSelect from "./CustomSelect";
 import { t } from "../i18n/i18n";
 
 export default function AccountDetails({ account, onUpdate }) {
@@ -520,9 +521,6 @@ export default function AccountDetails({ account, onUpdate }) {
 
   // When viewing the consolidated "All" view, allow adding to a selected account
   const effectiveAddTarget = account.id === "all" ? addTargetAccount : account;
-  const effectiveKind = effectiveAddTarget
-    ? effectiveAddTarget.kind
-    : account.kind;
 
   return (
     <div className="max-w-full pb-8">
@@ -602,29 +600,21 @@ export default function AccountDetails({ account, onUpdate }) {
           </div>
           <div className="flex items-center gap-3">
             {account.id === "all" && availableAccounts.length > 0 && (
-              <div className="relative">
-                <select
+              <div className="relative w-64">
+                <CustomSelect
                   value={addTargetAccount ? addTargetAccount.id : ""}
-                  onChange={(e) => {
+                  onChange={(val) => {
                     const selected = availableAccounts.find(
-                      (a) => String(a.id) === String(e.target.value),
+                      (a) => String(a.id) === String(val),
                     );
                     setAddTargetAccount(selected || null);
                   }}
-                  className="px-3 py-2 pr-10 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 appearance-none"
-                  aria-label="Select account to add transaction"
-                >
-                  {availableAccounts.map((a) => (
-                    <option
-                      key={a.id}
-                      value={a.id}
-                      className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                    >
-                      {a.name} ({a.kind})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-400 pointer-events-none" />
+                  options={availableAccounts.map((a) => ({
+                    value: a.id,
+                    label: a.name,
+                  }))}
+                  placeholder="Select Account"
+                />
               </div>
             )}
 
@@ -814,7 +804,7 @@ export default function AccountDetails({ account, onUpdate }) {
 
 
 
-              <div className="md:col-span-4 relative">
+              <div className="md:col-span-2 relative">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Ticker
                 </label>
@@ -861,7 +851,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 )}
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Shares
                 </label>
@@ -879,7 +869,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 />
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Price / Share
                 </label>
@@ -899,7 +889,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Total Price
                 </label>
