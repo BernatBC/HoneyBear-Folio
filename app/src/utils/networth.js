@@ -13,7 +13,7 @@ export function computeNetWorth(accounts = [], marketValues = {}) {
 
     const balanceNumeric = toNumeric(acc.balance);
     const mv = toNumeric(marketValues?.[acc.id]);
-    
+
     // Always add market value if it exists, regardless of account 'kind' (which is deprecated/unified)
     return (
       sum +

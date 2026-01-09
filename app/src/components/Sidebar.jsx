@@ -153,12 +153,13 @@ export default function Sidebar({
             </button>
           </div>
           <div
-            className={`net-worth-value ${formattedTotalBalance.length > 20
-              ? "text-lg"
-              : formattedTotalBalance.length > 15
-                ? "text-xl"
-                : "text-2xl"
-              }`}
+            className={`net-worth-value ${
+              formattedTotalBalance.length > 20
+                ? "text-lg"
+                : formattedTotalBalance.length > 15
+                  ? "text-xl"
+                  : "text-2xl"
+            }`}
           >
             {formattedTotalBalance}
           </div>
@@ -172,10 +173,11 @@ export default function Sidebar({
           <div className="space-y-1">
             <button
               onClick={() => handleSelect("dashboard")}
-              className={`sidebar-nav-item group ${selectedId === "dashboard"
-                ? "sidebar-nav-item-active"
-                : "sidebar-nav-item-inactive"
-                }`}
+              className={`sidebar-nav-item group ${
+                selectedId === "dashboard"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
+              }`}
             >
               <LayoutDashboard
                 className={`sidebar-nav-icon ${selectedId === "dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -185,10 +187,11 @@ export default function Sidebar({
 
             <button
               onClick={() => handleSelect("investment-dashboard")}
-              className={`sidebar-nav-item group ${selectedId === "investment-dashboard"
-                ? "sidebar-nav-item-active"
-                : "sidebar-nav-item-inactive"
-                }`}
+              className={`sidebar-nav-item group ${
+                selectedId === "investment-dashboard"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
+              }`}
             >
               <PieChart
                 className={`sidebar-nav-icon ${selectedId === "investment-dashboard" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -198,10 +201,11 @@ export default function Sidebar({
 
             <button
               onClick={() => handleSelect("fire-calculator")}
-              className={`sidebar-nav-item group ${selectedId === "fire-calculator"
-                ? "sidebar-nav-item-active"
-                : "sidebar-nav-item-inactive"
-                }`}
+              className={`sidebar-nav-item group ${
+                selectedId === "fire-calculator"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
+              }`}
             >
               <Calculator
                 className={`sidebar-nav-icon ${selectedId === "fire-calculator" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -211,10 +215,11 @@ export default function Sidebar({
 
             <button
               onClick={() => handleSelect("all")}
-              className={`sidebar-nav-item group ${selectedId === "all"
-                ? "sidebar-nav-item-active"
-                : "sidebar-nav-item-inactive"
-                }`}
+              className={`sidebar-nav-item group ${
+                selectedId === "all"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
+              }`}
             >
               <List
                 className={`sidebar-nav-icon ${selectedId === "all" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
@@ -252,7 +257,9 @@ export default function Sidebar({
           <div className="sidebar-form-container">
             <form onSubmit={handleAddAccount} className="sidebar-form">
               <div className="sidebar-form-header">
-                <span className="sidebar-form-title">{t("account.new_account")}</span>
+                <span className="sidebar-form-title">
+                  {t("account.new_account")}
+                </span>
                 <button
                   type="button"
                   onClick={() => setIsAdding(false)}

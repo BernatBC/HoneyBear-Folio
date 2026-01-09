@@ -27,28 +27,32 @@ export default function AccountList({
           <button
             key={account.id}
             onClick={() => onSelectAccount(account.id)}
-            className={`sidebar-nav-item justify-between group ${selectedId === account.id
-              ? "sidebar-nav-item-active"
-              : "sidebar-nav-item-inactive"
-              }`}
+            className={`sidebar-nav-item justify-between group ${
+              selectedId === account.id
+                ? "sidebar-nav-item-active"
+                : "sidebar-nav-item-inactive"
+            }`}
           >
             <div className="flex items-center gap-3 min-w-0">
               <Icon
-                className={`sidebar-nav-icon shrink-0 ${selectedId === account.id
-                  ? "sidebar-nav-icon-active"
-                  : "sidebar-nav-icon-inactive"
-                  }`}
+                className={`sidebar-nav-icon shrink-0 ${
+                  selectedId === account.id
+                    ? "sidebar-nav-icon-active"
+                    : "sidebar-nav-icon-inactive"
+                }`}
               />
               <span className="font-medium truncate">{account.name}</span>
             </div>
             <span
-              className={`font-medium shrink-0 ml-2 ${finalFormattedValue && finalFormattedValue.length > 14
-                ? "text-xs"
-                : "text-sm"
-                } ${selectedId === account.id
+              className={`font-medium shrink-0 ml-2 ${
+                finalFormattedValue && finalFormattedValue.length > 14
+                  ? "text-xs"
+                  : "text-sm"
+              } ${
+                selectedId === account.id
                   ? "text-blue-100"
                   : "text-slate-500 group-hover:text-slate-300"
-                }`}
+              }`}
             >
               {finalFormattedValue}
             </span>

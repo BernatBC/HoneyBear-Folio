@@ -90,7 +90,7 @@ export default function Dashboard({
           const prices = await invoke("get_daily_stock_prices", { ticker });
           // Sort prices by date ascending to ensure getPrice binary search/linear scan works
           prices.sort((a, b) => (a.date > b.date ? 1 : -1));
-          
+
           // Convert to map for faster lookup: date -> price
           const priceByDate = {};
           prices.forEach((p) => {
