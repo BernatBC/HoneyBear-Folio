@@ -78,7 +78,6 @@ fn test_randomized_balance_invariants() {
         } else if op < 0.85 {
             // create brokerage transaction
             let brokerage_idx = rng.random_range(0..accounts.len());
-            let cash_idx = (brokerage_idx + 1) % accounts.len();
             let args = crate::CreateInvestmentTransactionArgs {
                 account_id: accounts[brokerage_idx].id,
 

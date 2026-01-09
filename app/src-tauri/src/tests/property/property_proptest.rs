@@ -56,7 +56,6 @@ proptest! {
             } else if op < 0.8 {
                 // create brokerage
                 let a = rng.random_range(0..accounts.len());
-                let b = (a+1)%accounts.len();
                 let args = crate::CreateInvestmentTransactionArgs{account_id: accounts[a].id, date: "2023-01-01".to_string(), ticker: "P".to_string(), shares: rng.random_range(1..10) as f64, price_per_share: rng.random_range(1..50) as f64, fee: rng.random_range(0..5) as f64, is_buy: rng.random_bool(0.5)};
                 let _ = crate::create_investment_transaction_db(&db_path, args);
             } else {
