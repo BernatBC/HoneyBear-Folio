@@ -32,26 +32,26 @@ export default function SettingsModal({ onClose }) {
   } = useNumberFormat();
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
-  const [txRowPadding, setTxRowPadding] = useState(() => {
+  const [fontSize, setFontSize] = useState(() => {
     try {
-      const v = localStorage.getItem("hb_tx_row_padding");
-      return v ? parseInt(v, 10) : 12;
+      const v = localStorage.getItem("hb_font_size");
+      return v ? parseFloat(v) : 1.0;
     } catch {
-      return 12;
+      return 1.0;
     }
   });
 
   useEffect(() => {
     try {
       document.documentElement.style.setProperty(
-        "--hb-tx-cell-py",
-        `${txRowPadding}px`,
+        "--hb-font-size",
+        `${fontSize}`,
       );
-      localStorage.setItem("hb_tx_row_padding", String(txRowPadding));
+      localStorage.setItem("hb_font_size", String(fontSize));
     } catch (e) {
-      console.error("Failed to apply tx row padding:", e);
+      console.error("Failed to apply font size:", e);
     }
-  }, [txRowPadding]);
+  }, [fontSize]);
 
   // Helpful debug logs so we can see contextual values the component depends on
   try {
@@ -126,7 +126,7 @@ export default function SettingsModal({ onClose }) {
       localStorage.removeItem("hb_number_format");
       localStorage.removeItem("hb_currency");
       localStorage.removeItem("hb_theme");
-      localStorage.removeItem("hb_tx_row_padding");
+      localStorage.removeItem("hb_font_size");
       localStorage.removeItem("hb_date_format");
     } catch {
       /* ignore */
@@ -134,7 +134,7 @@ export default function SettingsModal({ onClose }) {
     setLocale("en-US");
     setCurrency("USD");
     setTheme("system");
-    setTxRowPadding(12);
+    setFontSize(1.0);
     setDateFormat("YYYY-MM-DD");
     try {
       await invoke("reset_db_path");
@@ -301,11 +301,11 @@ export default function SettingsModal({ onClose }) {
                     <div className="label-with-help">
                       <span
                         className="help-wrapper"
-                        data-tooltip="Adjust row padding to control transaction row height
-                      (smaller = more rows)."
+                        data-tooltip="Adjust font size to control UI scale
+                      (smaller = more content fits, larger = easier to read)."
                         role="button"
                         tabIndex={0}
-                        aria-label="Adjusts padding inside each transaction row (affects visible rows)"
+                        aria-label="Adjusts font size of the entire application UI"
                         onMouseEnter={showTooltip}
                         onFocus={showTooltip}
                         onMouseLeave={hideTooltip}
@@ -317,23 +317,23 @@ export default function SettingsModal({ onClose }) {
                         />
                       </span>
                       <label className="modal-label">
-                        {t("settings.transaction_row_height")}
+                        {t("settings.font_size")}
                       </label>
                     </div>
                     <div className="text-sm text-slate-500">
-                      {txRowPadding}px
+                      {Math.round(fontSize * 100)}%
                     </div>
                   </div>
                   <div className="relative mt-1 settings-slider">
                     <input
                       type="range"
-                      min={4}
-                      max={24}
-                      step={1}
-                      value={txRowPadding}
-                      onChange={(e) => setTxRowPadding(Number(e.target.value))}
+                      min={0.75}
+                      max={1.25}
+                      step={0.05}
+                      value={fontSize}
+                      onChange={(e) => setFontSize(Number(e.target.value))}
                       className="w-full"
-                      aria-label={t("settings.transaction_row_height")}
+                      aria-label={t("settings.font_size")}
                     />
                   </div>
                 </>

@@ -8,10 +8,14 @@
     backdrop-filter: blur(6px);
     will-change: backdrop-filter;
     z-index: 10001;
+    /* Ensure modals don't scale with font-size setting */
+    font-size: 16px;
   }
 
   .modal-container {
     @apply relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl px-6 py-4 max-h-[90vh] overflow-y-auto flex flex-col;
     z-index: 10002;
+    /* Ensure modals don't scale with font-size setting */
+    font-size: 16px;
   }
 }

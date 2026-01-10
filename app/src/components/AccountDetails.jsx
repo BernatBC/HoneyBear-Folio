@@ -522,7 +522,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const effectiveAddTarget = account.id === "all" ? addTargetAccount : account;
 
   return (
-    <div className="max-w-full pb-8">
+    <div className="max-w-full pb-8 account-details-scaled-container">
       {/* Header */}
       <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 px-4 lg:px-6 py-4 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow duration-200">
         <div>
@@ -777,14 +777,6 @@ export default function AccountDetails({ account, onUpdate }) {
                     </span>
                   </label>
                 </div>
-                {account.id === "all" && (
-                  <div className="text-sm text-slate-500 dark:text-slate-400">
-                    Account:{" "}
-                    <span className="font-medium text-slate-700 dark:text-slate-300">
-                      {effectiveAddTarget?.name}
-                    </span>
-                  </div>
-                )}
               </div>
 
               <div className="md:col-span-2">
@@ -946,15 +938,6 @@ export default function AccountDetails({ account, onUpdate }) {
               onSubmit={handleAddTransaction}
               className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
             >
-              {account.id === "all" && (
-                <div className="md:col-span-12 mb-2 text-sm text-slate-500 dark:text-slate-400">
-                  Account:{" "}
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    {effectiveAddTarget?.name}
-                  </span>
-                </div>
-              )}
-
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Date

@@ -116,14 +116,14 @@ function App() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("hb_tx_row_padding");
-      const padding = stored ? parseInt(stored, 10) : 12;
+      const stored = localStorage.getItem("hb_font_size");
+      const fontSize = stored ? parseFloat(stored) : 1.0;
       document.documentElement.style.setProperty(
-        "--hb-tx-cell-py",
-        `${padding}px`,
+        "--hb-font-size",
+        String(fontSize),
       );
     } catch (e) {
-      console.debug("Failed to apply transaction row padding:", e);
+      console.debug("Failed to apply font size:", e);
     }
   }, []);
 

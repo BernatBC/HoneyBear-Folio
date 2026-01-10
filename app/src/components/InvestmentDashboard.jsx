@@ -83,7 +83,7 @@ export default function InvestmentDashboard() {
             return colors[i % colors.length];
           }),
           borderColor: rawData.map((_, i) => colors[i % colors.length]),
-          borderWidth: 2,
+          borderWidth: 4,
           borderDash: (ctx) => {
             const val = rawData[ctx.dataIndex];
             return val < 0 ? [5, 5] : [];
@@ -175,7 +175,7 @@ export default function InvestmentDashboard() {
   );
 
   return (
-    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
+    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8 investment-dashboard-container">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
