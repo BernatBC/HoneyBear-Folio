@@ -29,6 +29,8 @@ export default function SettingsModal({ onClose }) {
     setCurrency,
     dateFormat,
     setDateFormat,
+    firstDayOfWeek,
+    setFirstDayOfWeek,
   } = useNumberFormat();
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
@@ -128,6 +130,7 @@ export default function SettingsModal({ onClose }) {
       localStorage.removeItem("hb_theme");
       localStorage.removeItem("hb_font_size");
       localStorage.removeItem("hb_date_format");
+      localStorage.removeItem("hb_first_day_of_week");
     } catch {
       /* ignore */
     }
@@ -136,6 +139,7 @@ export default function SettingsModal({ onClose }) {
     setTheme("system");
     setFontSize(1.0);
     setDateFormat("YYYY-MM-DD");
+    setFirstDayOfWeek(1);
     try {
       await invoke("reset_db_path");
       const p = await invoke("get_db_path_command");
@@ -449,6 +453,47 @@ export default function SettingsModal({ onClose }) {
                       onChange={(v) => setDateFormat(v)}
                       options={dateFormatOptions}
                       placeholder={t("settings.select_date_format_placeholder")}
+                      fullWidth={false}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="label-with-help">
+                      <span
+                        className="help-wrapper"
+                        data-tooltip="Choose the first day of the week for calendars."
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Choose the first day of the week for calendars"
+                        onMouseEnter={showTooltip}
+                        onFocus={showTooltip}
+                        onMouseLeave={hideTooltip}
+                        onBlur={hideTooltip}
+                      >
+                        <HelpCircle
+                          className="w-4 h-4 text-slate-400 help-icon"
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <label className="modal-label">
+                        {t("settings.first_day_of_week")}
+                      </label>
+                    </div>
+                  </div>
+                  <div className="relative settings-select">
+                    <CustomSelect
+                      value={firstDayOfWeek}
+                      onChange={(v) => setFirstDayOfWeek(Number(v))}
+                      options={[
+                        { value: 1, label: t("Monday") },
+                        { value: 2, label: t("Tuesday") },
+                        { value: 3, label: t("Wednesday") },
+                        { value: 4, label: t("Thursday") },
+                        { value: 5, label: t("Friday") },
+                        { value: 6, label: t("Saturday") },
+                        { value: 0, label: t("Sunday") },
+                      ]}
+                      placeholder={t("settings.select_first_day_placeholder")}
                       fullWidth={false}
                     />
                   </div>

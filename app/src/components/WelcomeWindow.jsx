@@ -25,6 +25,8 @@ export default function WelcomeWindow() {
     setCurrency,
     dateFormat,
     setDateFormat,
+    firstDayOfWeek,
+    setFirstDayOfWeek,
   } = useNumberFormat();
 
   const _today = new Date();
@@ -124,6 +126,26 @@ export default function WelcomeWindow() {
               onChange={setDateFormat}
               options={dateFormatOptions}
               placeholder={t("settings.select_date_format_placeholder")}
+            />
+          </div>
+          {/* First Day of Week Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              {t("First Day of Week")}
+            </label>
+            <CustomSelect
+              value={firstDayOfWeek}
+              onChange={(v) => setFirstDayOfWeek(Number(v))}
+              options={[
+                { value: 1, label: t("Monday") },
+                { value: 2, label: t("Tuesday") },
+                { value: 3, label: t("Wednesday") },
+                { value: 4, label: t("Thursday") },
+                { value: 5, label: t("Friday") },
+                { value: 6, label: t("Saturday") },
+                { value: 0, label: t("Sunday") },
+              ]}
+              placeholder={t("settings.select_first_day_placeholder")}
             />
           </div>
         </div>

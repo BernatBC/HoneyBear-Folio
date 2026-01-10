@@ -39,7 +39,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const formatNumber = useFormatNumber();
   const parseNumber = useParseNumber();
   const formatDate = useFormatDate();
-  const { dateFormat } = useNumberFormat();
+  const { dateFormat, firstDayOfWeek } = useNumberFormat();
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
@@ -791,6 +791,7 @@ export default function AccountDetails({ account, onUpdate }) {
                       setDate(date ? date.toISOString().split("T")[0] : "")
                     }
                     dateFormat={getDatePickerFormat(dateFormat)}
+                    calendarStartDay={firstDayOfWeek}
                     shouldCloseOnSelect={false}
                     required
                     className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
@@ -950,6 +951,7 @@ export default function AccountDetails({ account, onUpdate }) {
                       setDate(date ? date.toISOString().split("T")[0] : "")
                     }
                     dateFormat={getDatePickerFormat(dateFormat)}
+                    calendarStartDay={firstDayOfWeek}
                     shouldCloseOnSelect={false}
                     required
                     className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-600"
@@ -1144,6 +1146,7 @@ export default function AccountDetails({ account, onUpdate }) {
                               })
                             }
                             dateFormat={getDatePickerFormat(dateFormat)}
+                            calendarStartDay={firstDayOfWeek}
                             shouldCloseOnSelect={false}
                             className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                           />
