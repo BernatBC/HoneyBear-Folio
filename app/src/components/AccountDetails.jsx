@@ -355,6 +355,7 @@ export default function AccountDetails({ account, onUpdate }) {
             pricePerShare: parseNumber(pricePerShare),
             fee: parseNumber(fee) || 0.0,
             isBuy,
+            currency: useCustomCurrency ? selectedCurrency : null,
           },
         });
 
@@ -363,6 +364,8 @@ export default function AccountDetails({ account, onUpdate }) {
         setPricePerShare("");
         setTotalPrice("");
         setFee("");
+        setUseCustomCurrency(false);
+        setSelectedCurrency(localStorage.getItem("hb_currency") || "USD");
       } else {
         await invoke("create_transaction", {
           args: {
@@ -837,6 +840,10 @@ export default function AccountDetails({ account, onUpdate }) {
                         onClick={() => {
                           setTicker(suggestion.symbol);
                           setShowTickerSuggestions(false);
+                          if (suggestion.currency) {
+                            setUseCustomCurrency(true);
+                            setSelectedCurrency(suggestion.currency);
+                          }
                         }}
                       >
                         <div className="font-medium text-slate-900 dark:text-slate-100">
@@ -932,7 +939,35 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-12 flex justify-end mt-2">
+              <div className="md:col-span-12 flex items-center justify-between mt-2">
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={useCustomCurrency}
+                      onChange={(e) => setUseCustomCurrency(e.target.checked)}
+                      className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Use different currency
+                    </span>
+                  </label>
+
+                  {useCustomCurrency && (
+                    <div className="w-64">
+                      <CustomSelect
+                        options={CURRENCIES.map((c) => ({
+                          value: c.code,
+                          label: `${c.code} - ${c.name}`,
+                        }))}
+                        value={selectedCurrency}
+                        onChange={(val) => setSelectedCurrency(val)}
+                        placeholder="Select currency"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
@@ -1041,35 +1076,35 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
-              <div className="md:col-span-12 flex items-center gap-4 mb-2">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={useCustomCurrency}
-                    onChange={(e) => setUseCustomCurrency(e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
-                  />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Use different currency
-                  </span>
-                </label>
-
-                {useCustomCurrency && (
-                  <div className="w-64">
-                    <CustomSelect
-                      options={CURRENCIES.map((c) => ({
-                        value: c.code,
-                        label: `${c.code} - ${c.name}`,
-                      }))}
-                      value={selectedCurrency}
-                      onChange={(val) => setSelectedCurrency(val)}
-                      placeholder="Select currency"
+              <div className="md:col-span-12 flex items-center justify-between mt-2">
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={useCustomCurrency}
+                      onChange={(e) => setUseCustomCurrency(e.target.checked)}
+                      className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
                     />
-                  </div>
-                )}
-              </div>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Use different currency
+                    </span>
+                  </label>
 
-              <div className="md:col-span-12 flex justify-end mt-2">
+                  {useCustomCurrency && (
+                    <div className="w-64">
+                      <CustomSelect
+                        options={CURRENCIES.map((c) => ({
+                          value: c.code,
+                          label: `${c.code} - ${c.name}`,
+                        }))}
+                        value={selectedCurrency}
+                        onChange={(val) => setSelectedCurrency(val)}
+                        placeholder="Select currency"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"

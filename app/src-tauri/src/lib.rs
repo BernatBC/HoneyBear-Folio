@@ -13,6 +13,7 @@ struct YahooQuote {
     price: f64,
     #[serde(rename = "regularMarketChangePercent")]
     change_percent: f64,
+    currency: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,6 +25,7 @@ struct YahooChartMeta {
     chart_previous_close: Option<f64>,
     #[serde(rename = "previousClose")]
     previous_close: Option<f64>,
+    currency: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -61,6 +63,7 @@ struct YahooSearchQuote {
     exchange: Option<String>,
     #[serde(rename = "typeDisp")]
     type_disp: Option<String>,
+    currency: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -1413,7 +1416,8 @@ async fn get_stock_quotes_with_client(
                                                 return Some(YahooQuote {
                                                     symbol: item.meta.symbol.clone(),
                                                     price,
-                                                    change_percent
+                                                    change_percent,
+                                                    currency: item.meta.currency.clone(),
                                                 });
                                             }
                                         }
@@ -1480,6 +1484,7 @@ async fn get_stock_quotes_with_client(
                     symbol,
                     price,
                     change_percent: 0.0, // We don't store change percent in DB yet, could add it
+                    currency: None,
                 });
             }
         }
@@ -1536,7 +1541,8 @@ async fn get_stock_quotes_with_client_and_db(
                                                 return Some(YahooQuote {
                                                     symbol: item.meta.symbol.clone(),
                                                     price,
-                                                    change_percent
+                                                    change_percent,
+                                                    currency: item.meta.currency.clone(),
                                                 });
                                             }
                                         }
@@ -1602,6 +1608,7 @@ async fn get_stock_quotes_with_client_and_db(
                     symbol,
                     price,
                     change_percent: 0.0, // We don't store change percent in DB yet, could add it
+                    currency: None,
                 });
             }
         }
