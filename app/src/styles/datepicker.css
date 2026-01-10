@@ -112,7 +112,7 @@
 
 .react-datepicker__day--keyboard-selected {
   background-color: transparent !important;
-  color: inherit !important;
+  color: #334155 !important; /* slate-700 */
   box-shadow: none !important;
   border: none !important;
   outline: none !important;
@@ -144,6 +144,13 @@
 
 .react-datepicker__day--today {
   font-weight: 600 !important;
+  color: #334155 !important; /* slate-700 */
+}
+
+.react-datepicker__day--selected.react-datepicker__day--today,
+.react-datepicker__day--range-start.react-datepicker__day--today,
+.react-datepicker__day--range-end.react-datepicker__day--today {
+  color: white !important;
 }
 
 .react-datepicker__day--today::after {
@@ -252,14 +259,13 @@
 
 .dark .react-datepicker__day--keyboard-selected {
   background-color: transparent !important;
-  color: inherit !important;
+  color: #cbd5e1 !important; /* slate-300 */
   box-shadow: none !important;
   border: none !important;
   outline: none !important;
 }
 
 /* Ensure keyboard selected doesn't override range colors in dark mode */
-.dark .react-datepicker__day--in-range.dark .react-datepicker__day--keyboard-selected,
 .dark .react-datepicker__day--in-range.react-datepicker__day--keyboard-selected {
   background-color: #1e3a8a !important;
   color: #bfdbfe !important;
@@ -280,15 +286,21 @@
   background-color: #2563eb !important; /* brand-600 */
 }
 
+.dark .react-datepicker__day--today {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
 .dark .react-datepicker__day--today::after {
   background-color: #3b82f6; /* brand-500 */
 }
 
-.dark .react-datepicker__day--selected.react-datepicker__day--today::after,
-.dark .react-datepicker__day--range-start.react-datepicker__day--today::after,
-.dark .react-datepicker__day--range-end.react-datepicker__day--today::after {
-  background-color: white;
+.dark .react-datepicker__day--selected.react-datepicker__day--today,
+.dark .react-datepicker__day--range-start.react-datepicker__day--today,
+.dark .react-datepicker__day--range-end.react-datepicker__day--today {
+  color: white !important;
 }
+
+.dark .react-datepicker__day--selected.react-datepicker__day--today::after,
 
 .dark .react-datepicker__day--in-range.react-datepicker__day--today::after {
   background-color: #bfdbfe;
