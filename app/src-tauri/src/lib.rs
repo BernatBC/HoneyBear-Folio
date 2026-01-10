@@ -94,6 +94,13 @@ struct Transaction {
     currency: Option<String>,
 }
 
+#[derive(Debug)]
+struct AccountsSummary {
+    accounts: Vec<Account>,
+    raw_data: Vec<(i32, String, f64)>,
+    currencies_to_fetch: HashSet<String>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Default)]
 struct AppSettings {
     db_path: Option<String>,
@@ -495,7 +502,7 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
 fn get_accounts_summary_db(
     db_path: &PathBuf,
     target: &str,
-) -> Result<(Vec<Account>, Vec<(i32, String, f64)>, HashSet<String>), String> {
+) -> Result<AccountsSummary, String> {
     let accounts = get_accounts_db(db_path)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
@@ -527,7 +534,7 @@ fn get_accounts_summary_db(
         }
     }
 
-    Ok((accounts, raw_data, currencies_to_fetch))
+    Ok(AccountsSummary { accounts, raw_data, currencies_to_fetch })
 }
 
 // Triggering re-check
@@ -543,11 +550,15 @@ async fn get_accounts(
     let target_clone = target.clone();
 
     // Use spawn_blocking for DB operations
-    let (mut accounts, raw_data, currencies_to_fetch) = tauri::async_runtime::spawn_blocking(move || {
+    let summary = tauri::async_runtime::spawn_blocking(move || {
         get_accounts_summary_db(&db_path_clone, &target_clone)
     })
     .await
     .map_err(|e| e.to_string())??;
+
+    let mut accounts = summary.accounts;
+    let raw_data = summary.raw_data;
+    let currencies_to_fetch = summary.currencies_to_fetch;
 
     let mut rates = HashMap::new();
     if !currencies_to_fetch.is_empty() {
