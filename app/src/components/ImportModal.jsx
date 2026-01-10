@@ -46,6 +46,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
     shares: "",
     price: "",
     fee: "",
+    currency: "",
   });
 
   /* Modal JSX moved to end of function to avoid referencing refs/state before initialization */
@@ -100,6 +101,8 @@ export default function ImportModal({ onClose, onImportComplete }) {
         else if (lower.includes("price")) newMapping.price = col;
         else if (lower.includes("fee") || lower.includes("commission"))
           newMapping.fee = col;
+        else if (lower.includes("currency") || lower === "curr")
+          newMapping.currency = col;
       });
       return newMapping;
     });
@@ -622,6 +625,15 @@ export default function ImportModal({ onClose, onImportComplete }) {
             ? row[mapping.fee]
             : row.fee || row.commission || row.Fee;
 
+          let currency = mapping.currency
+            ? row[mapping.currency]
+            : row.currency ||
+              row.Currency ||
+              row.curr ||
+              row.currency_code ||
+              row.currencyCode ||
+              null;
+
           if (typeof shares === "string")
             shares = parseNumberWithLocale(shares, "en-US");
           if (typeof price === "string")
@@ -646,6 +658,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
               shares,
               pricePerShare: price,
               fee,
+              currency: currency ? String(currency) : null,
             },
           });
           successCount++;

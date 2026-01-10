@@ -18,6 +18,7 @@ fn test_update_transaction() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -30,6 +31,7 @@ fn test_update_transaction() {
         notes: Some("Updated".to_string()),
         category: Some("Food".to_string()),
         amount: -20.0,
+        currency: None,
     };
 
     crate::update_transaction_db(&db_path, args).unwrap();
@@ -50,6 +52,7 @@ fn test_update_transaction_missing_id_should_error() {
         notes: None,
         category: None,
         amount: 10.0,
+        currency: None,
     };
 
     let res = crate::update_transaction_db(&db_path, args);
@@ -97,6 +100,7 @@ fn test_update_transaction_finds_counterpart_by_notes() {
         notes: Some("XFER".to_string()),
         category: Some("Transfer".to_string()),
         amount: -60.0,
+        currency: None,
     };
 
     crate::update_transaction_db(&db_path, args).unwrap();
@@ -136,6 +140,7 @@ fn test_update_transaction_updates_counterpart_when_linked() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -153,6 +158,7 @@ fn test_update_transaction_updates_counterpart_when_linked() {
         notes: Some("X".to_string()),
         category: Some("Transfer".to_string()),
         amount: -50.0,
+        currency: None,
     };
 
     crate::update_transaction_db(&db_path, args).unwrap();
@@ -187,6 +193,7 @@ fn test_update_transaction_no_amount_change_doesnt_alter_balances() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -199,6 +206,7 @@ fn test_update_transaction_no_amount_change_doesnt_alter_balances() {
         notes: Some("Note".to_string()),
         category: Some("Misc".to_string()),
         amount: -20.0,
+        currency: None,
     };
 
     crate::update_transaction_db(&db_path, args).unwrap();

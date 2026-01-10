@@ -63,6 +63,7 @@ export default function ExportModal({ onClose }) {
           "Shares",
           "Price",
           "Fee",
+          "Currency",
         ];
         const rows = transactions.map((t) => {
           const acc = accounts.find((a) => a.id === t.account_id);
@@ -77,6 +78,7 @@ export default function ExportModal({ onClose }) {
             formatNumberForExport(t.shares),
             formatNumberForExport(t.price_per_share),
             formatNumberForExport(t.fee),
+            t.currency || "",
           ];
           return values
             .map((v) => {
@@ -116,6 +118,7 @@ export default function ExportModal({ onClose }) {
             Shares: coerceNumber(t.shares),
             Price: coerceNumber(t.price_per_share),
             Fee: coerceNumber(t.fee),
+            Currency: t.currency || "",
           };
         });
         const wsTx = XLSX.utils.json_to_sheet(txData);

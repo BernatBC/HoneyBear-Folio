@@ -14,6 +14,7 @@ fn test_delete_investment_transaction_updates_balance() {
         price_per_share: 100.0,
         fee: 5.0,
         is_buy: true,
+        currency: None,
     };
     let created = crate::create_investment_transaction_db(&db_path, args).unwrap();
 

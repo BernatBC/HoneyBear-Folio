@@ -1,6 +1,7 @@
 use chrono::{NaiveDate, TimeZone, Utc};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
@@ -12,6 +13,7 @@ struct YahooQuote {
     price: f64,
     #[serde(rename = "regularMarketChangePercent")]
     change_percent: f64,
+    currency: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -23,6 +25,7 @@ struct YahooChartMeta {
     chart_previous_close: Option<f64>,
     #[serde(rename = "previousClose")]
     previous_close: Option<f64>,
+    currency: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -60,6 +63,7 @@ struct YahooSearchQuote {
     exchange: Option<String>,
     #[serde(rename = "typeDisp")]
     type_disp: Option<String>,
+    currency: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -87,6 +91,14 @@ struct Transaction {
     shares: Option<f64>,
     price_per_share: Option<f64>,
     fee: Option<f64>,
+    currency: Option<String>,
+}
+
+#[derive(Debug)]
+struct AccountsSummary {
+    accounts: Vec<Account>,
+    raw_data: Vec<(i32, String, f64)>,
+    currencies_to_fetch: HashSet<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -213,6 +225,34 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
                 "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
                 [],
             ) {
+                Ok(_) => {}
+                Err(e) => {
+                    let s = e.to_string();
+                    if !s.contains("duplicate column name") && !s.contains("already exists") {
+                        return Err(s);
+                    }
+                }
+            }
+        }
+    }
+
+    // Ensure we have a column for currency (multi-currency support)
+    {
+        let mut stmt = conn
+            .prepare("PRAGMA table_info(transactions)")
+            .map_err(|e| e.to_string())?;
+        let mut has_currency = false;
+        let col_iter = stmt
+            .query_map([], |row| row.get::<_, String>(1))
+            .map_err(|e| e.to_string())?;
+        for name in col_iter.flatten() {
+            if name == "currency" {
+                has_currency = true;
+                break;
+            }
+        }
+        if !has_currency {
+            match conn.execute("ALTER TABLE transactions ADD COLUMN currency TEXT", []) {
                 Ok(_) => {}
                 Err(e) => {
                     let s = e.to_string();
@@ -456,10 +496,115 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
     Ok(accounts)
 }
 
+fn get_accounts_summary_db(db_path: &PathBuf, target: &str) -> Result<AccountsSummary, String> {
+    let accounts = get_accounts_db(db_path)?;
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // Group transaction amounts by account and currency
+    let mut stmt = conn
+        .prepare("SELECT account_id, currency, SUM(amount) FROM transactions GROUP BY account_id, currency")
+        .map_err(|e| e.to_string())?;
+
+    let rows = stmt
+        .query_map([], |row| {
+            Ok((
+                row.get::<_, i32>(0)?,
+                row.get::<_, Option<String>>(1)?,
+                row.get::<_, Option<f64>>(2)?,
+            ))
+        })
+        .map_err(|e| e.to_string())?;
+
+    let mut raw_data = Vec::new();
+    let mut currencies_to_fetch = HashSet::new();
+
+    for r in rows {
+        let (acc_id, curr_opt, amt_opt) = r.map_err(|e| e.to_string())?;
+        let amt = amt_opt.unwrap_or(0.0);
+        let curr = curr_opt.unwrap_or_else(|| target.to_string());
+        raw_data.push((acc_id, curr.clone(), amt));
+        if curr != target {
+            currencies_to_fetch.insert(curr);
+        }
+    }
+
+    Ok(AccountsSummary {
+        accounts,
+        raw_data,
+        currencies_to_fetch,
+    })
+}
+
+// Triggering re-check
 #[tauri::command]
-fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
+async fn get_accounts(
+    app_handle: AppHandle,
+    target_currency: Option<String>,
+) -> Result<Vec<Account>, String> {
     let db_path = get_db_path(&app_handle)?;
-    get_accounts_db(&db_path)
+    let target = target_currency.unwrap_or_else(|| "USD".to_string());
+
+    let db_path_clone = db_path.clone();
+    let target_clone = target.clone();
+
+    // Use spawn_blocking for DB operations
+    let summary = tauri::async_runtime::spawn_blocking(move || {
+        get_accounts_summary_db(&db_path_clone, &target_clone)
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+
+    let mut accounts = summary.accounts;
+    let raw_data = summary.raw_data;
+    let currencies_to_fetch = summary.currencies_to_fetch;
+
+    let mut rates = HashMap::new();
+    if !currencies_to_fetch.is_empty() {
+        let tickers: Vec<String> = currencies_to_fetch
+            .iter()
+            .map(|c| format!("{}{}=X", c, target))
+            .collect();
+        let client = reqwest::Client::builder()
+            .build()
+            .map_err(|e| e.to_string())?;
+        // Reuse existing get_stock_quotes_with_client
+        let quotes = get_stock_quotes_with_client(
+            client,
+            "https://query1.finance.yahoo.com".to_string(),
+            app_handle.clone(),
+            tickers,
+        )
+        .await?;
+
+        for q in quotes {
+            // Symbol is e.g. "EURUSD=X"
+            let clean = q.symbol.trim_end_matches("=X");
+            if clean.ends_with(&target) && clean.len() > target.len() {
+                let source_curr = &clean[0..clean.len() - target.len()];
+                rates.insert(source_curr.to_string(), q.price);
+            }
+        }
+    }
+    let mut sums: HashMap<i32, f64> = HashMap::new();
+    for (acc_id, curr, amt) in raw_data {
+        let val = if curr == target {
+            amt
+        } else {
+            let rate = rates.get(&curr).unwrap_or(&1.0);
+            amt * rate
+        };
+        *sums.entry(acc_id).or_insert(0.0) += val;
+    }
+
+    for acc in &mut accounts {
+        if let Some(bal) = sums.get(&acc.id) {
+            acc.balance = *bal;
+        } else {
+            acc.balance = 0.0;
+        }
+    }
+
+    Ok(accounts)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -475,6 +620,7 @@ pub struct CreateTransactionArgs {
     pub shares: Option<f64>,
     pub price_per_share: Option<f64>,
     pub fee: Option<f64>,
+    pub currency: Option<String>,
 }
 
 fn create_transaction_db(
@@ -502,8 +648,8 @@ fn create_transaction_db(
     };
 
     tx.execute(
-        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-        params![args.account_id, args.date, args.payee, args.notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee],
+        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+        params![args.account_id, args.date, args.payee, args.notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee, args.currency],
     ).map_err(|e| e.to_string())?;
 
     let id = tx.last_insert_rowid() as i32;
@@ -565,6 +711,7 @@ fn create_transaction_db(
         shares: args.shares,
         price_per_share: args.price_per_share,
         fee: args.fee,
+        currency: args.currency,
     })
 }
 
@@ -580,7 +727,7 @@ fn create_transaction(
 fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transaction>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
     let transaction_iter = stmt
         .query_map(params![account_id], |row| {
             Ok(Transaction {
@@ -595,6 +742,7 @@ fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transac
                 shares: row.get(8)?,
                 price_per_share: row.get(9)?,
                 fee: row.get(10)?,
+                currency: row.get(11)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -616,7 +764,7 @@ fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transa
 fn get_all_transactions_db(db_path: &PathBuf) -> Result<Vec<Transaction>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
     let transaction_iter = stmt
         .query_map([], |row| {
             Ok(Transaction {
@@ -631,6 +779,7 @@ fn get_all_transactions_db(db_path: &PathBuf) -> Result<Vec<Transaction>, String
                 shares: row.get(8)?,
                 price_per_share: row.get(9)?,
                 fee: row.get(10)?,
+                currency: row.get(11)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -659,6 +808,7 @@ struct CreateInvestmentTransactionArgs {
     price_per_share: f64,
     fee: f64,
     is_buy: bool,
+    currency: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -671,6 +821,7 @@ struct UpdateTransactionArgs {
     notes: Option<String>,
     category: Option<String>,
     amount: f64,
+    currency: Option<String>,
 }
 
 fn create_investment_transaction_db(
@@ -685,6 +836,7 @@ fn create_investment_transaction_db(
         price_per_share,
         fee,
         is_buy,
+        currency,
     } = args;
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -705,7 +857,7 @@ fn create_investment_transaction_db(
     let investment_shares = if is_buy { shares } else { -shares };
 
     tx.execute(
-        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
         params![
             account_id,
             date,
@@ -716,7 +868,8 @@ fn create_investment_transaction_db(
             ticker,
             investment_shares,
             price_per_share,
-            fee
+            fee,
+            currency
         ],
     ).map_err(|e| e.to_string())?;
 
@@ -751,6 +904,7 @@ fn create_investment_transaction_db(
         shares: Some(investment_shares),
         price_per_share: Some(price_per_share),
         fee: Some(fee),
+        currency,
     })
 }
 
@@ -775,6 +929,7 @@ fn update_transaction_db(
         notes,
         category,
         amount,
+        currency,
     } = args;
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -792,8 +947,8 @@ fn update_transaction_db(
 
     // Update transaction including account_id to support moving between accounts
     tx.execute(
-        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6 WHERE id = ?7",
-        params![account_id, date, payee, notes, category, amount, id],
+        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6, currency = ?7 WHERE id = ?8",
+        params![account_id, date, payee, notes, category, amount, currency, id],
     ).map_err(|e| e.to_string())?;
 
     if old_account_id == account_id {
@@ -883,8 +1038,8 @@ fn update_transaction_db(
                 .map_err(|e| e.to_string())?;
 
             tx.execute(
-                "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5 WHERE id = ?6",
-                params![date, source_name, notes, "Transfer", new_ctr_amount, counterpart_id],
+                "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5, currency = ?6 WHERE id = ?7",
+                params![date, source_name, notes, "Transfer", new_ctr_amount, currency, counterpart_id],
             )
             .map_err(|e| e.to_string())?;
 
@@ -912,6 +1067,7 @@ fn update_transaction_db(
         shares: None,
         price_per_share: None,
         fee: None,
+        currency,
     })
 }
 
@@ -936,6 +1092,7 @@ struct UpdateInvestmentTransactionArgs {
     fee: f64,
     is_buy: bool,
     notes: Option<String>,
+    currency: Option<String>,
 }
 
 fn update_investment_transaction_db(
@@ -952,6 +1109,7 @@ fn update_investment_transaction_db(
         fee,
         is_buy,
         notes,
+        currency,
     } = args;
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -1000,8 +1158,9 @@ fn update_investment_transaction_db(
             ticker = ?7,
             shares = ?8,
             price_per_share = ?9,
-            fee = ?10
-         WHERE id = ?11",
+            fee = ?10,
+            currency = ?11
+         WHERE id = ?12",
         params![
             account_id,
             date,
@@ -1013,6 +1172,7 @@ fn update_investment_transaction_db(
             investment_shares,
             price_per_share,
             fee,
+            currency,
             id
         ],
     )
@@ -1060,6 +1220,7 @@ fn update_investment_transaction_db(
         shares: Some(investment_shares),
         price_per_share: Some(price_per_share),
         fee: Some(fee),
+        currency,
     })
 }
 
@@ -1196,14 +1357,36 @@ fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn search_ticker(query: String) -> Result<Vec<YahooSearchQuote>, String> {
-    // Delegate to the test-injectable helper that accepts a client and base url
-    search_ticker_with_client(
+async fn search_ticker(
+    app_handle: AppHandle,
+    query: String,
+) -> Result<Vec<YahooSearchQuote>, String> {
+    // 1. Get initial search results
+    let mut quotes = search_ticker_with_client(
         reqwest::Client::new(),
         "https://query1.finance.yahoo.com".to_string(),
         query,
     )
-    .await
+    .await?;
+
+    if quotes.is_empty() {
+        return Ok(quotes);
+    }
+
+    // 2. Fetch full quotes to get currencies for these symbols
+    let tickers: Vec<String> = quotes.iter().map(|q| q.symbol.clone()).collect();
+    let full_quotes = get_stock_quotes(app_handle, tickers)
+        .await
+        .unwrap_or_default();
+
+    // 3. Merge currency info back into search results
+    for q in &mut quotes {
+        if let Some(fq) = full_quotes.iter().find(|f| f.symbol == q.symbol) {
+            q.currency = fq.currency.clone();
+        }
+    }
+
+    Ok(quotes)
 }
 
 // Helper allowing tests to inject client and base URL
@@ -1289,7 +1472,8 @@ async fn get_stock_quotes_with_client(
                                                 return Some(YahooQuote {
                                                     symbol: item.meta.symbol.clone(),
                                                     price,
-                                                    change_percent
+                                                    change_percent,
+                                                    currency: item.meta.currency.clone(),
                                                 });
                                             }
                                         }
@@ -1356,6 +1540,7 @@ async fn get_stock_quotes_with_client(
                     symbol,
                     price,
                     change_percent: 0.0, // We don't store change percent in DB yet, could add it
+                    currency: None,
                 });
             }
         }
@@ -1412,7 +1597,8 @@ async fn get_stock_quotes_with_client_and_db(
                                                 return Some(YahooQuote {
                                                     symbol: item.meta.symbol.clone(),
                                                     price,
-                                                    change_percent
+                                                    change_percent,
+                                                    currency: item.meta.currency.clone(),
                                                 });
                                             }
                                         }
@@ -1478,6 +1664,7 @@ async fn get_stock_quotes_with_client_and_db(
                     symbol,
                     price,
                     change_percent: 0.0, // We don't store change percent in DB yet, could add it
+                    currency: None,
                 });
             }
         }

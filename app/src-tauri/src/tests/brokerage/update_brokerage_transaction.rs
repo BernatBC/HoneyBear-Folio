@@ -13,6 +13,7 @@ fn test_update_investment_transaction_missing_id_should_error() {
         fee: 1.0,
         is_buy: true,
         notes: None,
+        currency: None,
     };
 
     let res = crate::update_investment_transaction_db(&db_path, args);
@@ -35,6 +36,7 @@ fn test_update_investment_transaction_updates_balance() {
         price_per_share: 100.0,
         fee: 2.0,
         is_buy: true,
+        currency: None,
     };
 
     let created = crate::create_investment_transaction_db(&db_path, args).unwrap();
@@ -55,6 +57,7 @@ fn test_update_investment_transaction_updates_balance() {
         fee: 1.0,
         is_buy: true,
         notes: None,
+        currency: None,
     };
 
     crate::update_investment_transaction_db(&db_path, update_args).unwrap();
@@ -80,6 +83,7 @@ fn test_update_investment_transaction_custom_notes() {
         price_per_share: 100.0,
         fee: 2.0,
         is_buy: true,
+        currency: None,
     };
 
     let created = crate::create_investment_transaction_db(&db_path, args).unwrap();
@@ -96,6 +100,7 @@ fn test_update_investment_transaction_custom_notes() {
         fee: 2.0,
         is_buy: true,
         notes: Some(custom_note.clone()),
+        currency: None,
     };
 
     crate::update_investment_transaction_db(&db_path, update_args).unwrap();
@@ -120,6 +125,7 @@ fn test_update_investment_transaction_sell_changes_amounts() {
         price_per_share: 100.0,
         fee: 2.0,
         is_buy: true,
+        currency: None,
     };
 
     let created = crate::create_investment_transaction_db(&db_path, args).unwrap();
@@ -137,6 +143,7 @@ fn test_update_investment_transaction_sell_changes_amounts() {
         fee: 2.0,
         is_buy: false,
         notes: None,
+        currency: None,
     };
 
     crate::update_investment_transaction_db(&db_path, update_args).unwrap();

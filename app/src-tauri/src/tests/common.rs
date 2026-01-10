@@ -32,6 +32,7 @@ pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
             shares REAL,
             price_per_share REAL,
             fee REAL,
+            currency TEXT,
             linked_tx_id INTEGER,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
         )",

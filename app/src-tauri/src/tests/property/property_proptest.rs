@@ -38,6 +38,7 @@ proptest! {
                         shares: None,
                         price_per_share: None,
                         fee: None,
+                        currency: None,
                     });
                 } else {
                     let _ = crate::create_transaction_db(&db_path, crate::CreateTransactionArgs {
@@ -51,12 +52,13 @@ proptest! {
                         shares: None,
                         price_per_share: None,
                         fee: None,
+                        currency: None,
                     });
                 }
             } else if op < 0.8 {
                 // create brokerage
                 let a = rng.random_range(0..accounts.len());
-                let args = crate::CreateInvestmentTransactionArgs{account_id: accounts[a].id, date: "2023-01-01".to_string(), ticker: "P".to_string(), shares: rng.random_range(1..10) as f64, price_per_share: rng.random_range(1..50) as f64, fee: rng.random_range(0..5) as f64, is_buy: rng.random_bool(0.5)};
+                let args = crate::CreateInvestmentTransactionArgs{account_id: accounts[a].id, date: "2023-01-01".to_string(), ticker: "P".to_string(), shares: rng.random_range(1..10) as f64, price_per_share: rng.random_range(1..50) as f64, fee: rng.random_range(0..5) as f64, is_buy: rng.random_bool(0.5), currency: None};
                 let _ = crate::create_investment_transaction_db(&db_path, args);
             } else {
                 // random update/delete
@@ -64,7 +66,7 @@ proptest! {
                 if !all.is_empty() {
                     if rng.random_bool(0.5) {
                         let tx = all[rng.random_range(0..all.len())].clone();
-                        let args = crate::UpdateTransactionArgs{ id: tx.id, account_id: tx.account_id, date: tx.date.clone(), payee: tx.payee.clone(), notes: tx.notes.clone(), category: tx.category.clone(), amount: tx.amount * (1.0 + rng.random_range(-50..50) as f64 / 100.0)};
+                        let args = crate::UpdateTransactionArgs{ id: tx.id, account_id: tx.account_id, date: tx.date.clone(), payee: tx.payee.clone(), notes: tx.notes.clone(), category: tx.category.clone(), amount: tx.amount * (1.0 + rng.random_range(-50..50) as f64 / 100.0), currency: None};
                         let _ = crate::update_transaction_db(&db_path, args);
                     } else {
                         let tx = all[rng.random_range(0..all.len())].clone();

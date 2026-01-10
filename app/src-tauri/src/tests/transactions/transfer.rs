@@ -21,6 +21,7 @@ fn test_transfer() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
