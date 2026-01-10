@@ -560,7 +560,6 @@ export default function Dashboard({
       }
     } else {
       // Use months for 3M, 6M, 1Y, ALL and CUSTOM > 31 days
-      let monthsCount = 6; // default
       let end = new Date(now);
       let start = new Date(now);
 
