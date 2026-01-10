@@ -31,6 +31,7 @@ import { useConfirm } from "../contexts/confirm";
 import NumberInput from "./NumberInput";
 import CustomSelect from "./CustomSelect";
 import { t } from "../i18n/i18n";
+import { CURRENCIES } from "../utils/currencies";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);
@@ -39,7 +40,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const formatNumber = useFormatNumber();
   const parseNumber = useParseNumber();
   const formatDate = useFormatDate();
-  const { dateFormat, firstDayOfWeek } = useNumberFormat();
+  const { dateFormat, firstDayOfWeek, currency: appCurrency } = useNumberFormat();
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
@@ -85,6 +86,10 @@ export default function AccountDetails({ account, onUpdate }) {
   const [notes, setNotes] = useState("");
   const [amount, setAmount] = useState("");
   const [transactionType, setTransactionType] = useState("cash");
+  const [useCustomCurrency, setUseCustomCurrency] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState(
+    () => localStorage.getItem("hb_currency") || "USD",
+  );
 
   // Brokerage Form State
   const [ticker, setTicker] = useState("");
@@ -371,6 +376,7 @@ export default function AccountDetails({ account, onUpdate }) {
             shares: null,
             pricePerShare: null,
             fee: null,
+            currency: useCustomCurrency ? selectedCurrency : null,
           },
         });
 
@@ -378,6 +384,8 @@ export default function AccountDetails({ account, onUpdate }) {
         setCategory("");
         setNotes("");
         setAmount("");
+        setUseCustomCurrency(false);
+        setSelectedCurrency(localStorage.getItem("hb_currency") || "USD");
       }
 
       setIsAdding(false);
@@ -1033,6 +1041,34 @@ export default function AccountDetails({ account, onUpdate }) {
                 </div>
               </div>
 
+              <div className="md:col-span-12 flex items-center gap-4 mb-2">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={useCustomCurrency}
+                    onChange={(e) => setUseCustomCurrency(e.target.checked)}
+                    className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                  />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Use different currency
+                  </span>
+                </label>
+
+                {useCustomCurrency && (
+                  <div className="w-64">
+                    <CustomSelect
+                      options={CURRENCIES.map((c) => ({
+                        value: c.code,
+                        label: `${c.code} - ${c.name}`,
+                      }))}
+                      value={selectedCurrency}
+                      onChange={(val) => setSelectedCurrency(val)}
+                      placeholder="Select currency"
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="md:col-span-12 flex justify-end mt-2">
                 <button
                   type="submit"
@@ -1594,6 +1630,7 @@ export default function AccountDetails({ account, onUpdate }) {
                           {tx.amount >= 0 ? "+" : ""}
                           {formatNumber(Math.abs(tx.amount), {
                             style: "currency",
+                            currency: tx.currency || appCurrency,
                           })}
                         </td>
                         <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">

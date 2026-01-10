@@ -31,7 +31,8 @@ function App() {
 
   async function fetchAccounts() {
     try {
-      const accs = await invoke("get_accounts");
+      const currency = localStorage.getItem("hb_currency") || "USD";
+      const accs = await invoke("get_accounts", { targetCurrency: currency });
       accs.sort((a, b) => b.balance - a.balance);
       setAccounts(accs);
     } catch (e) {

@@ -1,6 +1,7 @@
 use chrono::{NaiveDate, TimeZone, Utc};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
@@ -87,6 +88,7 @@ struct Transaction {
     shares: Option<f64>,
     price_per_share: Option<f64>,
     fee: Option<f64>,
+    currency: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -211,6 +213,37 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
             match conn.execute(
                 "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
+                [],
+            ) {
+                Ok(_) => {}
+                Err(e) => {
+                    let s = e.to_string();
+                    if !s.contains("duplicate column name") && !s.contains("already exists") {
+                        return Err(s);
+                    }
+                }
+            }
+        }
+    }
+
+    // Ensure we have a column for currency (multi-currency support)
+    {
+        let mut stmt = conn
+            .prepare("PRAGMA table_info(transactions)")
+            .map_err(|e| e.to_string())?;
+        let mut has_currency = false;
+        let col_iter = stmt
+            .query_map([], |row| row.get::<_, String>(1))
+            .map_err(|e| e.to_string())?;
+        for name in col_iter.flatten() {
+            if name == "currency" {
+                has_currency = true;
+                break;
+            }
+        }
+        if !has_currency {
+            match conn.execute(
+                "ALTER TABLE transactions ADD COLUMN currency TEXT",
                 [],
             ) {
                 Ok(_) => {}
@@ -457,9 +490,90 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
 }
 
 #[tauri::command]
-fn get_accounts(app_handle: AppHandle) -> Result<Vec<Account>, String> {
+async fn get_accounts(app_handle: AppHandle, target_currency: Option<String>) -> Result<Vec<Account>, String> {
     let db_path = get_db_path(&app_handle)?;
-    get_accounts_db(&db_path)
+    let target = target_currency.unwrap_or_else(|| "USD".to_string());
+
+    // Run DB work on a blocking thread so rusqlite's non-Send types do not live across an await
+    let db_path_clone = db_path.clone();
+    let target_clone = target.clone();
+    let (mut accounts, raw_data, currencies_to_fetch) = std::thread::spawn(move || -> Result<(Vec<Account>, Vec<(i32, String, f64)>, HashSet<String>), String> {
+        let accounts = get_accounts_db(&db_path_clone)?;
+
+        let conn = Connection::open(&db_path_clone).map_err(|e| e.to_string())?;
+
+        // Group transaction amounts by account and currency
+        let mut stmt = conn
+            .prepare("SELECT account_id, currency, SUM(amount) FROM transactions GROUP BY account_id, currency")
+            .map_err(|e| e.to_string())?;
+
+        let rows = stmt.query_map([], |row| {
+            Ok((
+                row.get::<_, i32>(0)?,
+                row.get::<_, Option<String>>(1)?,
+                row.get::<_, Option<f64>>(2)?
+            ))
+        }).map_err(|e| e.to_string())?;
+
+        let mut raw_data = Vec::new();
+        let mut currencies_to_fetch = HashSet::new();
+
+        for r in rows {
+            let (acc_id, curr_opt, amt_opt) = r.map_err(|e| e.to_string())?;
+            let amt = amt_opt.unwrap_or(0.0);
+            let curr = curr_opt.unwrap_or_else(|| target_clone.clone());
+            raw_data.push((acc_id, curr.clone(), amt));
+            if curr != target_clone {
+                currencies_to_fetch.insert(curr);
+            }
+        }
+
+        Ok((accounts, raw_data, currencies_to_fetch))
+    })
+    .join().map_err(|_| "DB thread panicked".to_string())??;
+
+    let mut rates = HashMap::new();
+    if !currencies_to_fetch.is_empty() {
+        let tickers: Vec<String> = currencies_to_fetch.iter().map(|c| format!("{}{}=X", c, target)).collect();
+        let client = reqwest::Client::builder().build().map_err(|e| e.to_string())?;
+        // Reuse existing get_stock_quotes_with_client
+        let quotes = get_stock_quotes_with_client(
+            client,
+            "https://query1.finance.yahoo.com".to_string(),
+            app_handle.clone(),
+            tickers
+        ).await?;
+
+        for q in quotes {
+            // Symbol is e.g. "EURUSD=X"
+            let clean = q.symbol.trim_end_matches("=X");
+            if clean.ends_with(&target) && clean.len() > target.len() {
+                 let source_curr = &clean[0..clean.len() - target.len()];
+                 rates.insert(source_curr.to_string(), q.price);
+            }
+        }
+    }
+
+    let mut sums: HashMap<i32, f64> = HashMap::new();
+    for (acc_id, curr, amt) in raw_data {
+        let val = if curr == target {
+            amt
+        } else {
+            let rate = rates.get(&curr).unwrap_or(&1.0);
+            amt * rate
+        };
+        *sums.entry(acc_id).or_insert(0.0) += val;
+    }
+
+    for acc in &mut accounts {
+        if let Some(bal) = sums.get(&acc.id) {
+            acc.balance = *bal;
+        } else {
+            acc.balance = 0.0;
+        }
+    }
+
+    Ok(accounts)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -475,6 +589,7 @@ pub struct CreateTransactionArgs {
     pub shares: Option<f64>,
     pub price_per_share: Option<f64>,
     pub fee: Option<f64>,
+    pub currency: Option<String>,
 }
 
 fn create_transaction_db(
@@ -502,8 +617,8 @@ fn create_transaction_db(
     };
 
     tx.execute(
-        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-        params![args.account_id, args.date, args.payee, args.notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee],
+        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+        params![args.account_id, args.date, args.payee, args.notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee, args.currency],
     ).map_err(|e| e.to_string())?;
 
     let id = tx.last_insert_rowid() as i32;
@@ -565,6 +680,7 @@ fn create_transaction_db(
         shares: args.shares,
         price_per_share: args.price_per_share,
         fee: args.fee,
+        currency: args.currency,
     })
 }
 
@@ -580,7 +696,7 @@ fn create_transaction(
 fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transaction>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency FROM transactions WHERE account_id = ?1 ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
     let transaction_iter = stmt
         .query_map(params![account_id], |row| {
             Ok(Transaction {
@@ -595,6 +711,7 @@ fn get_transactions_db(db_path: &PathBuf, account_id: i32) -> Result<Vec<Transac
                 shares: row.get(8)?,
                 price_per_share: row.get(9)?,
                 fee: row.get(10)?,
+                currency: row.get(11)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -616,7 +733,7 @@ fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transa
 fn get_all_transactions_db(db_path: &PathBuf) -> Result<Vec<Transaction>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
+    let mut stmt = conn.prepare("SELECT id, account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency FROM transactions ORDER BY date DESC, id DESC").map_err(|e| e.to_string())?;
     let transaction_iter = stmt
         .query_map([], |row| {
             Ok(Transaction {
@@ -631,6 +748,7 @@ fn get_all_transactions_db(db_path: &PathBuf) -> Result<Vec<Transaction>, String
                 shares: row.get(8)?,
                 price_per_share: row.get(9)?,
                 fee: row.get(10)?,
+                currency: row.get(11)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -659,6 +777,7 @@ struct CreateInvestmentTransactionArgs {
     price_per_share: f64,
     fee: f64,
     is_buy: bool,
+    currency: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -685,6 +804,7 @@ fn create_investment_transaction_db(
         price_per_share,
         fee,
         is_buy,
+        currency,
     } = args;
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -705,7 +825,7 @@ fn create_investment_transaction_db(
     let investment_shares = if is_buy { shares } else { -shares };
 
     tx.execute(
-        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+        "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
         params![
             account_id,
             date,
@@ -716,7 +836,8 @@ fn create_investment_transaction_db(
             ticker,
             investment_shares,
             price_per_share,
-            fee
+            fee,
+            currency
         ],
     ).map_err(|e| e.to_string())?;
 
@@ -751,6 +872,7 @@ fn create_investment_transaction_db(
         shares: Some(investment_shares),
         price_per_share: Some(price_per_share),
         fee: Some(fee),
+        currency,
     })
 }
 
@@ -912,6 +1034,7 @@ fn update_transaction_db(
         shares: None,
         price_per_share: None,
         fee: None,
+        currency: None, // Updates don't currently support changing currency of existing transaction
     })
 }
 
@@ -1060,6 +1183,7 @@ fn update_investment_transaction_db(
         shares: Some(investment_shares),
         price_per_share: Some(price_per_share),
         fee: Some(fee),
+        currency: None, // Updates don't currently support changing currency of existing transaction
     })
 }
 
