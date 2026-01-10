@@ -24,39 +24,39 @@
   /* slate-50 */
   border-bottom: 1px solid #e2e8f0 !important;
   /* slate-200 */
-  padding-top: 0.75rem !important;
+  padding-top: 0.5rem !important;
 }
 .react-datepicker__month {
   margin: 0 !important;
-  padding: 0.4rem !important;
+  padding: 0.25rem !important;
 }
 .react-datepicker__current-month {
   color: #334155 !important;
   /* slate-700 */
   font-weight: 600 !important;
-  font-size: 0.9rem !important;
-  margin-bottom: 0.5rem !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 0.35rem !important;
 }
 
 .react-datepicker__day-name {
   color: #64748b !important;
   /* slate-500 */
   font-weight: 600 !important;
-  width: 2.25rem !important;
-  line-height: 2.25rem !important;
+  width: 1.875rem !important;
+  line-height: 1.875rem !important;
   margin: 0 !important;
-  font-size: 0.75rem !important;
+  font-size: 0.7rem !important;
 }
 
 .react-datepicker__day {
-  width: 2.25rem !important;
-  line-height: 2.25rem !important;
+  width: 1.875rem !important;
+  line-height: 1.875rem !important;
   margin: 0 !important;
-  border-radius: 0.375rem !important;
-  /* rounded-md */
+  border-radius: 0.3125rem !important;
+  /* slightly smaller rounded */
   color: #334155 !important;
   /* slate-700 */
-  font-size: 0.85rem !important;
+  font-size: 0.8rem !important;
   transition: background-color 0.2s, color 0.2s, border-radius 0.2s;
   position: relative;
 }
@@ -156,11 +156,11 @@
 .react-datepicker__day--today::after {
   content: "";
   position: absolute;
-  bottom: 0.25rem;
+  bottom: 0.2rem;
   left: 50%;
   transform: translateX(-50%);
-  width: 0.25rem;
-  height: 0.25rem;
+  width: 0.18rem;
+  height: 0.18rem;
   border-radius: 50%;
   background-color: #2563eb;
 }
@@ -176,7 +176,7 @@
 }
 
 .react-datepicker__navigation {
-  top: 0.75rem !important;
+  top: 0.5rem !important;
 }
 
 .react-datepicker__navigation-icon::before {
