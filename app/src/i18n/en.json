@@ -108,6 +108,7 @@
   "settings.date_format": "Date format",
   "settings.select_date_format_placeholder": "Select date format",
   "dashboard.title": "Dashboard",
+  "dashboard.custom": "Custom",
   "dashboard.current_net_worth": "Current Net Worth",
   "dashboard.total_accounts": "Total Accounts",
   "dashboard.total_transactions": "Total Transactions",
