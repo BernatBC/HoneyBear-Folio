@@ -126,44 +126,32 @@
     @apply lg:col-span-2;
   }
 
-  /* Transaction row sizing via CSS variables — controlled by user setting */
-  /* Default values live on :root so they can be overridden by JavaScript changes to document.documentElement */
-  :root {
-    --hb-tx-cell-py: 12px; /* default vertical padding (top and bottom each) */
-    --hb-tx-cell-px: 16px; /* default horizontal padding (left and right) */
+  /* Transaction table scales with font-size, including padding for horizontal fit */
+  .account-transactions-table {
+    /* Font size scales with global setting - much smaller base size (12px) for very compact table */
+    font-size: calc(12px * var(--hb-font-size));
   }
 
   .account-transactions-table thead th {
-    padding: var(--hb-tx-cell-py) var(--hb-tx-cell-px) !important;
-    /* Make font-size grow up to 25% but never shrink below 1.0 */
-    font-size: calc(
-      0.75rem * clamp(1, (var(--hb-tx-cell-py) / 12px), 1.25)
-    ) !important; /* text-xs scaled (1.0–1.2) */
+    /* Padding scales with font size - em units are relative to table font-size */
+    /* To allow more horizontal content when font is smaller, we reduce padding more aggressively */
+    padding: calc(0.75em * var(--hb-font-size) * var(--hb-font-size)) calc(1em * var(--hb-font-size) * var(--hb-font-size)) !important;
+    font-size: inherit !important;
   }
 
-  /* Use explicit padding + font-size to ensure we override utility classes in cells */
   .account-transactions-table tbody td {
-    padding: var(--hb-tx-cell-py) var(--hb-tx-cell-px) !important;
-    /* Make font-size grow up to 25% but never shrink below 1.0 */
-    font-size: calc(
-      0.75rem * clamp(1, (var(--hb-tx-cell-py) / 12px), 1.25)
-    ) !important; /* text-xs scaled (1.0–1.2) */
+    /* Padding scales with font size - em units are relative to table font-size */
+    /* To allow more horizontal content when font is smaller, we reduce padding more aggressively */
+    padding: calc(0.75em * var(--hb-font-size) * var(--hb-font-size)) calc(1em * var(--hb-font-size) * var(--hb-font-size)) !important;
+    font-size: inherit !important;
   }
 
-  /* Make inputs and rounded controls inside table smaller */
+  /* Inputs and controls inside table scale with font size */
   .account-transactions-table input,
   .account-transactions-table .rounded-lg,
   .account-transactions-table .p-2 {
-    padding: 0.25rem !important; /* p-1 */
-    /* Scale control fonts with row padding too (grow up to 20%) */
-    font-size: calc(
-      0.75rem * clamp(1, (var(--hb-tx-cell-py) / 12px), 1.25)
-    ) !important;
-  }
-
-  /* Slightly reduce padding for buttons/icons that use p-2 */
-  .account-transactions-table .p-2 {
-    padding: 0.25rem !important;
+    padding: calc(0.25em * var(--hb-font-size)) !important;
+    font-size: inherit !important;
   }
 
   .account-visibility .account-item {

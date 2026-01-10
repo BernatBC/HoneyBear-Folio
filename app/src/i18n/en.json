@@ -99,7 +99,7 @@
   "settings.database_file": "Database file",
   "settings.select_db_file": "Select DB file",
   "settings.reset_to_defaults": "Reset to defaults",
-  "settings.transaction_row_height": "Transaction row height",
+  "settings.font_size": "Font size",
   "settings.currency": "Currency",
   "settings.number_format": "Number format",
   "settings.select_currency_placeholder": "Select currency",
