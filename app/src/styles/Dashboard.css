@@ -135,14 +135,16 @@
   .account-transactions-table thead th {
     /* Padding scales with font size - em units are relative to table font-size */
     /* To allow more horizontal content when font is smaller, we reduce padding more aggressively */
-    padding: calc(0.75em * var(--hb-font-size) * var(--hb-font-size)) calc(1em * var(--hb-font-size) * var(--hb-font-size)) !important;
+    padding: calc(0.75em * var(--hb-font-size) * var(--hb-font-size))
+      calc(1em * var(--hb-font-size) * var(--hb-font-size)) !important;
     font-size: inherit !important;
   }
 
   .account-transactions-table tbody td {
     /* Padding scales with font size - em units are relative to table font-size */
     /* To allow more horizontal content when font is smaller, we reduce padding more aggressively */
-    padding: calc(0.75em * var(--hb-font-size) * var(--hb-font-size)) calc(1em * var(--hb-font-size) * var(--hb-font-size)) !important;
+    padding: calc(0.75em * var(--hb-font-size) * var(--hb-font-size))
+      calc(1em * var(--hb-font-size) * var(--hb-font-size)) !important;
     font-size: inherit !important;
   }
 

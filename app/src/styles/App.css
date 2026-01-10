@@ -16,7 +16,7 @@
     "Helvetica Neue",
     sans-serif;
   /* Global font size multiplier - default 1.0 (100%) */
-  --hb-font-size: 1.0;
+  --hb-font-size: 1;
 }
 
 @layer base {
