@@ -154,6 +154,109 @@
     font-size: inherit !important;
   }
 
+  /* Header and Form above transaction table also scale with font-size */
+  .account-details-scaled-container .text-3xl {
+    font-size: calc(1.875rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .text-lg {
+    font-size: calc(1.125rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .text-sm {
+    font-size: calc(0.875rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .text-xs {
+    font-size: calc(0.75rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .py-4 {
+    padding-top: calc(1rem * var(--hb-font-size)) !important;
+    padding-bottom: calc(1rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .py-3 {
+    padding-top: calc(0.75rem * var(--hb-font-size)) !important;
+    padding-bottom: calc(0.75rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .py-2 {
+    padding-top: calc(0.5rem * var(--hb-font-size)) !important;
+    padding-bottom: calc(0.5rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .py-1\.5 {
+    padding-top: calc(0.375rem * var(--hb-font-size)) !important;
+    padding-bottom: calc(0.375rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .px-6 {
+    padding-left: calc(1.5rem * var(--hb-font-size)) !important;
+    padding-right: calc(1.5rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .px-5 {
+    padding-left: calc(1.25rem * var(--hb-font-size)) !important;
+    padding-right: calc(1.25rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .px-4 {
+    padding-left: calc(1rem * var(--hb-font-size)) !important;
+    padding-right: calc(1rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .px-3 {
+    padding-left: calc(0.75rem * var(--hb-font-size)) !important;
+    padding-right: calc(0.75rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .pr-10 {
+    padding-right: calc(2.5rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .p-3 {
+    padding: calc(0.75rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .p-2\.5 {
+    padding: calc(0.625rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .w-5 {
+    width: calc(1.25rem * var(--hb-font-size)) !important;
+    height: calc(1.25rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .w-4 {
+    width: calc(1rem * var(--hb-font-size)) !important;
+    height: calc(1rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .gap-4 {
+    gap: calc(1rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .gap-3 {
+    gap: calc(0.75rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .gap-2 {
+    gap: calc(0.5rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .pl-10 {
+    padding-left: calc(2.5rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .pl-9 {
+    padding-left: calc(2.25rem * var(--hb-font-size)) !important;
+  }
+
+  .account-details-scaled-container .left-3 {
+    left: calc(0.75rem * var(--hb-font-size)) !important;
+  }
+
   .account-visibility .account-item {
     @apply cursor-pointer;
   }
