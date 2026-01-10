@@ -62,7 +62,7 @@ export default function Dashboard({
 
   const formatNumber = useFormatNumber();
   const formatDate = useFormatDate();
-  const { dateFormat } = useNumberFormat();
+  const { dateFormat, firstDayOfWeek } = useNumberFormat();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1014,6 +1014,7 @@ export default function Dashboard({
                   maxDate={new Date()}
                   showPopperArrow={false}
                   dateFormat={getDatePickerFormat(dateFormat)}
+                  calendarStartDay={firstDayOfWeek}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
                 />
               </div>
@@ -1029,6 +1030,7 @@ export default function Dashboard({
                   maxDate={new Date()}
                   showPopperArrow={false}
                   dateFormat={getDatePickerFormat(dateFormat)}
+                  calendarStartDay={firstDayOfWeek}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
                 />
               </div>

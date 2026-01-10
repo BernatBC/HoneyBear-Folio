@@ -27,6 +27,15 @@ export function NumberFormatProvider({ children }) {
     }
   });
 
+  const [firstDayOfWeek, setFirstDayOfWeek] = useState(() => {
+    try {
+      const v = localStorage.getItem("hb_first_day_of_week");
+      return v !== null ? parseInt(v, 10) : 1; // Default to Monday
+    } catch {
+      return 1;
+    }
+  });
+
   useEffect(() => {
     try {
       localStorage.setItem("hb_number_format", locale);
@@ -51,6 +60,14 @@ export function NumberFormatProvider({ children }) {
     }
   }, [dateFormat]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem("hb_first_day_of_week", String(firstDayOfWeek));
+    } catch {
+      // ignore
+    }
+  }, [firstDayOfWeek]);
+
   return (
     <NumberFormatContext.Provider
       value={{
@@ -60,6 +77,8 @@ export function NumberFormatProvider({ children }) {
         setCurrency,
         dateFormat,
         setDateFormat,
+        firstDayOfWeek,
+        setFirstDayOfWeek,
       }}
     >
       {children}
