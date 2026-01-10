@@ -1081,6 +1081,12 @@ export default function AccountDetails({ account, onUpdate }) {
                 <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
                   Payee
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-56">
+                  Category
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
+                  {t("account.notes")}
+                </th>
                 {hasInvestment && (
                   <>
                     <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-48">
@@ -1097,15 +1103,9 @@ export default function AccountDetails({ account, onUpdate }) {
                     </th>
                   </>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-56">
-                  Category
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
-                  {t("account.notes")}
-                </th>
                 <th className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36">
                   Amount
-                </th>
+                </th> 
                 <th className="w-16"></th>
               </tr>
             </thead>
@@ -1224,6 +1224,35 @@ export default function AccountDetails({ account, onUpdate }) {
                             <td className="px-6 py-3">
                               <input
                                 type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.category || "Investment"}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    category: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.notes || ""}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    notes: e.target.value,
+                                  })
+                                }
+                                placeholder={t("account.notes_placeholder")}
+                              />
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <input
+                                type="text"
                                 className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
                                 value={editForm.ticker || ""}
                                 onChange={(e) =>
@@ -1286,35 +1315,6 @@ export default function AccountDetails({ account, onUpdate }) {
                               </div>
                             </td>
 
-                            <td className="px-6 py-3">
-                              <input
-                                type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                                value={editForm.category || "Investment"}
-                                onChange={(e) =>
-                                  setEditForm({
-                                    ...editForm,
-                                    category: e.target.value,
-                                  })
-                                }
-                              />
-                            </td>
-
-                            <td className="px-6 py-3">
-                              <input
-                                type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                                value={editForm.notes || ""}
-                                onChange={(e) =>
-                                  setEditForm({
-                                    ...editForm,
-                                    notes: e.target.value,
-                                  })
-                                }
-                                placeholder={t("account.notes_placeholder")}
-                              />
-                            </td>
-
                             <td className="px-6 py-3 text-right font-bold text-slate-900 dark:text-slate-100">
                               {(() => {
                                 const s = parseNumber(editForm.shares) || 0;
@@ -1365,6 +1365,43 @@ export default function AccountDetails({ account, onUpdate }) {
                               />
                             </td>
 
+                            <td className="px-6 py-3">
+                              <AutocompleteInput
+                                suggestions={categorySuggestions}
+                                className={`w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${
+                                  availableAccounts?.some(
+                                    (a) => a.name === editForm.payee,
+                                  )
+                                    ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                    : ""
+                                }`}
+                                value={editForm.category || ""}
+                                onChange={(val) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    category: val,
+                                  })
+                                }
+                                disabled={availableAccounts?.some(
+                                  (a) => a.name === editForm.payee,
+                                )}
+                              />
+                            </td>
+
+                            <td className="px-6 py-3">
+                              <input
+                                type="text"
+                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
+                                value={editForm.notes || ""}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    notes: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+
                             {/* If the table includes brokerage columns (non-cash views), insert placeholders so columns stay aligned */}
                             {hasInvestment && (
                               <>
@@ -1391,41 +1428,6 @@ export default function AccountDetails({ account, onUpdate }) {
                               </>
                             )}
 
-                            <td className="px-6 py-3">
-                              <AutocompleteInput
-                                suggestions={categorySuggestions}
-                                className={`w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none ${
-                                  availableAccounts?.some(
-                                    (a) => a.name === editForm.payee,
-                                  )
-                                    ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                                    : ""
-                                }`}
-                                value={editForm.category || ""}
-                                onChange={(val) =>
-                                  setEditForm({
-                                    ...editForm,
-                                    category: val,
-                                  })
-                                }
-                                disabled={availableAccounts?.some(
-                                  (a) => a.name === editForm.payee,
-                                )}
-                              />
-                            </td>
-                            <td className="px-6 py-3">
-                              <input
-                                type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
-                                value={editForm.notes || ""}
-                                onChange={(e) =>
-                                  setEditForm({
-                                    ...editForm,
-                                    notes: e.target.value,
-                                  })
-                                }
-                              />
-                            </td>
                             <td className="px-6 py-3">
                               <input
                                 type="text"
@@ -1487,6 +1489,37 @@ export default function AccountDetails({ account, onUpdate }) {
                           onClick={() => startEditing(tx)}
                         >
                           {tx.payee}
+                        </td>
+
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
+                          onClick={() => startEditing(tx)}
+                        >
+                          {tx.category ? (
+                            <span
+                              className={`px-2 py-1 inline-flex text-xs font-bold rounded-lg border ${
+                                tx.category === "Transfer"
+                                  ? "bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                                  : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600"
+                              }`}
+                            >
+                              {tx.category}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 dark:text-slate-500">
+                              -
+                            </span>
+                          )}
+                        </td>
+                        <td
+                          className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate cursor-pointer"
+                          onClick={() => startEditing(tx)}
+                        >
+                          {tx.notes || (
+                            <span className="text-slate-300 dark:text-slate-600 italic">
+                              {t("account.no_notes")}
+                            </span>
+                          )}
                         </td>
 
                         {hasInvestment && (
@@ -1568,36 +1601,6 @@ export default function AccountDetails({ account, onUpdate }) {
                           </>
                         )}
 
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer"
-                          onClick={() => startEditing(tx)}
-                        >
-                          {tx.category ? (
-                            <span
-                              className={`px-2 py-1 inline-flex text-xs font-bold rounded-lg border ${
-                                tx.category === "Transfer"
-                                  ? "bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
-                                  : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600"
-                              }`}
-                            >
-                              {tx.category}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 dark:text-slate-500">
-                              -
-                            </span>
-                          )}
-                        </td>
-                        <td
-                          className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate cursor-pointer"
-                          onClick={() => startEditing(tx)}
-                        >
-                          {tx.notes || (
-                            <span className="text-slate-300 dark:text-slate-600 italic">
-                              {t("account.no_notes")}
-                            </span>
-                          )}
-                        </td>
                         <td
                           className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold cursor-pointer ${tx.amount >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
                           onClick={() => startEditing(tx)}
