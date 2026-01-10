@@ -1647,11 +1647,6 @@ export default function AccountDetails({ account, onUpdate }) {
                                     maximumFractionDigits: 2,
                                     minimumFractionDigits: 2,
                                   })}
-                                  {tx.currency && tx.currency !== appCurrency && (
-                                    <span className="ml-1 text-[10px] text-slate-400 dark:text-slate-500">
-                                      {tx.currency}
-                                    </span>
-                                  )}
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1673,11 +1668,6 @@ export default function AccountDetails({ account, onUpdate }) {
                                     maximumFractionDigits: 2,
                                     minimumFractionDigits: 2,
                                   })}
-                                  {tx.currency && tx.currency !== appCurrency && (
-                                    <span className="ml-1 text-[10px] text-slate-400 dark:text-slate-500">
-                                      {tx.currency}
-                                    </span>
-                                  )}
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1697,11 +1687,6 @@ export default function AccountDetails({ account, onUpdate }) {
                             style: "currency",
                             currency: tx.currency || appCurrency,
                           })}
-                          {tx.currency && tx.currency !== appCurrency && (
-                            <span className="ml-1 text-[10px] text-slate-400 dark:text-slate-500 font-normal">
-                              ({tx.currency})
-                            </span>
-                          )}
                         </td>
                         <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button

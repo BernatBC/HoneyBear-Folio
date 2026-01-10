@@ -43,6 +43,7 @@ function App() {
   async function fetchMarketValues() {
     try {
       const transactions = await invoke("get_all_transactions");
+      const appCurrency = localStorage.getItem("hb_currency") || "USD";
 
       // Group holdings by account
       const accountHoldings = {};
@@ -71,9 +72,38 @@ function App() {
       });
 
       const quoteMap = {};
+      const currenciesNeeded = new Set();
+
       quotes.forEach((q) => {
-        quoteMap[q.symbol] = q.regularMarketPrice;
+        quoteMap[q.symbol] = q;
+        if (q.currency && q.currency !== appCurrency) {
+          currenciesNeeded.add(q.currency);
+        }
       });
+
+      // Fetch exchange rates
+      const exchangeRates = {};
+      if (currenciesNeeded.size > 0) {
+        const rateTickers = Array.from(currenciesNeeded).map(
+          (c) => `${c}${appCurrency}=X`,
+        );
+
+        // Fetch rates in chunks or all at once? all at once seems fine
+        const rateQuotes = await invoke("get_stock_quotes", {
+          tickers: rateTickers,
+        });
+
+        rateQuotes.forEach((q) => {
+          // Extract source currency from ticker (e.g., "EURUSD=X" -> "EUR")
+          // We know the structure is {SOURCE}{TARGET}=X
+          const symbol = q.symbol;
+          const targetIndex = symbol.indexOf(appCurrency);
+          if (targetIndex !== -1) {
+            const sourceCurr = symbol.substring(0, targetIndex);
+            exchangeRates[sourceCurr] = q.regularMarketPrice;
+          }
+        });
+      }
 
       const newMarketValues = {};
       for (const [accountId, holdings] of Object.entries(accountHoldings)) {
@@ -81,9 +111,18 @@ function App() {
         for (const [ticker, shares] of Object.entries(holdings)) {
           if (shares > 0.0001) {
             // Try exact match or uppercase match
-            const price =
-              quoteMap[ticker] || quoteMap[ticker.toUpperCase()] || 0;
-            totalValue += shares * price;
+            const q = quoteMap[ticker] || quoteMap[ticker.toUpperCase()];
+            if (q) {
+              let price = q.regularMarketPrice || 0;
+              if (
+                q.currency &&
+                q.currency !== appCurrency &&
+                exchangeRates[q.currency]
+              ) {
+                price = price * exchangeRates[q.currency];
+              }
+              totalValue += shares * price;
+            }
           }
         }
         newMarketValues[accountId] = totalValue;
