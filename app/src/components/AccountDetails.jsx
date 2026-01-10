@@ -1105,7 +1105,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 )}
                 <th className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36">
                   Amount
-                </th> 
+                </th>
                 <th className="w-16"></th>
               </tr>
             </thead>
