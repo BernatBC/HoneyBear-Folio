@@ -1011,6 +1011,7 @@ export default function Dashboard({
                   startDate={customStartDate}
                   endDate={customEndDate}
                   maxDate={new Date()}
+                  showPopperArrow={false}
                   dateFormat={getDatePickerFormat(dateFormat)}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
                 />
@@ -1025,6 +1026,7 @@ export default function Dashboard({
                   endDate={customEndDate}
                   minDate={customStartDate}
                   maxDate={new Date()}
+                  showPopperArrow={false}
                   dateFormat={getDatePickerFormat(dateFormat)}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
                 />

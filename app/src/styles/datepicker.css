@@ -93,7 +93,7 @@
 
 .react-datepicker__day--outside-month {
   visibility: hidden !important;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 .react-datepicker__day:hover {
@@ -112,7 +112,22 @@
 
 .react-datepicker__day--keyboard-selected {
   background-color: transparent !important;
-  color: #334155 !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Ensure keyboard selected doesn't override range colors in light mode */
+.react-datepicker__day--in-range.react-datepicker__day--keyboard-selected {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+.react-datepicker__day--selected.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--range-start.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--range-end.react-datepicker__day--keyboard-selected {
+  background-color: #2563eb !important;
+  color: white !important;
 }
 
 .react-datepicker__day--selected {
@@ -128,7 +143,7 @@
 }
 
 .react-datepicker__day--today {
-  font-weight: 800 !important;
+  font-weight: 600 !important;
 }
 
 .react-datepicker__day--today::after {
@@ -215,8 +230,8 @@
 }
 
 .dark .react-datepicker__day--outside-month {
-  color: #334155 !important;
-  opacity: 0;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .dark .react-datepicker__day:hover {
@@ -236,7 +251,24 @@
 }
 
 .dark .react-datepicker__day--keyboard-selected {
-  color: #cbd5e1 !important; /* slate-300 */
+  background-color: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Ensure keyboard selected doesn't override range colors in dark mode */
+.dark .react-datepicker__day--in-range.dark .react-datepicker__day--keyboard-selected,
+.dark .react-datepicker__day--in-range.react-datepicker__day--keyboard-selected {
+  background-color: #1e3a8a !important;
+  color: #bfdbfe !important;
+}
+.dark .react-datepicker__day--selected.react-datepicker__day--keyboard-selected,
+.dark .react-datepicker__day--range-start.react-datepicker__day--keyboard-selected,
+.dark .react-datepicker__day--range-end.react-datepicker__day--keyboard-selected {
+  background-color: #3b82f6 !important;
+  color: white !important;
 }
 
 .dark .react-datepicker__day--selected {
