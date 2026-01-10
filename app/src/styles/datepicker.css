@@ -57,7 +57,10 @@
   color: #334155 !important;
   /* slate-700 */
   font-size: 0.8rem !important;
-  transition: background-color 0.2s, color 0.2s, border-radius 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-radius 0.2s;
   position: relative;
 }
 
@@ -266,13 +269,16 @@
 }
 
 /* Ensure keyboard selected doesn't override range colors in dark mode */
-.dark .react-datepicker__day--in-range.react-datepicker__day--keyboard-selected {
+.dark
+  .react-datepicker__day--in-range.react-datepicker__day--keyboard-selected {
   background-color: #1e3a8a !important;
   color: #bfdbfe !important;
 }
 .dark .react-datepicker__day--selected.react-datepicker__day--keyboard-selected,
-.dark .react-datepicker__day--range-start.react-datepicker__day--keyboard-selected,
-.dark .react-datepicker__day--range-end.react-datepicker__day--keyboard-selected {
+.dark
+  .react-datepicker__day--range-start.react-datepicker__day--keyboard-selected,
+.dark
+  .react-datepicker__day--range-end.react-datepicker__day--keyboard-selected {
   background-color: #3b82f6 !important;
   color: white !important;
 }
@@ -301,7 +307,6 @@
 }
 
 .dark .react-datepicker__day--selected.react-datepicker__day--today::after,
-
 .dark .react-datepicker__day--in-range.react-datepicker__day--today::after {
   background-color: #bfdbfe;
 }

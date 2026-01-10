@@ -542,8 +542,10 @@ export default function Dashboard({
 
     if (isDayBucket) {
       // Last 30 days or custom range <= 31 days
-      const end = timeRange === "CUSTOM" ? new Date(customEndDate) : new Date(now);
-      const start = timeRange === "CUSTOM" ? new Date(customStartDate) : new Date(now);
+      const end =
+        timeRange === "CUSTOM" ? new Date(customEndDate) : new Date(now);
+      const start =
+        timeRange === "CUSTOM" ? new Date(customStartDate) : new Date(now);
       if (timeRange === "1M") start.setDate(now.getDate() - 29);
 
       start.setHours(0, 0, 0, 0);
