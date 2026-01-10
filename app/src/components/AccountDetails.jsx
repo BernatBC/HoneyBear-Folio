@@ -95,7 +95,6 @@ export default function AccountDetails({ account, onUpdate }) {
   const [ticker, setTicker] = useState("");
   const [shares, setShares] = useState("");
   const [pricePerShare, setPricePerShare] = useState("");
-  const [totalPrice, setTotalPrice] = useState("");
   const [fee, setFee] = useState("");
   // Removed cashAccountId/Name/Suggestions as we are unified now
   const [isBuy, setIsBuy] = useState(true);
@@ -245,57 +244,34 @@ export default function AccountDetails({ account, onUpdate }) {
     }
   }, [editForm.payee, availableAccounts]);
 
-  useEffect(() => {
-    const fetchTickerSuggestions = async () => {
-      if (!ticker || ticker.length < 2) {
-        setTickerSuggestions([]);
-        return;
-      }
+  const tickerTimeoutRef = useMemo(() => ({ current: null }), []);
 
+  const handleTickerChange = (query) => {
+    if (tickerTimeoutRef.current) clearTimeout(tickerTimeoutRef.current);
+
+    if (!query || query.length < 2) {
+      setTickerSuggestions([]);
+      return;
+    }
+
+    tickerTimeoutRef.current = setTimeout(async () => {
       try {
-        const suggestions = await invoke("search_ticker", { query: ticker });
+        const suggestions = await invoke("search_ticker", { query });
         setTickerSuggestions(suggestions);
         setShowTickerSuggestions(true);
       } catch (error) {
         console.error("Error fetching ticker suggestions:", error);
       }
-    };
+    }, 300);
+  };
 
-    const timeoutId = setTimeout(fetchTickerSuggestions, 300);
-    return () => clearTimeout(timeoutId);
-  }, [ticker]);
-
-  // Auto-calculate total price or price per share
+  // Handle input changes
   const handleSharesChange = (num) => {
     setShares(num);
-    if (num !== undefined && num !== null && pricePerShare) {
-      setTotalPrice(
-        ((Math.abs(num) || 0) * (parseNumber(pricePerShare) || 0)).toFixed(2),
-      );
-    }
   };
 
   const handlePricePerShareChange = (num) => {
     setPricePerShare(num);
-    if (
-      shares !== undefined &&
-      shares !== null &&
-      num !== undefined &&
-      num !== null
-    ) {
-      setTotalPrice(
-        ((parseNumber(shares) || 0) * (Math.abs(num) || 0)).toFixed(2),
-      );
-    }
-  };
-
-  const handleTotalPriceChange = (val) => {
-    setTotalPrice(val);
-    if (shares !== undefined && shares !== null && val) {
-      setPricePerShare(
-        ((parseNumber(val) || 0) / (parseNumber(shares) || 1)).toFixed(4),
-      );
-    }
   };
 
   async function handleRenameAccount(e) {
@@ -362,7 +338,6 @@ export default function AccountDetails({ account, onUpdate }) {
         setTicker("");
         setShares("");
         setPricePerShare("");
-        setTotalPrice("");
         setFee("");
         setUseCustomCurrency(false);
         setSelectedCurrency(localStorage.getItem("hb_currency") || "USD");
@@ -445,6 +420,7 @@ export default function AccountDetails({ account, onUpdate }) {
             fee: feeVal,
             isBuy: isBuy,
             notes: editForm.notes || null,
+            currency: editForm.currency || null,
           },
         });
       } else {
@@ -457,6 +433,7 @@ export default function AccountDetails({ account, onUpdate }) {
             category: editForm.category || null,
             notes: editForm.notes || null,
             amount: parseNumber(editForm.amount) || 0.0,
+            currency: editForm.currency || null,
           },
         });
       }
@@ -501,6 +478,7 @@ export default function AccountDetails({ account, onUpdate }) {
           shares: tx.shares || null,
           pricePerShare: tx.price_per_share || null,
           fee: tx.fee || null,
+          currency: tx.currency || null,
         },
       });
       setMenuOpenId(null);
@@ -821,7 +799,9 @@ export default function AccountDetails({ account, onUpdate }) {
                   className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all uppercase"
                   value={ticker}
                   onChange={(e) => {
-                    setTicker(e.target.value.toUpperCase());
+                    const val = e.target.value.toUpperCase();
+                    setTicker(val);
+                    handleTickerChange(val);
                     setShowTickerSuggestions(true);
                   }}
                   onBlur={() =>
@@ -841,13 +821,24 @@ export default function AccountDetails({ account, onUpdate }) {
                           setTicker(suggestion.symbol);
                           setShowTickerSuggestions(false);
                           if (suggestion.currency) {
-                            setUseCustomCurrency(true);
-                            setSelectedCurrency(suggestion.currency);
+                            if (suggestion.currency !== appCurrency) {
+                              setUseCustomCurrency(true);
+                              setSelectedCurrency(suggestion.currency);
+                            } else {
+                              setUseCustomCurrency(false);
+                            }
                           }
                         }}
                       >
-                        <div className="font-medium text-slate-900 dark:text-slate-100">
-                          {suggestion.symbol}
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {suggestion.symbol}
+                          </span>
+                          {suggestion.currency && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+                              {suggestion.currency}
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                           {suggestion.shortname || suggestion.longname}
@@ -893,26 +884,6 @@ export default function AccountDetails({ account, onUpdate }) {
                       minimumFractionDigits: 2,
                     })}
                     maximumFractionDigits={4}
-                    minimumFractionDigits={2}
-                    useGrouping={false}
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                  Total Price
-                </label>
-                <div className="relative">
-                  <NumberInput
-                    value={totalPrice}
-                    onChange={(num) => handleTotalPriceChange(num)}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    placeholder={formatNumber(0, {
-                      maximumFractionDigits: 2,
-                      minimumFractionDigits: 2,
-                    })}
-                    maximumFractionDigits={2}
                     minimumFractionDigits={2}
                     useGrouping={false}
                   />
@@ -1308,17 +1279,54 @@ export default function AccountDetails({ account, onUpdate }) {
                             </td>
 
                             <td className="px-6 py-3">
-                              <input
-                                type="text"
-                                className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
-                                value={editForm.ticker || ""}
-                                onChange={(e) =>
-                                  setEditForm({
-                                    ...editForm,
-                                    ticker: e.target.value.toUpperCase(),
-                                  })
-                                }
-                              />
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase"
+                                  value={editForm.ticker || ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value.toUpperCase();
+                                    setEditForm({
+                                      ...editForm,
+                                      ticker: val,
+                                    });
+                                    handleTickerChange(val);
+                                  }}
+                                />
+                                {tickerSuggestions.length > 0 && (
+                                  <div className="absolute z-[100] w-64 mt-1 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden">
+                                    {tickerSuggestions.map((suggestion) => (
+                                      <button
+                                        key={suggestion.symbol}
+                                        type="button"
+                                        className="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 flex flex-col gap-0.5 transition-colors border-b border-slate-100 dark:border-slate-700 last:border-0"
+                                        onClick={() => {
+                                          setEditForm({
+                                            ...editForm,
+                                            ticker: suggestion.symbol,
+                                            currency: suggestion.currency || editForm.currency
+                                          });
+                                          setTickerSuggestions([]);
+                                        }}
+                                      >
+                                        <div className="flex items-center justify-between">
+                                          <span className="font-bold text-slate-900 dark:text-slate-100 uppercase">
+                                            {suggestion.symbol}
+                                          </span>
+                                          {suggestion.currency && (
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+                                              {suggestion.currency}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                          {suggestion.shortname || suggestion.longname}
+                                        </span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                             </td>
 
                             <td className="px-6 py-3">
@@ -1373,22 +1381,32 @@ export default function AccountDetails({ account, onUpdate }) {
                             </td>
 
                             <td className="px-6 py-3 text-right font-bold text-slate-900 dark:text-slate-100">
-                              {(() => {
-                                const s = parseNumber(editForm.shares) || 0;
-                                const p =
-                                  parseNumber(editForm.price_per_share) || 0;
-                                const totalNum = Math.abs(s) * p;
-                                const sign =
-                                  editForm.payee === "Sell" || s < 0 ? "" : "+";
-                                return (
-                                  sign +
-                                  formatNumber(totalNum, {
-                                    style: "currency",
-                                    maximumFractionDigits: 2,
-                                    minimumFractionDigits: 2,
-                                  })
-                                );
-                              })()}
+                              <div className="flex flex-col items-end">
+                                {(() => {
+                                  const s = parseNumber(editForm.shares) || 0;
+                                  const p =
+                                    parseNumber(editForm.price_per_share) || 0;
+                                  const totalNum = Math.abs(s) * p;
+                                  const sign =
+                                    editForm.payee === "Sell" || s < 0 ? "" : "+";
+                                  return (
+                                    <span className="flex items-center gap-1 justify-end">
+                                      {sign}
+                                      {formatNumber(totalNum, {
+                                        style: "currency",
+                                        currency: editForm.currency || appCurrency,
+                                        maximumFractionDigits: 2,
+                                        minimumFractionDigits: 2,
+                                      })}
+                                    </span>
+                                  );
+                                })()}
+                                {editForm.currency && editForm.currency !== appCurrency && (
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">
+                                    {editForm.currency}
+                                  </span>
+                                )}
+                              </div>
                             </td>
 
                             <td className="px-6 py-3 text-center">
@@ -1625,9 +1643,15 @@ export default function AccountDetails({ account, onUpdate }) {
                                 <span>
                                   {formatNumber(tx.price_per_share, {
                                     style: "currency",
+                                    currency: tx.currency || appCurrency,
                                     maximumFractionDigits: 2,
                                     minimumFractionDigits: 2,
                                   })}
+                                  {tx.currency && tx.currency !== appCurrency && (
+                                    <span className="ml-1 text-[10px] text-slate-400 dark:text-slate-500">
+                                      {tx.currency}
+                                    </span>
+                                  )}
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1645,9 +1669,15 @@ export default function AccountDetails({ account, onUpdate }) {
                                 <span>
                                   {formatNumber(tx.fee, {
                                     style: "currency",
+                                    currency: tx.currency || appCurrency,
                                     maximumFractionDigits: 2,
                                     minimumFractionDigits: 2,
                                   })}
+                                  {tx.currency && tx.currency !== appCurrency && (
+                                    <span className="ml-1 text-[10px] text-slate-400 dark:text-slate-500">
+                                      {tx.currency}
+                                    </span>
+                                  )}
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1667,6 +1697,11 @@ export default function AccountDetails({ account, onUpdate }) {
                             style: "currency",
                             currency: tx.currency || appCurrency,
                           })}
+                          {tx.currency && tx.currency !== appCurrency && (
+                            <span className="ml-1 text-[10px] text-slate-400 dark:text-slate-500 font-normal">
+                              ({tx.currency})
+                            </span>
+                          )}
                         </td>
                         <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button

@@ -492,71 +492,90 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
     Ok(accounts)
 }
 
-#[tauri::command]
-async fn get_accounts(app_handle: AppHandle, target_currency: Option<String>) -> Result<Vec<Account>, String> {
-    let db_path = get_db_path(&app_handle)?;
-    let target = target_currency.unwrap_or_else(|| "USD".to_string());
+fn get_accounts_summary_db(
+    db_path: &PathBuf,
+    target: &str,
+) -> Result<(Vec<Account>, Vec<(i32, String, f64)>, HashSet<String>), String> {
+    let accounts = get_accounts_db(db_path)?;
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    // Run DB work on a blocking thread so rusqlite's non-Send types do not live across an await
-    let db_path_clone = db_path.clone();
-    let target_clone = target.clone();
-    let (mut accounts, raw_data, currencies_to_fetch) = std::thread::spawn(move || -> Result<(Vec<Account>, Vec<(i32, String, f64)>, HashSet<String>), String> {
-        let accounts = get_accounts_db(&db_path_clone)?;
+    // Group transaction amounts by account and currency
+    let mut stmt = conn
+        .prepare("SELECT account_id, currency, SUM(amount) FROM transactions GROUP BY account_id, currency")
+        .map_err(|e| e.to_string())?;
 
-        let conn = Connection::open(&db_path_clone).map_err(|e| e.to_string())?;
-
-        // Group transaction amounts by account and currency
-        let mut stmt = conn
-            .prepare("SELECT account_id, currency, SUM(amount) FROM transactions GROUP BY account_id, currency")
-            .map_err(|e| e.to_string())?;
-
-        let rows = stmt.query_map([], |row| {
+    let rows = stmt
+        .query_map([], |row| {
             Ok((
                 row.get::<_, i32>(0)?,
                 row.get::<_, Option<String>>(1)?,
-                row.get::<_, Option<f64>>(2)?
+                row.get::<_, Option<f64>>(2)?,
             ))
-        }).map_err(|e| e.to_string())?;
+        })
+        .map_err(|e| e.to_string())?;
 
-        let mut raw_data = Vec::new();
-        let mut currencies_to_fetch = HashSet::new();
+    let mut raw_data = Vec::new();
+    let mut currencies_to_fetch = HashSet::new();
 
-        for r in rows {
-            let (acc_id, curr_opt, amt_opt) = r.map_err(|e| e.to_string())?;
-            let amt = amt_opt.unwrap_or(0.0);
-            let curr = curr_opt.unwrap_or_else(|| target_clone.clone());
-            raw_data.push((acc_id, curr.clone(), amt));
-            if curr != target_clone {
-                currencies_to_fetch.insert(curr);
-            }
+    for r in rows {
+        let (acc_id, curr_opt, amt_opt) = r.map_err(|e| e.to_string())?;
+        let amt = amt_opt.unwrap_or(0.0);
+        let curr = curr_opt.unwrap_or_else(|| target.to_string());
+        raw_data.push((acc_id, curr.clone(), amt));
+        if curr != target {
+            currencies_to_fetch.insert(curr);
         }
+    }
 
-        Ok((accounts, raw_data, currencies_to_fetch))
+    Ok((accounts, raw_data, currencies_to_fetch))
+}
+
+// Triggering re-check
+#[tauri::command]
+async fn get_accounts(
+    app_handle: AppHandle,
+    target_currency: Option<String>,
+) -> Result<Vec<Account>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    let target = target_currency.unwrap_or_else(|| "USD".to_string());
+
+    let db_path_clone = db_path.clone();
+    let target_clone = target.clone();
+
+    // Use spawn_blocking for DB operations
+    let (mut accounts, raw_data, currencies_to_fetch) = tauri::async_runtime::spawn_blocking(move || {
+        get_accounts_summary_db(&db_path_clone, &target_clone)
     })
-    .join().map_err(|_| "DB thread panicked".to_string())??;
+    .await
+    .map_err(|e| e.to_string())??;
 
     let mut rates = HashMap::new();
     if !currencies_to_fetch.is_empty() {
-        let tickers: Vec<String> = currencies_to_fetch.iter().map(|c| format!("{}{}=X", c, target)).collect();
-        let client = reqwest::Client::builder().build().map_err(|e| e.to_string())?;
+        let tickers: Vec<String> = currencies_to_fetch
+            .iter()
+            .map(|c| format!("{}{}=X", c, target))
+            .collect();
+        let client = reqwest::Client::builder()
+            .build()
+            .map_err(|e| e.to_string())?;
         // Reuse existing get_stock_quotes_with_client
         let quotes = get_stock_quotes_with_client(
             client,
             "https://query1.finance.yahoo.com".to_string(),
             app_handle.clone(),
-            tickers
-        ).await?;
+            tickers,
+        )
+        .await?;
 
         for q in quotes {
             // Symbol is e.g. "EURUSD=X"
             let clean = q.symbol.trim_end_matches("=X");
             if clean.ends_with(&target) && clean.len() > target.len() {
-                 let source_curr = &clean[0..clean.len() - target.len()];
-                 rates.insert(source_curr.to_string(), q.price);
+                let source_curr = &clean[0..clean.len() - target.len()];
+                rates.insert(source_curr.to_string(), q.price);
             }
         }
     }
-
     let mut sums: HashMap<i32, f64> = HashMap::new();
     for (acc_id, curr, amt) in raw_data {
         let val = if curr == target {
@@ -793,6 +812,7 @@ struct UpdateTransactionArgs {
     notes: Option<String>,
     category: Option<String>,
     amount: f64,
+    currency: Option<String>,
 }
 
 fn create_investment_transaction_db(
@@ -900,6 +920,7 @@ fn update_transaction_db(
         notes,
         category,
         amount,
+        currency,
     } = args;
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -917,8 +938,8 @@ fn update_transaction_db(
 
     // Update transaction including account_id to support moving between accounts
     tx.execute(
-        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6 WHERE id = ?7",
-        params![account_id, date, payee, notes, category, amount, id],
+        "UPDATE transactions SET account_id = ?1, date = ?2, payee = ?3, notes = ?4, category = ?5, amount = ?6, currency = ?7 WHERE id = ?8",
+        params![account_id, date, payee, notes, category, amount, currency, id],
     ).map_err(|e| e.to_string())?;
 
     if old_account_id == account_id {
@@ -1008,8 +1029,8 @@ fn update_transaction_db(
                 .map_err(|e| e.to_string())?;
 
             tx.execute(
-                "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5 WHERE id = ?6",
-                params![date, source_name, notes, "Transfer", new_ctr_amount, counterpart_id],
+                "UPDATE transactions SET date = ?1, payee = ?2, notes = ?3, category = ?4, amount = ?5, currency = ?6 WHERE id = ?7",
+                params![date, source_name, notes, "Transfer", new_ctr_amount, currency, counterpart_id],
             )
             .map_err(|e| e.to_string())?;
 
@@ -1037,7 +1058,7 @@ fn update_transaction_db(
         shares: None,
         price_per_share: None,
         fee: None,
-        currency: None, // Updates don't currently support changing currency of existing transaction
+        currency,
     })
 }
 
@@ -1062,6 +1083,7 @@ struct UpdateInvestmentTransactionArgs {
     fee: f64,
     is_buy: bool,
     notes: Option<String>,
+    currency: Option<String>,
 }
 
 fn update_investment_transaction_db(
@@ -1078,6 +1100,7 @@ fn update_investment_transaction_db(
         fee,
         is_buy,
         notes,
+        currency,
     } = args;
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -1126,8 +1149,9 @@ fn update_investment_transaction_db(
             ticker = ?7,
             shares = ?8,
             price_per_share = ?9,
-            fee = ?10
-         WHERE id = ?11",
+            fee = ?10,
+            currency = ?11
+         WHERE id = ?12",
         params![
             account_id,
             date,
@@ -1139,6 +1163,7 @@ fn update_investment_transaction_db(
             investment_shares,
             price_per_share,
             fee,
+            currency,
             id
         ],
     )
@@ -1186,7 +1211,7 @@ fn update_investment_transaction_db(
         shares: Some(investment_shares),
         price_per_share: Some(price_per_share),
         fee: Some(fee),
-        currency: None, // Updates don't currently support changing currency of existing transaction
+        currency,
     })
 }
 
@@ -1323,14 +1348,34 @@ fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn search_ticker(query: String) -> Result<Vec<YahooSearchQuote>, String> {
-    // Delegate to the test-injectable helper that accepts a client and base url
-    search_ticker_with_client(
+async fn search_ticker(
+    app_handle: AppHandle,
+    query: String,
+) -> Result<Vec<YahooSearchQuote>, String> {
+    // 1. Get initial search results
+    let mut quotes = search_ticker_with_client(
         reqwest::Client::new(),
         "https://query1.finance.yahoo.com".to_string(),
         query,
     )
-    .await
+    .await?;
+
+    if quotes.is_empty() {
+        return Ok(quotes);
+    }
+
+    // 2. Fetch full quotes to get currencies for these symbols
+    let tickers: Vec<String> = quotes.iter().map(|q| q.symbol.clone()).collect();
+    let full_quotes = get_stock_quotes(app_handle, tickers).await.unwrap_or_default();
+
+    // 3. Merge currency info back into search results
+    for q in &mut quotes {
+        if let Some(fq) = full_quotes.iter().find(|f| f.symbol == q.symbol) {
+            q.currency = fq.currency.clone();
+        }
+    }
+
+    Ok(quotes)
 }
 
 // Helper allowing tests to inject client and base URL
