@@ -40,7 +40,11 @@ export default function AccountDetails({ account, onUpdate }) {
   const formatNumber = useFormatNumber();
   const parseNumber = useParseNumber();
   const formatDate = useFormatDate();
-  const { dateFormat, firstDayOfWeek, currency: appCurrency } = useNumberFormat();
+  const {
+    dateFormat,
+    firstDayOfWeek,
+    currency: appCurrency,
+  } = useNumberFormat();
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [payeeSuggestions, setPayeeSuggestions] = useState([]);
@@ -1304,7 +1308,9 @@ export default function AccountDetails({ account, onUpdate }) {
                                           setEditForm({
                                             ...editForm,
                                             ticker: suggestion.symbol,
-                                            currency: suggestion.currency || editForm.currency
+                                            currency:
+                                              suggestion.currency ||
+                                              editForm.currency,
                                           });
                                           setTickerSuggestions([]);
                                         }}
@@ -1320,7 +1326,8 @@ export default function AccountDetails({ account, onUpdate }) {
                                           )}
                                         </div>
                                         <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                          {suggestion.shortname || suggestion.longname}
+                                          {suggestion.shortname ||
+                                            suggestion.longname}
                                         </span>
                                       </button>
                                     ))}
@@ -1388,24 +1395,28 @@ export default function AccountDetails({ account, onUpdate }) {
                                     parseNumber(editForm.price_per_share) || 0;
                                   const totalNum = Math.abs(s) * p;
                                   const sign =
-                                    editForm.payee === "Sell" || s < 0 ? "" : "+";
+                                    editForm.payee === "Sell" || s < 0
+                                      ? ""
+                                      : "+";
                                   return (
                                     <span className="flex items-center gap-1 justify-end">
                                       {sign}
                                       {formatNumber(totalNum, {
                                         style: "currency",
-                                        currency: editForm.currency || appCurrency,
+                                        currency:
+                                          editForm.currency || appCurrency,
                                         maximumFractionDigits: 2,
                                         minimumFractionDigits: 2,
                                       })}
                                     </span>
                                   );
                                 })()}
-                                {editForm.currency && editForm.currency !== appCurrency && (
-                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">
-                                    {editForm.currency}
-                                  </span>
-                                )}
+                                {editForm.currency &&
+                                  editForm.currency !== appCurrency && (
+                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">
+                                      {editForm.currency}
+                                    </span>
+                                  )}
                               </div>
                             </td>
 

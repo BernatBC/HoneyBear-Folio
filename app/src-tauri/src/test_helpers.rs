@@ -133,10 +133,7 @@ pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
 
         if !has_currency {
             // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
-            match conn.execute(
-                "ALTER TABLE transactions ADD COLUMN currency TEXT",
-                [],
-            ) {
+            match conn.execute("ALTER TABLE transactions ADD COLUMN currency TEXT", []) {
                 Ok(_) => {}
                 Err(e) => {
                     let s = e.to_string();

@@ -17,7 +17,9 @@ fn test_update_transaction() {
             ticker: None,
             shares: None,
             price_per_share: None,
-            fee: None,            currency: None,        },
+            fee: None,
+            currency: None,
+        },
     )
     .unwrap();
 

@@ -47,7 +47,9 @@ fn test_get_all_transactions() {
             ticker: None,
             shares: None,
             price_per_share: None,
-            fee: None,            currency: None,        },
+            fee: None,
+            currency: None,
+        },
     )
     .unwrap();
     crate::create_transaction_db(

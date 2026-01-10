@@ -252,10 +252,7 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             }
         }
         if !has_currency {
-            match conn.execute(
-                "ALTER TABLE transactions ADD COLUMN currency TEXT",
-                [],
-            ) {
+            match conn.execute("ALTER TABLE transactions ADD COLUMN currency TEXT", []) {
                 Ok(_) => {}
                 Err(e) => {
                     let s = e.to_string();
@@ -499,10 +496,7 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
     Ok(accounts)
 }
 
-fn get_accounts_summary_db(
-    db_path: &PathBuf,
-    target: &str,
-) -> Result<AccountsSummary, String> {
+fn get_accounts_summary_db(db_path: &PathBuf, target: &str) -> Result<AccountsSummary, String> {
     let accounts = get_accounts_db(db_path)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
@@ -534,7 +528,11 @@ fn get_accounts_summary_db(
         }
     }
 
-    Ok(AccountsSummary { accounts, raw_data, currencies_to_fetch })
+    Ok(AccountsSummary {
+        accounts,
+        raw_data,
+        currencies_to_fetch,
+    })
 }
 
 // Triggering re-check
@@ -1377,7 +1375,9 @@ async fn search_ticker(
 
     // 2. Fetch full quotes to get currencies for these symbols
     let tickers: Vec<String> = quotes.iter().map(|q| q.symbol.clone()).collect();
-    let full_quotes = get_stock_quotes(app_handle, tickers).await.unwrap_or_default();
+    let full_quotes = get_stock_quotes(app_handle, tickers)
+        .await
+        .unwrap_or_default();
 
     // 3. Merge currency info back into search results
     for q in &mut quotes {
