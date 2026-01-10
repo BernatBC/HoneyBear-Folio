@@ -18,6 +18,7 @@ fn test_delete_transaction() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -48,6 +49,7 @@ fn test_delete_transaction_deletes_linked_counterpart() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();

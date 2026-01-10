@@ -17,8 +17,7 @@ fn test_get_payees_and_categories() {
             ticker: None,
             shares: None,
             price_per_share: None,
-            fee: None,
-        },
+            fee: None,            currency: None,        },
     )
     .unwrap();
     crate::create_transaction_db(
@@ -34,6 +33,7 @@ fn test_get_payees_and_categories() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -53,6 +53,7 @@ fn test_get_payees_and_categories() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -96,6 +97,7 @@ fn test_payees_and_categories_sorted() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -112,6 +114,7 @@ fn test_payees_and_categories_sorted() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();

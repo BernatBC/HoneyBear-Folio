@@ -47,6 +47,7 @@ fn test_randomized_balance_invariants() {
                     shares: None,
                     price_per_share: None,
                     fee: None,
+                    currency: None,
                 },
             );
             if let Ok(tx) = res {
@@ -69,6 +70,7 @@ fn test_randomized_balance_invariants() {
                     shares: None,
                     price_per_share: None,
                     fee: None,
+                    currency: None,
                 },
             );
             if let Ok(tx) = res {
@@ -86,6 +88,7 @@ fn test_randomized_balance_invariants() {
                 price_per_share: rng.random_range(1..50) as f64,
                 fee: rng.random_range(0..5) as f64,
                 is_buy: rng.random_bool(0.5),
+                currency: None,
             };
             let _ = crate::create_investment_transaction_db(&db_path, args);
         } else if op < 0.9 {
@@ -105,6 +108,7 @@ fn test_randomized_balance_invariants() {
                         notes: tx.notes.clone(),
                         category: tx.category.clone(),
                         amount: new_amount,
+                        currency: None,
                     };
                     let _ = crate::update_transaction_db(&db_path, args);
                 }

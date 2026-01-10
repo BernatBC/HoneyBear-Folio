@@ -17,6 +17,7 @@ fn test_update_investment_transaction_move_between_accounts() {
         price_per_share: 100.0,
         fee: 1.0,
         is_buy: true,
+        currency: None,
     };
 
     let created = crate::create_investment_transaction_db(&db_path, args).unwrap();
@@ -38,6 +39,7 @@ fn test_update_investment_transaction_move_between_accounts() {
         fee: 1.0,
         is_buy: true,
         notes: None,
+        currency: None,
     };
 
     crate::update_investment_transaction_db(&db_path, update_args).unwrap();

@@ -18,6 +18,7 @@ fn test_create_transaction() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -46,8 +47,7 @@ fn test_get_all_transactions() {
             ticker: None,
             shares: None,
             price_per_share: None,
-            fee: None,
-        },
+            fee: None,            currency: None,        },
     )
     .unwrap();
     crate::create_transaction_db(
@@ -63,6 +63,7 @@ fn test_get_all_transactions() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -92,6 +93,7 @@ fn test_create_transaction_transfer_details() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -121,6 +123,7 @@ fn test_get_transactions_ordering() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -137,6 +140,7 @@ fn test_get_transactions_ordering() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -163,6 +167,7 @@ fn test_create_transaction_with_nonexistent_account_errors_due_to_foreign_key() 
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     );
     assert!(res.is_err());
@@ -189,6 +194,7 @@ fn test_create_transaction_preserves_nontransfer_category() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -213,6 +219,7 @@ fn test_create_transaction_with_ticker_shares_price_fee() {
             shares: Some(10.0),
             price_per_share: Some(150.0),
             fee: Some(5.0),
+            currency: None,
         },
     )
     .unwrap();

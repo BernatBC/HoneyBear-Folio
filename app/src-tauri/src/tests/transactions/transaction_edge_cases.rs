@@ -20,6 +20,7 @@ fn test_update_transaction_move_between_accounts() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();
@@ -33,6 +34,7 @@ fn test_update_transaction_move_between_accounts() {
         notes: Some("Moved".to_string()),
         category: Some("Misc".to_string()),
         amount: -20.0,
+        currency: None,
     };
 
     crate::update_transaction_db(&db_path, args).unwrap();
@@ -72,6 +74,7 @@ fn test_create_transaction_payee_same_account_name_no_transfer_created() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();

@@ -86,31 +86,55 @@ pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
             shares REAL,
             price_per_share REAL,
             fee REAL,
+            currency TEXT,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
         )",
         [],
     )
     .map_err(|e| e.to_string())?;
 
-    // Ensure we have a column to link transfer pairs so updates/deletes can keep both sides in sync
+    // Ensure we have columns added for migrations so tests using older DBs still work
     {
         let mut stmt = conn
             .prepare("PRAGMA table_info(transactions)")
             .map_err(|e| e.to_string())?;
         let mut has_linked = false;
+        let mut has_currency = false;
         let col_iter = stmt
             .query_map([], |row| row.get::<_, String>(1))
             .map_err(|e| e.to_string())?;
         for name in col_iter.flatten() {
             if name == "linked_tx_id" {
                 has_linked = true;
+            }
+            if name == "currency" {
+                has_currency = true;
+            }
+            if has_linked && has_currency {
                 break;
             }
         }
+
         if !has_linked {
             // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
             match conn.execute(
                 "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
+                [],
+            ) {
+                Ok(_) => {}
+                Err(e) => {
+                    let s = e.to_string();
+                    if !s.contains("duplicate column name") && !s.contains("already exists") {
+                        return Err(s);
+                    }
+                }
+            }
+        }
+
+        if !has_currency {
+            // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
+            match conn.execute(
+                "ALTER TABLE transactions ADD COLUMN currency TEXT",
                 [],
             ) {
                 Ok(_) => {}
@@ -183,6 +207,7 @@ pub(crate) fn create_transaction_in_dir(
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
 }

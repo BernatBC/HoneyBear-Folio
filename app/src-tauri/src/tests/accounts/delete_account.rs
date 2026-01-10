@@ -26,6 +26,7 @@ fn test_delete_account_with_transactions() {
             shares: None,
             price_per_share: None,
             fee: None,
+            currency: None,
         },
     )
     .unwrap();

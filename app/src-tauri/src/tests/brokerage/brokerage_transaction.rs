@@ -14,6 +14,7 @@ fn test_investment_transaction_buy() {
         price_per_share: 150.0,
         fee: 5.0,
         is_buy: true,
+        currency: None,
     };
 
     let created = crate::create_investment_transaction_db(&db_path, args).unwrap();
@@ -46,6 +47,7 @@ fn test_investment_transaction_sell() {
         price_per_share: 150.0,
         fee: 5.0,
         is_buy: false,
+        currency: None,
     };
 
     let created = crate::create_investment_transaction_db(&db_path, args).unwrap();
@@ -77,6 +79,7 @@ fn test_create_investment_transaction_missing_account_should_error() {
         price_per_share: 100.0,
         fee: 1.0,
         is_buy: true,
+        currency: None,
     };
 
     let res = crate::create_investment_transaction_db(&db_path, args);
