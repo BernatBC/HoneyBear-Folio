@@ -1001,10 +1001,16 @@ export default function Dashboard({
                 <Calendar className="w-4 h-4 text-slate-400" />
                 <DatePicker
                   selected={customStartDate}
-                  onChange={(date) => setCustomStartDate(date)}
+                  onChange={(date) => {
+                    setCustomStartDate(date);
+                    if (date && customEndDate && date > customEndDate) {
+                      setCustomEndDate(date);
+                    }
+                  }}
                   selectsStart
                   startDate={customStartDate}
                   endDate={customEndDate}
+                  maxDate={new Date()}
                   dateFormat={getDatePickerFormat(dateFormat)}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
                 />
@@ -1018,6 +1024,7 @@ export default function Dashboard({
                   startDate={customStartDate}
                   endDate={customEndDate}
                   minDate={customStartDate}
+                  maxDate={new Date()}
                   dateFormat={getDatePickerFormat(dateFormat)}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
                 />
