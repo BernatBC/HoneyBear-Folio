@@ -50,6 +50,7 @@
   "import.field.shares": "Shares",
   "import.field.price": "Price per share",
   "import.field.fee": "Fee",
+  "import.field.currency": "Currency",
   "update.title": "Update Available",
   "update.available_text": "A new version of HoneyBear Folio is available: {version}",
   "update.downloading": "Downloading...",
