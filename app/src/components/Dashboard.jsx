@@ -1,5 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "../styles/datepicker.css";
+import { Calendar } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,7 +21,12 @@ import { Line, Doughnut, Bar } from "react-chartjs-2";
 import "../styles/Dashboard.css";
 import PropTypes from "prop-types";
 import { computeNetWorth } from "../utils/networth";
-import { useFormatNumber, useFormatDate } from "../utils/format";
+import {
+  useFormatNumber,
+  useFormatDate,
+  getDatePickerFormat,
+} from "../utils/format";
+import { useNumberFormat } from "../contexts/number-format";
 import { t } from "../i18n/i18n";
 
 ChartJS.register(
@@ -43,11 +52,17 @@ export default function Dashboard({
   const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
   const [dailyPrices, setDailyPrices] = useState({});
-  const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, YTD, 1Y, ALL
+  const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, YTD, 1Y, ALL, CUSTOM
+  const [customStartDate, setCustomStartDate] = useState(
+    new Date(new Date().setFullYear(new Date().getFullYear() - 1)),
+  );
+  const [customEndDate, setCustomEndDate] = useState(new Date());
+
   const isDark = useIsDark();
 
   const formatNumber = useFormatNumber();
   const formatDate = useFormatDate();
+  const { dateFormat } = useNumberFormat();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -126,13 +141,22 @@ export default function Dashboard({
     // 2. Collect all relevant dates
     const now = new Date();
     let cutoffDate = new Date();
+    let endDate = new Date();
+    endDate.setHours(0, 0, 0, 0);
+
     if (timeRange === "1M") cutoffDate.setMonth(now.getMonth() - 1);
     else if (timeRange === "3M") cutoffDate.setMonth(now.getMonth() - 3);
     else if (timeRange === "6M") cutoffDate.setMonth(now.getMonth() - 6);
     else if (timeRange === "YTD")
       cutoffDate = new Date(now.getFullYear(), 0, 1);
     else if (timeRange === "1Y") cutoffDate.setFullYear(now.getFullYear() - 1);
-    else cutoffDate = new Date(0); // ALL
+    else if (timeRange === "CUSTOM") {
+      cutoffDate = new Date(customStartDate);
+      endDate = new Date(customEndDate);
+    } else cutoffDate = new Date(0); // ALL
+
+    cutoffDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
 
     // If ALL, find the first transaction date
     if (timeRange === "ALL" && transactions.length > 0) {
@@ -143,8 +167,10 @@ export default function Dashboard({
         ),
       );
       cutoffDate = firstTxDate;
+      cutoffDate.setHours(0, 0, 0, 0);
     } else if (timeRange === "ALL") {
       cutoffDate.setFullYear(now.getFullYear() - 1); // Default to 1Y if no txs
+      cutoffDate.setHours(0, 0, 0, 0);
     }
 
     // Ensure we never show dates earlier than the first transaction — start chart at firstTxDate
@@ -157,17 +183,15 @@ export default function Dashboard({
       );
       // Normalize to midnight for consistent comparisons
       firstTxDate.setHours(0, 0, 0, 0);
-      if (firstTxDate > cutoffDate) cutoffDate = new Date(firstTxDate);
+      if (firstTxDate > cutoffDate && timeRange !== "CUSTOM")
+        cutoffDate = new Date(firstTxDate);
     }
 
     const sortedDates = [];
     let d = new Date(cutoffDate);
-    const today = new Date();
-    // Normalize today to midnight to match date strings
-    today.setHours(0, 0, 0, 0);
     d.setHours(0, 0, 0, 0);
 
-    while (d <= today) {
+    while (d <= endDate) {
       // Use local date components to avoid UTC conversion issues that can
       // shift the date to the previous day for users in negative timezones.
       const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
@@ -322,6 +346,8 @@ export default function Dashboard({
     accounts,
     transactions,
     timeRange,
+    customStartDate,
+    customEndDate,
     marketValues,
     formatDate,
     dailyPrices,
@@ -423,8 +449,41 @@ export default function Dashboard({
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;
 
+    const now = new Date();
+    let startDate = new Date(0);
+    let endDate = new Date();
+
+    if (timeRange === "1M") {
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() - 30);
+    } else if (timeRange === "3M") {
+      startDate = new Date(now);
+      startDate.setMonth(now.getMonth() - 3);
+    } else if (timeRange === "6M") {
+      startDate = new Date(now);
+      startDate.setMonth(now.getMonth() - 6);
+    } else if (timeRange === "YTD") {
+      startDate = new Date(now.getFullYear(), 0, 1);
+    } else if (timeRange === "1Y") {
+      startDate = new Date(now);
+      startDate.setFullYear(now.getFullYear() - 1);
+    } else if (timeRange === "CUSTOM") {
+      startDate = new Date(customStartDate);
+      endDate = new Date(customEndDate);
+    }
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    const startStr = startDate.toISOString().split("T")[0];
+    const endStr = endDate.toISOString().split("T")[0];
+
     const expenses = transactions.filter(
-      (t) => t.amount < 0 && t.category !== "Transfer",
+      (t) =>
+        t.amount < 0 &&
+        t.category !== "Transfer" &&
+        t.date >= startStr &&
+        t.date <= endStr,
     );
 
     // No expense transactions — return an explicit empty marker so the UI
@@ -467,7 +526,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [transactions, isDark]);
+  }, [transactions, timeRange, customStartDate, customEndDate, isDark]);
 
   const incomeVsExpensesData = useMemo(() => {
     if (transactions.length === 0) return null;
@@ -476,42 +535,61 @@ export default function Dashboard({
     const keys = []; // keys for matching (YYYY-MM-DD for days or YYYY-MM for months)
     const labels = [];
 
-    if (timeRange === "1M") {
-      // Last 30 days
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - i);
+    const isDayBucket =
+      timeRange === "1M" ||
+      (timeRange === "CUSTOM" &&
+        (customEndDate - customStartDate) / (1000 * 60 * 60 * 24) <= 31);
+
+    if (isDayBucket) {
+      // Last 30 days or custom range <= 31 days
+      const end = timeRange === "CUSTOM" ? new Date(customEndDate) : new Date(now);
+      const start = timeRange === "CUSTOM" ? new Date(customStartDate) : new Date(now);
+      if (timeRange === "1M") start.setDate(now.getDate() - 29);
+
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      const d = new Date(start);
+      while (d <= end) {
         const key = d.toISOString().slice(0, 10);
         keys.push(key);
         labels.push(formatDate(key));
+        d.setDate(d.getDate() + 1);
       }
     } else {
-      // Use months for 3M, 6M, 1Y and ALL
+      // Use months for 3M, 6M, 1Y, ALL and CUSTOM > 31 days
       let monthsCount = 6; // default
-      if (timeRange === "3M") monthsCount = 3;
-      else if (timeRange === "6M") monthsCount = 6;
-      else if (timeRange === "YTD") monthsCount = now.getMonth() + 1;
-      else if (timeRange === "1Y") monthsCount = 12;
+      let end = new Date(now);
+      let start = new Date(now);
+
+      if (timeRange === "3M") start.setMonth(now.getMonth() - 2);
+      else if (timeRange === "6M") start.setMonth(now.getMonth() - 5);
+      else if (timeRange === "YTD") start = new Date(now.getFullYear(), 0, 1);
+      else if (timeRange === "1Y") start.setFullYear(now.getFullYear() - 1);
       else if (timeRange === "ALL") {
         const txDates = transactions.map((t) => t.date).sort();
-        const first = new Date(txDates[0]);
-        monthsCount =
-          (now.getFullYear() - first.getFullYear()) * 12 +
-          (now.getMonth() - first.getMonth()) +
-          1;
-        if (monthsCount < 1) monthsCount = 1;
+        start = new Date(txDates[0]);
+      } else if (timeRange === "CUSTOM") {
+        start = new Date(customStartDate);
+        end = new Date(customEndDate);
       }
 
-      for (let i = monthsCount - 1; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      start.setDate(1); // Start of month
+      const d = new Date(start);
+      while (d <= end) {
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
           2,
           "0",
         )}`;
         keys.push(key);
         const opts = { month: "short" };
-        if (monthsCount > 12) opts.year = "numeric";
+        // If the range spans more than a year, show the year
+        const monthsDiff =
+          (end.getFullYear() - start.getFullYear()) * 12 +
+          (end.getMonth() - start.getMonth());
+        if (monthsDiff >= 12) opts.year = "numeric";
         labels.push(d.toLocaleDateString(undefined, opts));
+        d.setMonth(d.getMonth() + 1);
       }
     }
 
@@ -520,7 +598,7 @@ export default function Dashboard({
 
     transactions.forEach((t) => {
       if (t.category === "Transfer") return;
-      const key = timeRange === "1M" ? t.date : t.date.slice(0, 7);
+      const key = isDayBucket ? t.date : t.date.slice(0, 7);
       const index = keys.indexOf(key);
       if (index !== -1) {
         if (t.amount > 0) incomeData[index] += t.amount;
@@ -549,7 +627,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [transactions, timeRange, formatDate]);
+  }, [transactions, timeRange, customStartDate, customEndDate, formatDate]);
 
   const doughnutOptions = useMemo(
     () => ({
@@ -900,9 +978,9 @@ export default function Dashboard({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="time-range-selector">
-            {["1M", "3M", "6M", "1Y", "YTD", "ALL"].map((range) => (
+            {["1M", "3M", "6M", "1Y", "YTD", "ALL", "CUSTOM"].map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
@@ -912,10 +990,40 @@ export default function Dashboard({
                     : "time-range-button-inactive"
                 }`}
               >
-                {range}
+                {range === "CUSTOM" ? t("dashboard.custom") : range}
               </button>
             ))}
           </div>
+
+          {timeRange === "CUSTOM" && (
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <div className="flex items-center gap-2 px-2">
+                <Calendar className="w-4 h-4 text-slate-400" />
+                <DatePicker
+                  selected={customStartDate}
+                  onChange={(date) => setCustomStartDate(date)}
+                  selectsStart
+                  startDate={customStartDate}
+                  endDate={customEndDate}
+                  dateFormat={getDatePickerFormat(dateFormat)}
+                  className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
+                />
+              </div>
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="flex items-center gap-2 px-2">
+                <DatePicker
+                  selected={customEndDate}
+                  onChange={(date) => setCustomEndDate(date)}
+                  selectsEnd
+                  startDate={customStartDate}
+                  endDate={customEndDate}
+                  minDate={customStartDate}
+                  dateFormat={getDatePickerFormat(dateFormat)}
+                  className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
