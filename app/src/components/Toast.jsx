@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import PropTypes from "prop-types";
+import { Info, CheckCircle, AlertCircle, X } from "lucide-react";
 import "../styles/Toast.css";
 import { ToastContext } from "../contexts/toast";
 
@@ -24,6 +25,18 @@ export function ToastProvider({ children }) {
     [removeToast],
   );
 
+  const getIcon = (type) => {
+    switch (type) {
+      case "success":
+        return <CheckCircle size={18} className="text-emerald-500" />;
+      case "error":
+        return <AlertCircle size={18} className="text-red-500" />;
+      case "info":
+      default:
+        return <Info size={18} className="text-blue-500" />;
+    }
+  };
+
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
@@ -31,13 +44,14 @@ export function ToastProvider({ children }) {
         {toasts.map((t) => (
           <div key={t.id} className={`toast toast-${t.type}`} role="status">
             <div className="toast-content">
+              <span className="toast-icon">{getIcon(t.type)}</span>
               <span className="toast-message">{t.message}</span>
               <button
                 aria-label="Dismiss"
                 className="toast-close"
                 onClick={() => removeToast(t.id)}
               >
-                ×
+                <X size={16} />
               </button>
             </div>
           </div>
