@@ -435,7 +435,7 @@ export default function Dashboard({
             return colors[i % colors.length];
           }),
           borderColor: rawData.map((_, i) => colors[i % colors.length]),
-          borderWidth: 2,
+          borderWidth: 4,
           borderDash: (ctx) => {
             const val = rawData[ctx.dataIndex];
             return val < 0 ? [5, 5] : [];
