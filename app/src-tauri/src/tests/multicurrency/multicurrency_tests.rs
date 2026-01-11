@@ -4,7 +4,7 @@ use tempfile::tempdir;
 #[test]
 fn test_transactions_store_currency() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(&db_path, "A".to_string(), 1000.0).unwrap();
+    let acc = crate::create_account_db(&db_path, "A".to_string(), 1000.0, None).unwrap();
 
     let tx = crate::create_transaction_db(
         &db_path,

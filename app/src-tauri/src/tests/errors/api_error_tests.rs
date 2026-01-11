@@ -12,7 +12,7 @@ fn test_delete_account_with_missing_id_noop() {
     let (_dir, db_path) = setup_db();
 
     // create an account so the DB isn't empty
-    let _ = crate::create_account_db(&db_path, "Exists".to_string(), 100.0).unwrap();
+    let _ = crate::create_account_db(&db_path, "Exists".to_string(), 100.0, None).unwrap();
 
     // deleting non-existent id should return Ok and not affect existing accounts
     let res = crate::delete_account_db(&db_path, -999);

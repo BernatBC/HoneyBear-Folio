@@ -1,9 +1,9 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { invoke } from "@tauri-apps/api/core";
 import ImportModal from "./ImportModal";
 import ExportModal from "./ExportModal";
 import SettingsModal from "./SettingsModal";
+import AccountModal from "./AccountModal";
 import AccountList from "./AccountList";
 import {
   Wallet,
@@ -11,8 +11,6 @@ import {
   CreditCard,
   TrendingUp,
   LayoutDashboard,
-  X,
-  Check,
   List,
   PieChart,
   Calculator,
@@ -27,9 +25,8 @@ import { getDisplayVersion, IS_RELEASE } from "../utils/version";
 import { computeNetWorth } from "../utils/networth";
 import { t } from "../i18n/i18n";
 import "../styles/Sidebar.css";
-import { useFormatNumber, useParseNumber } from "../utils/format";
+import { useFormatNumber } from "../utils/format";
 import { usePrivacy } from "../contexts/privacy";
-import { useToast } from "../contexts/toast";
 
 export default function Sidebar({
   accounts,
@@ -39,13 +36,10 @@ export default function Sidebar({
   onUpdate,
   onClose,
 }) {
-  const [isAdding, setIsAdding] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [newAccountName, setNewAccountName] = useState("");
-
-  const [newAccountBalance, setNewAccountBalance] = useState("");
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   // Compute total balance using helper so logic is shared with Dashboard/App
   const totalBalance = computeNetWorth(accounts, marketValues);
@@ -53,54 +47,7 @@ export default function Sidebar({
   const formattedTotalBalance = formatNumber(totalBalance, {
     style: "currency",
   });
-  const parseNumber = useParseNumber();
   const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
-  const { showToast } = useToast();
-
-  async function handleAddAccount(e) {
-    e.preventDefault();
-    // Basic client-side validation: non-empty and no duplicate names
-    const nameTrimmed = newAccountName.trim();
-    if (nameTrimmed.length === 0) {
-      showToast(t("account.error.empty_name"), { type: "warning" });
-      return;
-    }
-
-    if (
-      accounts.some(
-        (acc) =>
-          acc.name &&
-          acc.name.trim().toLowerCase() === nameTrimmed.toLowerCase(),
-      )
-    ) {
-      showToast(t("error.account_exists", { name: nameTrimmed }), {
-        type: "warning",
-      });
-      return;
-    }
-
-    try {
-      const balance = parseNumber(newAccountBalance) || 0.0;
-      await invoke("create_account", {
-        name: nameTrimmed,
-        balance,
-      });
-      setNewAccountName("");
-      setNewAccountBalance("");
-      setIsAdding(false);
-      onUpdate();
-    } catch (e) {
-      const msg = String(e || "");
-      if (msg.includes("already exists")) {
-        showToast(t("error.account_exists", { name: nameTrimmed }), {
-          type: "warning",
-        });
-      } else {
-        showToast(t("error.something_went_wrong"), { type: "danger" });
-      }
-      console.error("Failed to create account:", e);
-    }
-  }
 
   const handleSelect = (id) => {
     onSelectAccount(id);
@@ -236,9 +183,7 @@ export default function Sidebar({
               {t("accounts.accounts")}
             </h2>
             <button
-              onClick={() => {
-                setIsAdding(true);
-              }}
+              onClick={() => setShowAccountModal(true)}
               className="sidebar-add-button"
             >
               <Plus className="w-4 h-4" />
@@ -253,44 +198,6 @@ export default function Sidebar({
             Icon={CreditCard}
           />
         </div>
-        {isAdding && (
-          <div className="sidebar-form-container">
-            <form onSubmit={handleAddAccount} className="sidebar-form">
-              <div className="sidebar-form-header">
-                <span className="sidebar-form-title">
-                  {t("account.new_account")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsAdding(false)}
-                  className="sidebar-form-close"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <input
-                type="text"
-                placeholder="Account Name"
-                value={newAccountName}
-                onChange={(e) => setNewAccountName(e.target.value)}
-                className="sidebar-input"
-                autoFocus
-              />
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="Initial Balance"
-                value={newAccountBalance}
-                onChange={(e) => setNewAccountBalance(e.target.value)}
-                className="sidebar-input"
-              />
-              <button type="submit" className="sidebar-submit-button">
-                <Check className="w-4 h-4" />
-                <span className="text-white">Create Account</span>
-              </button>
-            </form>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
@@ -339,6 +246,13 @@ export default function Sidebar({
 
       {showSettingsModal && (
         <SettingsModal onClose={() => setShowSettingsModal(false)} />
+      )}
+
+      {showAccountModal && (
+        <AccountModal
+          onClose={() => setShowAccountModal(false)}
+          onUpdate={onUpdate}
+        />
       )}
     </div>
   );

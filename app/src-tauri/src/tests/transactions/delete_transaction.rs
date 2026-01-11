@@ -4,7 +4,7 @@ use rusqlite::{params, Connection};
 #[test]
 fn test_delete_transaction() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Test".to_string(), 100.0).unwrap();
+    let account = crate::create_account_db(&db_path, "Test".to_string(), 100.0, None).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
         crate::CreateTransactionArgs {
@@ -32,8 +32,8 @@ fn test_delete_transaction() {
 #[test]
 fn test_delete_transaction_deletes_linked_counterpart() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "A1".to_string(), 100.0).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "A2".to_string(), 0.0).unwrap();
+    let acc1 = crate::create_account_db(&db_path, "A1".to_string(), 100.0, None).unwrap();
+    let acc2 = crate::create_account_db(&db_path, "A2".to_string(), 0.0, None).unwrap();
 
     // Create a transfer via API which should link txs
     let tx = crate::create_transaction_db(
@@ -106,8 +106,8 @@ fn test_delete_transaction_deletes_linked_counterpart() {
 #[test]
 fn test_delete_transaction_fallback_by_notes() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0).unwrap();
+    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, None).unwrap();
+    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, None).unwrap();
 
     // Insert two transactions manually with matching notes but no linked_tx_id
     let conn = Connection::open(&db_path).unwrap();

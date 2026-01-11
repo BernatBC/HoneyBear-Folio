@@ -70,7 +70,7 @@ fn test_db_locked_write_fails() {
     conn.execute_batch("BEGIN EXCLUSIVE;").unwrap();
 
     // Attempts to create a new account should fail because DB is locked
-    let res = crate::create_account_db(&db_path, "LockTest".to_string(), 10.0);
+    let res = crate::create_account_db(&db_path, "LockTest".to_string(), 10.0, None);
     assert!(res.is_err());
 
     // End exclusive to unlock

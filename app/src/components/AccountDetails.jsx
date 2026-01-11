@@ -563,6 +563,7 @@ export default function AccountDetails({ account, onUpdate }) {
               {account.name}
             </h1>
           )}
+
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Balance:
@@ -575,7 +576,10 @@ export default function AccountDetails({ account, onUpdate }) {
               }`}
             >
               {account.balance >= 0 ? "+" : ""}
-              {formatNumber(account.balance, { style: "currency" })}
+              {formatNumber(account.balance, {
+                style: "currency",
+                currency: account.currency,
+              })}
             </span>
           </div>
         </div>
@@ -676,6 +680,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     <Edit className="w-4 h-4 text-slate-400" />
                     Rename Account
                   </button>
+
                   <div className="h-px bg-slate-100 dark:bg-slate-700 my-1" />
                   <button
                     onClick={handleDeleteAccount}
@@ -1842,6 +1847,7 @@ AccountDetails.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     name: PropTypes.string,
     balance: PropTypes.number,
+    currency: PropTypes.string,
     kind: PropTypes.string,
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,

@@ -35,15 +35,24 @@ function App() {
       const accs = await invoke("get_accounts", { targetCurrency: currency });
       accs.sort((a, b) => b.balance - a.balance);
       setAccounts(accs);
+      return accs;
     } catch (e) {
       console.error("Failed to fetch accounts:", e);
+      return [];
     }
   }
 
-  async function fetchMarketValues() {
+  async function fetchMarketValues(currentAccounts = []) {
     try {
       const transactions = await invoke("get_all_transactions");
       const appCurrency = localStorage.getItem("hb_currency") || "USD";
+
+      const accountCcyMap = {};
+      if (currentAccounts && currentAccounts.length) {
+        currentAccounts.forEach((acc) => {
+          if (acc.currency) accountCcyMap[acc.id] = acc.currency;
+        });
+      }
 
       // Group holdings by account
       const accountHoldings = {};
@@ -72,54 +81,49 @@ function App() {
       });
 
       const quoteMap = {};
-      const currenciesNeeded = new Set();
-
       quotes.forEach((q) => {
         quoteMap[q.symbol] = q;
-        if (q.currency && q.currency !== appCurrency) {
-          currenciesNeeded.add(q.currency);
-        }
       });
 
-      // Fetch exchange rates
-      const exchangeRates = {};
-      if (currenciesNeeded.size > 0) {
-        const rateTickers = Array.from(currenciesNeeded).map(
-          (c) => `${c}${appCurrency}=X`,
-        );
+      // Determine required exchange rates
+      const ratesToFetch = new Set();
+      for (const [accountId, holdings] of Object.entries(accountHoldings)) {
+        const targetCcy = accountCcyMap[Number(accountId)] || appCurrency;
+        for (const ticker of Object.keys(holdings)) {
+          const q = quoteMap[ticker] || quoteMap[ticker.toUpperCase()];
+          if (q && q.currency && q.currency !== targetCcy) {
+            ratesToFetch.add(`${q.currency}${targetCcy}=X`);
+          }
+        }
+      }
 
-        // Fetch rates in chunks or all at once? all at once seems fine
+      // Fetch rates
+      const exchangeRates = {};
+      if (ratesToFetch.size > 0) {
+        const rateTickers = Array.from(ratesToFetch);
         const rateQuotes = await invoke("get_stock_quotes", {
           tickers: rateTickers,
         });
-
         rateQuotes.forEach((q) => {
-          // Extract source currency from ticker (e.g., "EURUSD=X" -> "EUR")
-          // We know the structure is {SOURCE}{TARGET}=X
-          const symbol = q.symbol;
-          const targetIndex = symbol.indexOf(appCurrency);
-          if (targetIndex !== -1) {
-            const sourceCurr = symbol.substring(0, targetIndex);
-            exchangeRates[sourceCurr] = q.regularMarketPrice;
-          }
+          exchangeRates[q.symbol] = q.regularMarketPrice;
         });
       }
 
       const newMarketValues = {};
       for (const [accountId, holdings] of Object.entries(accountHoldings)) {
         let totalValue = 0;
+        const targetCcy = accountCcyMap[Number(accountId)] || appCurrency;
+
         for (const [ticker, shares] of Object.entries(holdings)) {
           if (shares > 0.0001) {
-            // Try exact match or uppercase match
             const q = quoteMap[ticker] || quoteMap[ticker.toUpperCase()];
             if (q) {
               let price = q.regularMarketPrice || 0;
-              if (
-                q.currency &&
-                q.currency !== appCurrency &&
-                exchangeRates[q.currency]
-              ) {
-                price = price * exchangeRates[q.currency];
+              if (q.currency && q.currency !== targetCcy) {
+                const pair = `${q.currency}${targetCcy}=X`;
+                if (exchangeRates[pair]) {
+                  price = price * exchangeRates[pair];
+                }
               }
               totalValue += shares * price;
             }
@@ -135,8 +139,8 @@ function App() {
 
   useEffect(() => {
     const loadData = async () => {
-      await fetchAccounts();
-      await fetchMarketValues();
+      const accs = await fetchAccounts();
+      await fetchMarketValues(accs);
     };
     loadData();
   }, [refreshTrigger]);

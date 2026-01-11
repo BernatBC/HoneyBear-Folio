@@ -14,11 +14,14 @@ export function computeNetWorth(accounts = [], marketValues = {}) {
     const balanceNumeric = toNumeric(acc.balance);
     const mv = toNumeric(marketValues?.[acc.id]);
 
+    const rate = acc.exchange_rate || 1.0;
+
     // Always add market value if it exists, regardless of account 'kind' (which is deprecated/unified)
     return (
       sum +
-      (Number.isNaN(balanceNumeric) ? 0 : balanceNumeric) +
-      (Number.isNaN(mv) ? 0 : mv)
+      ((Number.isNaN(balanceNumeric) ? 0 : balanceNumeric) +
+        (Number.isNaN(mv) ? 0 : mv)) *
+        rate
     );
   }, 0);
 }
