@@ -4,7 +4,8 @@ use super::common::setup_db;
 fn test_investment_transaction_buy() {
     let (_dir, db_path) = setup_db();
     // Unified account
-    let acc = crate::create_account_db(&db_path, "Investment Account".to_string(), 1000.0, None).unwrap();
+    let acc =
+        crate::create_account_db(&db_path, "Investment Account".to_string(), 1000.0, None).unwrap();
 
     let args = crate::CreateInvestmentTransactionArgs {
         account_id: acc.id,
@@ -37,7 +38,13 @@ fn test_investment_transaction_buy() {
 #[test]
 fn test_investment_transaction_with_currency_sets_transaction_currency() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(&db_path, "Investment Account".to_string(), 1000.0, Some("USD".to_string())).unwrap();
+    let acc = crate::create_account_db(
+        &db_path,
+        "Investment Account".to_string(),
+        1000.0,
+        Some("USD".to_string()),
+    )
+    .unwrap();
 
     let args = crate::CreateInvestmentTransactionArgs {
         account_id: acc.id,
@@ -54,13 +61,16 @@ fn test_investment_transaction_with_currency_sets_transaction_currency() {
     assert_eq!(created.currency.as_deref(), Some("USD"));
 
     let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
-    assert!(txs.iter().any(|t| t.id == created.id && t.currency.as_deref() == Some("USD")));
+    assert!(txs
+        .iter()
+        .any(|t| t.id == created.id && t.currency.as_deref() == Some("USD")));
 }
 
 #[test]
 fn test_investment_transaction_sell() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(&db_path, "Investment Account".to_string(), 0.0, None).unwrap();
+    let acc =
+        crate::create_account_db(&db_path, "Investment Account".to_string(), 0.0, None).unwrap();
 
     let args = crate::CreateInvestmentTransactionArgs {
         account_id: acc.id,

@@ -3,7 +3,8 @@ use super::common::setup_db;
 #[test]
 fn test_create_transaction() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Test Account".to_string(), 100.0, None).unwrap();
+    let account =
+        crate::create_account_db(&db_path, "Test Account".to_string(), 100.0, None).unwrap();
 
     let tx = crate::create_transaction_db(
         &db_path,
@@ -32,7 +33,13 @@ fn test_create_transaction() {
 #[test]
 fn test_create_transaction_with_currency_sets_transaction_currency() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "CurTxAcct".to_string(), 100.0, Some("GBP".to_string())).unwrap();
+    let account = crate::create_account_db(
+        &db_path,
+        "CurTxAcct".to_string(),
+        100.0,
+        Some("GBP".to_string()),
+    )
+    .unwrap();
 
     let tx = crate::create_transaction_db(
         &db_path,

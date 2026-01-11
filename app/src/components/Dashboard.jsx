@@ -161,18 +161,21 @@ export default function Dashboard({
   }, [transactions, accounts, propAccounts]);
 
   // Helper to get price
-  const getPrice = useCallback((ticker, date) => {
-    if (!dailyPrices[ticker]) return 0;
-    const { list, map } = dailyPrices[ticker];
-    if (map[date]) return map[date];
-    // Find last available price
-    let lastPrice = 0;
-    for (const p of list) {
-      if (p.date > date) break;
-      lastPrice = p.price;
-    }
-    return lastPrice;
-  }, [dailyPrices]);
+  const getPrice = useCallback(
+    (ticker, date) => {
+      if (!dailyPrices[ticker]) return 0;
+      const { list, map } = dailyPrices[ticker];
+      if (map[date]) return map[date];
+      // Find last available price
+      let lastPrice = 0;
+      for (const p of list) {
+        if (p.date > date) break;
+        lastPrice = p.price;
+      }
+      return lastPrice;
+    },
+    [dailyPrices],
+  );
 
   const chartData = useMemo(() => {
     // Require accounts and at least one transaction to render the net worth evolution chart

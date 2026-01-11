@@ -3,7 +3,8 @@ use super::common::setup_db;
 #[test]
 fn test_create_account() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Test Account".to_string(), 100.0, None).unwrap();
+    let account =
+        crate::create_account_db(&db_path, "Test Account".to_string(), 100.0, None).unwrap();
     assert_eq!(account.name, "Test Account");
     assert_eq!(account.balance, 100.0);
 
@@ -83,7 +84,13 @@ fn test_create_duplicate_account_case_insensitive_should_error() {
 #[test]
 fn test_create_account_with_currency_sets_account_and_tx_currency() {
     let (_dir, db_path) = setup_db();
-    let acc = crate::create_account_db(&db_path, "CurAcct".to_string(), 100.0, Some("USD".to_string())).unwrap();
+    let acc = crate::create_account_db(
+        &db_path,
+        "CurAcct".to_string(),
+        100.0,
+        Some("USD".to_string()),
+    )
+    .unwrap();
     assert_eq!(acc.currency.as_deref(), Some("USD"));
 
     let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();

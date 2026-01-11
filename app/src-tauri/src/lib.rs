@@ -105,7 +105,7 @@ struct Transaction {
 struct AccountsSummary {
     accounts: Vec<Account>,
     raw_data: Vec<(i32, String, f64)>,
-} 
+}
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 struct AppSettings {
@@ -357,7 +357,12 @@ fn get_db_path_command(app_handle: AppHandle) -> Result<String, String> {
     Ok(pb.to_string_lossy().to_string())
 }
 
-fn create_account_db(db_path: &PathBuf, name: String, balance: f64, currency: Option<String>) -> Result<Account, String> {
+fn create_account_db(
+    db_path: &PathBuf,
+    name: String,
+    balance: f64,
+    currency: Option<String>,
+) -> Result<Account, String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     // Trim name and validate non-empty
@@ -424,7 +429,12 @@ fn create_account_db(db_path: &PathBuf, name: String, balance: f64, currency: Op
 }
 
 #[tauri::command]
-fn create_account(app_handle: AppHandle, name: String, balance: f64, currency: Option<String>) -> Result<Account, String> {
+fn create_account(
+    app_handle: AppHandle,
+    name: String,
+    balance: f64,
+    currency: Option<String>,
+) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
     create_account_db(&db_path, name, balance, currency)
 }
@@ -484,7 +494,12 @@ fn rename_account(app_handle: AppHandle, id: i32, new_name: String) -> Result<Ac
     rename_account_db(&db_path, id, new_name)
 }
 
-fn update_account_db(db_path: &PathBuf, id: i32, name: String, currency: Option<String>) -> Result<Account, String> {
+fn update_account_db(
+    db_path: &PathBuf,
+    id: i32,
+    name: String,
+    currency: Option<String>,
+) -> Result<Account, String> {
     let name_trimmed = name.trim().to_string();
     if name_trimmed.is_empty() {
         return Err("Account name cannot be empty or whitespace-only".to_string());
@@ -534,7 +549,12 @@ fn update_account_db(db_path: &PathBuf, id: i32, name: String, currency: Option<
 }
 
 #[tauri::command]
-fn update_account(app_handle: AppHandle, id: i32, name: String, currency: Option<String>) -> Result<Account, String> {
+fn update_account(
+    app_handle: AppHandle,
+    id: i32,
+    name: String,
+    currency: Option<String>,
+) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
     update_account_db(&db_path, id, name, currency)
 }
@@ -620,10 +640,7 @@ fn get_accounts_summary_db(db_path: &PathBuf, target: &str) -> Result<AccountsSu
         raw_data.push((acc_id, curr.clone(), amt));
     }
 
-    Ok(AccountsSummary {
-        accounts,
-        raw_data,
-    })
+    Ok(AccountsSummary { accounts, raw_data })
 }
 
 // Triggering re-check
@@ -647,16 +664,16 @@ async fn get_accounts(
 
     let mut accounts = summary.accounts;
     let raw_data = summary.raw_data;
-    
+
     // Determine which rates we need to fetch
     // Each account might have a specific currency preference.
-    // If set, we convert all its txs to that currency. 
+    // If set, we convert all its txs to that currency.
     // If not set, we convert to global target.
 
     let mut account_currency_map: HashMap<i32, String> = HashMap::new();
     for acc in &accounts {
         if let Some(c) = &acc.currency {
-             account_currency_map.insert(acc.id, c.clone());
+            account_currency_map.insert(acc.id, c.clone());
         }
     }
 
@@ -687,7 +704,7 @@ async fn get_accounts(
         let client = reqwest::Client::builder()
             .build()
             .map_err(|e| e.to_string())?;
-        
+
         let quotes = get_stock_quotes_with_client(
             client,
             "https://query1.finance.yahoo.com".to_string(),
@@ -696,7 +713,7 @@ async fn get_accounts(
         )
         .await?;
 
-         for q in quotes {
+        for q in quotes {
             rates.insert(q.symbol.clone(), q.price);
         }
     }
@@ -704,7 +721,7 @@ async fn get_accounts(
     let mut sums: HashMap<i32, f64> = HashMap::new();
     for (acc_id, tx_curr, amt) in raw_data {
         let acc_currency = account_currency_map.get(&acc_id).unwrap_or(&target);
-        
+
         let val = if tx_curr == *acc_currency {
             amt
         } else {
