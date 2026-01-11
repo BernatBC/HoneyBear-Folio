@@ -10,10 +10,10 @@ import CustomSelect from "./CustomSelect";
 import { useToast } from "../contexts/toast";
 import { useParseNumber } from "../utils/format";
 
-export default function AccountModal({ onClose, onUpdate }) {
-  const [name, setName] = useState("");
+export default function AccountModal({ onClose, onUpdate, account = null, isEditing = false }) {
+  const [name, setName] = useState(account?.name || "");
   const [balanceStr, setBalanceStr] = useState("");
-  const [currency, setCurrency] = useState("");
+  const [currency, setCurrency] = useState(account?.currency || "");
 
   const { showToast } = useToast();
   const parseNumber = useParseNumber();
@@ -28,13 +28,22 @@ export default function AccountModal({ onClose, onUpdate }) {
     }
 
     try {
-      const balance = parseNumber(balanceStr) || 0.0;
-      await invoke("create_account", {
-        name: nameTrimmed,
-        balance,
-        currency: currency || null,
-      });
-      showToast(t("account.created") || "Account created", { type: "success" });
+      if (isEditing) {
+        await invoke("update_account", {
+          id: account.id,
+          name: nameTrimmed,
+          currency: currency || null,
+        });
+        showToast(t("account.updated") || "Account updated", { type: "success" });
+      } else {
+        const balance = parseNumber(balanceStr) || 0.0;
+        await invoke("create_account", {
+          name: nameTrimmed,
+          balance,
+          currency: currency || null,
+        });
+        showToast(t("account.created") || "Account created", { type: "success" });
+      }
       onUpdate();
       onClose();
     } catch (err) {
@@ -52,42 +61,38 @@ export default function AccountModal({ onClose, onUpdate }) {
 
   return createPortal(
     <div className="modal-overlay">
-      <div className="modal-content w-full max-w-md">
+      <div className="modal-container w-full max-w-md">
         <div className="modal-header">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-800 rounded-lg border border-slate-700">
-              <Wallet className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-slate-100">
-                {t("account.new_account") || "New Account"}
-              </h2>
-              <p className="text-sm text-slate-400">
-                Create a new account to track your assets
-              </p>
-            </div>
-          </div>
+          <h2 className="modal-title">
+            <Wallet className="w-5 h-5 text-blue-500" />
+            {isEditing ? t("account.edit_account") : t("account.new_account")}
+          </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors p-1 rounded-md hover:bg-slate-800"
+            className="modal-close-button"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="modal-body">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+            {isEditing ? t("account.edit_description") : t("account.new_description")}
+          </p>
+
           <div className="space-y-4">
             {/* Account Name */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
-                Account Name
+              <label className="modal-label">
+                {t("account.field.name")}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Main Savings"
-                className="w-full bg-slate-900 border border-slate-700 text-slate-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-500 transition-all outline-none"
+                placeholder={t("account.placeholder.name")}
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-500 transition-all outline-none"
                 autoFocus
               />
             </div>
@@ -95,20 +100,17 @@ export default function AccountModal({ onClose, onUpdate }) {
             {/* Initial Balance (Only for new accounts) */}
             {!isEditing && (
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
-                  Initial Balance
+                <label className="modal-label">
+                  {t("account.field.initial_balance")}
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                     <DollarSign className="w-4 h-4 text-slate-500" />
-                  </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={balanceStr}
                     onChange={(e) => setBalanceStr(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full bg-slate-900 border border-slate-700 text-slate-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 pl-9 placeholder-slate-500 transition-all outline-none"
+                    placeholder={t("account.placeholder.balance")}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 pl-9 placeholder-slate-500 transition-all outline-none"
                   />
                 </div>
               </div>
@@ -116,13 +118,16 @@ export default function AccountModal({ onClose, onUpdate }) {
 
             {/* Currency Selection */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
-                Currency <span className="normal-case font-normal text-slate-500">(Optional - Default used if empty)</span>
+              <label className="modal-label flex items-center justify-between">
+                <span>{t("account.field.currency")}</span>
+                <span className="text-xs font-normal text-slate-500 italic uppercase">
+                  {t("account.field.currency_optional")}
+                </span>
               </label>
               <CustomSelect
                 value={currency}
                 options={[
-                  { value: "", label: "Default Currency" }, // Option to use default
+                  { value: "", label: t("account.default_currency") },
                   ...CURRENCIES.map((c) => ({
                     value: c.code,
                     label: `${c.code} (${c.symbol}) - ${c.name}`,
@@ -134,20 +139,22 @@ export default function AccountModal({ onClose, onUpdate }) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800 mt-6">
+          <div className="modal-footer">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+              className="modal-cancel-button"
             >
-              Cancel
+              {t("account.cancel")}
             </button>
             <button
               type="submit"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+              className="modal-action-button"
             >
-              <Check className="w-4 h-4" />
-              Create Account
+              <Check className="w-4 h-4 text-white" />
+              <span className="text-white">
+                {isEditing ? t("account.save_changes") : t("account.create_account")}
+              </span>
             </button>
           </div>
         </form>
@@ -160,4 +167,6 @@ export default function AccountModal({ onClose, onUpdate }) {
 AccountModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
+  account: PropTypes.object,
+  isEditing: PropTypes.bool,
 };

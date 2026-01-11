@@ -18,4 +18,36 @@
     /* Ensure modals don't scale with font-size setting */
     font-size: 16px;
   }
+
+  .modal-header {
+    @apply flex justify-between items-center mb-6;
+  }
+
+  .modal-title {
+    @apply text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2;
+  }
+
+  .modal-close-button {
+    @apply text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white;
+  }
+
+  .modal-body {
+    @apply space-y-4;
+  }
+
+  .modal-label {
+    @apply block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2;
+  }
+
+  .modal-footer {
+    @apply mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3;
+  }
+
+  .modal-cancel-button {
+    @apply px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors;
+  }
+
+  .modal-action-button {
+    @apply flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
 }

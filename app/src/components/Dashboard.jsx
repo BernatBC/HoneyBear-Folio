@@ -62,7 +62,19 @@ export default function Dashboard({
 
   const formatNumber = useFormatNumber();
   const formatDate = useFormatDate();
-  const { dateFormat, firstDayOfWeek } = useNumberFormat();
+  const {
+    dateFormat,
+    firstDayOfWeek,
+    currency: appCurrency,
+  } = useNumberFormat();
+
+  const accountMap = useMemo(() => {
+    const map = {};
+    accounts.forEach((acc) => {
+      map[acc.id] = acc;
+    });
+    return map;
+  }, [accounts]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,8 +99,32 @@ export default function Dashboard({
   useEffect(() => {
     const fetchDailyPrices = async () => {
       const tickers = new Set();
+      const appCurrency = localStorage.getItem("hb_currency") || "USD";
+
+      // Include all tickers from transactions
       transactions.forEach((t) => {
         if (t.ticker) tickers.add(t.ticker);
+      });
+
+      // Also include currency pairs for multi-currency support
+      const accountMap = {};
+      accounts.forEach((a) => (accountMap[a.id] = a));
+
+      transactions.forEach((t) => {
+        const acc = accountMap[t.account_id];
+        const accCurrency = acc?.currency || appCurrency;
+        const txCurrency = t.currency || accCurrency;
+
+        if (txCurrency !== accCurrency) {
+          tickers.add(`${txCurrency}${accCurrency}=X`);
+        }
+      });
+
+      accounts.forEach((acc) => {
+        const accCurrency = acc.currency || appCurrency;
+        if (accCurrency !== appCurrency) {
+          tickers.add(`${accCurrency}${appCurrency}=X`);
+        }
       });
 
       if (tickers.size === 0) return;
@@ -122,7 +158,21 @@ export default function Dashboard({
     if (transactions.length > 0) {
       fetchDailyPrices();
     }
-  }, [transactions]);
+  }, [transactions, accounts, propAccounts]);
+
+  // Helper to get price
+  const getPrice = (ticker, date) => {
+    if (!dailyPrices[ticker]) return 0;
+    const { list, map } = dailyPrices[ticker];
+    if (map[date]) return map[date];
+    // Find last available price
+    let lastPrice = 0;
+    for (const p of list) {
+      if (p.date > date) break;
+      lastPrice = p.price;
+    }
+    return lastPrice;
+  };
 
   const chartData = useMemo(() => {
     // Require accounts and at least one transaction to render the net worth evolution chart
@@ -202,19 +252,13 @@ export default function Dashboard({
       d.setDate(d.getDate() + 1);
     }
 
-    // Helper to get price
-    const getPrice = (ticker, date) => {
-      if (!dailyPrices[ticker]) return 0;
-      const { list, map } = dailyPrices[ticker];
-      if (map[date]) return map[date];
-      // Find last available price
-      let lastPrice = 0;
-      for (const p of list) {
-        if (p.date > date) break;
-        lastPrice = p.price;
+    // Index ticker currencies from transactions
+    const tickerCurrencies = {};
+    transactions.forEach((t) => {
+      if (t.ticker && t.currency) {
+        tickerCurrencies[t.ticker] = t.currency;
       }
-      return lastPrice;
-    };
+    });
 
     // 3. Calculate balances for each date
     // We need a map of date -> balance for each account and total.
@@ -237,6 +281,7 @@ export default function Dashboard({
     const totalData = sortedDates.map((date) => {
       let total = 0;
       accounts.forEach((acc) => {
+        const accCurrency = acc.currency || appCurrency;
         const initial = accountInitialBalances[acc.id];
         const accTxs = transactions.filter(
           (t) => t.account_id === acc.id && t.date <= date,
@@ -256,10 +301,20 @@ export default function Dashboard({
         for (const [ticker, shares] of Object.entries(holdings)) {
           if (Math.abs(shares) > 0.0001) {
             const price = getPrice(ticker, date);
-            stockValue += shares * price;
+            const tickerCurr = tickerCurrencies[ticker] || accCurrency;
+            const rateToAcc =
+              tickerCurr === accCurrency
+                ? 1.0
+                : getPrice(`${tickerCurr}${accCurrency}=X`, date) || 1.0;
+            stockValue += shares * price * rateToAcc;
           }
         }
-        total += cashBalance + stockValue;
+
+        const rateToApp =
+          accCurrency === appCurrency
+            ? 1.0
+            : getPrice(`${accCurrency}${appCurrency}=X`, date) || 1.0;
+        total += (cashBalance + stockValue) * rateToApp;
       });
       return total;
     });
@@ -293,7 +348,13 @@ export default function Dashboard({
 
     // Individual Account Datasets
     accounts.forEach((acc, index) => {
-      const accData = sortedDates.map((date) => {
+      const accCurrency = acc.currency || appCurrency;
+
+      // Build both the native (account currency) and converted (app currency) series
+      const accDataNative = [];
+      const accDataConverted = [];
+
+      sortedDates.forEach((date) => {
         const initial = accountInitialBalances[acc.id];
         const accTxs = transactions.filter(
           (t) => t.account_id === acc.id && t.date <= date,
@@ -313,17 +374,33 @@ export default function Dashboard({
         for (const [ticker, shares] of Object.entries(holdings)) {
           if (Math.abs(shares) > 0.0001) {
             const price = getPrice(ticker, date);
-            stockValue += shares * price;
+            const tickerCurr = tickerCurrencies[ticker] || accCurrency;
+            const rateToAcc =
+              tickerCurr === accCurrency
+                ? 1.0
+                : getPrice(`${tickerCurr}${accCurrency}=X`, date) || 1.0;
+            stockValue += shares * price * rateToAcc;
           }
         }
-        return cashBalance + stockValue;
+
+        const nativeVal = cashBalance + stockValue;
+        const rateToApp =
+          accCurrency === appCurrency
+            ? 1.0
+            : getPrice(`${accCurrency}${appCurrency}=X`, date) || 1.0;
+        const convertedVal = nativeVal * rateToApp;
+
+        accDataNative.push(nativeVal);
+        accDataConverted.push(convertedVal);
       });
 
       const color = colors[index % colors.length];
 
       datasets.push({
         label: acc.name,
-        data: accData,
+        data: accDataConverted,
+        originalData: accDataNative,
+        accountCurrency: accCurrency,
         borderColor: color,
         backgroundColor: "transparent",
         borderWidth: 2,
@@ -396,11 +473,11 @@ export default function Dashboard({
 
       // Use current market value for brokerage accounts when available
       const value =
-        accKindLower === "brokerage" &&
+        (accKindLower === "brokerage" &&
         marketValues &&
         marketValues[acc.id] !== undefined
           ? marketValues[acc.id]
-          : acc.balance || 0;
+          : acc.balance || 0) * (acc.exchange_rate || 1.0);
 
       if (accKindLower === "brokerage") kind = "Stock";
       else if (accKindLower === "cash") kind = "Cash";
@@ -494,7 +571,14 @@ export default function Dashboard({
 
     expenses.forEach((t) => {
       const cat = t.category || "Uncategorized";
-      categoryTotals[cat] = (categoryTotals[cat] || 0) + Math.abs(t.amount);
+      const acc = accountMap[t.account_id];
+      const accCurrency = acc?.currency || appCurrency;
+      const rateToApp =
+        accCurrency === appCurrency
+          ? 1.0
+          : getPrice(`${accCurrency}${appCurrency}=X`, t.date) || 1.0;
+      const convertedAmount = Math.abs(t.amount) * rateToApp;
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + convertedAmount;
     });
 
     const sortedCategories = Object.entries(categoryTotals).sort(
@@ -526,7 +610,16 @@ export default function Dashboard({
         },
       ],
     };
-  }, [transactions, timeRange, customStartDate, customEndDate, isDark]);
+  }, [
+    transactions,
+    timeRange,
+    customStartDate,
+    customEndDate,
+    isDark,
+    accountMap,
+    dailyPrices,
+    appCurrency,
+  ]);
 
   const incomeVsExpensesData = useMemo(() => {
     if (transactions.length === 0) return null;
@@ -602,8 +695,16 @@ export default function Dashboard({
       const key = isDayBucket ? t.date : t.date.slice(0, 7);
       const index = keys.indexOf(key);
       if (index !== -1) {
-        if (t.amount > 0) incomeData[index] += t.amount;
-        else expenseData[index] += Math.abs(t.amount);
+        const acc = accountMap[t.account_id];
+        const accCurrency = acc?.currency || appCurrency;
+        const rateToApp =
+          accCurrency === appCurrency
+            ? 1.0
+            : getPrice(`${accCurrency}${appCurrency}=X`, t.date) || 1.0;
+        const amount = t.amount * rateToApp;
+
+        if (amount > 0) incomeData[index] += amount;
+        else expenseData[index] += Math.abs(amount);
       }
     });
 
@@ -628,7 +729,16 @@ export default function Dashboard({
         },
       ],
     };
-  }, [transactions, timeRange, customStartDate, customEndDate, formatDate]);
+  }, [
+    transactions,
+    timeRange,
+    customStartDate,
+    customEndDate,
+    formatDate,
+    accountMap,
+    dailyPrices,
+    appCurrency,
+  ]);
 
   const doughnutOptions = useMemo(
     () => ({
@@ -910,9 +1020,27 @@ export default function Dashboard({
                 label += ": ";
               }
               if (context.parsed.y !== null) {
-                label += formatNumber(context.parsed.y, {
-                  style: "currency",
-                });
+                // If this dataset represents an individual account, prefer
+                // showing the value in the account's native currency when available.
+                if (context.dataset && context.dataset.accountCurrency) {
+                  const nativeVal =
+                    context.dataset.originalData &&
+                    context.dataset.originalData[context.dataIndex];
+                  if (nativeVal !== undefined && nativeVal !== null) {
+                    label += formatNumber(nativeVal, {
+                      style: "currency",
+                      currency: context.dataset.accountCurrency,
+                    });
+                  } else {
+                    label += formatNumber(context.parsed.y, {
+                      style: "currency",
+                    });
+                  }
+                } else {
+                  label += formatNumber(context.parsed.y, {
+                    style: "currency",
+                  });
+                }
               }
               return label;
             },
@@ -1117,7 +1245,7 @@ export default function Dashboard({
                           marketValues && marketValues[acc.id] !== undefined
                             ? (acc.balance || 0) + marketValues[acc.id]
                             : acc.balance || 0,
-                          { style: "currency" },
+                          { style: "currency", currency: acc.currency || appCurrency },
                         )}
                       </span>
                     </label>

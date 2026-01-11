@@ -71,12 +71,18 @@ struct YahooSearchResponse {
     quotes: Vec<YahooSearchQuote>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct Account {
     id: i32,
     name: String,
     balance: f64,
     currency: Option<String>,
+    #[serde(default = "default_exchange_rate")]
+    exchange_rate: f64,
+}
+
+fn default_exchange_rate() -> f64 {
+    1.0
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -414,6 +420,7 @@ fn create_account_db(db_path: &PathBuf, name: String, balance: f64, currency: Op
         name: name_trimmed,
         balance: balance_to_set,
         currency,
+        exchange_rate: 1.0,
     })
 }
 
@@ -464,6 +471,7 @@ fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result<Acc
                 name: row.get(1)?,
                 balance: row.get(2)?,
                 currency: row.get(3)?,
+                exchange_rate: 1.0,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -518,6 +526,7 @@ fn update_account_db(db_path: &PathBuf, id: i32, name: String, currency: Option<
                 name: row.get(1)?,
                 balance: row.get(2)?,
                 currency: row.get(3)?,
+                exchange_rate: 1.0,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -571,6 +580,7 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
                 name: row.get(1)?,
                 balance: row.get(2)?,
                 currency: row.get(3)?,
+                exchange_rate: 1.0,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -660,11 +670,20 @@ async fn get_accounts(
 
     for (acc_id, tx_curr, _) in &raw_data {
         let acc_currency = account_currency_map.get(acc_id).unwrap_or(&target);
-        
+
         if tx_curr != acc_currency {
-             // We need rate tx_curr -> acc_currency
-             // Yahoo format: SOURCE + TARGET + =X
-             tickers_to_fetch.insert(format!("{}{}=X", tx_curr, acc_currency));
+            // We need rate tx_curr -> acc_currency
+            // Yahoo format: SOURCE + TARGET + =X
+            tickers_to_fetch.insert(format!("{}{}=X", tx_curr, acc_currency));
+        }
+    }
+
+    // Also fetch rates for account currencies to the target global currency
+    for acc in &accounts {
+        if let Some(acc_curr) = &acc.currency {
+            if acc_curr != &target {
+                tickers_to_fetch.insert(format!("{}{}=X", acc_curr, target));
+            }
         }
     }
 
@@ -706,6 +725,18 @@ async fn get_accounts(
     for acc in &mut accounts {
         if let Some(sum) = sums.get(&acc.id) {
             acc.balance = *sum;
+        }
+
+        // Set exchange rate to target app currency
+        if let Some(acc_curr) = &acc.currency {
+            if acc_curr == &target {
+                acc.exchange_rate = 1.0;
+            } else {
+                let symbol = format!("{}{}=X", acc_curr, target);
+                acc.exchange_rate = *rates.get(&symbol).unwrap_or(&1.0);
+            }
+        } else {
+            acc.exchange_rate = 1.0;
         }
     }
 
