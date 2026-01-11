@@ -105,8 +105,7 @@ struct Transaction {
 struct AccountsSummary {
     accounts: Vec<Account>,
     raw_data: Vec<(i32, String, f64)>,
-    currencies_to_fetch: HashSet<String>,
-}
+} 
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 struct AppSettings {
@@ -613,22 +612,17 @@ fn get_accounts_summary_db(db_path: &PathBuf, target: &str) -> Result<AccountsSu
         .map_err(|e| e.to_string())?;
 
     let mut raw_data = Vec::new();
-    let mut currencies_to_fetch = HashSet::new();
 
     for r in rows {
         let (acc_id, curr_opt, amt_opt) = r.map_err(|e| e.to_string())?;
         let amt = amt_opt.unwrap_or(0.0);
         let curr = curr_opt.unwrap_or_else(|| target.to_string());
         raw_data.push((acc_id, curr.clone(), amt));
-        if curr != target {
-            currencies_to_fetch.insert(curr);
-        }
     }
 
     Ok(AccountsSummary {
         accounts,
         raw_data,
-        currencies_to_fetch,
     })
 }
 
