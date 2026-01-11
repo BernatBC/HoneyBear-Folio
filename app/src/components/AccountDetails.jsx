@@ -19,6 +19,7 @@ import {
   ArrowRightLeft,
   User,
   Edit,
+  Globe,
 } from "lucide-react";
 import {
   useFormatNumber,
@@ -67,10 +68,16 @@ export default function AccountDetails({ account, onUpdate }) {
   const [isRenamingAccount, setIsRenamingAccount] = useState(false);
   const [renameValue, setRenameValue] = useState(account.name);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [isChangingCurrency, setIsChangingCurrency] = useState(false);
+  const [currencyValue, setCurrencyValue] = useState(account.currency || "");
 
   useEffect(() => {
     setRenameValue(account.name);
   }, [account.name]);
+
+  useEffect(() => {
+    setCurrencyValue(account.currency || "");
+  }, [account.currency]);
 
   // Close account menu when clicking outside
   useEffect(() => {
@@ -309,6 +316,18 @@ export default function AccountDetails({ account, onUpdate }) {
       if (onUpdate) onUpdate();
     } catch (e) {
       console.error("Failed to delete account:", e);
+    }
+  }
+
+  async function handleChangeCurrency(e) {
+    e && e.preventDefault();
+    try {
+      await invoke("update_account", { id: account.id, name: account.name, currency: currencyValue || null });
+      setIsChangingCurrency(false);
+      setAccountMenuOpen(false);
+      if (onUpdate) onUpdate();
+    } catch (e) {
+      console.error("Failed to change account currency:", e);
     }
   }
 
@@ -563,6 +582,41 @@ export default function AccountDetails({ account, onUpdate }) {
               {account.name}
             </h1>
           )}
+
+          {isChangingCurrency && (
+            <form onSubmit={handleChangeCurrency} className="mt-4 flex items-center gap-3">
+              <div className="w-64">
+                <CustomSelect
+                  value={currencyValue}
+                  onChange={setCurrencyValue}
+                  options={[
+                    { value: "", label: "Default Currency" },
+                    ...CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} (${c.symbol}) - ${c.name}` })),
+                  ]}
+                />
+              </div>
+              <div className="flex gap-1">
+                <button
+                  type="submit"
+                  className="p-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                  title="Save Currency"
+                >
+                  <Check className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsChangingCurrency(false);
+                    setCurrencyValue(account.currency || "");
+                  }}
+                  className="p-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-rose-500 transition-colors"
+                  title="Cancel"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </form>
+          )}
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Balance:
@@ -675,6 +729,16 @@ export default function AccountDetails({ account, onUpdate }) {
                   >
                     <Edit className="w-4 h-4 text-slate-400" />
                     Rename Account
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsChangingCurrency(true);
+                      setAccountMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                  >
+                    <Globe className="w-4 h-4 text-slate-400" />
+                    Change Currency
                   </button>
                   <div className="h-px bg-slate-100 dark:bg-slate-700 my-1" />
                   <button

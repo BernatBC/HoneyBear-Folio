@@ -76,6 +76,7 @@ struct Account {
     id: i32,
     name: String,
     balance: f64,
+    currency: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -264,6 +265,34 @@ fn init_db(app_handle: &AppHandle) -> Result<(), String> {
         }
     }
 
+    // Ensure we have a column for currency in accounts
+    {
+        let mut stmt = conn
+            .prepare("PRAGMA table_info(accounts)")
+            .map_err(|e| e.to_string())?;
+        let mut has_currency = false;
+        let col_iter = stmt
+            .query_map([], |row| row.get::<_, String>(1))
+            .map_err(|e| e.to_string())?;
+        for name in col_iter.flatten() {
+            if name == "currency" {
+                has_currency = true;
+                break;
+            }
+        }
+        if !has_currency {
+            match conn.execute("ALTER TABLE accounts ADD COLUMN currency TEXT", []) {
+                Ok(_) => {}
+                Err(e) => {
+                    let s = e.to_string();
+                    if !s.contains("duplicate column name") && !s.contains("already exists") {
+                        return Err(s);
+                    }
+                }
+            }
+        }
+    }
+
     conn.execute(
         "CREATE TABLE IF NOT EXISTS stock_prices (
             ticker TEXT PRIMARY KEY,
@@ -323,7 +352,7 @@ fn get_db_path_command(app_handle: AppHandle) -> Result<String, String> {
     Ok(pb.to_string_lossy().to_string())
 }
 
-fn create_account_db(db_path: &PathBuf, name: String, balance: f64) -> Result<Account, String> {
+fn create_account_db(db_path: &PathBuf, name: String, balance: f64, currency: Option<String>) -> Result<Account, String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     // Trim name and validate non-empty
@@ -354,8 +383,8 @@ fn create_account_db(db_path: &PathBuf, name: String, balance: f64) -> Result<Ac
     // We can omit 'kind' since it has a default value in schema, or set it to 'unified' if we want to be explicit.
     // relying on default 'cash' is fine or we can pass "unified".
     tx.execute(
-        "INSERT INTO accounts (name, balance) VALUES (?1, ?2)",
-        params![name_trimmed, balance_to_set],
+        "INSERT INTO accounts (name, balance, currency) VALUES (?1, ?2, ?3)",
+        params![name_trimmed, balance_to_set, currency],
     )
     .map_err(|e| e.to_string())?;
 
@@ -365,13 +394,14 @@ fn create_account_db(db_path: &PathBuf, name: String, balance: f64) -> Result<Ac
     if balance.abs() > f64::EPSILON {
         // Create initial transaction
         tx.execute(
-            "INSERT INTO transactions (account_id, date, payee, notes, category, amount) VALUES (?1, date('now'), ?2, ?3, ?4, ?5)",
+            "INSERT INTO transactions (account_id, date, payee, notes, category, amount, currency) VALUES (?1, date('now'), ?2, ?3, ?4, ?5, ?6)",
             params![
                 id,
                 "Opening Balance",
                 "Initial Balance",
                 "Income",
-                balance_to_set
+                balance_to_set,
+                currency
             ],
         )
         .map_err(|e| e.to_string())?;
@@ -383,13 +413,14 @@ fn create_account_db(db_path: &PathBuf, name: String, balance: f64) -> Result<Ac
         id,
         name: name_trimmed,
         balance: balance_to_set,
+        currency,
     })
 }
 
 #[tauri::command]
-fn create_account(app_handle: AppHandle, name: String, balance: f64) -> Result<Account, String> {
+fn create_account(app_handle: AppHandle, name: String, balance: f64, currency: Option<String>) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
-    create_account_db(&db_path, name, balance)
+    create_account_db(&db_path, name, balance, currency)
 }
 
 fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result<Account, String> {
@@ -423,7 +454,7 @@ fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result<Acc
     .map_err(|e| e.to_string())?;
 
     let mut stmt = conn
-        .prepare("SELECT id, name, balance FROM accounts WHERE id = ?1")
+        .prepare("SELECT id, name, balance, currency FROM accounts WHERE id = ?1")
         .map_err(|e| e.to_string())?;
 
     let account = stmt
@@ -432,6 +463,7 @@ fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result<Acc
                 id: row.get(0)?,
                 name: row.get(1)?,
                 balance: row.get(2)?,
+                currency: row.get(3)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -443,6 +475,60 @@ fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result<Acc
 fn rename_account(app_handle: AppHandle, id: i32, new_name: String) -> Result<Account, String> {
     let db_path = get_db_path(&app_handle)?;
     rename_account_db(&db_path, id, new_name)
+}
+
+fn update_account_db(db_path: &PathBuf, id: i32, name: String, currency: Option<String>) -> Result<Account, String> {
+    let name_trimmed = name.trim().to_string();
+    if name_trimmed.is_empty() {
+        return Err("Account name cannot be empty or whitespace-only".to_string());
+    }
+
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // Check for duplicate name (case-insensitive) excluding this account id
+    {
+        let mut stmt_check = conn
+            .prepare("SELECT id FROM accounts WHERE LOWER(name) = LOWER(?1) LIMIT 1")
+            .map_err(|e| e.to_string())?;
+        let dup: Option<i32> = stmt_check
+            .query_row(params![name_trimmed], |row| row.get(0))
+            .optional()
+            .map_err(|e| e.to_string())?;
+        if let Some(existing_id) = dup {
+            if existing_id != id {
+                return Err("Account name already exists".to_string());
+            }
+        }
+    }
+
+    conn.execute(
+        "UPDATE accounts SET name = ?1, currency = ?2 WHERE id = ?3",
+        params![name_trimmed, currency, id],
+    )
+    .map_err(|e| e.to_string())?;
+
+    let mut stmt = conn
+        .prepare("SELECT id, name, balance, currency FROM accounts WHERE id = ?1")
+        .map_err(|e| e.to_string())?;
+
+    let account = stmt
+        .query_row(params![id], |row| {
+            Ok(Account {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                balance: row.get(2)?,
+                currency: row.get(3)?,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+
+    Ok(account)
+}
+
+#[tauri::command]
+fn update_account(app_handle: AppHandle, id: i32, name: String, currency: Option<String>) -> Result<Account, String> {
+    let db_path = get_db_path(&app_handle)?;
+    update_account_db(&db_path, id, name, currency)
 }
 
 fn delete_account_db(db_path: &PathBuf, id: i32) -> Result<(), String> {
@@ -476,7 +562,7 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn
-        .prepare("SELECT id, name, balance FROM accounts")
+        .prepare("SELECT id, name, balance, currency FROM accounts")
         .map_err(|e| e.to_string())?;
     let account_iter = stmt
         .query_map([], |row| {
@@ -484,6 +570,7 @@ fn get_accounts_db(db_path: &PathBuf) -> Result<Vec<Account>, String> {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 balance: row.get(2)?,
+                currency: row.get(3)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -556,18 +643,38 @@ async fn get_accounts(
 
     let mut accounts = summary.accounts;
     let raw_data = summary.raw_data;
-    let currencies_to_fetch = summary.currencies_to_fetch;
+    
+    // Determine which rates we need to fetch
+    // Each account might have a specific currency preference.
+    // If set, we convert all its txs to that currency. 
+    // If not set, we convert to global target.
+
+    let mut account_currency_map: HashMap<i32, String> = HashMap::new();
+    for acc in &accounts {
+        if let Some(c) = &acc.currency {
+             account_currency_map.insert(acc.id, c.clone());
+        }
+    }
+
+    let mut tickers_to_fetch = HashSet::new();
+
+    for (acc_id, tx_curr, _) in &raw_data {
+        let acc_currency = account_currency_map.get(acc_id).unwrap_or(&target);
+        
+        if tx_curr != acc_currency {
+             // We need rate tx_curr -> acc_currency
+             // Yahoo format: SOURCE + TARGET + =X
+             tickers_to_fetch.insert(format!("{}{}=X", tx_curr, acc_currency));
+        }
+    }
 
     let mut rates = HashMap::new();
-    if !currencies_to_fetch.is_empty() {
-        let tickers: Vec<String> = currencies_to_fetch
-            .iter()
-            .map(|c| format!("{}{}=X", c, target))
-            .collect();
+    if !tickers_to_fetch.is_empty() {
+        let tickers: Vec<String> = tickers_to_fetch.into_iter().collect();
         let client = reqwest::Client::builder()
             .build()
             .map_err(|e| e.to_string())?;
-        // Reuse existing get_stock_quotes_with_client
+        
         let quotes = get_stock_quotes_with_client(
             client,
             "https://query1.finance.yahoo.com".to_string(),
@@ -576,51 +683,49 @@ async fn get_accounts(
         )
         .await?;
 
-        for q in quotes {
-            // Symbol is e.g. "EURUSD=X"
-            let clean = q.symbol.trim_end_matches("=X");
-            if clean.ends_with(&target) && clean.len() > target.len() {
-                let source_curr = &clean[0..clean.len() - target.len()];
-                rates.insert(source_curr.to_string(), q.price);
-            }
+         for q in quotes {
+            rates.insert(q.symbol.clone(), q.price);
         }
     }
+
     let mut sums: HashMap<i32, f64> = HashMap::new();
-    for (acc_id, curr, amt) in raw_data {
-        let val = if curr == target {
+    for (acc_id, tx_curr, amt) in raw_data {
+        let acc_currency = account_currency_map.get(&acc_id).unwrap_or(&target);
+        
+        let val = if tx_curr == *acc_currency {
             amt
         } else {
-            let rate = rates.get(&curr).unwrap_or(&1.0);
+            let symbol = format!("{}{}=X", tx_curr, acc_currency);
+            let rate = *rates.get(&symbol).unwrap_or(&1.0);
             amt * rate
         };
-        *sums.entry(acc_id).or_insert(0.0) += val;
+
+        sums.entry(acc_id).and_modify(|e| *e += val).or_insert(val);
     }
 
     for acc in &mut accounts {
-        if let Some(bal) = sums.get(&acc.id) {
-            acc.balance = *bal;
-        } else {
-            acc.balance = 0.0;
+        if let Some(sum) = sums.get(&acc.id) {
+            acc.balance = *sum;
         }
     }
 
     Ok(accounts)
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CreateTransactionArgs {
-    pub account_id: i32,
-    pub date: String,
-    pub payee: String,
-    pub notes: Option<String>,
-    pub category: Option<String>,
-    pub amount: f64,
-    pub ticker: Option<String>,
-    pub shares: Option<f64>,
-    pub price_per_share: Option<f64>,
-    pub fee: Option<f64>,
-    pub currency: Option<String>,
+struct CreateTransactionArgs {
+    account_id: i32,
+    date: String,
+    payee: String,
+    notes: Option<String>,
+    category: Option<String>,
+    amount: f64,
+    ticker: Option<String>,
+    shares: Option<f64>,
+    price_per_share: Option<f64>,
+    fee: Option<f64>,
+    currency: Option<String>,
 }
 
 fn create_transaction_db(
@@ -1970,6 +2075,7 @@ pub fn run() {
             get_daily_stock_prices,
             search_ticker,
             rename_account,
+            update_account,
             delete_account,
             // DB path commands
             set_db_path,

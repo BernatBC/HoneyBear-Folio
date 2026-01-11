@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import { useFormatNumber } from "../utils/format";
+import { Settings } from "lucide-react";
 
 export default function AccountList({
   accounts,
-
   selectedId,
   onSelectAccount,
   marketValues,
@@ -19,7 +19,10 @@ export default function AccountList({
             ? Number(account.balance) + Number(marketValues[account.id])
             : Number(account.balance);
 
-        const formattedValue = formatNumber(value, { style: "currency" });
+        const formattedValue = formatNumber(value, { 
+            style: "currency",
+            currency: account.currency || undefined 
+        });
         const finalFormattedValue =
           formattedValue === "NaN" ? "" : formattedValue;
 
@@ -33,7 +36,7 @@ export default function AccountList({
                 : "sidebar-nav-item-inactive"
             }`}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               <Icon
                 className={`sidebar-nav-icon shrink-0 ${
                   selectedId === account.id
@@ -42,6 +45,8 @@ export default function AccountList({
                 }`}
               />
               <span className="font-medium truncate">{account.name}</span>
+              
+
             </div>
             <span
               className={`font-medium shrink-0 ml-2 ${
