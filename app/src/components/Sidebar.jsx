@@ -1,6 +1,5 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { invoke } from "@tauri-apps/api/core";
 import ImportModal from "./ImportModal";
 import ExportModal from "./ExportModal";
 import SettingsModal from "./SettingsModal";
@@ -12,8 +11,6 @@ import {
   CreditCard,
   TrendingUp,
   LayoutDashboard,
-  X,
-  Check,
   List,
   PieChart,
   Calculator,
@@ -28,9 +25,8 @@ import { getDisplayVersion, IS_RELEASE } from "../utils/version";
 import { computeNetWorth } from "../utils/networth";
 import { t } from "../i18n/i18n";
 import "../styles/Sidebar.css";
-import { useFormatNumber, useParseNumber } from "../utils/format";
+import { useFormatNumber } from "../utils/format";
 import { usePrivacy } from "../contexts/privacy";
-import { useToast } from "../contexts/toast";
 
 export default function Sidebar({
   accounts,
@@ -52,7 +48,6 @@ export default function Sidebar({
     style: "currency",
   });
   const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
-  const { showToast } = useToast();
 
   const handleSelect = (id) => {
     onSelectAccount(id);

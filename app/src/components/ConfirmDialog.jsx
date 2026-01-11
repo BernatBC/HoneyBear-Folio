@@ -83,9 +83,7 @@ function ConfirmDialog({
   return createPortal(
     <div className="modal-overlay">
       <div className="modal-container w-auto max-w-md p-6 h-auto min-h-0">
-        <h2 className="modal-title mb-4">
-          {title}
-        </h2>
+        <h2 className="modal-title mb-4">{title}</h2>
         <p className="mb-6 text-slate-600 dark:text-slate-300">{message}</p>
         <div className="modal-footer">
           {showCancel && (

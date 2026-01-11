@@ -72,8 +72,6 @@ export default function AccountDetails({ account, onUpdate }) {
     setRenameValue(account.name);
   }, [account.name]);
 
-
-
   // Close account menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -313,8 +311,6 @@ export default function AccountDetails({ account, onUpdate }) {
       console.error("Failed to delete account:", e);
     }
   }
-
-
 
   async function handleAddTransaction(e) {
     e.preventDefault();
@@ -567,7 +563,6 @@ export default function AccountDetails({ account, onUpdate }) {
               {account.name}
             </h1>
           )}
-
 
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -1852,6 +1847,7 @@ AccountDetails.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     name: PropTypes.string,
     balance: PropTypes.number,
+    currency: PropTypes.string,
     kind: PropTypes.string,
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,

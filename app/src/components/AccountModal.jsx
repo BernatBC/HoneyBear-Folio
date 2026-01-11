@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
-import { useState, useEffect } from "react";
-import { X, Check, Wallet, Globe, DollarSign } from "lucide-react";
+import { useState } from "react";
+import { X, Check, Wallet, Globe } from "lucide-react";
 import { createPortal } from "react-dom";
 import "../styles/Modal.css";
 import { invoke } from "@tauri-apps/api/core";
@@ -10,7 +10,12 @@ import CustomSelect from "./CustomSelect";
 import { useToast } from "../contexts/toast";
 import { useParseNumber } from "../utils/format";
 
-export default function AccountModal({ onClose, onUpdate, account = null, isEditing = false }) {
+export default function AccountModal({
+  onClose,
+  onUpdate,
+  account = null,
+  isEditing = false,
+}) {
   const [name, setName] = useState(account?.name || "");
   const [balanceStr, setBalanceStr] = useState("");
   const [currency, setCurrency] = useState(account?.currency || "");
@@ -23,7 +28,10 @@ export default function AccountModal({ onClose, onUpdate, account = null, isEdit
     const nameTrimmed = name.trim();
 
     if (nameTrimmed.length === 0) {
-      showToast(t("account.error.empty_name") || "Account name cannot be empty", { type: "warning" });
+      showToast(
+        t("account.error.empty_name") || "Account name cannot be empty",
+        { type: "warning" },
+      );
       return;
     }
 
@@ -34,7 +42,9 @@ export default function AccountModal({ onClose, onUpdate, account = null, isEdit
           name: nameTrimmed,
           currency: currency || null,
         });
-        showToast(t("account.updated") || "Account updated", { type: "success" });
+        showToast(t("account.updated") || "Account updated", {
+          type: "success",
+        });
       } else {
         const balance = parseNumber(balanceStr) || 0.0;
         await invoke("create_account", {
@@ -42,20 +52,28 @@ export default function AccountModal({ onClose, onUpdate, account = null, isEdit
           balance,
           currency: currency || null,
         });
-        showToast(t("account.created") || "Account created", { type: "success" });
+        showToast(t("account.created") || "Account created", {
+          type: "success",
+        });
       }
       onUpdate();
       onClose();
     } catch (err) {
       console.error(err);
       const msg = String(err || "");
-        if (msg.includes("already exists")) {
-            showToast(t("error.account_exists", { name: nameTrimmed }) || `Account "${nameTrimmed}" already exists`, {
+      if (msg.includes("already exists")) {
+        showToast(
+          t("error.account_exists", { name: nameTrimmed }) ||
+            `Account "${nameTrimmed}" already exists`,
+          {
             type: "warning",
-            });
-        } else {
-            showToast(t("error.something_went_wrong") || "Something went wrong", { type: "danger" });
-        }
+          },
+        );
+      } else {
+        showToast(t("error.something_went_wrong") || "Something went wrong", {
+          type: "danger",
+        });
+      }
     }
   }
 
@@ -78,15 +96,15 @@ export default function AccountModal({ onClose, onUpdate, account = null, isEdit
 
         <form onSubmit={handleSubmit} className="modal-body">
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-            {isEditing ? t("account.edit_description") : t("account.new_description")}
+            {isEditing
+              ? t("account.edit_description")
+              : t("account.new_description")}
           </p>
 
           <div className="space-y-4">
             {/* Account Name */}
             <div>
-              <label className="modal-label">
-                {t("account.field.name")}
-              </label>
+              <label className="modal-label">{t("account.field.name")}</label>
               <input
                 type="text"
                 value={name}
@@ -147,13 +165,12 @@ export default function AccountModal({ onClose, onUpdate, account = null, isEdit
             >
               {t("account.cancel")}
             </button>
-            <button
-              type="submit"
-              className="modal-action-button"
-            >
+            <button type="submit" className="modal-action-button">
               <Check className="w-4 h-4 text-white" />
               <span className="text-white">
-                {isEditing ? t("account.save_changes") : t("account.create_account")}
+                {isEditing
+                  ? t("account.save_changes")
+                  : t("account.create_account")}
               </span>
             </button>
           </div>

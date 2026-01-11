@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -161,7 +161,7 @@ export default function Dashboard({
   }, [transactions, accounts, propAccounts]);
 
   // Helper to get price
-  const getPrice = (ticker, date) => {
+  const getPrice = useCallback((ticker, date) => {
     if (!dailyPrices[ticker]) return 0;
     const { list, map } = dailyPrices[ticker];
     if (map[date]) return map[date];
@@ -172,7 +172,7 @@ export default function Dashboard({
       lastPrice = p.price;
     }
     return lastPrice;
-  };
+  }, [dailyPrices]);
 
   const chartData = useMemo(() => {
     // Require accounts and at least one transaction to render the net worth evolution chart
@@ -427,7 +427,8 @@ export default function Dashboard({
     customEndDate,
     marketValues,
     formatDate,
-    dailyPrices,
+    appCurrency,
+    getPrice,
   ]);
 
   // Track user toggles for account visibility; derive the actual visibility from accounts + toggles
@@ -617,7 +618,7 @@ export default function Dashboard({
     customEndDate,
     isDark,
     accountMap,
-    dailyPrices,
+    getPrice,
     appCurrency,
   ]);
 
@@ -736,7 +737,7 @@ export default function Dashboard({
     customEndDate,
     formatDate,
     accountMap,
-    dailyPrices,
+    getPrice,
     appCurrency,
   ]);
 
@@ -1245,7 +1246,10 @@ export default function Dashboard({
                           marketValues && marketValues[acc.id] !== undefined
                             ? (acc.balance || 0) + marketValues[acc.id]
                             : acc.balance || 0,
-                          { style: "currency", currency: acc.currency || appCurrency },
+                          {
+                            style: "currency",
+                            currency: acc.currency || appCurrency,
+                          },
                         )}
                       </span>
                     </label>
