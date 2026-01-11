@@ -3,8 +3,8 @@ use super::common::setup_db;
 #[test]
 fn test_update_investment_transaction_move_between_accounts() {
     let (_dir, db_path) = setup_db();
-    let acc_a = crate::create_account_db(&db_path, "AccountA".to_string(), 1000.0).unwrap();
-    let acc_b = crate::create_account_db(&db_path, "AccountB".to_string(), 1000.0).unwrap();
+    let acc_a = crate::create_account_db(&db_path, "AccountA".to_string(), 1000.0, None).unwrap();
+    let acc_b = crate::create_account_db(&db_path, "AccountB".to_string(), 1000.0, None).unwrap();
 
     // Create initial buy in A
     // Cost: 2*100 + 1 => 201.

@@ -13,6 +13,7 @@ pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             balance REAL NOT NULL,
+            currency TEXT,
             kind TEXT DEFAULT 'cash'
         )",
         [],

@@ -4,7 +4,7 @@ use rusqlite::{params, Connection};
 #[test]
 fn test_update_transaction() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "Test".to_string(), 100.0).unwrap();
+    let account = crate::create_account_db(&db_path, "Test".to_string(), 100.0, None).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
         crate::CreateTransactionArgs {
@@ -62,8 +62,8 @@ fn test_update_transaction_missing_id_should_error() {
 #[test]
 fn test_update_transaction_finds_counterpart_by_notes() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0).unwrap();
+    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, None).unwrap();
+    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, None).unwrap();
 
     // Insert two transactions manually without linked_tx_id but with matching notes
     let conn = Connection::open(&db_path).unwrap();
@@ -123,8 +123,8 @@ fn test_update_transaction_finds_counterpart_by_notes() {
 #[test]
 fn test_update_transaction_updates_counterpart_when_linked() {
     let (_dir, db_path) = setup_db();
-    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0).unwrap();
-    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0).unwrap();
+    let acc1 = crate::create_account_db(&db_path, "Acc1".to_string(), 100.0, None).unwrap();
+    let acc2 = crate::create_account_db(&db_path, "Acc2".to_string(), 0.0, None).unwrap();
 
     // Create transfer via API which should link txs
     let tx = crate::create_transaction_db(
@@ -179,7 +179,7 @@ fn test_update_transaction_updates_counterpart_when_linked() {
 #[test]
 fn test_update_transaction_no_amount_change_doesnt_alter_balances() {
     let (_dir, db_path) = setup_db();
-    let account = crate::create_account_db(&db_path, "T".to_string(), 100.0).unwrap();
+    let account = crate::create_account_db(&db_path, "T".to_string(), 100.0, None).unwrap();
     let tx = crate::create_transaction_db(
         &db_path,
         crate::CreateTransactionArgs {

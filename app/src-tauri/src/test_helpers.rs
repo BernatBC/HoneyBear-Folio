@@ -145,6 +145,34 @@ pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
         }
     }
 
+    // Ensure we have a column for currency in accounts
+    {
+        let mut stmt = conn
+            .prepare("PRAGMA table_info(accounts)")
+            .map_err(|e| e.to_string())?;
+        let mut has_currency = false;
+        let col_iter = stmt
+            .query_map([], |row| row.get::<_, String>(1))
+            .map_err(|e| e.to_string())?;
+        for name in col_iter.flatten() {
+            if name == "currency" {
+                has_currency = true;
+                break;
+            }
+        }
+        if !has_currency {
+            match conn.execute("ALTER TABLE accounts ADD COLUMN currency TEXT", []) {
+                Ok(_) => {}
+                Err(e) => {
+                    let s = e.to_string();
+                    if !s.contains("duplicate column name") && !s.contains("already exists") {
+                        return Err(s);
+                    }
+                }
+            }
+        }
+    }
+
     conn.execute(
         "CREATE TABLE IF NOT EXISTS stock_prices (
             ticker TEXT PRIMARY KEY,
@@ -177,7 +205,7 @@ pub(crate) fn create_account_in_dir(
 ) -> Result<super::Account, String> {
     let db_path = get_db_path_for_dir(dir)?;
     init_db_at_path(&db_path)?;
-    super::create_account_db(&db_path, name, balance)
+    super::create_account_db(&db_path, name, balance, None)
 }
 
 pub(crate) fn create_transaction_in_dir(

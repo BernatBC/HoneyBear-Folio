@@ -14,7 +14,7 @@ proptest! {
         let mut accounts = Vec::new();
         for i in 0..3 {
             let bal = rng.random_range(0..500) as f64;
-            let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal).unwrap();
+            let acc = crate::create_account_db(&db_path, format!("Acc{}", i), bal, None).unwrap();
             accounts.push(acc);
         }
 
