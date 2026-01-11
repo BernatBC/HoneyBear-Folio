@@ -30,6 +30,35 @@ fn test_create_transaction() {
 }
 
 #[test]
+fn test_create_transaction_with_currency_sets_transaction_currency() {
+    let (_dir, db_path) = setup_db();
+    let account = crate::create_account_db(&db_path, "CurTxAcct".to_string(), 100.0, Some("GBP".to_string())).unwrap();
+
+    let tx = crate::create_transaction_db(
+        &db_path,
+        crate::CreateTransactionArgs {
+            account_id: account.id,
+            date: "2023-01-10".to_string(),
+            payee: "Payee".to_string(),
+            notes: Some("Notes".to_string()),
+            category: Some("Category".to_string()),
+            amount: -20.0,
+            ticker: None,
+            shares: None,
+            price_per_share: None,
+            fee: None,
+            currency: Some("GBP".to_string()),
+        },
+    )
+    .unwrap();
+
+    assert_eq!(tx.currency.as_deref(), Some("GBP"));
+
+    let txs = crate::get_transactions_db(&db_path, account.id).unwrap();
+    assert!(txs.iter().any(|t| t.currency.as_deref() == Some("GBP")));
+}
+
+#[test]
 fn test_get_all_transactions() {
     let (_dir, db_path) = setup_db();
     let acc1 = crate::create_account_db(&db_path, "A1".to_string(), 100.0, None).unwrap();

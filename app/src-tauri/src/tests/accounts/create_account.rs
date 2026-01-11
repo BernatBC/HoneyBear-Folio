@@ -79,3 +79,25 @@ fn test_create_duplicate_account_case_insensitive_should_error() {
     let res = crate::create_account_db(&db_path, "foobar".to_string(), 0.0, None);
     assert!(res.is_err());
 }
+
+#[test]
+fn test_create_account_with_currency_sets_account_and_tx_currency() {
+    let (_dir, db_path) = setup_db();
+    let acc = crate::create_account_db(&db_path, "CurAcct".to_string(), 100.0, Some("USD".to_string())).unwrap();
+    assert_eq!(acc.currency.as_deref(), Some("USD"));
+
+    let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
+    assert_eq!(txs.len(), 1);
+    assert_eq!(txs[0].currency.as_deref(), Some("USD"));
+}
+
+#[test]
+fn test_create_account_without_currency_transaction_currency_none() {
+    let (_dir, db_path) = setup_db();
+    let acc = crate::create_account_db(&db_path, "NoCurAcct".to_string(), 50.0, None).unwrap();
+    assert_eq!(acc.currency, None);
+
+    let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
+    assert_eq!(txs.len(), 1);
+    assert_eq!(txs[0].currency, None);
+}
