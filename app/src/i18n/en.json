@@ -175,5 +175,8 @@
   "confirm.transaction_title": "Transaction",
   "confirm.invalid_input_title": "Invalid Input",
   "confirm.edit_automated_notes_title": "Edit Automated Note",
-  "confirm.edit_automated_notes": "This note was automatically generated for a brokerage transaction. Do you want to continue?"
+  "confirm.edit_automated_notes": "This note was automatically generated for a brokerage transaction. Do you want to continue?",
+  "confirm.save": "Save",
+  "custom_rate.title": "Custom Exchange Rate",
+  "custom_rate.message": "Yahoo Finance does not support {currency}. Please enter the exchange rate in USD (Price of 1 {currency} in USD)."
 }

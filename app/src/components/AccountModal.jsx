@@ -7,6 +7,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { t } from "../i18n/i18n"; // Assuming translation hook/function exists
 import { CURRENCIES } from "../utils/currencies";
 import CustomSelect from "./CustomSelect";
+import { useCustomRate } from "../hooks/useCustomRate";
 import { useToast } from "../contexts/toast";
 import { useParseNumber } from "../utils/format";
 
@@ -22,6 +23,7 @@ export default function AccountModal({
 
   const { showToast } = useToast();
   const parseNumber = useParseNumber();
+  const { checkAndPrompt, dialog } = useCustomRate();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -151,7 +153,10 @@ export default function AccountModal({
                     label: `${c.code} (${c.symbol}) - ${c.name}`,
                   })),
                 ]}
-                onChange={setCurrency}
+                onChange={async (val) => {
+                  setCurrency(val);
+                  if (val) await checkAndPrompt(val); 
+                }}
                 icon={Globe}
               />
             </div>
@@ -176,6 +181,7 @@ export default function AccountModal({
           </div>
         </form>
       </div>
+      {dialog}
     </div>,
     document.body,
   );

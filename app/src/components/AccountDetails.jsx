@@ -32,10 +32,12 @@ import NumberInput from "./NumberInput";
 import CustomSelect from "./CustomSelect";
 import { t } from "../i18n/i18n";
 import { CURRENCIES } from "../utils/currencies";
+import { useCustomRate } from "../hooks/useCustomRate";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);
   const confirm = useConfirm();
+  const { checkAndPrompt, dialog } = useCustomRate();
 
   const formatNumber = useFormatNumber();
   const parseNumber = useParseNumber();
@@ -941,7 +943,10 @@ export default function AccountDetails({ account, onUpdate }) {
                           label: `${c.code} - ${c.name}`,
                         }))}
                         value={selectedCurrency}
-                        onChange={(val) => setSelectedCurrency(val)}
+                        onChange={async (val) => {
+                          setSelectedCurrency(val);
+                          if(val) await checkAndPrompt(val);
+                        }}
                         placeholder="Select currency"
                       />
                     </div>
@@ -1078,7 +1083,10 @@ export default function AccountDetails({ account, onUpdate }) {
                           label: `${c.code} - ${c.name}`,
                         }))}
                         value={selectedCurrency}
-                        onChange={(val) => setSelectedCurrency(val)}
+                        onChange={async (val) => {
+                          setSelectedCurrency(val);
+                          if(val) await checkAndPrompt(val); 
+                        }}
                         placeholder="Select currency"
                       />
                     </div>
@@ -1775,6 +1783,7 @@ export default function AccountDetails({ account, onUpdate }) {
           </table>
         </div>
       </div>
+      {dialog}
     </div>
   );
 }

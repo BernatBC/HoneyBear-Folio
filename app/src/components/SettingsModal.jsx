@@ -21,6 +21,8 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { t } from "../i18n/i18n";
 import { formatDateForUI } from "../utils/format";
 
+import { useCustomRate } from "../hooks/useCustomRate";
+
 export default function SettingsModal({ onClose }) {
   const {
     locale,
@@ -34,6 +36,7 @@ export default function SettingsModal({ onClose }) {
   } = useNumberFormat();
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
+  const { checkAndPrompt, dialog } = useCustomRate();
   const [fontSize, setFontSize] = useState(() => {
     try {
       const v = localStorage.getItem("hb_font_size");
@@ -371,7 +374,10 @@ export default function SettingsModal({ onClose }) {
                   <div className="relative settings-select">
                     <CustomSelect
                       value={currency}
-                      onChange={(v) => setCurrency(v)}
+                      onChange={async (v) => {
+                          setCurrency(v);
+                          if(v) await checkAndPrompt(v);
+                      }}
                       options={CURRENCIES.map((c) => ({
                         value: c.code,
                         label: `${c.code} - ${c.name} (${c.symbol})`,
@@ -519,7 +525,7 @@ export default function SettingsModal({ onClose }) {
   );
 
   if (typeof document === "undefined") return null;
-  return createPortal(modal, document.body);
+  return createPortal(<>{modal}{dialog}</>, document.body);
 }
 
 SettingsModal.propTypes = {
