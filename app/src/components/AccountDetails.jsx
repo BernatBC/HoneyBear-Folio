@@ -945,7 +945,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         value={selectedCurrency}
                         onChange={async (val) => {
                           setSelectedCurrency(val);
-                          if(val) await checkAndPrompt(val);
+                          if (val) await checkAndPrompt(val);
                         }}
                         placeholder="Select currency"
                       />
@@ -1085,7 +1085,7 @@ export default function AccountDetails({ account, onUpdate }) {
                         value={selectedCurrency}
                         onChange={async (val) => {
                           setSelectedCurrency(val);
-                          if(val) await checkAndPrompt(val); 
+                          if (val) await checkAndPrompt(val);
                         }}
                         placeholder="Select currency"
                       />

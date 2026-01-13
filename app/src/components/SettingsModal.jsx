@@ -375,8 +375,8 @@ export default function SettingsModal({ onClose }) {
                     <CustomSelect
                       value={currency}
                       onChange={async (v) => {
-                          setCurrency(v);
-                          if(v) await checkAndPrompt(v);
+                        setCurrency(v);
+                        if (v) await checkAndPrompt(v);
                       }}
                       options={CURRENCIES.map((c) => ({
                         value: c.code,
@@ -525,7 +525,13 @@ export default function SettingsModal({ onClose }) {
   );
 
   if (typeof document === "undefined") return null;
-  return createPortal(<>{modal}{dialog}</>, document.body);
+  return createPortal(
+    <>
+      {modal}
+      {dialog}
+    </>,
+    document.body,
+  );
 }
 
 SettingsModal.propTypes = {

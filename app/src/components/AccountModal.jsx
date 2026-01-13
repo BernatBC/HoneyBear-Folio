@@ -155,7 +155,7 @@ export default function AccountModal({
                 ]}
                 onChange={async (val) => {
                   setCurrency(val);
-                  if (val) await checkAndPrompt(val); 
+                  if (val) await checkAndPrompt(val);
                 }}
                 icon={Globe}
               />

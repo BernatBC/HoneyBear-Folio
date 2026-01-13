@@ -15,8 +15,11 @@ export default function CustomRateDialog({
 
   useEffect(() => {
     if (isOpen) {
+      const id = setTimeout(() => {
         setRate("");
-        setTimeout(() => inputRef.current?.focus(), 100);
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(id);
     }
   }, [isOpen]);
 
@@ -49,17 +52,24 @@ export default function CustomRateDialog({
             autoFocus
           />
           <div className="modal-footer mt-2">
-              <button type="button" onClick={onCancel} className="modal-cancel-button">
-                {t("confirm.cancel")}
-              </button>
-              <button type="submit" className="modal-action-button bg-blue-600 hover:bg-blue-700 text-white">
-                {t("confirm.save")}
-              </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="modal-cancel-button"
+            >
+              {t("confirm.cancel")}
+            </button>
+            <button
+              type="submit"
+              className="modal-action-button bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {t("confirm.save")}
+            </button>
           </div>
         </form>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
