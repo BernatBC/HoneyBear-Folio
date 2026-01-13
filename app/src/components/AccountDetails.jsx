@@ -1003,7 +1003,7 @@ export default function AccountDetails({ account, onUpdate }) {
                   Category
                 </label>
                 <div className="relative">
-                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
                   <AutocompleteInput
                     suggestions={categorySuggestions}
                     placeholder="Category"
