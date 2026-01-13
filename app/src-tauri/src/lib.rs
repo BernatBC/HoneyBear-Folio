@@ -72,13 +72,13 @@ struct YahooSearchResponse {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Account {
-    id: i32,
-    name: String,
-    balance: f64,
-    currency: Option<String>,
+pub struct Account {
+    pub id: i32,
+    pub name: String,
+    pub balance: f64,
+    pub currency: Option<String>,
     #[serde(default = "default_exchange_rate")]
-    exchange_rate: f64,
+    pub exchange_rate: f64,
 }
 
 fn default_exchange_rate() -> f64 {
@@ -671,6 +671,67 @@ fn get_custom_rates_map(db_path: &PathBuf) -> Result<HashMap<String, f64>, Strin
     Ok(map)
 }
 
+pub fn calculate_account_balances(
+    mut accounts: Vec<Account>,
+    raw_data: Vec<(i32, String, f64)>,
+    target: &str,
+    rates: &HashMap<String, f64>,
+    custom_rates: &HashMap<String, f64>
+) -> Vec<Account> {
+    let mut account_currency_map: HashMap<i32, String> = HashMap::new();
+    for acc in &accounts {
+        if let Some(c) = &acc.currency {
+            account_currency_map.insert(acc.id, c.clone());
+        }
+    }
+
+    // Helper to compute rate
+    let compute_rate = |src: &String, dst: &String, rates: &HashMap<String, f64>, custom_rates: &HashMap<String, f64>| -> f64 {
+        if src == dst { return 1.0; }
+        
+        // 1. Try direct pair first (e.g. EURGBP=X)
+        let direct_ticker = format!("{}{}=X", src, dst);
+        if let Some(r) = rates.get(&direct_ticker) {
+            if *r > 0.0 { return *r; }
+        }
+
+        // 2. Fallback to USD pivot
+        let get_rate_to_usd = |curr: &String| -> f64 {
+            if curr == "USD" { return 1.0; }
+            if let Some(r) = custom_rates.get(curr) { return *r; }
+            *rates.get(&format!("{}USD=X", curr)).unwrap_or(&1.0)
+        };
+        
+        let r_src = get_rate_to_usd(src);
+        let r_dst = get_rate_to_usd(dst);
+        
+        if r_dst == 0.0 { return 1.0; }
+        r_src / r_dst
+    };
+
+    let mut sums: HashMap<i32, f64> = HashMap::new();
+    for (acc_id, tx_curr, amt) in raw_data {
+        let acc_currency = account_currency_map.get(&acc_id).map(|s| s.as_str()).unwrap_or(target);
+        let rate = compute_rate(&tx_curr, &acc_currency.to_string(), rates, custom_rates);
+        let val = amt * rate;
+        sums.entry(acc_id).and_modify(|e| *e += val).or_insert(val);
+    }
+
+    for acc in &mut accounts {
+        if let Some(sum) = sums.get(&acc.id) {
+            acc.balance = *sum;
+        }
+
+        // Set exchange rate to target app currency
+        if let Some(acc_curr) = &acc.currency {
+             acc.exchange_rate = compute_rate(acc_curr, &target.to_string(), rates, custom_rates);
+        } else {
+            acc.exchange_rate = 1.0;
+        }
+    }
+    accounts
+}
+
 #[tauri::command]
 async fn get_accounts(
     app_handle: AppHandle,
@@ -689,7 +750,7 @@ async fn get_accounts(
     .await
     .map_err(|e| e.to_string())??;
 
-    let mut accounts = summary.accounts;
+    let accounts = summary.accounts;
     let raw_data = summary.raw_data;
 
     // Load custom rates
@@ -780,51 +841,7 @@ async fn get_accounts(
         }
     }
 
-    // Helper to compute rate
-    let compute_rate = |src: &String, dst: &String, rates: &HashMap<String, f64>, custom_rates: &HashMap<String, f64>| -> f64 {
-        if src == dst { return 1.0; }
-        
-        // 1. Try direct pair first (e.g. EURGBP=X)
-        let direct_ticker = format!("{}{}=X", src, dst);
-        if let Some(r) = rates.get(&direct_ticker) {
-            if *r > 0.0 { return *r; }
-        }
-
-        // 2. Fallback to USD pivot
-        let get_rate_to_usd = |curr: &String| -> f64 {
-            if curr == "USD" { return 1.0; }
-            if let Some(r) = custom_rates.get(curr) { return *r; }
-            *rates.get(&format!("{}USD=X", curr)).unwrap_or(&1.0)
-        };
-        
-        let r_src = get_rate_to_usd(src);
-        let r_dst = get_rate_to_usd(dst);
-        
-        if r_dst == 0.0 { return 1.0; }
-        r_src / r_dst
-    };
-
-    let mut sums: HashMap<i32, f64> = HashMap::new();
-    for (acc_id, tx_curr, amt) in raw_data {
-        let acc_currency = account_currency_map.get(&acc_id).unwrap_or(&target);
-        let rate = compute_rate(&tx_curr, acc_currency, &rates, &custom_rates);
-        let val = amt * rate;
-        sums.entry(acc_id).and_modify(|e| *e += val).or_insert(val);
-    }
-
-    for acc in &mut accounts {
-        if let Some(sum) = sums.get(&acc.id) {
-            acc.balance = *sum;
-        }
-
-        // Set exchange rate to target app currency
-        if let Some(acc_curr) = &acc.currency {
-             acc.exchange_rate = compute_rate(acc_curr, &target, &rates, &custom_rates);
-        } else {
-            acc.exchange_rate = 1.0;
-        }
-    }
-
+    let accounts = calculate_account_balances(accounts, raw_data, &target, &rates, &custom_rates);
     Ok(accounts)
 }
 

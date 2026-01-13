@@ -9,3 +9,5 @@ pub mod payees;
 pub mod property;
 pub mod stock;
 pub mod transactions;
+pub mod multicurrency;
+

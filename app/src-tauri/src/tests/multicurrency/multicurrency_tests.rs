@@ -1,5 +1,6 @@
-use super::common::setup_db;
+use super::super::common::setup_db;
 use tempfile::tempdir;
+
 
 #[test]
 fn test_transactions_store_currency() {
