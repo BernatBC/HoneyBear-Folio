@@ -1,7 +1,6 @@
 use super::super::common::setup_db;
 use tempfile::tempdir;
 
-
 #[test]
 fn test_transactions_store_currency() {
     let (_dir, db_path) = setup_db();
@@ -26,7 +25,9 @@ fn test_transactions_store_currency() {
     .unwrap();
 
     let txs = crate::get_transactions_db(&db_path, acc.id).unwrap();
-    assert!(txs.iter().any(|t| t.id == tx.id && t.currency.as_deref() == Some("EUR")));
+    assert!(txs
+        .iter()
+        .any(|t| t.id == tx.id && t.currency.as_deref() == Some("EUR")));
 }
 
 #[test]
@@ -102,5 +103,7 @@ fn test_json_export_import_preserves_currency() {
 
     // Verify imported transactions preserved currency
     let imported = crate::get_transactions_db(&dst_db, dst_acc.id).unwrap();
-    assert!(imported.iter().any(|t| t.currency.as_deref() == Some("JPY")));
+    assert!(imported
+        .iter()
+        .any(|t| t.currency.as_deref() == Some("JPY")));
 }
