@@ -40,7 +40,7 @@
 
   .sidebar-nav {
     @apply flex-1 overflow-y-auto px-4 space-y-8 py-2;
-    
+
     /* Force dark scrollbar for sidebar always */
     scrollbar-color: rgb(71, 85, 105) rgb(30, 41, 59);
   }
