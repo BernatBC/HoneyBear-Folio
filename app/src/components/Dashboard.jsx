@@ -1333,7 +1333,10 @@ export default function Dashboard({
             </div>
 
             {/* Cash Flow Sankey */}
-            <div className="chart-card chart-card-full" style={{ height: "500px" }}>
+            <div
+              className="chart-card chart-card-full"
+              style={{ height: "500px" }}
+            >
               <div className="chart-header">
                 <h3 className="chart-title">{t("dashboard.cash_flow")}</h3>
                 <p className="chart-subtitle">Income and expense flow</p>

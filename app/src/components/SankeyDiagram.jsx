@@ -9,7 +9,6 @@ import {
 import { SankeyController, Flow } from "chartjs-chart-sankey";
 import { Chart } from "react-chartjs-2";
 import PropTypes from "prop-types";
-import { useNumberFormat } from "../contexts/number-format";
 import { useFormatNumber } from "../utils/format";
 import { t } from "../i18n/i18n";
 import useIsDark from "../hooks/useIsDark";
@@ -77,8 +76,13 @@ export default function SankeyDiagram({
 
     // Helper to detect investment-like categories
     const isInvestment = (cat) => {
-        const lower = cat.toLowerCase();
-        return lower.includes("invest") || lower.includes("savings") || lower.includes("brokerage") || lower.includes("deposit");
+      const lower = cat.toLowerCase();
+      return (
+        lower.includes("invest") ||
+        lower.includes("savings") ||
+        lower.includes("brokerage") ||
+        lower.includes("deposit")
+      );
     };
 
     relevantTransactions.forEach((t) => {
@@ -90,21 +94,22 @@ export default function SankeyDiagram({
           : getPrice(`${accCurrency}${appCurrency}=X`, t.date) || 1.0;
       const amount = t.amount * rateToApp;
 
-        if (amount > 0) {
-            const cat = t.category || t("general.uncategorized");
-            incomeCategories[cat] = (incomeCategories[cat] || 0) + amount;
-            totalIncome += amount;
-        } else if (amount < 0) {
-            const cat = t.category || t("general.uncategorized");
-            const absAmount = Math.abs(amount);
-            
-            if (isInvestment(cat)) {
-                investmentCategories[cat] = (investmentCategories[cat] || 0) + absAmount;
-            } else {
-                expenseCategories[cat] = (expenseCategories[cat] || 0) + absAmount;
-            }
-            totalExpense += absAmount;
+      if (amount > 0) {
+        const cat = t.category || t("general.uncategorized");
+        incomeCategories[cat] = (incomeCategories[cat] || 0) + amount;
+        totalIncome += amount;
+      } else if (amount < 0) {
+        const cat = t.category || t("general.uncategorized");
+        const absAmount = Math.abs(amount);
+
+        if (isInvestment(cat)) {
+          investmentCategories[cat] =
+            (investmentCategories[cat] || 0) + absAmount;
+        } else {
+          expenseCategories[cat] = (expenseCategories[cat] || 0) + absAmount;
         }
+        totalExpense += absAmount;
+      }
     });
 
     if (totalIncome === 0 && totalExpense === 0) return { empty: true };
@@ -129,10 +134,10 @@ export default function SankeyDiagram({
 
     // Set priorities for system nodes to enforce vertical order
     priorityMap[ID_INVESTMENTS_GROUP] = 1000; // Top
-    priorityMap[ID_SURPLUS] = 900;            // Just below Inv Group
-    priorityMap[ID_BUDGET] = 500;             // Middle
-    priorityMap[ID_DEFICIT] = 500;            // Middle
-    priorityMap[ID_EXPENSES_GROUP] = 1200;       // Bottom relative to others
+    priorityMap[ID_SURPLUS] = 900; // Just below Inv Group
+    priorityMap[ID_BUDGET] = 500; // Middle
+    priorityMap[ID_DEFICIT] = 500; // Middle
+    priorityMap[ID_EXPENSES_GROUP] = 1200; // Bottom relative to others
 
     // 1. Income -> Budget
     Object.entries(incomeCategories)
@@ -146,66 +151,66 @@ export default function SankeyDiagram({
 
     // 2. Budget -> Intermediate Nodes
     let expensesTotal = 0;
-    Object.values(expenseCategories).forEach(v => expensesTotal += v);
-    
+    Object.values(expenseCategories).forEach((v) => (expensesTotal += v));
+
     let investmentsTotal = 0;
-    Object.values(investmentCategories).forEach(v => investmentsTotal += v);
-    
+    Object.values(investmentCategories).forEach((v) => (investmentsTotal += v));
+
     let surplus = 0;
     let deficit = 0;
-    
+
     if (totalIncome > totalExpense) {
       surplus = totalIncome - totalExpense;
     } else {
       deficit = totalExpense - totalIncome;
     }
-    
+
     const totalInvestmentsAndSavings = investmentsTotal + surplus;
-    
+
     if (totalInvestmentsAndSavings > 0) {
-        flows.push({
-            from: ID_BUDGET,
-            to: ID_INVESTMENTS_GROUP,
-            flow: totalInvestmentsAndSavings
-        });
+      flows.push({
+        from: ID_BUDGET,
+        to: ID_INVESTMENTS_GROUP,
+        flow: totalInvestmentsAndSavings,
+      });
     }
 
     if (expensesTotal > 0) {
-        flows.push({
-            from: ID_BUDGET,
-            to: ID_EXPENSES_GROUP,
-            flow: expensesTotal
-        });
+      flows.push({
+        from: ID_BUDGET,
+        to: ID_EXPENSES_GROUP,
+        flow: expensesTotal,
+      });
     }
 
     // Handle Deficit
     if (deficit > 0) {
-        flows.push({
-            from: ID_DEFICIT,
-            to: ID_BUDGET,
-            flow: deficit
-        });
+      flows.push({
+        from: ID_DEFICIT,
+        to: ID_BUDGET,
+        flow: deficit,
+      });
     }
 
     // 3. Intermediate -> Final Categories
-    
+
     // Explicitly add "Savings" (Surplus) flow if there is any surplus
     if (surplus > 0) {
-         flows.push({
-            from: ID_INVESTMENTS_GROUP,
-            to: ID_SURPLUS, 
-            flow: surplus
-        });
+      flows.push({
+        from: ID_INVESTMENTS_GROUP,
+        to: ID_SURPLUS,
+        flow: surplus,
+      });
     }
 
     Object.entries(investmentCategories)
       .sort(([, a], [, b]) => b - a)
       .forEach(([cat, value]) => {
-         const id = `inv:${cat}`;
-         flows.push({ from: ID_INVESTMENTS_GROUP, to: id, flow: value });
-         labels[id] = cat;
-         priorityMap[id] = 800; // Right side, below Surplus
-    });
+        const id = `inv:${cat}`;
+        flows.push({ from: ID_INVESTMENTS_GROUP, to: id, flow: value });
+        labels[id] = cat;
+        priorityMap[id] = 800; // Right side, below Surplus
+      });
 
     Object.entries(expenseCategories)
       .sort(([, a], [, b]) => b - a)
@@ -214,29 +219,29 @@ export default function SankeyDiagram({
         flows.push({ from: ID_EXPENSES_GROUP, to: id, flow: value });
         labels[id] = cat;
         priorityMap[id] = 1000; // Right side, bottom
-    });
+      });
 
     // Node colors
     const getColor = (key) => {
-        if (key === ID_BUDGET) return isDark ? "#475569" : "#94a3b8";
-        if (key === ID_INVESTMENTS_GROUP) return isDark ? "#10b981" : "#10b981";
-        if (key === ID_EXPENSES_GROUP) return isDark ? "#ef4444" : "#ef4444";
-        if (key === ID_DEFICIT) return isDark ? "#ef4444" : "#ef4444";
-        if (key === ID_SURPLUS) return isDark ? "#10b981" : "#34d399";
-        
-        if (key.startsWith("inc:")) {
-             // We can check the original cat name if needed, but for now uniform color
-             // const cat = key.substring(4);
-             return isDark ? "#059669" : "#34d399";
-        }
-        if (key.startsWith("inv:")) {
-             return isDark ? "#10b981" : "#34d399"; 
-        }
-        if (key.startsWith("exp:")) {
-             return isDark ? "#e11d48" : "#fb7185";
-        }
-        
-        return isDark ? "#475569" : "#94a3b8";
+      if (key === ID_BUDGET) return isDark ? "#475569" : "#94a3b8";
+      if (key === ID_INVESTMENTS_GROUP) return isDark ? "#10b981" : "#10b981";
+      if (key === ID_EXPENSES_GROUP) return isDark ? "#ef4444" : "#ef4444";
+      if (key === ID_DEFICIT) return isDark ? "#ef4444" : "#ef4444";
+      if (key === ID_SURPLUS) return isDark ? "#10b981" : "#34d399";
+
+      if (key.startsWith("inc:")) {
+        // We can check the original cat name if needed, but for now uniform color
+        // const cat = key.substring(4);
+        return isDark ? "#059669" : "#34d399";
+      }
+      if (key.startsWith("inv:")) {
+        return isDark ? "#10b981" : "#34d399";
+      }
+      if (key.startsWith("exp:")) {
+        return isDark ? "#e11d48" : "#fb7185";
+      }
+
+      return isDark ? "#475569" : "#94a3b8";
     };
 
     return {
@@ -247,18 +252,18 @@ export default function SankeyDiagram({
           colorFrom: (c) => getColor(c.dataset.data[c.dataIndex].from),
           colorTo: (c) => getColor(c.dataset.data[c.dataIndex].to),
           colorMode: "gradient",
-          labels: labels, 
+          labels: labels,
           priority: priorityMap,
-          
+
           // Styling
-          size: "max", 
+          size: "max",
           borderWidth: 0,
           color: isDark ? "#e2e8f0" : "#1e293b", // Text color: slate-200 : slate-800
           font: {
             family: "Inter",
             size: 12,
-            weight: "500"
-          }
+            weight: "500",
+          },
         },
       ],
     };
@@ -270,19 +275,9 @@ export default function SankeyDiagram({
     accountMap,
     getPrice,
     appCurrency,
-    t,
     isDark, // Added isDark dependency
+    // NOTE: `t` (i18n) is intentionally excluded from deps because it's an external stable function
   ]);
-
-  // Helper just in case we need map of labels
-  function getLabels(flows) {
-      const labels = {};
-      flows.forEach(f => {
-          labels[f.from] = f.from;
-          labels[f.to] = f.to;
-      });
-      return labels;
-  }
 
   const options = {
     responsive: true,
@@ -308,29 +303,30 @@ export default function SankeyDiagram({
           size: 12,
         },
         callbacks: {
-          label: function(context) {
-             const item = context.raw;
-             return `${item.from} -> ${item.to}: ${formatNumber(item.flow, { style: 'currency' })}`;
-          }
-        }
-      }
+          label: function (context) {
+            const item = context.raw;
+            return `${item.from} -> ${item.to}: ${formatNumber(item.flow, { style: "currency" })}`;
+          },
+        },
+      },
     },
     layout: {
-        padding: 20
-    }
+      padding: 20,
+    },
   };
 
   if (!data || data.empty) {
-      return (
-        <div className="col-span-full flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-8">
-            <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                {t("dashboard.no_data_title") || "No Data"}
-            </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500">
-                {t("dashboard.no_data_body") || "Not enough data to generate the diagram."}
-            </p>
-        </div>
-      );
+    return (
+      <div className="col-span-full flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-8">
+        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">
+          {t("dashboard.no_data_title") || "No Data"}
+        </p>
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          {t("dashboard.no_data_body") ||
+            "Not enough data to generate the diagram."}
+        </p>
+      </div>
+    );
   }
 
   return <Chart type="sankey" data={data} options={options} />;
