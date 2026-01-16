@@ -44,6 +44,7 @@ ChartJS.register(
 
 // useIsDark moved to a shared hook at src/hooks/useIsDark.js
 import useIsDark from "../hooks/useIsDark";
+import SankeyDiagram from "./SankeyDiagram";
 
 export default function Dashboard({
   accounts: propAccounts = [],
@@ -1328,6 +1329,25 @@ export default function Dashboard({
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Cash Flow Sankey */}
+            <div className="chart-card chart-card-full" style={{ height: "500px" }}>
+              <div className="chart-header">
+                <h3 className="chart-title">{t("dashboard.cash_flow")}</h3>
+                <p className="chart-subtitle">Income and expense flow</p>
+              </div>
+              <div className="chart-body">
+                <SankeyDiagram
+                  transactions={transactions}
+                  timeRange={timeRange}
+                  customStartDate={customStartDate}
+                  customEndDate={customEndDate}
+                  accountMap={accountMap}
+                  getPrice={getPrice}
+                  appCurrency={appCurrency}
+                />
               </div>
             </div>
 

@@ -143,6 +143,7 @@
   "dashboard.total_transactions": "Total Transactions",
   "dashboard.networth_evolution": "Net Worth Evolution",
   "dashboard.income_vs_expenses": "Income vs Expenses",
+  "dashboard.cash_flow": "Cash Flow",
   "dashboard.asset_allocation": "Asset Allocation",
   "dashboard.expenses_by_category": "Expenses by Category",
   "dashboard.accounts_breakdown": "Accounts",
