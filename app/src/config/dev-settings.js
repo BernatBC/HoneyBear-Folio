@@ -1,4 +1,4 @@
-import { IS_RELEASE } from '../utils/version';
+import { IS_RELEASE } from "../utils/version";
 
 /**
  * Development settings configuration.
@@ -6,9 +6,9 @@ import { IS_RELEASE } from '../utils/version';
  */
 const DEV_SETTINGS = {
   // UI Flow Overrides
-  FORCE_WELCOME_SCREEN: false,        // If true, always show welcome screen (ignores localStorage)
-  FORCE_HIDE_UPDATE_POPUP: true,     // If true, never check for updates
-  FORCE_SHOW_UPDATE_POPUP: false,     // If true, mocks an available update (useful for UI testing)
+  FORCE_WELCOME_SCREEN: false, // If true, always show welcome screen (ignores localStorage)
+  FORCE_HIDE_UPDATE_POPUP: true, // If true, never check for updates
+  FORCE_SHOW_UPDATE_POPUP: false, // If true, mocks an available update (useful for UI testing)
 
   // Toast Testing (triggers on app mount)
   FORCE_SUCCESS_TOAST: false,
