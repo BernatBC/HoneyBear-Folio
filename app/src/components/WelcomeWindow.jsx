@@ -7,9 +7,13 @@ import { t } from "../i18n/i18n";
 import { formatDateForUI } from "../utils/format";
 import { Check } from "lucide-react";
 import "../styles/Modal.css";
+import { getDevSetting } from "../config/dev-settings";
 
 export default function WelcomeWindow() {
   const [isVisible, setIsVisible] = useState(() => {
+    const forced = getDevSetting("FORCE_WELCOME_SCREEN");
+    if (forced === true) return true;
+
     try {
       return !localStorage.getItem("hb_first_run_completed");
     } catch {

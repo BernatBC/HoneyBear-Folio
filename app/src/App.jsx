@@ -17,6 +17,7 @@ import { PrivacyProvider } from "./contexts/PrivacyContext";
 import ChartNumberFormatSync from "./components/ChartNumberFormatSync";
 import UpdateNotification from "./components/UpdateNotification";
 import WelcomeWindow from "./components/WelcomeWindow";
+import DevTools from "./components/DevTools";
 
 function App() {
   const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
@@ -336,6 +337,7 @@ function App() {
                 )}
               </ErrorBoundary>
               <WelcomeWindow />
+              <DevTools />
             </ConfirmDialogProvider>
           </ToastProvider>{" "}
         </PrivacyProvider>

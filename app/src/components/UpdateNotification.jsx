@@ -6,9 +6,7 @@ import { X, Download, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import "../styles/Modal.css";
 import { t } from "../i18n/i18n";
-
-// Set this to true to test the popup without a real update server
-const TEST_MODE = false;
+import { getDevSetting } from "../config/dev-settings";
 
 export default function UpdateNotification() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -20,16 +18,23 @@ export default function UpdateNotification() {
 
   useEffect(() => {
     const checkForUpdates = async () => {
+      // Dev settings overrides
+      if (getDevSetting("FORCE_HIDE_UPDATE_POPUP")) {
+        return;
+      }
+
+      const forceShow = getDevSetting("FORCE_SHOW_UPDATE_POPUP");
+
       try {
         let update;
 
-        if (TEST_MODE) {
+        if (forceShow) {
           // Mock update data for testing UI
           await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
           update = {
             available: true,
-            version: "2.0.0-test",
-            body: "## Test Update Available\n\nThis is a simulated update to test the notification UI.\n\n- **Feature**: Added update notifications\n- **Fix**: Improved performance",
+            version: "2.0.0-dev-test",
+            body: "## Dev Test Update\n\nThis is a forced update notification from dev-settings.\n\n- **Feature**: Testing update notifications",
             downloadAndInstall: async (cb) => {
               // Simulate download process
               cb({ event: "Started", data: { contentLength: 100 } });
