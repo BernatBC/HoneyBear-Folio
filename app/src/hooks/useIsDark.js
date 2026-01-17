@@ -9,12 +9,12 @@ export default function useIsDark() {
   });
 
   useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class") {
-          setIsDark(document.documentElement.classList.contains("dark"));
-        }
-      });
+    // 1. Check immediately to handle any changes between render and this effect
+    setIsDark(document.documentElement.classList.contains("dark"));
+
+    // 2. Observe changes
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
     });
 
     observer.observe(document.documentElement, {

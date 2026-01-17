@@ -329,7 +329,14 @@ export default function SankeyDiagram({
     );
   }
 
-  return <Chart type="sankey" data={data} options={options} />;
+  return (
+    <Chart
+      key={isDark ? "dark" : "light"}
+      type="sankey"
+      data={data}
+      options={options}
+    />
+  );
 }
 
 SankeyDiagram.propTypes = {
