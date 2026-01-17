@@ -255,8 +255,9 @@ function App() {
                 <UpdateNotification />
                 <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
                   <div
-                    className={`transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 ${isSidebarOpen ? "w-80" : "w-0"
-                      }`}
+                    className={`transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 ${
+                      isSidebarOpen ? "w-80" : "w-0"
+                    }`}
                   >
                     <div className="w-80 h-full">
                       <Sidebar
@@ -272,10 +273,11 @@ function App() {
 
                   <main className="flex-1 min-w-0 px-4 py-4 md:py-8 overflow-y-auto bg-slate-50 dark:bg-slate-900 relative">
                     <div
-                      className={`absolute top-4 left-4 z-20 transition-all duration-300 ${!isSidebarOpen
-                        ? "opacity-100 translate-x-0"
-                        : "opacity-0 -translate-x-4 pointer-events-none"
-                        }`}
+                      className={`absolute top-4 left-4 z-20 transition-all duration-300 ${
+                        !isSidebarOpen
+                          ? "opacity-100 translate-x-0"
+                          : "opacity-0 -translate-x-4 pointer-events-none"
+                      }`}
                     >
                       <button
                         onClick={() => setIsSidebarOpen(true)}
@@ -329,7 +331,7 @@ function App() {
                       {typeof globalError === "string"
                         ? globalError
                         : (globalError && globalError.stack) ||
-                        String(globalError)}
+                          String(globalError)}
                     </pre>
                     <div className="mt-3 flex gap-2">
                       <button
