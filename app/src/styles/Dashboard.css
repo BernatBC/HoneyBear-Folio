@@ -386,7 +386,7 @@
   }
 
   .dashboard-container,
-  .investment-dashboard-container, 
+  .investment-dashboard-container,
   .rules-container {
     padding-bottom: calc(2rem * var(--hb-font-size)) !important;
   }
