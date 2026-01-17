@@ -1898,6 +1898,7 @@ AccountDetails.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     name: PropTypes.string,
     balance: PropTypes.number,
+    totalValue: PropTypes.number,
     currency: PropTypes.string,
     kind: PropTypes.string,
   }).isRequired,
