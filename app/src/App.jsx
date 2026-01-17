@@ -49,7 +49,7 @@ function App() {
         }
       }
     },
-    [isResizing]
+    [isResizing],
   );
 
   useEffect(() => {
