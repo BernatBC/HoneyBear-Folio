@@ -72,7 +72,7 @@ export default function RulesList() {
   }
 
   async function handleDelete(id) {
-    if (await confirm(t("rules.delete_confirm"), { kind: "error" })) {
+    if (await confirm(t("rules.delete_confirm"), { kind: "warning" })) {
       try {
         await invoke("delete_rule", { id });
         // Optimistic update
