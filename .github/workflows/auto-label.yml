@@ -47,6 +47,51 @@ jobs:
               if (r.regex.test(title) || r.regex.test(body)) found.add(r.name);
             }
 
+            // Also check for linked issues and copy/ map their labels to PR labels
+            //  - parses "fixes #NN" style references from title/body
+            //  - checks the issue/PR timeline for cross-references
+            //  - maps issue labels to PR labels based on `labelMap`
+            try {
+              const refRegex = /(?:close[sd]?|fixe?s?|resolve[sd]?|resolves|closes|refs?)\s+#(\d+)/ig;
+              const text = (title + '\n' + body);
+              const referenced = new Set();
+              let m;
+              while (m = refRegex.exec(text)) referenced.add(Number(m[1]));
+
+              // also check timeline for cross-referenced issues (more robust)
+              const timeline = await github.paginate(github.rest.issues.listEventsForTimeline, {
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: number
+              });
+              for (const ev of timeline) {
+                if (ev.event === 'cross-referenced' && ev.source && ev.source.issue && ev.source.issue.number) {
+                  referenced.add(ev.source.issue.number);
+                }
+              }
+
+              const labelMap = {
+                'bug': 'fix',
+                'enhancement': 'feature',
+                'maintainability': 'chore',
+                'skip-changelog': 'skip-changelog'
+              };
+
+              for (const issueNum of referenced) {
+                try {
+                  const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+                    owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNum
+                  });
+                  for (const l of labels) {
+                    const mapped = labelMap[l.name];
+                    if (mapped) found.add(mapped);
+                  }
+                } catch (e) {
+                  console.log(`Unable to get labels for issue #${issueNum}: ${e.message}`);
+                }
+              }
+            } catch (e) {
+              console.log('Error while resolving linked issues:', e.message);
+            }
+
             // detect platform-specific files
             const files = await github.paginate(github.rest.pulls.listFiles, { owner: context.repo.owner, repo: context.repo.repo, pull_number: number });
             const paths = files.map(f => f.filename);
