@@ -19,7 +19,7 @@ export default function UpdateNotification() {
 
   const cleanReleaseNotes = (body) => {
     if (!body) return "";
-    let cleaned = body.replace(/\s*\([^)]+\)\s*[—\-]\s*@[\w-]+/g, "");
+    let cleaned = body.replace(/\s*\([^)]+\)\s*[—-]\s*@[\w-]+/g, "");
     cleaned = cleaned.replace(/\*\*Assets:\*\*[\s\S]*$/i, "");
     cleaned = cleaned.replace(/^# .*\n+/gm, "");
     return cleaned.trim();
