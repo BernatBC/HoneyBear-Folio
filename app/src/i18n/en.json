@@ -197,6 +197,7 @@
   "about.github": "GitHub Repository",
   "about.issues": "Report Issues",
   "sort.sort_by": "Sort By",
+  "sort.manual": "Manual",
   "sort.name_asc": "Name (A-Z)",
   "sort.name_desc": "Name (Z-A)",
   "sort.balance_asc": "Balance (Low to High)",

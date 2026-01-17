@@ -67,8 +67,31 @@ export default function Sidebar({
     };
   }, []);
 
+  const [manualOrder, setManualOrder] = useState(() => {
+    try {
+      const stored = localStorage.getItem("hb_account_order");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const sortedAccounts = useMemo(() => {
     const list = [...accounts];
+
+    if (sortConfig.field === "manual") {
+      list.sort((a, b) => {
+        const indexA = manualOrder.indexOf(a.id);
+        const indexB = manualOrder.indexOf(b.id);
+
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA === -1 && indexB !== -1) return 1;
+        if (indexA !== -1 && indexB === -1) return -1;
+        return a.name.localeCompare(b.name);
+      });
+      return list;
+    }
+
     list.sort((a, b) => {
       let valA, valB;
 
@@ -93,11 +116,17 @@ export default function Sidebar({
       return 0;
     });
     return list;
-  }, [accounts, marketValues, sortConfig]);
+  }, [accounts, marketValues, sortConfig, manualOrder]);
 
   const handleSort = (field, direction) => {
     setSortConfig({ field, direction });
     setShowSortMenu(false);
+  };
+
+  const handleReorder = (newAccountsList) => {
+    const newOrder = newAccountsList.map((a) => a.id);
+    setManualOrder(newOrder);
+    localStorage.setItem("hb_account_order", JSON.stringify(newOrder));
   };
 
   const handleSelect = (id) => {
@@ -252,6 +281,11 @@ export default function Sidebar({
                       </div>
                       {[
                         {
+                          label: t("sort.manual"),
+                          field: "manual",
+                          dir: "asc",
+                        },
+                        {
                           label: t("sort.name_asc"),
                           field: "name",
                           dir: "asc",
@@ -318,6 +352,8 @@ export default function Sidebar({
             onSelectAccount={onSelectAccount}
             marketValues={marketValues}
             Icon={CreditCard}
+            onReorder={handleReorder}
+            isDraggable={sortConfig.field === "manual"}
           />
         </div>
       </div>
