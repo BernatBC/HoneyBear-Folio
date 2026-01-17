@@ -295,7 +295,7 @@ export default function Sidebar({
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
                 {showSortMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-2 min-w-[12rem] max-w-full bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden">
                     <div className="py-1">
                       <div className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-800/50 border-b border-slate-700/50">
                         {t("sort.sort_by")}
