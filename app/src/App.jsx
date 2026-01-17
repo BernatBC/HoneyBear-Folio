@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import Sidebar from "./components/Sidebar";
 import { computeNetWorth } from "./utils/networth";
@@ -19,12 +19,57 @@ import UpdateNotification from "./components/UpdateNotification";
 import WelcomeWindow from "./components/WelcomeWindow";
 import DevTools from "./components/DevTools";
 
+const MIN_SIDEBAR_WIDTH = 240;
+const MAX_SIDEBAR_WIDTH = 600;
+const DEFAULT_SIDEBAR_WIDTH = 320;
+
 function App() {
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [accounts, setAccounts] = useState([]);
   const [marketValues, setMarketValues] = useState({});
+
+  const startResizing = useCallback(() => {
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback(
+    (mouseMoveEvent) => {
+      if (isResizing) {
+        const newWidth = mouseMoveEvent.clientX;
+        if (newWidth >= MIN_SIDEBAR_WIDTH && newWidth <= MAX_SIDEBAR_WIDTH) {
+          setSidebarWidth(newWidth);
+        }
+      }
+    },
+    [isResizing]
+  );
+
+  useEffect(() => {
+    window.addEventListener("mousemove", resize);
+    window.addEventListener("mouseup", stopResizing);
+    return () => {
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    };
+  }, [resize, stopResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    } else {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+  }, [isResizing]);
 
   const handleAccountUpdate = () => {
     setRefreshTrigger((prev) => prev + 1);
@@ -255,18 +300,30 @@ function App() {
                 <UpdateNotification />
                 <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
                   <div
-                    className={`transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 ${
-                      isSidebarOpen ? "w-80" : "w-0"
-                    }`}
+                    style={{ width: isSidebarOpen ? sidebarWidth : 0 }}
+                    className={`${
+                      isResizing
+                        ? "transition-none"
+                        : "transition-all duration-300 ease-in-out"
+                    } overflow-hidden flex-shrink-0 relative`}
                   >
-                    <div className="w-80 h-full">
-                      <Sidebar
-                        accounts={accounts}
-                        marketValues={marketValues}
-                        selectedId={selectedAccountId}
-                        onSelectAccount={setSelectedAccountId}
-                        onUpdate={handleAccountUpdate}
-                        onClose={() => setIsSidebarOpen(false)}
+                    <div
+                      style={{ width: sidebarWidth }}
+                      className="h-full relative flex"
+                    >
+                      <div className="flex-1 w-full h-full overflow-hidden">
+                        <Sidebar
+                          accounts={accounts}
+                          marketValues={marketValues}
+                          selectedId={selectedAccountId}
+                          onSelectAccount={setSelectedAccountId}
+                          onUpdate={handleAccountUpdate}
+                          onClose={() => setIsSidebarOpen(false)}
+                        />
+                      </div>
+                      <div
+                        className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-brand-500/50 active:bg-brand-500 z-50 transition-colors delay-100 hover:delay-0"
+                        onMouseDown={startResizing}
                       />
                     </div>
                   </div>

@@ -3,7 +3,7 @@
 
 @layer components {
   .sidebar-container {
-    @apply w-80 bg-slate-900 dark:bg-slate-950 text-slate-300 h-screen flex flex-col border-r border-slate-800 dark:border-slate-900 shadow-2xl z-10;
+    @apply w-full bg-slate-900 dark:bg-slate-950 text-slate-300 h-screen flex flex-col border-r border-slate-800 dark:border-slate-900 shadow-2xl z-10;
   }
 
   .sidebar-header {
