@@ -66,7 +66,7 @@ export default function AccountList({
 
         const finalFormattedTotal =
           formattedTotal === "NaN" ? "" : formattedTotal;
-        
+
         const isDragging = draggingId === account.id;
 
         return (
@@ -119,7 +119,9 @@ export default function AccountList({
                   {finalFormattedTotal}
                 </span>
                 {hasInvestments && (
-                  <span className="text-[10px] opacity-80">{formattedCash}</span>
+                  <span className="text-[10px] opacity-80">
+                    {formattedCash}
+                  </span>
                 )}
               </div>
             </button>
