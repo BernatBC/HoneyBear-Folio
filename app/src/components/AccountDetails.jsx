@@ -106,7 +106,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const [fee, setFee] = useState("");
   // Removed cashAccountId/Name/Suggestions as we are unified now
   const [isBuy, setIsBuy] = useState(true);
-  
+
   // Sorting State
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
@@ -575,11 +575,7 @@ export default function AccountDetails({ account, onUpdate }) {
     const direction = active ? sortConfig.direction : null;
 
     return (
-      <span
-        className={`inline-flex w-4 h-4 ${
-          !direction ? "invisible" : ""
-        }`}
-      >
+      <span className={`inline-flex w-4 h-4 ${!direction ? "invisible" : ""}`}>
         {direction === "descending" ? (
           <ArrowDown className="w-4 h-4" />
         ) : (
