@@ -558,14 +558,18 @@ export default function Dashboard({
         const cashValue = cashBalanceConverted;
 
         // Add to Cash if significant
-        if (holdingsValue === 0 && currentHoldings.length === 0 && Math.abs(cashBalanceConverted) > 1.0) {
-          // Case: Account marked as brokerage manually but no holdings transactions entered. 
+        if (
+          holdingsValue === 0 &&
+          currentHoldings.length === 0 &&
+          Math.abs(cashBalanceConverted) > 1.0
+        ) {
+          // Case: Account marked as brokerage manually but no holdings transactions entered.
           // Treat all balance as "Stock" because presumably the user is tracking total value manually in the balance field.
-          assetTypes["Stock"] = (assetTypes["Stock"] || 0) + cashBalanceConverted;
+          assetTypes["Stock"] =
+            (assetTypes["Stock"] || 0) + cashBalanceConverted;
         } else if (Math.abs(cashValue) > 1.0) {
           assetTypes["Cash"] = (assetTypes["Cash"] || 0) + cashValue;
         }
-
       } else {
         // Non-Brokerage (e.g. Cash, Savings)
         // If they have no holdings (otherwise they'd be in the 'if' above),
@@ -614,7 +618,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [accounts, marketValues, transactions, quotes, dailyPrices, isDark]);
+  }, [accounts, transactions, quotes, dailyPrices, isDark]);
 
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;
@@ -891,12 +895,12 @@ export default function Dashboard({
 
               const bg =
                 Array.isArray(dataset.backgroundColor) &&
-                  dataset.backgroundColor[index] !== undefined
+                dataset.backgroundColor[index] !== undefined
                   ? dataset.backgroundColor[index]
                   : dataset.backgroundColor;
               const border =
                 Array.isArray(dataset.borderColor) &&
-                  dataset.borderColor[index] !== undefined
+                dataset.borderColor[index] !== undefined
                   ? dataset.borderColor[index]
                   : dataset.borderColor;
 
@@ -969,7 +973,7 @@ export default function Dashboard({
 
               const bg =
                 Array.isArray(dataset.backgroundColor) &&
-                  dataset.backgroundColor[index] !== undefined
+                dataset.backgroundColor[index] !== undefined
                   ? dataset.backgroundColor[index]
                   : dataset.backgroundColor;
               const border = dataset.borderColor;
@@ -1207,10 +1211,11 @@ export default function Dashboard({
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`time-range-button ${timeRange === range
-                  ? "time-range-button-active"
-                  : "time-range-button-inactive"
-                  }`}
+                className={`time-range-button ${
+                  timeRange === range
+                    ? "time-range-button-active"
+                    : "time-range-button-inactive"
+                }`}
               >
                 {range === "CUSTOM" ? t("dashboard.custom") : range}
               </button>
