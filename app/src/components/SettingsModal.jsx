@@ -28,6 +28,8 @@ import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../utils/version";
 
 import { useCustomRate } from "../hooks/useCustomRate";
 import CONTRIBUTORS from "../config/contributors";
+import THIRD_PARTY_LICENSES from "../config/licenses";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const GITHUB_REPO = "https://github.com/BernatBC/HoneyBear-Folio";
 const LICENSE_URL = `${GITHUB_REPO}/blob/main/LICENSE`;
@@ -46,6 +48,7 @@ export default function SettingsModal({ onClose }) {
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
   const { checkAndPrompt, dialog } = useCustomRate();
+  const [showAllLicenses, setShowAllLicenses] = useState(false);
   const [fontSize, setFontSize] = useState(() => {
     try {
       const v = localStorage.getItem("hb_font_size");
@@ -584,6 +587,49 @@ export default function SettingsModal({ onClose }) {
                       <ExternalLink className="w-3.5 h-3.5" />
                       {t("about.view_license")}
                     </a>
+                  </div>
+
+                  {/* Third Party Licenses */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">{t("about.third_party")}</h4>
+                    {showAllLicenses && (
+                      <ul className="about-license-list">
+                        {THIRD_PARTY_LICENSES.map((l) => (
+                          <li key={l.name}>
+                            <a
+                              href={l.url}
+                              className="about-link"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                openExternal(l.url);
+                              }}
+                            >
+                              {l.name}
+                            </a>
+                            <span className="about-license-meta">({l.license})</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <div className="mt-2">
+                      <button
+                        onClick={() => setShowAllLicenses(!showAllLicenses)}
+                        className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors"
+                      >
+                        {showAllLicenses ? (
+                          <>
+                            <span>{t("about.third_party_hide")}</span>
+                            <ChevronUp className="w-3 h-3" />
+                          </>
+                        ) : (
+                          <>
+                            <span>{t("about.third_party_show", { count: THIRD_PARTY_LICENSES.length })}</span>
+                            <ChevronDown className="w-3 h-3" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="about-divider" />

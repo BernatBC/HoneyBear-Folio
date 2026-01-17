@@ -245,6 +245,18 @@
     @apply text-sm text-slate-600 dark:text-slate-400 mb-2;
   }
 
+  .about-license-list {
+    @apply list-none p-0 m-0 flex flex-col gap-1;
+  }
+
+  .about-license-list li {
+    @apply flex items-center;
+  }
+
+  .about-license-meta {
+    @apply text-xs text-slate-500 dark:text-slate-400 ml-2;
+  }
+
   .about-link {
     @apply inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 hover:underline cursor-pointer transition-colors;
   }
