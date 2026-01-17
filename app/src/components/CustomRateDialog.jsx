@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import "../styles/Modal.css";
 import { t } from "../i18n/i18n";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 
 export default function CustomRateDialog({
   isOpen,
@@ -32,14 +32,17 @@ export default function CustomRateDialog({
     onConfirm(val);
   };
 
-  return createPortal(
-    <div className="modal-overlay">
-      <div className="modal-container w-full max-w-sm confirm-dialog">
-        <h3 className="modal-title mb-4">{t("custom_rate.title")}</h3>
-        <p className="mb-6 text-slate-600 dark:text-slate-300">
+  return (
+    <Modal onClose={onCancel} size="sm">
+      <ModalHeader
+        title={t("custom_rate.title")}
+        onClose={onCancel}
+      />
+      <ModalBody>
+        <p className="mb-4 text-slate-600 dark:text-slate-300">
           {t("custom_rate.message", { currency })}
         </p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form id="custom-rate-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             ref={inputRef}
             type="number"
@@ -51,25 +54,25 @@ export default function CustomRateDialog({
             required
             autoFocus
           />
-          <div className="modal-footer mt-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="modal-cancel-button"
-            >
-              {t("confirm.cancel")}
-            </button>
-            <button
-              type="submit"
-              className="modal-action-button bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {t("confirm.save")}
-            </button>
-          </div>
         </form>
-      </div>
-    </div>,
-    document.body,
+      </ModalBody>
+      <ModalFooter className="mt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="modal-cancel-button"
+        >
+          {t("confirm.cancel")}
+        </button>
+        <button
+          type="submit"
+          form="custom-rate-form"
+          className="modal-action-button bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {t("confirm.save")}
+        </button>
+      </ModalFooter>
+    </Modal>
   );
 }
 

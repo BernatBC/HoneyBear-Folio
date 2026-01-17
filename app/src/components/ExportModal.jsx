@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
-import { X, Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
+import { Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 import * as XLSX from "xlsx";
 import { t } from "../i18n/i18n";
 import "../styles/Modal.css";
@@ -194,91 +194,78 @@ export default function ExportModal({ onClose }) {
     }
   };
 
-  const modal = (
-    <div className="modal-overlay">
-      <div className="modal-container">
-        <div className="modal-header">
-          <h2 className="modal-title">
-            <Download className="w-5 h-5 text-brand-500" />
-            {t("export.title")}
-          </h2>
-          <button onClick={onClose} className="modal-close-button">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="modal-body">
-          <label className="modal-label">{t("export.select_format")}</label>
-          <div className="format-grid">
-            <button
-              onClick={() => setFormat("json")}
-              className={`format-button ${
-                format === "json"
-                  ? "format-button-active"
-                  : "format-button-inactive"
-              }`}
-            >
-              <FileJson className="w-6 h-6 mb-2" />
-              <span className="text-xs font-medium">
-                {t("export.format.json")}
-              </span>
-            </button>
-            <button
-              onClick={() => setFormat("csv")}
-              className={`format-button ${
-                format === "csv"
-                  ? "format-button-active"
-                  : "format-button-inactive"
-              }`}
-            >
-              <FileText className="w-6 h-6 mb-2" />
-              <span className="text-xs font-medium">
-                {t("export.format.csv")}
-              </span>
-            </button>
-            <button
-              onClick={() => setFormat("xlsx")}
-              className={`format-button ${
-                format === "xlsx"
-                  ? "format-button-active"
-                  : "format-button-inactive"
-              }`}
-            >
-              <FileSpreadsheet className="w-6 h-6 mb-2" />
-              <span className="text-xs font-medium">
-                {t("export.format.xlsx")}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className="modal-footer">
+  // If SSR or tests, avoid touching document
+  if (typeof document === "undefined") return null;
+  return (
+    <Modal onClose={onClose}>
+      <ModalHeader
+        onClose={onClose}
+        title={t("export.title")}
+        icon={Download}
+      />
+      <ModalBody>
+        <label className="modal-label">{t("export.select_format")}</label>
+        <div className="format-grid">
           <button
-            onClick={onClose}
-            className="modal-cancel-button"
-            disabled={exporting}
+            onClick={() => setFormat("json")}
+            className={`format-button ${format === "json"
+              ? "format-button-active"
+              : "format-button-inactive"
+              }`}
           >
-            {t("export.cancel")}
+            <FileJson className="w-6 h-6 mb-2" />
+            <span className="text-xs font-medium">
+              {t("export.format.json")}
+            </span>
           </button>
           <button
-            onClick={handleExport}
-            disabled={exporting}
-            className="modal-export-button"
+            onClick={() => setFormat("csv")}
+            className={`format-button ${format === "csv"
+              ? "format-button-active"
+              : "format-button-inactive"
+              }`}
           >
-            <span className="text-white">
-              {exporting
-                ? t("export.exporting")
-                : t("export.select_location_export")}
+            <FileText className="w-6 h-6 mb-2" />
+            <span className="text-xs font-medium">
+              {t("export.format.csv")}
+            </span>
+          </button>
+          <button
+            onClick={() => setFormat("xlsx")}
+            className={`format-button ${format === "xlsx"
+              ? "format-button-active"
+              : "format-button-inactive"
+              }`}
+          >
+            <FileSpreadsheet className="w-6 h-6 mb-2" />
+            <span className="text-xs font-medium">
+              {t("export.format.xlsx")}
             </span>
           </button>
         </div>
-      </div>
-    </div>
+      </ModalBody>
+      <ModalFooter>
+        <button
+          onClick={onClose}
+          className="modal-cancel-button"
+          disabled={exporting}
+        >
+          {t("export.cancel")}
+        </button>
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="modal-export-button"
+        >
+          <span className="text-white">
+            {exporting
+              ? t("export.exporting")
+              : t("export.select_location_export")}
+          </span>
+        </button>
+      </ModalFooter>
+    </Modal>
   );
-
-  // If SSR or tests, avoid touching document
-  if (typeof document === "undefined") return null;
-  return createPortal(modal, document.body);
 }
 
 ExportModal.propTypes = {
