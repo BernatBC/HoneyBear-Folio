@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   Plus,
@@ -117,20 +117,34 @@ export default function RulesList() {
   }
 
   // DnD Handlers
+  const lastReorder = useRef(0);
+
   const handleDragStart = (e, id) => {
     setDraggingId(id);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", id);
+    // Setting an empty drag image can sometimes help with performance/visuals
+    // but default is usually fine.
   };
 
-  const handleDragOver = (e, targetIndex) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
 
     if (!draggingId) return;
 
+    // Throttle state updates to prevent drag cancellation on Windows
+    const now = Date.now();
+    if (now - lastReorder.current < 50) return;
+
+    const row = e.target.closest("tr[data-index]");
+    if (!row) return;
+    const targetIndex = parseInt(row.dataset.index, 10);
+
     const dragIndex = rules.findIndex((r) => r.id === draggingId);
     if (dragIndex === -1 || dragIndex === targetIndex) return;
+
+    lastReorder.current = now;
 
     const newItems = [...rules];
     const item = newItems[dragIndex];
@@ -306,7 +320,12 @@ export default function RulesList() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            <tbody
+              className="divide-y divide-slate-200 dark:divide-slate-700"
+              onDragOver={handleDragOver}
+              onDragEnter={(e) => e.preventDefault()}
+              onDrop={(e) => e.preventDefault()}
+            >
               {rules.map((rule, index) => {
                 const isDragging = draggingId === rule.id;
                 return (
@@ -315,9 +334,8 @@ export default function RulesList() {
                     className={`transition-colors group ${isDragging ? "opacity-30 bg-slate-100 dark:bg-slate-700" : "hover:bg-slate-50 dark:hover:bg-slate-700/30"}`}
                     draggable={!isEditing}
                     onDragStart={(e) => handleDragStart(e, rule.id)}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDrop={(e) => e.preventDefault()}
                     onDragEnd={handleDragEnd}
+                    data-index={index}
                   >
                     <td className="px-4 py-4 text-slate-400 dark:text-slate-600 cursor-move">
                       <GripVertical

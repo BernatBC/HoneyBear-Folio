@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useFormatNumber } from "../utils/format";
 import { GripVertical } from "lucide-react";
 
@@ -14,6 +14,7 @@ export default function AccountList({
 }) {
   const formatNumber = useFormatNumber();
   const [draggingId, setDraggingId] = useState(null);
+  const lastReorder = useRef(0);
 
   const handleDragStart = (e, accountId) => {
     setDraggingId(accountId);
@@ -23,14 +24,24 @@ export default function AccountList({
     e.dataTransfer.setData("text/plain", accountId);
   };
 
-  const handleDragOver = (e, targetIndex) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
 
     if (!draggingId || !onReorder) return;
 
+    // Throttle state updates
+    const now = Date.now();
+    if (now - lastReorder.current < 50) return;
+
+    const row = e.target.closest("[data-index]");
+    if (!row) return;
+    const targetIndex = parseInt(row.dataset.index, 10);
+
     const dragIndex = accounts.findIndex((a) => a.id === draggingId);
     if (dragIndex === -1 || dragIndex === targetIndex) return;
+
+    lastReorder.current = now;
 
     const newItems = [...accounts];
     const item = newItems[dragIndex];
@@ -44,7 +55,12 @@ export default function AccountList({
   };
 
   return (
-    <div className="space-y-1">
+    <div
+      className="space-y-1"
+      onDragOver={handleDragOver}
+      onDragEnter={(e) => e.preventDefault()}
+      onDrop={(e) => e.preventDefault()}
+    >
       {accounts.map((account, index) => {
         const cashBalance = Number(account.balance);
         const marketValue =
@@ -74,8 +90,6 @@ export default function AccountList({
             key={account.id}
             draggable={isDraggable}
             onDragStart={(e) => handleDragStart(e, account.id)}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDrop={(e) => e.preventDefault()}
             onDragEnd={handleDragEnd}
             className={`${isDraggable ? "cursor-move" : ""} block w-full transition-all duration-200 ${isDragging ? "opacity-50" : ""}`}
             data-index={index}
