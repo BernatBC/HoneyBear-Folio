@@ -524,7 +524,7 @@ export default function Dashboard({
       const { currentHoldings } = buildHoldingsFromTransactions(accTxs);
 
       if (currentHoldings.length > 0) {
-        accKindLower = "brokerage"; 
+        accKindLower = "brokerage";
       }
 
       if (accKindLower === "brokerage") {
@@ -538,7 +538,7 @@ export default function Dashboard({
             (q) => q.symbol.toLowerCase() === h.ticker.toLowerCase(),
           );
           if (quote) {
-            price = quote.price;
+            price = quote.regularMarketPrice;
           } else if (dailyPrices[h.ticker]) {
             const { list } = dailyPrices[h.ticker];
             if (list.length > 0) price = list[list.length - 1].price;
@@ -556,14 +556,14 @@ export default function Dashboard({
         // We assume acc.balance correctly tracks the cash balance of the account (money in - money out - buys + sells)
         const cashBalanceConverted = (acc.balance || 0) * exchangeRate;
         const cashValue = cashBalanceConverted;
-        
+
         // Add to Cash if significant
         if (holdingsValue === 0 && currentHoldings.length === 0 && Math.abs(cashBalanceConverted) > 1.0) {
-           // Case: Account marked as brokerage manually but no holdings transactions entered. 
-           // Treat all balance as "Stock" because presumably the user is tracking total value manually in the balance field.
-           assetTypes["Stock"] = (assetTypes["Stock"] || 0) + cashBalanceConverted;
+          // Case: Account marked as brokerage manually but no holdings transactions entered. 
+          // Treat all balance as "Stock" because presumably the user is tracking total value manually in the balance field.
+          assetTypes["Stock"] = (assetTypes["Stock"] || 0) + cashBalanceConverted;
         } else if (Math.abs(cashValue) > 1.0) {
-           assetTypes["Cash"] = (assetTypes["Cash"] || 0) + cashValue;
+          assetTypes["Cash"] = (assetTypes["Cash"] || 0) + cashValue;
         }
 
       } else {
@@ -652,6 +652,7 @@ export default function Dashboard({
       (t) =>
         t.amount < 0 &&
         t.category !== "Transfer" &&
+        !t.ticker && // Exclude investment transactions
         t.date >= startStr &&
         t.date <= endStr,
     );
@@ -784,7 +785,7 @@ export default function Dashboard({
     const expenseData = new Array(keys.length).fill(0);
 
     transactions.forEach((t) => {
-      if (t.category === "Transfer") return;
+      if (t.category === "Transfer" || t.ticker) return; // Exclude transfers and investments
       const key = isDayBucket ? t.date : t.date.slice(0, 7);
       const index = keys.indexOf(key);
       if (index !== -1) {
@@ -890,12 +891,12 @@ export default function Dashboard({
 
               const bg =
                 Array.isArray(dataset.backgroundColor) &&
-                dataset.backgroundColor[index] !== undefined
+                  dataset.backgroundColor[index] !== undefined
                   ? dataset.backgroundColor[index]
                   : dataset.backgroundColor;
               const border =
                 Array.isArray(dataset.borderColor) &&
-                dataset.borderColor[index] !== undefined
+                  dataset.borderColor[index] !== undefined
                   ? dataset.borderColor[index]
                   : dataset.borderColor;
 
@@ -968,7 +969,7 @@ export default function Dashboard({
 
               const bg =
                 Array.isArray(dataset.backgroundColor) &&
-                dataset.backgroundColor[index] !== undefined
+                  dataset.backgroundColor[index] !== undefined
                   ? dataset.backgroundColor[index]
                   : dataset.backgroundColor;
               const border = dataset.borderColor;
@@ -1206,11 +1207,10 @@ export default function Dashboard({
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`time-range-button ${
-                  timeRange === range
-                    ? "time-range-button-active"
-                    : "time-range-button-inactive"
-                }`}
+                className={`time-range-button ${timeRange === range
+                  ? "time-range-button-active"
+                  : "time-range-button-inactive"
+                  }`}
               >
                 {range === "CUSTOM" ? t("dashboard.custom") : range}
               </button>
