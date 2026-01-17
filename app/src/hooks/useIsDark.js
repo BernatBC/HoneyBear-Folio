@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 
 export default function useIsDark() {
   const [isDark, setIsDark] = useState(() => {
@@ -8,13 +8,17 @@ export default function useIsDark() {
     return false;
   });
 
-  useEffect(() => {
-    // 1. Check immediately to handle any changes between render and this effect
-    setIsDark(document.documentElement.classList.contains("dark"));
-
-    // 2. Observe changes
-    const observer = new MutationObserver(() => {
+  useLayoutEffect(() => {
+    // Observe changes to the documentElement class and update state when needed
+    const checkDark = () =>
       setIsDark(document.documentElement.classList.contains("dark"));
+
+    // Do an initial check synchronously to ensure state matches the DOM before paint
+    checkDark();
+
+    // Observe changes
+    const observer = new MutationObserver(() => {
+      checkDark();
     });
 
     observer.observe(document.documentElement, {
