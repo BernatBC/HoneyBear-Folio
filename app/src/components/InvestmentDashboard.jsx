@@ -82,7 +82,7 @@ export default function InvestmentDashboard() {
             if (v < 0) return "transparent";
             return colors[i % colors.length];
           }),
-          borderColor: rawData.map((_, i) => colors[i % colors.length]),
+          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
           borderWidth: 4,
           borderDash: (ctx) => {
             const val = rawData[ctx.dataIndex];
@@ -92,7 +92,7 @@ export default function InvestmentDashboard() {
         },
       ],
     };
-  }, [holdings]);
+  }, [holdings, isDark]);
 
   const chartOptions = useMemo(
     () => ({
@@ -465,25 +465,42 @@ function TreeMapNode({ items, x, y, w, h, totalValue, isDark }) {
     // ROI -20% to +20% mapped to color.
     const roi = item.roi;
     let bgColor;
+    // Cap intensity at 30% ROI
+    const intensity = Math.min(Math.abs(roi) / 30, 1);
+
     if (roi >= 0) {
-      // Emerald: 0% -> Light, High% -> Darker
-      // Base Emerald-500 is roughly hsl(160, 84%, 39%)
-      // Let's vary lightness from 95% (very light) to 40% (dark)
-      const intensity = Math.min(roi / 30, 1); // Cap at 30% ROI
-      const lightness = 95 - intensity * 55;
-      bgColor = `hsl(160, 84%, ${lightness}%)`;
+      // Emerald
+      if (isDark) {
+        // Dark Mode: 0% -> Dark (20%), High% -> Vibrant (50%)
+        const lightness = 20 + intensity * 30;
+        bgColor = `hsl(160, 84%, ${lightness}%)`;
+      } else {
+        // Light Mode: 0% -> Very Light (95%), High% -> Dark (40%)
+        const lightness = 95 - intensity * 55;
+        bgColor = `hsl(160, 84%, ${lightness}%)`;
+      }
     } else {
-      // Rose: 0% -> Light, High% -> Darker
-      // Base Rose-500 is roughly hsl(343, 87%, 60%)
-      const intensity = Math.min(Math.abs(roi) / 30, 1);
-      const lightness = 95 - intensity * 45;
-      bgColor = `hsl(343, 87%, ${lightness}%)`;
+      // Rose
+      if (isDark) {
+        // Dark Mode: 0% -> Dark (15%), High% -> Vibrant (50%)
+        const lightness = 15 + intensity * 35;
+        bgColor = `hsl(343, 87%, ${lightness}%)`;
+      } else {
+        // Light Mode: 0% -> Very Light (95%), High% -> Dark (50%)
+        const lightness = 95 - intensity * 45;
+        bgColor = `hsl(343, 87%, ${lightness}%)`;
+      }
     }
 
-    const textColor =
-      (roi >= 0 && roi > 15) || (roi < 0 && Math.abs(roi) > 15)
-        ? "white"
-        : "rgb(30, 41, 59)"; // slate-800
+    // Determine text color based on theme and intensity
+    let textColor;
+    if (isDark) {
+      // In dark mode, white text works well on both dark (low ROI) and vibrant (high ROI) backgrounds
+      textColor = "rgb(241, 245, 249)"; // slate-100
+    } else {
+      // In light mode, switch to white text when background becomes dark enough
+      textColor = intensity > 0.5 ? "white" : "rgb(30, 41, 59)"; // slate-800
+    }
 
     return (
       <div

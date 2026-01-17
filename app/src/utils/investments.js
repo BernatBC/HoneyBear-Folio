@@ -47,7 +47,9 @@ export function buildHoldingsFromTransactions(transactions) {
 
 export function mergeHoldingsWithQuotes(holdings, quotes) {
   const finalHoldings = holdings.map((h) => {
-    const quote = quotes.find((q) => q.symbol === h.ticker);
+    const quote = quotes.find(
+      (q) => q.symbol.toLowerCase() === h.ticker.toLowerCase(),
+    );
     const price = quote ? quote.regularMarketPrice : 0;
     const currentValue = h.shares * price;
     const roi =
@@ -58,6 +60,7 @@ export function mergeHoldingsWithQuotes(holdings, quotes) {
       currentValue,
       roi,
       changePercent: quote ? quote.regularMarketChangePercent : 0,
+      quoteType: quote ? quote.quoteType : null,
     };
   });
 
