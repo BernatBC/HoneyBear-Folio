@@ -6,7 +6,6 @@ import SettingsModal from "./SettingsModal";
 import AccountModal from "./AccountModal";
 import AccountList from "./AccountList";
 import {
-  Wallet,
   Plus,
   CreditCard,
   TrendingUp,
@@ -59,9 +58,11 @@ export default function Sidebar({
       <div className="sidebar-header">
         <div className="flex items-center justify-between mb-8">
           <div className="sidebar-logo-container mb-0">
-            <div className="sidebar-logo-icon">
-              <Wallet className="w-6 h-6 text-white" />
-            </div>
+            <img
+              src="/icon.png"
+              alt="HoneyBear Folio"
+              className="w-10 h-10 object-contain"
+            />
             <div>
               <h1 className="sidebar-title">{t("sidebar.title")}</h1>
               <p className="sidebar-subtitle">{t("sidebar.subtitle")}</p>

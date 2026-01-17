@@ -197,7 +197,6 @@
     opacity: 1;
   }
 
-  /* Support dark theme variants (ensure readable background) */
   :root .label-with-help .help-wrapper[data-tooltip]::after {
     background-color: rgba(15, 23, 42, 0.95);
     color: #fff;
@@ -207,5 +206,74 @@
   :root.dark .label-with-help .help-wrapper[data-tooltip]::after {
     background-color: rgba(15, 23, 42, 0.95);
     color: #fff;
+  }
+
+  /* About tab styles */
+  .about-header {
+    @apply flex flex-col items-center text-center mb-6;
+  }
+
+  .about-logo {
+    @apply w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center mb-3 shadow-lg;
+  }
+
+  .about-app-name {
+    @apply text-xl font-bold text-slate-900 dark:text-white;
+  }
+
+  .about-version-badge {
+    @apply inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-sm text-slate-600 dark:text-slate-300;
+  }
+
+  .about-version-link {
+    @apply text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 hover:underline cursor-pointer transition-colors;
+  }
+
+  .about-section {
+    @apply mb-5;
+  }
+
+  .about-section-title {
+    @apply text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2;
+  }
+
+  .about-section-content {
+    @apply text-sm text-slate-700 dark:text-slate-300;
+  }
+
+  .about-license-text {
+    @apply text-sm text-slate-600 dark:text-slate-400 mb-2;
+  }
+
+  .about-link {
+    @apply inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 hover:underline cursor-pointer transition-colors;
+  }
+
+  .about-contributor {
+    @apply flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/50;
+  }
+
+  .about-contributor-avatar {
+    @apply w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-medium;
+  }
+
+  .about-contributor-info {
+    @apply flex flex-col;
+  }
+
+  .about-contributor-name {
+    @apply text-sm font-medium text-slate-900 dark:text-white;
+  }
+
+  .about-contributor-role {
+    @apply text-xs text-slate-500 dark:text-slate-400;
+  }
+
+  .about-links {
+    @apply flex flex-col gap-2;
+  }
+
+  .about-divider {
+    @apply border-t border-slate-100 dark:border-slate-800 my-4;
   }
 }

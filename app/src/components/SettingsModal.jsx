@@ -5,6 +5,9 @@ import {
   SlidersHorizontal,
   Globe,
   HelpCircle,
+  Info,
+  ExternalLink,
+  Github,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import "../styles/Modal.css";
@@ -20,8 +23,12 @@ import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { t } from "../i18n/i18n";
 import { formatDateForUI } from "../utils/format";
+import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../utils/version";
 
 import { useCustomRate } from "../hooks/useCustomRate";
+
+const GITHUB_REPO = "https://github.com/BernatBC/HoneyBear-Folio";
+const LICENSE_URL = `${GITHUB_REPO}/blob/main/LICENSE`;
 
 export default function SettingsModal({ onClose }) {
   const {
@@ -212,6 +219,15 @@ export default function SettingsModal({ onClose }) {
                 <Globe className="w-4 h-4 text-slate-400" />
                 <span>{t("settings.formats")}</span>
               </button>
+              <button
+                role="tab"
+                aria-selected={activeTab === "about"}
+                onClick={() => setActiveTab("about")}
+                className={`settings-tab ${activeTab === "about" ? "settings-tab-active" : ""}`}
+              >
+                <Info className="w-4 h-4 text-slate-400" />
+                <span>{t("settings.about")}</span>
+              </button>
             </div>
 
             <div className="modal-body flex-1">
@@ -219,7 +235,9 @@ export default function SettingsModal({ onClose }) {
                 <h3 className="settings-section-heading">
                   {activeTab === "general"
                     ? t("settings.general")
-                    : t("settings.formats")}
+                    : activeTab === "formats"
+                      ? t("settings.formats")
+                      : t("settings.about")}
                 </h3>
               </div>
               {activeTab === "general" && (
@@ -502,6 +520,96 @@ export default function SettingsModal({ onClose }) {
                       placeholder={t("settings.select_first_day_placeholder")}
                       fullWidth={false}
                     />
+                  </div>
+                </>
+              )}
+
+              {activeTab === "about" && (
+                <>
+                  {/* App Header */}
+                  <div className="about-header">
+                    <img
+                      src="/icon.png"
+                      alt="HoneyBear Folio"
+                      className="w-16 h-16 object-contain mb-3"
+                    />
+                    <h3 className="about-app-name">HoneyBear Folio</h3>
+                    <div className="about-version-badge">
+                      <span>{t("about.version")}:</span>
+                      {IS_RELEASE && APP_VERSION ? (
+                        <a
+                          href={`${GITHUB_REPO}/releases/tag/v${APP_VERSION}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="about-version-link"
+                        >
+                          v{getDisplayVersion()}
+                        </a>
+                      ) : (
+                        <span>{getDisplayVersion()}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Copyright */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">{t("about.copyright")}</h4>
+                    <p className="about-section-content">© 2025 BernatBC</p>
+                  </div>
+
+                  {/* License */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">{t("about.license")}</h4>
+                    <p className="about-license-text">{t("about.license_text")}</p>
+                    <a
+                      href={LICENSE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="about-link"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {t("about.view_license")}
+                    </a>
+                  </div>
+
+                  <div className="about-divider" />
+
+                  {/* Contributors */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">{t("about.contributors")}</h4>
+                    <div className="about-contributor">
+                      <div className="about-contributor-avatar">B</div>
+                      <div className="about-contributor-info">
+                        <span className="about-contributor-name">BernatBC</span>
+                        <span className="about-contributor-role">{t("about.lead_developer")}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="about-divider" />
+
+                  {/* Links */}
+                  <div className="about-section">
+                    <div className="about-links">
+                      <a
+                        href={GITHUB_REPO}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="about-link"
+                      >
+                        <Github className="w-3.5 h-3.5" />
+                        {t("about.github")}
+                      </a>
+                      <a
+                        href={`${GITHUB_REPO}/issues`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="about-link"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        {t("about.issues")}
+                      </a>
+                    </div>
                   </div>
                 </>
               )}
