@@ -216,5 +216,11 @@
   "rules.field.payee": "Payee",
   "rules.field.category": "Category",
   "rules.field.notes": "Notes",
+  "rules.field.amount": "Amount",
+  "rules.field.date": "Date",
+  "rules.field.ticker": "Ticker",
+  "rules.field.shares": "Shares",
+  "rules.field.price": "Price",
+  "rules.field.fee": "Fee",
   "rules.delete_confirm": "Are you sure you want to delete this rule?"
 }

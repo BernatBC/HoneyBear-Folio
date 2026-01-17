@@ -112,52 +112,83 @@ export default function AccountDetails({ account, onUpdate }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
   // Rules Engine Logic
-  const prevPayee = useRef(payee);
-  const prevCategory = useRef(category);
-  const prevNotes = useRef(notes);
+  const prevValues = useRef({
+    payee,
+    category,
+    notes,
+    amount,
+    date,
+    ticker,
+    shares,
+    price: pricePerShare,
+    fee,
+  });
 
   useEffect(() => {
     if (!rules.length) return;
 
+    // Map rule field names to state values and setters
+    const fieldMap = {
+      payee: { value: payee, set: setPayee },
+      category: { value: category, set: setCategory },
+      notes: { value: notes, set: setNotes },
+      amount: { value: amount, set: setAmount },
+      date: { value: date, set: setDate },
+      ticker: { value: ticker, set: setTicker },
+      shares: { value: shares, set: setShares },
+      price: { value: pricePerShare, set: setPricePerShare },
+      fee: { value: fee, set: setFee },
+    };
+
+    const currentValues = {
+      payee,
+      category,
+      notes,
+      amount,
+      date,
+      ticker,
+      shares,
+      price: pricePerShare,
+      fee,
+    };
+
     const sortedRules = [...rules].sort((a, b) => b.priority - a.priority);
 
-    // Check payee rules
-    if (payee !== prevPayee.current) {
-        for (const rule of sortedRules) {
-            if (rule.match_field === 'payee' && rule.match_pattern === payee) {
-                if (rule.action_field === 'category') setCategory(rule.action_value);
-                if (rule.action_field === 'notes') setNotes(rule.action_value);
-                if (rule.action_field === 'payee') setPayee(rule.action_value); // Recursive? Rare.
-            }
-        }
-    }
+    // Identify changed fields
+    const changedFields = Object.keys(currentValues).filter(
+      (k) => currentValues[k] !== prevValues.current[k],
+    );
 
-    // Check category rules
-    if (category !== prevCategory.current) {
-        for (const rule of sortedRules) {
-            if (rule.match_field === 'category' && rule.match_pattern === category) {
-                 if (rule.action_field === 'notes') setNotes(rule.action_value);
-                 if (rule.action_field === 'payee') setPayee(rule.action_value);
-                 if (rule.action_field === 'category') setCategory(rule.action_value);
-            }
+    changedFields.forEach((field) => {
+      const val = currentValues[field];
+      // Find matching rules (exact match for now)
+      const matchingRules = sortedRules.filter(
+        (r) => r.match_field === field && r.match_pattern === val,
+      );
+      matchingRules.forEach((rule) => {
+        const target = fieldMap[rule.action_field];
+        if (target) {
+          // Only update if value is different to avoid loops (though useRef prevents infinite loop on same field)
+          if (target.value !== rule.action_value) {
+            target.set(rule.action_value);
+          }
         }
-    }
-    
-    // Check notes rules (though less common to drive others)
-    if (notes !== prevNotes.current) {
-        for (const rule of sortedRules) {
-            if (rule.match_field === 'notes' && rule.match_pattern === notes) {
-                 if (rule.action_field === 'category') setCategory(rule.action_value);
-                 if (rule.action_field === 'payee') setPayee(rule.action_value);
-            }
-        }
-    }
+      });
+    });
 
-    prevPayee.current = payee;
-    prevCategory.current = category;
-    prevNotes.current = notes;
-    
-  }, [payee, category, notes, rules]);
+    prevValues.current = currentValues;
+  }, [
+    payee,
+    category,
+    notes,
+    rules,
+    amount,
+    date,
+    ticker,
+    shares,
+    pricePerShare,
+    fee,
+  ]);
 
   async function fetchSuggestions() {
     try {

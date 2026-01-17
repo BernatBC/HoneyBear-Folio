@@ -4,6 +4,7 @@ import { Plus, Trash2, Edit, Save, X, BookOpenCheck, GripVertical } from "lucide
 import { useConfirm } from "../contexts/confirm";
 import { t } from "../i18n/i18n";
 import CustomSelect from "./CustomSelect";
+import NumberInput from "./NumberInput";
 import "../styles/Dashboard.css"; // Reuse dashboard styles for cards
 
 export default function RulesList() {
@@ -18,10 +19,9 @@ export default function RulesList() {
     action_field: "category",
     action_value: "",
   });
+  const [draggingId, setDraggingId] = useState(null);
 
   const confirm = useConfirm();
-  const draggingItem = useRef(null);
-  const dragOverItem = useRef(null);
 
   async function fetchRules() {
     try {
@@ -54,13 +54,15 @@ export default function RulesList() {
   }
 
   async function handleDelete(id) {
-    if (await confirm({ title: t("rules.delete_confirm"), isDestructive: true })) {
+    if (await confirm(t("rules.delete_confirm"), { kind: "error" })) {
       try {
         await invoke("delete_rule", { id });
-        fetchRules();
+        // Optimistic update
+        setRules(current => current.filter(r => r.id !== id));
         if (formState.id === id) resetForm();
       } catch (e) {
         console.error("Failed to delete rule:", e);
+        fetchRules(); // Revert on failure
       }
     }
   }
@@ -72,7 +74,7 @@ export default function RulesList() {
         matchField: formState.match_field,
         matchPattern: formState.match_pattern,
         actionField: formState.action_field,
-        actionValue: formState.action_value,
+        actionValue: String(formState.action_value), // Ensure string for DB
       };
 
       if (formState.id) {
@@ -82,8 +84,6 @@ export default function RulesList() {
           priority: Number(formState.priority),
         });
       } else {
-        // New rules go to top-ish (depending on backend sort).
-        // We set priority to max+1 so it appears at top if sort is DESC.
         const maxPriority =
           rules.length > 0 ? Math.max(...rules.map((r) => r.priority)) : 0;
         await invoke("create_rule", {
@@ -99,58 +99,61 @@ export default function RulesList() {
   }
 
   // DnD Handlers
-  const handleDragStart = (e, position) => {
-    draggingItem.current = position;
-    e.target.classList.add('opacity-50');
+  const handleDragStart = (e, id) => {
+    setDraggingId(id);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", id);
   };
 
-  const handleDragEnter = (e, position) => {
-    dragOverItem.current = position;
-  };
+  const handleDragOver = (e, targetIndex) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
 
-  const handleDragEnd = async (e) => {
-    e.target.classList.remove('opacity-50');
-    const dragIndex = draggingItem.current;
-    const dropIndex = dragOverItem.current;
+    if (!draggingId) return;
 
-    if (dragIndex === null || dropIndex === null || dragIndex === dropIndex) {
-        draggingItem.current = null;
-        dragOverItem.current = null;
-        return;
-    }
+    const dragIndex = rules.findIndex((r) => r.id === draggingId);
+    if (dragIndex === -1 || dragIndex === targetIndex) return;
 
-    const copyList = [...rules];
-    const dragItemContent = copyList[dragIndex];
-    copyList.splice(dragIndex, 1);
-    copyList.splice(dropIndex, 0, dragItemContent);
-
-    // Update priorities locally to reflect new order immediately
-    // ensuring consistent behavior if user edits right after drag
-    const total = copyList.length;
-    const updatedList = copyList.map((rule, idx) => ({
+    const newItems = [...rules];
+    const item = newItems[dragIndex];
+    newItems.splice(dragIndex, 1);
+    newItems.splice(targetIndex, 0, item);
+    
+    // Update priorities locally
+    const total = newItems.length;
+    const updatedList = newItems.map((rule, idx) => ({
         ...rule,
-        priority: total - idx
+        priority: total - idx // Re-assign priorities based on new visual order
     }));
 
-    draggingItem.current = null;
-    dragOverItem.current = null;
     setRules(updatedList);
+  };
 
+  const handleDragEnd = async () => {
+    setDraggingId(null);
     // Persist new order
     try {
-        await invoke("update_rules_order", { ruleIds: updatedList.map(r => r.id) });
+        await invoke("update_rules_order", { ruleIds: rules.map(r => r.id) });
     } catch(err) {
         console.error("Failed to reorder rules:", err);
-        fetchRules(); // Revert on fail
+        fetchRules(); 
     }
   };
 
 
   const availableFields = [
-    { value: "payee", label: t("rules.field.payee") },
-    { value: "category", label: t("rules.field.category") },
-    { value: "notes", label: t("rules.field.notes") },
+    { value: "payee", label: t("rules.field.payee"), type: "text" },
+    { value: "category", label: t("rules.field.category"), type: "text"  },
+    { value: "notes", label: t("rules.field.notes"), type: "text"  },
+    { value: "amount", label: t("rules.field.amount"), type: "number" },
+    { value: "date", label: t("rules.field.date"), type: "text"  }, 
+    { value: "ticker", label: t("rules.field.ticker"), type: "text"  },
+    { value: "shares", label: t("rules.field.shares"), type: "number" },
+    { value: "price", label: t("rules.field.price"), type: "number" },
+    { value: "fee", label: t("rules.field.fee"), type: "number" },
   ];
+
+  const currentActionField = availableFields.find(f => f.value === formState.action_field) || availableFields[0];
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
@@ -217,14 +220,23 @@ export default function RulesList() {
                  {/* TO */}
                 <div className="flex flex-col">
                      <label className="text-xs font-semibold text-slate-500 uppercase mb-1">{t("rules.to")}</label>
-                     <input
-                      type="text"
-                      required
-                      placeholder="e.g. Coffee"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
-                      value={formState.action_value}
-                      onChange={(e) => setFormState({ ...formState, action_value: e.target.value })}
-                    />
+                     {currentActionField.type === "number" ? (
+                         <NumberInput
+                            value={formState.action_value}
+                            onChange={(val) => setFormState({ ...formState, action_value: val })}
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                            placeholder="0.00"
+                         />
+                     ) : (
+                        <input
+                            type="text"
+                            required
+                            placeholder="e.g. Coffee"
+                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                            value={formState.action_value}
+                            onChange={(e) => setFormState({ ...formState, action_value: e.target.value })}
+                        />
+                     )}
                 </div>
             </div>
 
@@ -252,17 +264,18 @@ export default function RulesList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-              {rules.map((rule, index) => (
+              {rules.map((rule, index) => {
+                  const isDragging = draggingId === rule.id;
+                  return (
                 <tr 
                     key={rule.id} 
-                    className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-move"
+                    className={`transition-colors group ${isDragging ? "opacity-30 bg-slate-100 dark:bg-slate-700" : "hover:bg-slate-50 dark:hover:bg-slate-700/30"}`}
                     draggable={!isEditing}
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragEnter={(e) => handleDragEnter(e, index)}
+                    onDragStart={(e) => handleDragStart(e, rule.id)}
+                    onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnd={handleDragEnd}
-                    onDragOver={(e) => e.preventDefault()}
                 >
-                  <td className="px-4 py-4 text-slate-400 dark:text-slate-600">
+                  <td className="px-4 py-4 text-slate-400 dark:text-slate-600 cursor-move">
                       <GripVertical size={16} className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing" />
                   </td>
                   <td className="px-6 py-4 capitalize text-slate-800 dark:text-slate-200">{t(`rules.field.${rule.match_field}`) || rule.match_field}</td>
@@ -286,13 +299,13 @@ export default function RulesList() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
               {rules.length === 0 && (
                  <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-slate-400">
                     No rules defined yet. Use the form above to create one.
                   </td>
-                 </tr>
+                </tr>
               )}
             </tbody>
           </table>
