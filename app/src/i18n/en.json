@@ -58,6 +58,8 @@
   "update.updating": "Updating...",
   "update.update_now": "Update Now",
   "update.restart_apply": "Restart to Apply Update",
+  "update.show_release_notes": "Show release notes",
+  "update.hide_release_notes": "Hide release notes",
   "update.failed_update": "Failed to update",
   "update.failed_relaunch": "Failed to relaunch application",
   "sidebar.title": "HoneyBear Folio",

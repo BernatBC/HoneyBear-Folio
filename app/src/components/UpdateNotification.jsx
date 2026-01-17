@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { createPortal } from "react-dom";
-import { X, Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw, ChevronDown, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import "../styles/Modal.css";
 import { t } from "../i18n/i18n";
@@ -15,6 +15,15 @@ export default function UpdateNotification() {
   const [downloaded, setDownloaded] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
+  const [showNotes, setShowNotes] = useState(false);
+
+  const cleanReleaseNotes = (body) => {
+    if (!body) return "";
+    let cleaned = body.replace(/\s*\([^)]+\)\s*[—\-]\s*@[\w-]+/g, "");
+    cleaned = cleaned.replace(/\*\*Assets:\*\*[\s\S]*$/i, "");
+    cleaned = cleaned.replace(/^# .*\n+/gm, "");
+    return cleaned.trim();
+  };
 
   useEffect(() => {
     const checkForUpdates = async () => {
@@ -114,58 +123,81 @@ export default function UpdateNotification() {
 
   return createPortal(
     <div className="modal-overlay">
-      <div className="modal-container w-full max-w-md">
-        <div className="flex justify-between items-center mb-4">
+      <div className="modal-container w-full max-w-md !pb-6 !min-h-0 h-auto">
+        <div className="flex items-center mb-3">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             {t("update.title")}
           </h2>
-          <button
-            onClick={handleClose}
-            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-          >
-            <X size={24} />
-          </button>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-3">
           <p className="text-slate-600 dark:text-slate-300 mb-2">
             {t("update.available_text", { version: updateInfo?.version })}
           </p>
 
           {updateInfo?.body && (
-            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 max-h-32 overflow-y-auto mb-4">
-              <ReactMarkdown
-                components={{
-                  ul: ({ node: _node, ...props }) => (
-                    <ul className="list-disc pl-4" {...props} />
-                  ),
-                  ol: ({ node: _node, ...props }) => (
-                    <ol className="list-decimal pl-4" {...props} />
-                  ),
-                  a: ({ node: _node, ...props }) => (
-                    <a
-                      className="text-blue-500 hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      {...props}
-                    />
-                  ),
-                  h1: ({ node: _node, ...props }) => (
-                    <h1 className="text-lg font-bold mt-2 mb-1" {...props} />
-                  ),
-                  h2: ({ node: _node, ...props }) => (
-                    <h2 className="text-base font-bold mt-2 mb-1" {...props} />
-                  ),
-                  h3: ({ node: _node, ...props }) => (
-                    <h3 className="text-sm font-bold mt-1 mb-1" {...props} />
-                  ),
-                  p: ({ node: _node, ...props }) => (
-                    <p className="mb-1" {...props} />
-                  ),
-                }}
+            <div className="mb-2">
+              <button
+                onClick={() => setShowNotes(!showNotes)}
+                className={`flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium ${
+                  showNotes ? "mb-2" : ""
+                }`}
               >
-                {updateInfo.body}
-              </ReactMarkdown>
+                {showNotes ? (
+                  <ChevronDown size={16} />
+                ) : (
+                  <ChevronRight size={16} />
+                )}
+                {showNotes
+                  ? t("update.hide_release_notes")
+                  : t("update.show_release_notes")}
+              </button>
+
+              {showNotes && (
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300 max-h-32 overflow-y-auto">
+                  <ReactMarkdown
+                    components={{
+                      ul: ({ node: _node, ...props }) => (
+                        <ul className="list-disc pl-4" {...props} />
+                      ),
+                      ol: ({ node: _node, ...props }) => (
+                        <ol className="list-decimal pl-4" {...props} />
+                      ),
+                      a: ({ node: _node, ...props }) => (
+                        <a
+                          className="text-blue-500 hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          {...props}
+                        />
+                      ),
+                      h1: ({ node: _node, ...props }) => (
+                        <h1
+                          className="text-lg font-bold mt-2 mb-1"
+                          {...props}
+                        />
+                      ),
+                      h2: ({ node: _node, ...props }) => (
+                        <h2
+                          className="text-base font-bold mt-2 mb-1"
+                          {...props}
+                        />
+                      ),
+                      h3: ({ node: _node, ...props }) => (
+                        <h3
+                          className="text-sm font-bold mt-1 mb-1"
+                          {...props}
+                        />
+                      ),
+                      p: ({ node: _node, ...props }) => (
+                        <p className="mb-1" {...props} />
+                      ),
+                    }}
+                  >
+                    {cleanReleaseNotes(updateInfo.body)}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
           )}
 
@@ -191,12 +223,12 @@ export default function UpdateNotification() {
           )}
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-2">
           {!downloaded ? (
             <>
               <button
                 onClick={handleClose}
-                className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                className="px-3 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                 disabled={downloading}
               >
                 {t("update.later")}
@@ -204,7 +236,7 @@ export default function UpdateNotification() {
               <button
                 onClick={handleUpdate}
                 disabled={downloading}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {downloading ? (
                   <>
@@ -222,7 +254,7 @@ export default function UpdateNotification() {
           ) : (
             <button
               onClick={handleRelaunch}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors w-full justify-center"
+              className="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors w-full justify-center"
             >
               <RefreshCw size={18} />
               {t("update.restart_apply")}
