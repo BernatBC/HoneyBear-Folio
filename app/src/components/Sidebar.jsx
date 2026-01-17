@@ -49,9 +49,13 @@ export default function Sidebar({
   const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
 
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const [sortConfig, setSortConfig] = useState({
-    field: "name",
-    direction: "asc",
+  const [sortConfig, setSortConfig] = useState(() => {
+    try {
+      const stored = localStorage.getItem("hb_account_sort_config");
+      return stored ? JSON.parse(stored) : { field: "name", direction: "asc" };
+    } catch {
+      return { field: "name", direction: "asc" };
+    }
   });
   const sortMenuRef = useRef(null);
 
@@ -119,8 +123,10 @@ export default function Sidebar({
   }, [accounts, marketValues, sortConfig, manualOrder]);
 
   const handleSort = (field, direction) => {
-    setSortConfig({ field, direction });
+    const newConfig = { field, direction };
+    setSortConfig(newConfig);
     setShowSortMenu(false);
+    localStorage.setItem("hb_account_sort_config", JSON.stringify(newConfig));
   };
 
   const handleReorder = (newAccountsList) => {
