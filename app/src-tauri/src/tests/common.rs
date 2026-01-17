@@ -51,5 +51,18 @@ pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
     )
     .unwrap();
 
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS rules (
+            id INTEGER PRIMARY KEY,
+            priority INTEGER NOT NULL DEFAULT 0,
+            match_field TEXT NOT NULL,
+            match_pattern TEXT NOT NULL,
+            action_field TEXT NOT NULL,
+            action_value TEXT NOT NULL
+        )",
+        [],
+    )
+    .unwrap();
+
     (dir, db_path)
 }

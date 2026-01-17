@@ -1596,9 +1596,8 @@ fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
     delete_transaction_db(&db_path, id)
 }
 
-#[tauri::command]
-fn get_rules(app_handle: AppHandle) -> Result<Vec<Rule>, String> {
-    let db_path = get_db_path(&app_handle)?;
+
+fn get_rules_db(db_path: &PathBuf) -> Result<Vec<Rule>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -1626,15 +1625,19 @@ fn get_rules(app_handle: AppHandle) -> Result<Vec<Rule>, String> {
 }
 
 #[tauri::command]
-fn create_rule(
-    app_handle: AppHandle,
+fn get_rules(app_handle: AppHandle) -> Result<Vec<Rule>, String> {
+    let db_path = get_db_path(&app_handle)?;
+    get_rules_db(&db_path)
+}
+
+fn create_rule_db(
+    db_path: &PathBuf,
     priority: i32,
     match_field: String,
     match_pattern: String,
     action_field: String,
     action_value: String,
 ) -> Result<i32, String> {
-    let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     conn.execute(
@@ -1648,8 +1651,27 @@ fn create_rule(
 }
 
 #[tauri::command]
-fn update_rule(
+fn create_rule(
     app_handle: AppHandle,
+    priority: i32,
+    match_field: String,
+    match_pattern: String,
+    action_field: String,
+    action_value: String,
+) -> Result<i32, String> {
+    let db_path = get_db_path(&app_handle)?;
+    create_rule_db(
+        &db_path,
+        priority,
+        match_field,
+        match_pattern,
+        action_field,
+        action_value,
+    )
+}
+
+fn update_rule_db(
+    db_path: &PathBuf,
     id: i32,
     priority: i32,
     match_field: String,
@@ -1657,7 +1679,6 @@ fn update_rule(
     action_field: String,
     action_value: String,
 ) -> Result<(), String> {
-    let db_path = get_db_path(&app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     conn.execute(
@@ -1670,8 +1691,28 @@ fn update_rule(
 }
 
 #[tauri::command]
-fn delete_rule(app_handle: AppHandle, id: i32) -> Result<(), String> {
+fn update_rule(
+    app_handle: AppHandle,
+    id: i32,
+    priority: i32,
+    match_field: String,
+    match_pattern: String,
+    action_field: String,
+    action_value: String,
+) -> Result<(), String> {
     let db_path = get_db_path(&app_handle)?;
+    update_rule_db(
+        &db_path,
+        id,
+        priority,
+        match_field,
+        match_pattern,
+        action_field,
+        action_value,
+    )
+}
+
+fn delete_rule_db(db_path: &PathBuf, id: i32) -> Result<(), String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     conn.execute("DELETE FROM rules WHERE id = ?1", params![id])
@@ -1681,8 +1722,12 @@ fn delete_rule(app_handle: AppHandle, id: i32) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn update_rules_order(app_handle: AppHandle, rule_ids: Vec<i32>) -> Result<(), String> {
+fn delete_rule(app_handle: AppHandle, id: i32) -> Result<(), String> {
     let db_path = get_db_path(&app_handle)?;
+    delete_rule_db(&db_path, id)
+}
+
+fn update_rules_order_db(db_path: &PathBuf, rule_ids: Vec<i32>) -> Result<(), String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
@@ -1698,7 +1743,14 @@ fn update_rules_order(app_handle: AppHandle, rule_ids: Vec<i32>) -> Result<(), S
     }
 
     tx.commit().map_err(|e| e.to_string())?;
+
     Ok(())
+}
+
+#[tauri::command]
+fn update_rules_order(app_handle: AppHandle, rule_ids: Vec<i32>) -> Result<(), String> {
+    let db_path = get_db_path(&app_handle)?;
+    update_rules_order_db(&db_path, rule_ids)
 }
 
 fn get_payees_db(db_path: &PathBuf) -> Result<Vec<String>, String> {
