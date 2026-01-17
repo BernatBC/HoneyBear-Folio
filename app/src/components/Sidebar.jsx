@@ -20,6 +20,7 @@ import {
   EyeOff,
   PanelLeftClose,
   ArrowUpDown,
+  BookOpenCheck,
 } from "lucide-react";
 import { computeNetWorth } from "../utils/networth";
 import { t } from "../i18n/i18n";
@@ -246,6 +247,20 @@ export default function Sidebar({
                 className={`sidebar-nav-icon ${selectedId === "fire-calculator" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
               />
               <span className="font-medium">{t("nav.fire_calculator")}</span>
+            </button>
+
+            <button
+              onClick={() => handleSelect("rules")}
+              className={`sidebar-nav-item group ${
+                selectedId === "rules"
+                  ? "sidebar-nav-item-active"
+                  : "sidebar-nav-item-inactive"
+              }`}
+            >
+              <BookOpenCheck
+                className={`sidebar-nav-icon ${selectedId === "rules" ? "sidebar-nav-icon-active" : "sidebar-nav-icon-inactive"}`}
+              />
+              <span className="font-medium">{t("nav.rules")}</span>
             </button>
 
             <button

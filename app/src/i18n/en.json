@@ -203,5 +203,18 @@
   "sort.balance_asc": "Balance (Low to High)",
   "sort.balance_desc": "Balance (High to Low)",
   "sort.value_asc": "Value (Low to High)",
-  "sort.value_desc": "Value (High to Low)"
+  "sort.value_desc": "Value (High to Low)",
+  "nav.rules": "Rules",
+  "rules.title": "Transaction Rules",
+  "rules.subtitle": "Define rules to automatically fill transaction fields",
+  "rules.add": "Add Rule",
+  "rules.priority": "Priority",
+  "rules.if": "If",
+  "rules.equals": "Equals",
+  "rules.then_set": "Then Set",
+  "rules.to": "To",
+  "rules.field.payee": "Payee",
+  "rules.field.category": "Category",
+  "rules.field.notes": "Notes",
+  "rules.delete_confirm": "Are you sure you want to delete this rule?"
 }

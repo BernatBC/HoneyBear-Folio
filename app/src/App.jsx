@@ -6,6 +6,7 @@ import AccountDetails from "./components/AccountDetails";
 import Dashboard from "./components/Dashboard";
 import InvestmentDashboard from "./components/InvestmentDashboard";
 import FireCalculator from "./components/FireCalculator";
+import RulesList from "./components/RulesList";
 import { Wallet, PanelLeftOpen } from "lucide-react";
 import "./styles/App.css";
 import { ToastProvider } from "./components/Toast";
@@ -355,6 +356,8 @@ function App() {
                         <InvestmentDashboard />
                       ) : selectedAccountId === "fire-calculator" ? (
                         <FireCalculator />
+                      ) : selectedAccountId === "rules" ? (
+                        <RulesList />
                       ) : selectedAccount ? (
                         <AccountDetails
                           key={selectedAccount.id}

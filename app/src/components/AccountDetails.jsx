@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -57,6 +57,7 @@ export default function AccountDetails({ account, onUpdate }) {
   const [addTargetAccount, setAddTargetAccount] = useState(null);
   const [tickerSuggestions, setTickerSuggestions] = useState([]);
   const [showTickerSuggestions, setShowTickerSuggestions] = useState(false);
+  const [rules, setRules] = useState([]);
 
   // Editing state
   const [editingId, setEditingId] = useState(null);
@@ -110,13 +111,63 @@ export default function AccountDetails({ account, onUpdate }) {
   // Sorting State
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
+  // Rules Engine Logic
+  const prevPayee = useRef(payee);
+  const prevCategory = useRef(category);
+  const prevNotes = useRef(notes);
+
+  useEffect(() => {
+    if (!rules.length) return;
+
+    const sortedRules = [...rules].sort((a, b) => b.priority - a.priority);
+
+    // Check payee rules
+    if (payee !== prevPayee.current) {
+        for (const rule of sortedRules) {
+            if (rule.match_field === 'payee' && rule.match_pattern === payee) {
+                if (rule.action_field === 'category') setCategory(rule.action_value);
+                if (rule.action_field === 'notes') setNotes(rule.action_value);
+                if (rule.action_field === 'payee') setPayee(rule.action_value); // Recursive? Rare.
+            }
+        }
+    }
+
+    // Check category rules
+    if (category !== prevCategory.current) {
+        for (const rule of sortedRules) {
+            if (rule.match_field === 'category' && rule.match_pattern === category) {
+                 if (rule.action_field === 'notes') setNotes(rule.action_value);
+                 if (rule.action_field === 'payee') setPayee(rule.action_value);
+                 if (rule.action_field === 'category') setCategory(rule.action_value);
+            }
+        }
+    }
+    
+    // Check notes rules (though less common to drive others)
+    if (notes !== prevNotes.current) {
+        for (const rule of sortedRules) {
+            if (rule.match_field === 'notes' && rule.match_pattern === notes) {
+                 if (rule.action_field === 'category') setCategory(rule.action_value);
+                 if (rule.action_field === 'payee') setPayee(rule.action_value);
+            }
+        }
+    }
+
+    prevPayee.current = payee;
+    prevCategory.current = category;
+    prevNotes.current = notes;
+    
+  }, [payee, category, notes, rules]);
+
   async function fetchSuggestions() {
     try {
-      const [payees, accountsList, categories] = await Promise.all([
+      const [payees, accountsList, categories, fetchedRules] = await Promise.all([
         invoke("get_payees"),
         invoke("get_accounts"),
         invoke("get_categories"),
+        invoke("get_rules"),
       ]);
+      setRules(fetchedRules);
 
       // Filter out current account from accounts list
       const otherAccounts = accountsList
