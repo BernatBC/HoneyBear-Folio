@@ -5,6 +5,9 @@ import {
   SlidersHorizontal,
   Globe,
   HelpCircle,
+  Info,
+  ExternalLink,
+  Github,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import "../styles/Modal.css";
@@ -18,10 +21,18 @@ import ErrorBoundary from "./ErrorBoundary";
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
+import { open } from "@tauri-apps/plugin-shell";
 import { t } from "../i18n/i18n";
 import { formatDateForUI } from "../utils/format";
+import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../utils/version";
 
 import { useCustomRate } from "../hooks/useCustomRate";
+import CONTRIBUTORS from "../config/contributors";
+import THIRD_PARTY_LICENSES from "../config/licenses";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+const GITHUB_REPO = "https://github.com/BernatBC/HoneyBear-Folio";
+const LICENSE_URL = `${GITHUB_REPO}/blob/main/LICENSE`;
 
 export default function SettingsModal({ onClose }) {
   const {
@@ -37,6 +48,7 @@ export default function SettingsModal({ onClose }) {
   const { theme, setTheme } = useTheme();
   const [dbPath, setDbPath] = useState("");
   const { checkAndPrompt, dialog } = useCustomRate();
+  const [showAllLicenses, setShowAllLicenses] = useState(false);
   const [fontSize, setFontSize] = useState(() => {
     try {
       const v = localStorage.getItem("hb_font_size");
@@ -107,6 +119,14 @@ export default function SettingsModal({ onClose }) {
     const el = e.currentTarget;
     el.removeAttribute("data-tooltip-visible");
     el.removeAttribute("data-tooltip-side");
+  }
+
+  async function openExternal(url) {
+    try {
+      await open(url);
+    } catch (e) {
+      console.error("Failed to open external URL:", e);
+    }
   }
 
   async function handleSelectDb() {
@@ -212,6 +232,15 @@ export default function SettingsModal({ onClose }) {
                 <Globe className="w-4 h-4 text-slate-400" />
                 <span>{t("settings.formats")}</span>
               </button>
+              <button
+                role="tab"
+                aria-selected={activeTab === "about"}
+                onClick={() => setActiveTab("about")}
+                className={`settings-tab ${activeTab === "about" ? "settings-tab-active" : ""}`}
+              >
+                <Info className="w-4 h-4 text-slate-400" />
+                <span>{t("settings.about")}</span>
+              </button>
             </div>
 
             <div className="modal-body flex-1">
@@ -219,7 +248,9 @@ export default function SettingsModal({ onClose }) {
                 <h3 className="settings-section-heading">
                   {activeTab === "general"
                     ? t("settings.general")
-                    : t("settings.formats")}
+                    : activeTab === "formats"
+                      ? t("settings.formats")
+                      : t("settings.about")}
                 </h3>
               </div>
               {activeTab === "general" && (
@@ -502,6 +533,188 @@ export default function SettingsModal({ onClose }) {
                       placeholder={t("settings.select_first_day_placeholder")}
                       fullWidth={false}
                     />
+                  </div>
+                </>
+              )}
+
+              {activeTab === "about" && (
+                <>
+                  {/* App Header */}
+                  <div className="about-header">
+                    <img
+                      src="/icon.png"
+                      alt="HoneyBear Folio"
+                      className="w-16 h-16 object-contain mb-3"
+                    />
+                    <h3 className="about-app-name">HoneyBear Folio</h3>
+                    <div className="about-version-badge">
+                      <span>{t("about.version")}:</span>
+                      {IS_RELEASE && APP_VERSION ? (
+                        <a
+                          href={`${GITHUB_REPO}/releases/tag/v${APP_VERSION}`}
+                          className="about-version-link"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            openExternal(
+                              `${GITHUB_REPO}/releases/tag/v${APP_VERSION}`,
+                            );
+                          }}
+                        >
+                          v{getDisplayVersion()}
+                        </a>
+                      ) : (
+                        <span>{getDisplayVersion()}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Copyright */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">
+                      {t("about.copyright")}
+                    </h4>
+                    <p className="about-section-content">© 2025 BernatBC</p>
+                  </div>
+
+                  {/* License */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">
+                      {t("about.license")}
+                    </h4>
+                    <p className="about-license-text">
+                      {t("about.license_text")}
+                    </p>
+                    <a
+                      href={LICENSE_URL}
+                      className="about-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openExternal(LICENSE_URL);
+                      }}
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {t("about.view_license")}
+                    </a>
+                  </div>
+
+                  {/* Third Party Licenses */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">
+                      {t("about.third_party")}
+                    </h4>
+                    {showAllLicenses && (
+                      <ul className="about-license-list">
+                        {THIRD_PARTY_LICENSES.map((l) => (
+                          <li key={l.name}>
+                            <a
+                              href={l.url}
+                              className="about-link"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                openExternal(l.url);
+                              }}
+                            >
+                              {l.name}
+                            </a>
+                            <span className="about-license-meta">
+                              ({l.license})
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <div className="mt-2">
+                      <button
+                        onClick={() => setShowAllLicenses(!showAllLicenses)}
+                        className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors"
+                      >
+                        {showAllLicenses ? (
+                          <>
+                            <span>{t("about.third_party_hide")}</span>
+                            <ChevronUp className="w-3 h-3" />
+                          </>
+                        ) : (
+                          <>
+                            <span>
+                              {t("about.third_party_show", {
+                                count: THIRD_PARTY_LICENSES.length,
+                              })}
+                            </span>
+                            <ChevronDown className="w-3 h-3" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="about-divider" />
+
+                  {/* Contributors */}
+                  <div className="about-section">
+                    <h4 className="about-section-title">
+                      {t("about.contributors")}
+                    </h4>
+                    {CONTRIBUTORS.map((c) => {
+                      const profileUrl =
+                        c.github || `https://github.com/${c.username}`;
+                      const avatarUrl = `https://avatars.githubusercontent.com/${c.username}?s=120&v=4`;
+                      return (
+                        <a
+                          key={c.username}
+                          href={profileUrl}
+                          className="about-contributor about-contributor-link"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            openExternal(profileUrl);
+                          }}
+                        >
+                          <img
+                            src={avatarUrl}
+                            alt={`${c.username} avatar`}
+                            className="about-contributor-avatar"
+                          />
+                          <div className="about-contributor-info">
+                            <span className="about-contributor-name">
+                              {c.username}
+                            </span>
+                            <span className="about-contributor-role">
+                              {t(c.roleKey)}
+                            </span>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+
+                  <div className="about-divider" />
+
+                  {/* Links */}
+                  <div className="about-section">
+                    <div className="about-links">
+                      <a
+                        href={GITHUB_REPO}
+                        className="about-link"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openExternal(GITHUB_REPO);
+                        }}
+                      >
+                        <Github className="w-3.5 h-3.5" />
+                        {t("about.github")}
+                      </a>
+                      <a
+                        href={`${GITHUB_REPO}/issues`}
+                        className="about-link"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openExternal(`${GITHUB_REPO}/issues`);
+                        }}
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        {t("about.issues")}
+                      </a>
+                    </div>
                   </div>
                 </>
               )}

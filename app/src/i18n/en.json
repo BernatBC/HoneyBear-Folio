@@ -181,5 +181,19 @@
   "confirm.edit_automated_notes": "This note was automatically generated for a brokerage transaction. Do you want to continue?",
   "confirm.save": "Save",
   "custom_rate.title": "Custom Exchange Rate",
-  "custom_rate.message": "Yahoo Finance does not support {currency}. Please enter the exchange rate in USD (Price of 1 {currency} in USD)."
+  "custom_rate.message": "Yahoo Finance does not support {currency}. Please enter the exchange rate in USD (Price of 1 {currency} in USD).",
+  "settings.about": "About",
+  "about.version": "Version",
+  "about.copyright": "Copyright",
+  "about.license": "License",
+  "about.third_party": "Third-Party Software",
+  "about.third_party_show": "Show all ({count})",
+  "about.third_party_hide": "Hide",
+  "about.license_text": "This software is licensed under the GNU General Public License v3.0 or later.",
+  "about.view_license": "View full license",
+  "about.contributors": "Contributors",
+  "about.lead_developer": "Lead Developer",
+  "about.tester_and_icon_designer": "Tester & Icon Designer",
+  "about.github": "GitHub Repository",
+  "about.issues": "Report Issues"
 }
