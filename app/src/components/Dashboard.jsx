@@ -618,7 +618,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [accounts, transactions, quotes, dailyPrices, isDark]);
+  }, [accounts, marketValues, transactions, quotes, dailyPrices, isDark]);
 
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;
