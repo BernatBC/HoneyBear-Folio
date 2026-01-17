@@ -1596,7 +1596,6 @@ fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
     delete_transaction_db(&db_path, id)
 }
 
-
 fn get_rules_db(db_path: &PathBuf) -> Result<Vec<Rule>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 

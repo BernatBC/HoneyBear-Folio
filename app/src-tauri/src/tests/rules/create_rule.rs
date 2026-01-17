@@ -4,7 +4,7 @@ use crate::{create_rule_db, get_rules_db};
 #[test]
 fn test_create_and_get_rules() {
     let (_dir, db_path) = setup_db();
-    
+
     // Create a rule
     let id = create_rule_db(
         &db_path,
@@ -21,7 +21,7 @@ fn test_create_and_get_rules() {
     // Verify fetching
     let rules = get_rules_db(&db_path).expect("failed to get rules");
     assert_eq!(rules.len(), 1);
-    
+
     let rule = &rules[0];
     assert_eq!(rule.id, id);
     assert_eq!(rule.priority, 10);
