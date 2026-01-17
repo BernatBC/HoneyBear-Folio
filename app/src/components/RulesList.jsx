@@ -175,7 +175,7 @@ export default function RulesList() {
     availableFields[0];
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-in fade-in duration-500 rules-container">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
