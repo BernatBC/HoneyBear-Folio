@@ -28,7 +28,7 @@
   }
 
   /* Header action group on the right */
-  .modal-header>.flex.items-center.gap-2 {
+  .modal-header > .flex.items-center.gap-2 {
     @apply items-center;
   }
 
@@ -194,7 +194,8 @@
   }
 
   /* Right-aligned tooltip */
-  .label-with-help .help-wrapper[data-tooltip][data-tooltip-side="right"]::after {
+  .label-with-help
+    .help-wrapper[data-tooltip][data-tooltip-side="right"]::after {
     transform: translateY(-50%);
     /* vertically center next to icon */
     top: var(--tooltip-top, 0);
@@ -203,7 +204,8 @@
     /* slightly less right offset */
   }
 
-  .label-with-help .help-wrapper[data-tooltip][data-tooltip-visible="true"]::after {
+  .label-with-help
+    .help-wrapper[data-tooltip][data-tooltip-visible="true"]::after {
     opacity: 1;
   }
 

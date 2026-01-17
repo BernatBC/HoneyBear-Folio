@@ -208,10 +208,11 @@ export default function ExportModal({ onClose }) {
         <div className="format-grid">
           <button
             onClick={() => setFormat("json")}
-            className={`format-button ${format === "json"
-              ? "format-button-active"
-              : "format-button-inactive"
-              }`}
+            className={`format-button ${
+              format === "json"
+                ? "format-button-active"
+                : "format-button-inactive"
+            }`}
           >
             <FileJson className="w-6 h-6 mb-2" />
             <span className="text-xs font-medium">
@@ -220,10 +221,11 @@ export default function ExportModal({ onClose }) {
           </button>
           <button
             onClick={() => setFormat("csv")}
-            className={`format-button ${format === "csv"
-              ? "format-button-active"
-              : "format-button-inactive"
-              }`}
+            className={`format-button ${
+              format === "csv"
+                ? "format-button-active"
+                : "format-button-inactive"
+            }`}
           >
             <FileText className="w-6 h-6 mb-2" />
             <span className="text-xs font-medium">
@@ -232,10 +234,11 @@ export default function ExportModal({ onClose }) {
           </button>
           <button
             onClick={() => setFormat("xlsx")}
-            className={`format-button ${format === "xlsx"
-              ? "format-button-active"
-              : "format-button-inactive"
-              }`}
+            className={`format-button ${
+              format === "xlsx"
+                ? "format-button-active"
+                : "format-button-inactive"
+            }`}
           >
             <FileSpreadsheet className="w-6 h-6 mb-2" />
             <span className="text-xs font-medium">

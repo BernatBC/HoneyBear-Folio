@@ -56,7 +56,7 @@ export default function WelcomeWindow() {
 
   return (
     <Modal
-      onClose={() => { }} // No-op closing, must complete setup
+      onClose={() => {}} // No-op closing, must complete setup
       className="!max-w-[500px] w-[90%]"
     >
       <ModalHeader title={t("Welcome to HoneyBear Folio")} />

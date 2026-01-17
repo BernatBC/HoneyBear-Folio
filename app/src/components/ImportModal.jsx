@@ -614,10 +614,10 @@ export default function ImportModal({ onClose, onImportComplete }) {
           let shares = mapping.shares
             ? row[mapping.shares]
             : row.shares ||
-            row.quantity ||
-            row.qty ||
-            row.Shares ||
-            row.Quantity;
+              row.quantity ||
+              row.qty ||
+              row.Shares ||
+              row.Quantity;
           let price = mapping.price
             ? row[mapping.price]
             : row.price || row.price_per_share || row.Price;
@@ -628,11 +628,11 @@ export default function ImportModal({ onClose, onImportComplete }) {
           let currency = mapping.currency
             ? row[mapping.currency]
             : row.currency ||
-            row.Currency ||
-            row.curr ||
-            row.currency_code ||
-            row.currencyCode ||
-            null;
+              row.Currency ||
+              row.curr ||
+              row.currency_code ||
+              row.currencyCode ||
+              null;
 
           if (typeof shares === "string")
             shares = parseNumberWithLocale(shares, "en-US");
@@ -733,10 +733,11 @@ export default function ImportModal({ onClose, onImportComplete }) {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragging
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-              : "border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50"
-              }`}
+            className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all group ${
+              isDragging
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                : "border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            }`}
           >
             {isDragging ? (
               <>

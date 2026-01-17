@@ -260,9 +260,7 @@ export default function SettingsModal({ onClose }) {
                         aria-hidden="true"
                       />
                     </span>
-                    <label className="modal-label">
-                      {t("settings.theme")}
-                    </label>
+                    <label className="modal-label">{t("settings.theme")}</label>
                   </div>
                 </div>
                 <div className="relative settings-select">
@@ -565,9 +563,7 @@ export default function SettingsModal({ onClose }) {
 
                 {/* License */}
                 <div className="about-section">
-                  <h4 className="about-section-title">
-                    {t("about.license")}
-                  </h4>
+                  <h4 className="about-section-title">{t("about.license")}</h4>
                   <p className="about-license-text">
                     {t("about.license_text")}
                   </p>

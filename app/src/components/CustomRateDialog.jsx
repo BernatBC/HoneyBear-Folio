@@ -34,15 +34,16 @@ export default function CustomRateDialog({
 
   return (
     <Modal onClose={onCancel} size="sm">
-      <ModalHeader
-        title={t("custom_rate.title")}
-        onClose={onCancel}
-      />
+      <ModalHeader title={t("custom_rate.title")} onClose={onCancel} />
       <ModalBody>
         <p className="mb-4 text-slate-600 dark:text-slate-300">
           {t("custom_rate.message", { currency })}
         </p>
-        <form id="custom-rate-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form
+          id="custom-rate-form"
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+        >
           <input
             ref={inputRef}
             type="number"

@@ -66,7 +66,7 @@ export default function AccountModal({
       if (msg.includes("already exists")) {
         showToast(
           t("error.account_exists", { name: nameTrimmed }) ||
-          `Account "${nameTrimmed}" already exists`,
+            `Account "${nameTrimmed}" already exists`,
           {
             type: "warning",
           },
@@ -80,10 +80,7 @@ export default function AccountModal({
   }
 
   return (
-    <Modal
-      onClose={onClose}
-      className="!p-6 !pb-4"
-    >
+    <Modal onClose={onClose} className="!p-6 !pb-4">
       <ModalHeader
         onClose={onClose}
         title={isEditing ? t("account.edit_account") : t("account.new_account")}
@@ -160,14 +157,14 @@ export default function AccountModal({
       </ModalBody>
 
       <ModalFooter>
-        <button
-          type="button"
-          onClick={onClose}
-          className="modal-cancel-button"
-        >
+        <button type="button" onClick={onClose} className="modal-cancel-button">
           {t("account.cancel")}
         </button>
-        <button type="submit" form="account-form" className="modal-action-button">
+        <button
+          type="submit"
+          form="account-form"
+          className="modal-action-button"
+        >
           <Check className="w-4 h-4 text-white" />
           <span className="text-white">
             {isEditing
