@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { X, Check, Wallet, Globe } from "lucide-react";
-import { createPortal } from "react-dom";
+import { Check, Wallet, Globe } from "lucide-react";
 import "../styles/Modal.css";
 import { invoke } from "@tauri-apps/api/core";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 import { t } from "../i18n/i18n"; // Assuming translation hook/function exists
 import { CURRENCIES } from "../utils/currencies";
 import CustomSelect from "./CustomSelect";
@@ -79,25 +79,17 @@ export default function AccountModal({
     }
   }
 
-  return createPortal(
-    <div className="modal-overlay">
-      <div className="modal-container w-full max-w-md">
-        <div className="modal-header">
-          <h2 className="modal-title">
-            <Wallet className="w-5 h-5 text-blue-500" />
-            {isEditing ? t("account.edit_account") : t("account.new_account")}
-          </h2>
-          <button
-            onClick={onClose}
-            className="modal-close-button"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+  return (
+    <Modal onClose={onClose} className="!p-6 !pb-4">
+      <ModalHeader
+        onClose={onClose}
+        title={isEditing ? t("account.edit_account") : t("account.new_account")}
+        icon={Wallet}
+      />
 
-        <form onSubmit={handleSubmit} className="modal-body">
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+      <ModalBody>
+        <form id="account-form" onSubmit={handleSubmit} className="space-y-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {isEditing
               ? t("account.edit_description")
               : t("account.new_description")}
@@ -161,29 +153,28 @@ export default function AccountModal({
               />
             </div>
           </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              onClick={onClose}
-              className="modal-cancel-button"
-            >
-              {t("account.cancel")}
-            </button>
-            <button type="submit" className="modal-action-button">
-              <Check className="w-4 h-4 text-white" />
-              <span className="text-white">
-                {isEditing
-                  ? t("account.save_changes")
-                  : t("account.create_account")}
-              </span>
-            </button>
-          </div>
         </form>
-      </div>
+      </ModalBody>
+
+      <ModalFooter>
+        <button type="button" onClick={onClose} className="modal-cancel-button">
+          {t("account.cancel")}
+        </button>
+        <button
+          type="submit"
+          form="account-form"
+          className="modal-action-button"
+        >
+          <Check className="w-4 h-4 text-white" />
+          <span className="text-white">
+            {isEditing
+              ? t("account.save_changes")
+              : t("account.create_account")}
+          </span>
+        </button>
+      </ModalFooter>
       {dialog}
-    </div>,
-    document.body,
+    </Modal>
   );
 }
 

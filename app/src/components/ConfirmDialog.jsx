@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { ConfirmContext } from "../contexts/confirm";
 import { t } from "../i18n/i18n";
 import "../styles/Modal.css";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 
 export function ConfirmDialogProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,27 +80,26 @@ function ConfirmDialog({
     }
   };
 
-  return createPortal(
-    <div className="modal-overlay">
-      <div className="modal-container w-auto max-w-md p-6 h-auto min-h-0">
-        <h2 className="modal-title mb-4">{title}</h2>
-        <p className="mb-6 text-slate-600 dark:text-slate-300">{message}</p>
-        <div className="modal-footer">
-          {showCancel && (
-            <button onClick={onCancel} className="modal-cancel-button">
-              {cancelLabel}
-            </button>
-          )}
-          <button
-            onClick={onConfirm}
-            className={`modal-action-button ${getButtonClass()}`}
-          >
-            {okLabel}
+  return (
+    <Modal onClose={onCancel} size="md">
+      <ModalHeader title={title} onClose={showCancel ? onCancel : undefined} />
+      <ModalBody>
+        <p className="text-slate-600 dark:text-slate-300">{message}</p>
+      </ModalBody>
+      <ModalFooter>
+        {showCancel && (
+          <button onClick={onCancel} className="modal-cancel-button">
+            {cancelLabel}
           </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
+        )}
+        <button
+          onClick={onConfirm}
+          className={`modal-action-button ${getButtonClass()}`}
+        >
+          {okLabel}
+        </button>
+      </ModalFooter>
+    </Modal>
   );
 }
 

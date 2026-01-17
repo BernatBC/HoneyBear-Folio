@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
-  X,
   Upload,
   FileSpreadsheet,
   FileJson,
@@ -12,6 +10,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import "../styles/Modal.css";
+import "../styles/SettingsModal.css";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 import "../styles/SettingsModal.css";
 import CustomSelect from "./CustomSelect";
 import Papa from "papaparse";
@@ -709,261 +709,262 @@ export default function ImportModal({ onClose, onImportComplete }) {
 
   // If SSR or tests, avoid touching document
   if (typeof document === "undefined") return null;
-  return createPortal(
-    <div className="modal-overlay">
-      <div className="modal-container w-full max-w-4xl flex flex-col max-h-[90vh]">
-        <div className="modal-header border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
-          <h2 className="modal-title">
-            <Upload className="w-5 h-5 text-blue-500" />
-            {t("import.title")}
-          </h2>
-          <button onClick={onClose} className="modal-close-button">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
-        <div className="modal-body overflow-y-auto flex-1">
-          {!file ? (
-            <div
-              ref={dropZoneRef}
-              onClick={() => fileInputRef.current?.click()}
-              onDragEnter={handleDragEnter}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all group ${
-                isDragging
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                  : "border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50"
-              }`}
-            >
-              {isDragging ? (
-                <>
-                  <Upload className="w-12 h-12 text-blue-500 mb-4 animate-pulse" />
-                  <p className="text-blue-600 dark:text-blue-400 font-medium">
-                    {t("import.drop_file_here") || "Drop file here"}
-                  </p>
-                </>
-              ) : (
-                <>
-                  {file && file.name && file.name.endsWith(".json") ? (
-                    <FileJson className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
-                  ) : (
-                    <FileSpreadsheet className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
-                  )}
-                  <p className="text-slate-600 dark:text-slate-300 font-medium">
-                    {t("import.drag_or_click") || t("import.click_to_upload")}
-                  </p>
-                  <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
-                    {t("import.supports")}
-                  </p>
-                </>
-              )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept=".csv,.xlsx,.xls,.json"
-                className="hidden"
-              />
+  return (
+    <Modal
+      onClose={onClose}
+      size="4xl"
+      className="!p-0 flex flex-col overflow-hidden max-h-[90vh]"
+    >
+      <div className="p-6 pb-0">
+        <ModalHeader
+          onClose={onClose}
+          title={t("import.title")}
+          icon={Upload}
+        />
+      </div>
+
+      <ModalBody className="overflow-y-auto flex-1 px-6">
+        {!file ? (
+          <div
+            ref={dropZoneRef}
+            onClick={() => fileInputRef.current?.click()}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all group ${
+              isDragging
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                : "border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            }`}
+          >
+            {isDragging ? (
+              <>
+                <Upload className="w-12 h-12 text-blue-500 mb-4 animate-pulse" />
+                <p className="text-blue-600 dark:text-blue-400 font-medium">
+                  {t("import.drop_file_here") || "Drop file here"}
+                </p>
+              </>
+            ) : (
+              <>
+                {file && file.name && file.name.endsWith(".json") ? (
+                  <FileJson className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+                ) : (
+                  <FileSpreadsheet className="w-12 h-12 text-slate-400 dark:text-slate-600 group-hover:text-blue-500 mb-4 transition-colors" />
+                )}
+                <p className="text-slate-600 dark:text-slate-300 font-medium">
+                  {t("import.drag_or_click") || t("import.click_to_upload")}
+                </p>
+                <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
+                  {t("import.supports")}
+                </p>
+              </>
+            )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".csv,.xlsx,.xls,.json"
+              className="hidden"
+            />
+          </div>
+        ) : step === 1 ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <FileSpreadsheet className="w-5 h-5 text-green-500" />
+                <span className="text-slate-900 dark:text-white font-medium">
+                  {file.name}
+                </span>
+              </div>
+              <button
+                onClick={() => setFile(null)}
+                className="text-slate-500 dark:text-slate-400 hover:text-red-400 text-sm"
+              >
+                {t("import.change_file")}
+              </button>
             </div>
-          ) : step === 1 ? (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-3">
-                  <FileSpreadsheet className="w-5 h-5 text-green-500" />
-                  <span className="text-slate-900 dark:text-white font-medium">
-                    {file.name}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setFile(null)}
-                  className="text-slate-500 dark:text-slate-400 hover:text-red-400 text-sm"
-                >
-                  {t("import.change_file")}
-                </button>
-              </div>
 
-              <div className="mb-2">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {t("import.indicate_account_column")}
-                </p>
-              </div>
+            <div className="mb-2">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {t("import.indicate_account_column")}
+              </p>
+            </div>
 
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  {t("import.map_columns")}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
-                  {t("import.be_sure_map_account")}
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  {Object.keys(mapping).map((field) => (
-                    <div key={field}>
-                      <label className="block text-xs font-medium text-slate-600 dark:text-slate-500 mb-1 capitalize">
-                        {t(`import.field.${field}`)}
-                      </label>
-                      <div className="relative">
-                        <CustomSelect
-                          value={mapping[field]}
-                          onChange={(v) =>
-                            setMapping({ ...mapping, [field]: v })
-                          }
-                          options={[
-                            { value: "", label: t("import.skip") },
-                            ...columns.map((col) => ({
-                              value: col,
-                              label: col,
-                            })),
-                          ]}
-                          placeholder={t("import.select_column")}
-                        />
-                      </div>
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                {t("import.map_columns")}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                {t("import.be_sure_map_account")}
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                {Object.keys(mapping).map((field) => (
+                  <div key={field}>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-500 mb-1 capitalize">
+                      {t(`import.field.${field}`)}
+                    </label>
+                    <div className="relative">
+                      <CustomSelect
+                        value={mapping[field]}
+                        onChange={(v) => setMapping({ ...mapping, [field]: v })}
+                        options={[
+                          { value: "", label: t("import.skip") },
+                          ...columns.map((col) => ({
+                            value: col,
+                            label: col,
+                          })),
+                        ]}
+                        placeholder={t("import.select_column")}
+                      />
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  {t("import.preview")}
+                </h3>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {t("import.showing_first_rows")}
+                </span>
               </div>
 
-              <div className="mb-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                    {t("import.preview")}
-                  </h3>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("import.showing_first_rows")}
-                  </span>
-                </div>
-
-                {parseError ? (
-                  <p className="text-sm text-red-500">{parseError}</p>
-                ) : previewRows && previewRows.length > 0 ? (
-                  <div className="overflow-x-auto bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 p-2 mt-2">
-                    <table className="w-full min-w-full text-sm table-auto">
-                      <thead>
-                        <tr className="bg-slate-100 dark:bg-slate-800">
+              {parseError ? (
+                <p className="text-sm text-red-500">{parseError}</p>
+              ) : previewRows && previewRows.length > 0 ? (
+                <div className="overflow-x-auto bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 p-2 mt-2">
+                  <table className="w-full min-w-full text-sm table-auto">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-slate-800">
+                        {Object.keys(previewRows[0]).map((h) => (
+                          <th
+                            key={h}
+                            className="text-left pr-4 text-xs font-medium text-slate-700 dark:text-slate-200 uppercase tracking-wide"
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {previewRows.map((r, idx) => (
+                        <tr
+                          key={idx}
+                          className="hover:bg-slate-100 dark:hover:bg-slate-800 odd:bg-white even:bg-slate-50 dark:odd:bg-slate-900 dark:even:bg-slate-800"
+                        >
                           {Object.keys(previewRows[0]).map((h) => (
-                            <th
+                            <td
                               key={h}
-                              className="text-left pr-4 text-xs font-medium text-slate-700 dark:text-slate-200 uppercase tracking-wide"
+                              className="pr-4 text-slate-900 dark:text-white whitespace-normal break-words"
                             >
-                              {h}
-                            </th>
+                              {String(r[h] ?? "")}
+                            </td>
                           ))}
                         </tr>
-                      </thead>
-                      <tbody>
-                        {previewRows.map((r, idx) => (
-                          <tr
-                            key={idx}
-                            className="hover:bg-slate-100 dark:hover:bg-slate-800 odd:bg-white even:bg-slate-50 dark:odd:bg-slate-900 dark:even:bg-slate-800"
-                          >
-                            {Object.keys(previewRows[0]).map((h) => (
-                              <td
-                                key={h}
-                                className="pr-4 text-slate-900 dark:text-white whitespace-normal break-words"
-                              >
-                                {String(r[h] ?? "")}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-500">
-                    {t("import.no_preview")}
-                  </p>
-                )}
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">
+                  {t("import.no_preview")}
+                </p>
+              )}
+            </div>
 
-              {importing && (
-                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-slate-700 dark:text-slate-300">
-                      {t("import.importing")}
-                    </span>
-                    <span className="text-slate-500 dark:text-slate-400">
-                      {progress.current} / {progress.total}
-                    </span>
-                  </div>
-                  <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-2">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: progress.total
-                          ? `${(progress.current / progress.total) * 100}%`
-                          : "0%",
-                      }}
-                    />
-                  </div>
-                  <div className="flex gap-4 text-xs">
-                    <span className="text-green-400 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" /> {progress.success}{" "}
-                      {t("import.success")}
-                    </span>
-                    <span className="text-red-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {progress.failed}
-                      {t("import.failed")}
-                    </span>
+            {importing && (
+              <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-slate-700 dark:text-slate-300">
+                    {t("import.importing")}
+                  </span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {progress.current} / {progress.total}
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: progress.total
+                        ? `${(progress.current / progress.total) * 100}%`
+                        : "0%",
+                    }}
+                  />
+                </div>
+                <div className="flex gap-4 text-xs">
+                  <span className="text-green-400 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> {progress.success}{" "}
+                    {t("import.success")}
+                  </span>
+                  <span className="text-red-400 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" /> {progress.failed}
+                    {t("import.failed")}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {showImportSummary &&
+              importErrorsState &&
+              importErrorsState.length > 0 && (
+                <div className="mt-4 p-4 rounded bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
+                  <h3 className="text-sm font-semibold mb-2">
+                    {t("import.error_summary") || "Import errors"}
+                  </h3>
+                  <p className="text-xs mb-2">
+                    {t("import.error_summary_instructions") ||
+                      "Some rows failed to import. Review the first errors below and fix your file or retry."}
+                  </p>
+                  <div className="max-h-40 overflow-auto text-sm">
+                    <ul>
+                      {importErrorsState.map((err, idx) => (
+                        <li key={idx} className="mb-1">
+                          <span className="font-semibold">
+                            Row {err.row + 1}:
+                          </span>{" "}
+                          {err.error}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               )}
-
-              {showImportSummary &&
-                importErrorsState &&
-                importErrorsState.length > 0 && (
-                  <div className="mt-4 p-4 rounded bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
-                    <h3 className="text-sm font-semibold mb-2">
-                      {t("import.error_summary") || "Import errors"}
-                    </h3>
-                    <p className="text-xs mb-2">
-                      {t("import.error_summary_instructions") ||
-                        "Some rows failed to import. Review the first errors below and fix your file or retry."}
-                    </p>
-                    <div className="max-h-40 overflow-auto text-sm">
-                      <ul>
-                        {importErrorsState.map((err, idx) => (
-                          <li key={idx} className="mb-1">
-                            <span className="font-semibold">
-                              Row {err.row + 1}:
-                            </span>{" "}
-                            {err.error}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-3">
-                  <FileSpreadsheet className="w-5 h-5 text-green-500" />
-                  <span className="text-slate-900 dark:text-white font-medium">
-                    {file.name}
-                  </span>
-                </div>
-                <button
-                  onClick={() => {
-                    setFile(null);
-                    setStep(0);
-                  }}
-                  className="text-slate-500 dark:text-slate-400 hover:text-red-400 text-sm"
-                >
-                  {t("import.change_file")}
-                </button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <FileSpreadsheet className="w-5 h-5 text-green-500" />
+                <span className="text-slate-900 dark:text-white font-medium">
+                  {file.name}
+                </span>
               </div>
-              <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300">
-                {t("import.file_loaded_review") ||
-                  "File loaded — click Next to review mappings and preview"}
-              </div>
+              <button
+                onClick={() => {
+                  setFile(null);
+                  setStep(0);
+                }}
+                className="text-slate-500 dark:text-slate-400 hover:text-red-400 text-sm"
+              >
+                {t("import.change_file")}
+              </button>
             </div>
-          )}
-        </div>
+            <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300">
+              {t("import.file_loaded_review") ||
+                "File loaded — click Next to review mappings and preview"}
+            </div>
+          </div>
+        )}
+      </ModalBody>
 
-        <div className="p-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+      <div className="px-6 pb-6 pt-0">
+        <ModalFooter className="mt-0 pt-4 border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={onClose}
             className="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
@@ -1006,10 +1007,9 @@ export default function ImportModal({ onClose, onImportComplete }) {
               </button>
             </>
           )}
-        </div>
+        </ModalFooter>
       </div>
-    </div>,
-    document.body,
+    </Modal>
   );
 }
 
