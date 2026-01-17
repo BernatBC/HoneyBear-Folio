@@ -192,12 +192,13 @@ export default function AccountDetails({ account, onUpdate }) {
 
   async function fetchSuggestions() {
     try {
-      const [payees, accountsList, categories, fetchedRules] = await Promise.all([
-        invoke("get_payees"),
-        invoke("get_accounts"),
-        invoke("get_categories"),
-        invoke("get_rules"),
-      ]);
+      const [payees, accountsList, categories, fetchedRules] =
+        await Promise.all([
+          invoke("get_payees"),
+          invoke("get_accounts"),
+          invoke("get_categories"),
+          invoke("get_rules"),
+        ]);
       setRules(fetchedRules);
 
       // Filter out current account from accounts list

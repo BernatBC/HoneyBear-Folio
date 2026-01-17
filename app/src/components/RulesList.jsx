@@ -1,6 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Plus, Trash2, Edit, Save, X, BookOpenCheck, GripVertical } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Edit,
+  Save,
+  BookOpenCheck,
+  GripVertical,
+} from "lucide-react";
 import { useConfirm } from "../contexts/confirm";
 import { t } from "../i18n/i18n";
 import CustomSelect from "./CustomSelect";
@@ -33,17 +40,28 @@ export default function RulesList() {
   }
 
   useEffect(() => {
-    fetchRules();
+    let mounted = true;
+    (async () => {
+      try {
+        const r = await invoke("get_rules");
+        if (mounted) setRules(r);
+      } catch (e) {
+        console.error("Failed to fetch rules:", e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   function resetForm() {
     setFormState({
-       id: null,
-       priority: 0,
-       match_field: "payee",
-       match_pattern: "",
-       action_field: "category",
-       action_value: "",
+      id: null,
+      priority: 0,
+      match_field: "payee",
+      match_pattern: "",
+      action_field: "category",
+      action_value: "",
     });
     setIsEditing(false);
   }
@@ -58,7 +76,7 @@ export default function RulesList() {
       try {
         await invoke("delete_rule", { id });
         // Optimistic update
-        setRules(current => current.filter(r => r.id !== id));
+        setRules((current) => current.filter((r) => r.id !== id));
         if (formState.id === id) resetForm();
       } catch (e) {
         console.error("Failed to delete rule:", e);
@@ -118,12 +136,12 @@ export default function RulesList() {
     const item = newItems[dragIndex];
     newItems.splice(dragIndex, 1);
     newItems.splice(targetIndex, 0, item);
-    
+
     // Update priorities locally
     const total = newItems.length;
     const updatedList = newItems.map((rule, idx) => ({
-        ...rule,
-        priority: total - idx // Re-assign priorities based on new visual order
+      ...rule,
+      priority: total - idx, // Re-assign priorities based on new visual order
     }));
 
     setRules(updatedList);
@@ -133,27 +151,28 @@ export default function RulesList() {
     setDraggingId(null);
     // Persist new order
     try {
-        await invoke("update_rules_order", { ruleIds: rules.map(r => r.id) });
-    } catch(err) {
-        console.error("Failed to reorder rules:", err);
-        fetchRules(); 
+      await invoke("update_rules_order", { ruleIds: rules.map((r) => r.id) });
+    } catch (err) {
+      console.error("Failed to reorder rules:", err);
+      fetchRules();
     }
   };
 
-
   const availableFields = [
     { value: "payee", label: t("rules.field.payee"), type: "text" },
-    { value: "category", label: t("rules.field.category"), type: "text"  },
-    { value: "notes", label: t("rules.field.notes"), type: "text"  },
+    { value: "category", label: t("rules.field.category"), type: "text" },
+    { value: "notes", label: t("rules.field.notes"), type: "text" },
     { value: "amount", label: t("rules.field.amount"), type: "number" },
-    { value: "date", label: t("rules.field.date"), type: "text"  }, 
-    { value: "ticker", label: t("rules.field.ticker"), type: "text"  },
+    { value: "date", label: t("rules.field.date"), type: "text" },
+    { value: "ticker", label: t("rules.field.ticker"), type: "text" },
     { value: "shares", label: t("rules.field.shares"), type: "number" },
     { value: "price", label: t("rules.field.price"), type: "number" },
     { value: "fee", label: t("rules.field.fee"), type: "number" },
   ];
 
-  const currentActionField = availableFields.find(f => f.value === formState.action_field) || availableFields[0];
+  const currentActionField =
+    availableFields.find((f) => f.value === formState.action_field) ||
+    availableFields[0];
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
@@ -171,83 +190,107 @@ export default function RulesList() {
 
       {/* Inline Form */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-             <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-                {isEditing ? "Edit Rule" : t("rules.add")}
-             </h2>
-             {isEditing && (
-                 <button onClick={resetForm} className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
-                     Cancel Edit
-                 </button>
-             )}
-          </div>
-          
-          <form onSubmit={handleSubmit} className="flex flex-col md:flex-row items-end gap-4">
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
-                {/* IF */}
-                <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-slate-500 uppercase mb-1">{t("rules.if")}</label>
-                    <CustomSelect
-                        value={formState.match_field}
-                        onChange={(val) => setFormState({ ...formState, match_field: val })}
-                        options={availableFields}
-                    />
-                </div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+            {isEditing ? "Edit Rule" : t("rules.add")}
+          </h2>
+          {isEditing && (
+            <button
+              onClick={resetForm}
+              className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
 
-                {/* EQUALS */}
-                <div className="flex flex-col">
-                     <label className="text-xs font-semibold text-slate-500 uppercase mb-1">{t("rules.equals")}</label>
-                     <input
-                      type="text"
-                      required
-                      placeholder="e.g. Starbucks"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
-                      value={formState.match_pattern}
-                      onChange={(e) => setFormState({ ...formState, match_pattern: e.target.value })}
-                    />
-                </div>
-
-                {/* THEN SET */}
-                <div className="flex flex-col">
-                     <label className="text-xs font-semibold text-slate-500 uppercase mb-1">{t("rules.then_set")}</label>
-                      <CustomSelect
-                        value={formState.action_field}
-                        onChange={(val) => setFormState({ ...formState, action_field: val })}
-                        options={availableFields}
-                    />
-                </div>
-
-                 {/* TO */}
-                <div className="flex flex-col">
-                     <label className="text-xs font-semibold text-slate-500 uppercase mb-1">{t("rules.to")}</label>
-                     {currentActionField.type === "number" ? (
-                         <NumberInput
-                            value={formState.action_value}
-                            onChange={(val) => setFormState({ ...formState, action_value: val })}
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
-                            placeholder="0.00"
-                         />
-                     ) : (
-                        <input
-                            type="text"
-                            required
-                            placeholder="e.g. Coffee"
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
-                            value={formState.action_value}
-                            onChange={(e) => setFormState({ ...formState, action_value: e.target.value })}
-                        />
-                     )}
-                </div>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col md:flex-row items-end gap-4"
+        >
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+            {/* IF */}
+            <div className="flex flex-col">
+              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                {t("rules.if")}
+              </label>
+              <CustomSelect
+                value={formState.match_field}
+                onChange={(val) =>
+                  setFormState({ ...formState, match_field: val })
+                }
+                options={availableFields}
+              />
             </div>
 
-            <button
-                type="submit"
-                className="h-10 px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2 whitespace-nowrap shadow-sm hover:shadow"
-            >
-                {isEditing ? <Save size={18} /> : <Plus size={18} />}
-                {isEditing ? "Update" : "Add"}
-            </button>
-          </form>
+            {/* EQUALS */}
+            <div className="flex flex-col">
+              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                {t("rules.equals")}
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Starbucks"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                value={formState.match_pattern}
+                onChange={(e) =>
+                  setFormState({ ...formState, match_pattern: e.target.value })
+                }
+              />
+            </div>
+
+            {/* THEN SET */}
+            <div className="flex flex-col">
+              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                {t("rules.then_set")}
+              </label>
+              <CustomSelect
+                value={formState.action_field}
+                onChange={(val) =>
+                  setFormState({ ...formState, action_field: val })
+                }
+                options={availableFields}
+              />
+            </div>
+
+            {/* TO */}
+            <div className="flex flex-col">
+              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                {t("rules.to")}
+              </label>
+              {currentActionField.type === "number" ? (
+                <NumberInput
+                  value={formState.action_value}
+                  onChange={(val) =>
+                    setFormState({ ...formState, action_value: val })
+                  }
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                  placeholder="0.00"
+                />
+              ) : (
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Coffee"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                  value={formState.action_value}
+                  onChange={(e) =>
+                    setFormState({ ...formState, action_value: e.target.value })
+                  }
+                />
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="h-10 px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2 whitespace-nowrap shadow-sm hover:shadow"
+          >
+            {isEditing ? <Save size={18} /> : <Plus size={18} />}
+            {isEditing ? "Update" : "Add"}
+          </button>
+        </form>
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
@@ -265,44 +308,60 @@ export default function RulesList() {
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
               {rules.map((rule, index) => {
-                  const isDragging = draggingId === rule.id;
-                  return (
-                <tr 
-                    key={rule.id} 
+                const isDragging = draggingId === rule.id;
+                return (
+                  <tr
+                    key={rule.id}
                     className={`transition-colors group ${isDragging ? "opacity-30 bg-slate-100 dark:bg-slate-700" : "hover:bg-slate-50 dark:hover:bg-slate-700/30"}`}
                     draggable={!isEditing}
                     onDragStart={(e) => handleDragStart(e, rule.id)}
                     onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnd={handleDragEnd}
-                >
-                  <td className="px-4 py-4 text-slate-400 dark:text-slate-600 cursor-move">
-                      <GripVertical size={16} className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing" />
-                  </td>
-                  <td className="px-6 py-4 capitalize text-slate-800 dark:text-slate-200">{t(`rules.field.${rule.match_field}`) || rule.match_field}</td>
-                  <td className="px-6 py-4 text-slate-800 dark:text-slate-200 font-medium">"{rule.match_pattern}"</td>
-                  <td className="px-6 py-4 capitalize text-slate-800 dark:text-slate-200">{t(`rules.field.${rule.action_field}`) || rule.action_field}</td>
-                  <td className="px-6 py-4 text-slate-800 dark:text-slate-200 font-medium">"{rule.action_value}"</td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                       <button
-                        onClick={() => handleEdit(rule)}
-                        className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(rule.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )})}
+                  >
+                    <td className="px-4 py-4 text-slate-400 dark:text-slate-600 cursor-move">
+                      <GripVertical
+                        size={16}
+                        className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"
+                      />
+                    </td>
+                    <td className="px-6 py-4 capitalize text-slate-800 dark:text-slate-200">
+                      {t(`rules.field.${rule.match_field}`) || rule.match_field}
+                    </td>
+                    <td className="px-6 py-4 text-slate-800 dark:text-slate-200 font-medium">
+                      &quot;{rule.match_pattern}&quot;
+                    </td>
+                    <td className="px-6 py-4 capitalize text-slate-800 dark:text-slate-200">
+                      {t(`rules.field.${rule.action_field}`) ||
+                        rule.action_field}
+                    </td>
+                    <td className="px-6 py-4 text-slate-800 dark:text-slate-200 font-medium">
+                      &quot;{rule.action_value}&quot;
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(rule)}
+                          className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(rule.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {rules.length === 0 && (
-                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400">
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-6 py-12 text-center text-slate-400"
+                  >
                     No rules defined yet. Use the form above to create one.
                   </td>
                 </tr>
