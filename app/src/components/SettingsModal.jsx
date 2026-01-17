@@ -555,7 +555,9 @@ export default function SettingsModal({ onClose }) {
                           className="about-version-link"
                           onClick={(e) => {
                             e.preventDefault();
-                            openExternal(`${GITHUB_REPO}/releases/tag/v${APP_VERSION}`);
+                            openExternal(
+                              `${GITHUB_REPO}/releases/tag/v${APP_VERSION}`,
+                            );
                           }}
                         >
                           v{getDisplayVersion()}
@@ -568,14 +570,20 @@ export default function SettingsModal({ onClose }) {
 
                   {/* Copyright */}
                   <div className="about-section">
-                    <h4 className="about-section-title">{t("about.copyright")}</h4>
+                    <h4 className="about-section-title">
+                      {t("about.copyright")}
+                    </h4>
                     <p className="about-section-content">© 2025 BernatBC</p>
                   </div>
 
                   {/* License */}
                   <div className="about-section">
-                    <h4 className="about-section-title">{t("about.license")}</h4>
-                    <p className="about-license-text">{t("about.license_text")}</p>
+                    <h4 className="about-section-title">
+                      {t("about.license")}
+                    </h4>
+                    <p className="about-license-text">
+                      {t("about.license_text")}
+                    </p>
                     <a
                       href={LICENSE_URL}
                       className="about-link"
@@ -591,7 +599,9 @@ export default function SettingsModal({ onClose }) {
 
                   {/* Third Party Licenses */}
                   <div className="about-section">
-                    <h4 className="about-section-title">{t("about.third_party")}</h4>
+                    <h4 className="about-section-title">
+                      {t("about.third_party")}
+                    </h4>
                     {showAllLicenses && (
                       <ul className="about-license-list">
                         {THIRD_PARTY_LICENSES.map((l) => (
@@ -606,7 +616,9 @@ export default function SettingsModal({ onClose }) {
                             >
                               {l.name}
                             </a>
-                            <span className="about-license-meta">({l.license})</span>
+                            <span className="about-license-meta">
+                              ({l.license})
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -624,7 +636,11 @@ export default function SettingsModal({ onClose }) {
                           </>
                         ) : (
                           <>
-                            <span>{t("about.third_party_show", { count: THIRD_PARTY_LICENSES.length })}</span>
+                            <span>
+                              {t("about.third_party_show", {
+                                count: THIRD_PARTY_LICENSES.length,
+                              })}
+                            </span>
                             <ChevronDown className="w-3 h-3" />
                           </>
                         )}
@@ -636,9 +652,12 @@ export default function SettingsModal({ onClose }) {
 
                   {/* Contributors */}
                   <div className="about-section">
-                    <h4 className="about-section-title">{t("about.contributors")}</h4>
+                    <h4 className="about-section-title">
+                      {t("about.contributors")}
+                    </h4>
                     {CONTRIBUTORS.map((c) => {
-                      const profileUrl = c.github || `https://github.com/${c.username}`;
+                      const profileUrl =
+                        c.github || `https://github.com/${c.username}`;
                       const avatarUrl = `https://avatars.githubusercontent.com/${c.username}?s=120&v=4`;
                       return (
                         <a
@@ -656,8 +675,12 @@ export default function SettingsModal({ onClose }) {
                             className="about-contributor-avatar"
                           />
                           <div className="about-contributor-info">
-                            <span className="about-contributor-name">{c.username}</span>
-                            <span className="about-contributor-role">{t(c.roleKey)}</span>
+                            <span className="about-contributor-name">
+                              {c.username}
+                            </span>
+                            <span className="about-contributor-role">
+                              {t(c.roleKey)}
+                            </span>
                           </div>
                         </a>
                       );
