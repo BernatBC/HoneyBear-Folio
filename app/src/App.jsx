@@ -271,7 +271,7 @@ function App() {
                     </div>
                   </div>
 
-                  <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-900 relative">
+                  <main className="flex-1 min-w-0 px-4 py-4 md:py-8 overflow-y-auto bg-slate-50 dark:bg-slate-900 relative">
                     <div
                       className={`absolute top-4 left-4 z-20 transition-all duration-300 ${
                         !isSidebarOpen
@@ -288,7 +288,7 @@ function App() {
                         <PanelLeftOpen size={20} />
                       </button>
                     </div>
-                    <div className="max-w-7xl mx-auto">
+                    <div>
                       {selectedAccountId === "dashboard" ? (
                         <Dashboard
                           accounts={accounts}
