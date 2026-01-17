@@ -26,6 +26,7 @@ import {
   useFormatDate,
   getDatePickerFormat,
 } from "../utils/format";
+import { buildHoldingsFromTransactions } from "../utils/investments";
 import { useNumberFormat } from "../contexts/number-format";
 import { t } from "../i18n/i18n";
 
@@ -53,6 +54,7 @@ export default function Dashboard({
   const [accounts, setAccounts] = useState(propAccounts);
   const [transactions, setTransactions] = useState([]);
   const [dailyPrices, setDailyPrices] = useState({});
+  const [quotes, setQuotes] = useState([]);
   const [timeRange, setTimeRange] = useState("1Y"); // 1M, 3M, 6M, YTD, 1Y, ALL, CUSTOM
   const [customStartDate, setCustomStartDate] = useState(
     new Date(new Date().setFullYear(new Date().getFullYear() - 1)),
@@ -96,6 +98,26 @@ export default function Dashboard({
     };
     fetchData();
   }, [propAccounts]);
+
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      if (transactions.length === 0) return;
+      const { currentHoldings } = buildHoldingsFromTransactions(transactions);
+      if (currentHoldings.length === 0) {
+        setQuotes([]);
+        return;
+      }
+      const tickers = currentHoldings.map((h) => h.ticker);
+      const uniqueTickers = [...new Set(tickers)];
+      try {
+        const qs = await invoke("get_stock_quotes", { tickers: uniqueTickers });
+        setQuotes(qs);
+      } catch (e) {
+        console.error("Failed to fetch quotes:", e);
+      }
+    };
+    fetchQuotes();
+  }, [transactions]);
 
   useEffect(() => {
     const fetchDailyPrices = async () => {
@@ -472,23 +494,89 @@ export default function Dashboard({
     if (accounts.length === 0) return null;
 
     const assetTypes = {};
+
+    // Helper to determine asset type
+    const getAssetType = (ticker) => {
+      const q = quotes.find(
+        (q) => q.symbol.toLowerCase() === ticker.toLowerCase(),
+      );
+      if (!q || !q.quoteType) return "Stock";
+
+      const type = q.quoteType.toUpperCase();
+      if (type === "EQUITY") return "Stock";
+      if (type === "ETF") return "ETF";
+      if (type === "CRYPTOCURRENCY") return "Crypto";
+      if (type === "MUTUALFUND") return "Mutual Fund";
+      if (type === "FUTURE") return "Future";
+      if (type === "INDEX") return "Index";
+      if (type === "COMMODITY") return "Commodities";
+      return "Stock";
+    };
+
     accounts.forEach((acc) => {
       let kind = acc.kind || "cash";
-      const accKindLower = kind.toLowerCase();
+      let accKindLower = kind.toLowerCase();
+      const exchangeRate = acc.exchange_rate || 1.0;
 
-      // Use current market value for brokerage accounts when available
-      const value =
-        (accKindLower === "brokerage" &&
-        marketValues &&
-        marketValues[acc.id] !== undefined
-          ? marketValues[acc.id]
-          : acc.balance || 0) * (acc.exchange_rate || 1.0);
+      // Check if this account has any holdings (transactions with ticker)
+      // If it does, we treat it as an investment capable account regardless of 'kind'
+      const accTxs = transactions.filter((t) => t.account_id === acc.id);
+      const { currentHoldings } = buildHoldingsFromTransactions(accTxs);
 
-      if (accKindLower === "brokerage") kind = "Stock";
-      else if (accKindLower === "cash") kind = "Cash";
-      else kind = kind.charAt(0).toUpperCase() + kind.slice(1);
+      if (currentHoldings.length > 0) {
+        accKindLower = "brokerage"; 
+      }
 
-      assetTypes[kind] = (assetTypes[kind] || 0) + value;
+      if (accKindLower === "brokerage") {
+        // Calculate holdings for this account
+        let holdingsValue = 0;
+
+        currentHoldings.forEach((h) => {
+          // Find price
+          let price = 0;
+          const quote = quotes.find(
+            (q) => q.symbol.toLowerCase() === h.ticker.toLowerCase(),
+          );
+          if (quote) {
+            price = quote.price;
+          } else if (dailyPrices[h.ticker]) {
+            const { list } = dailyPrices[h.ticker];
+            if (list.length > 0) price = list[list.length - 1].price;
+          }
+
+          const val = h.shares * price * exchangeRate;
+          holdingsValue += val;
+
+          const type = getAssetType(h.ticker);
+          assetTypes[type] = (assetTypes[type] || 0) + val;
+        });
+
+        // Remainder is Cash
+        // Calculate the cash component from the account balance
+        // We assume acc.balance correctly tracks the cash balance of the account (money in - money out - buys + sells)
+        const cashBalanceConverted = (acc.balance || 0) * exchangeRate;
+        const cashValue = cashBalanceConverted;
+        
+        // Add to Cash if significant
+        if (holdingsValue === 0 && currentHoldings.length === 0 && Math.abs(cashBalanceConverted) > 1.0) {
+           // Case: Account marked as brokerage manually but no holdings transactions entered. 
+           // Treat all balance as "Stock" because presumably the user is tracking total value manually in the balance field.
+           assetTypes["Stock"] = (assetTypes["Stock"] || 0) + cashBalanceConverted;
+        } else if (Math.abs(cashValue) > 1.0) {
+           assetTypes["Cash"] = (assetTypes["Cash"] || 0) + cashValue;
+        }
+
+      } else {
+        // Non-Brokerage (e.g. Cash, Savings)
+        // If they have no holdings (otherwise they'd be in the 'if' above),
+        // Then the value is just the balance.
+        const value = (acc.balance || 0) * exchangeRate;
+
+        if (accKindLower === "cash") kind = "Cash";
+        else kind = kind.charAt(0).toUpperCase() + kind.slice(1);
+
+        assetTypes[kind] = (assetTypes[kind] || 0) + value;
+      }
     });
 
     const labels = Object.keys(assetTypes);
@@ -516,7 +604,7 @@ export default function Dashboard({
             if (v < 0) return "transparent";
             return colors[i % colors.length];
           }),
-          borderColor: rawData.map((_, i) => colors[i % colors.length]),
+          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
           borderWidth: 4,
           borderDash: (ctx) => {
             const val = rawData[ctx.dataIndex];
@@ -526,7 +614,7 @@ export default function Dashboard({
         },
       ],
     };
-  }, [accounts, marketValues]);
+  }, [accounts, marketValues, transactions, quotes, dailyPrices, isDark]);
 
   const expensesByCategoryData = useMemo(() => {
     if (transactions.length === 0) return null;

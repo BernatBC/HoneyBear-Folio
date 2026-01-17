@@ -82,7 +82,7 @@ export default function InvestmentDashboard() {
             if (v < 0) return "transparent";
             return colors[i % colors.length];
           }),
-          borderColor: rawData.map((_, i) => colors[i % colors.length]),
+          borderColor: isDark ? "rgb(30, 41, 59)" : "#ffffff",
           borderWidth: 4,
           borderDash: (ctx) => {
             const val = rawData[ctx.dataIndex];
@@ -92,7 +92,7 @@ export default function InvestmentDashboard() {
         },
       ],
     };
-  }, [holdings]);
+  }, [holdings, isDark]);
 
   const chartOptions = useMemo(
     () => ({

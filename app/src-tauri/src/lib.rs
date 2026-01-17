@@ -14,6 +14,8 @@ struct YahooQuote {
     #[serde(rename = "regularMarketChangePercent")]
     change_percent: f64,
     currency: Option<String>,
+    #[serde(rename = "quoteType")]
+    quote_type: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -26,6 +28,8 @@ struct YahooChartMeta {
     #[serde(rename = "previousClose")]
     previous_close: Option<f64>,
     currency: Option<String>,
+    #[serde(rename = "instrumentType")]
+    instrument_type: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -1797,6 +1801,7 @@ async fn get_stock_quotes_with_client(
                                                     price,
                                                     change_percent,
                                                     currency: item.meta.currency.clone(),
+                                                    quote_type: item.meta.instrument_type.clone(),
                                                 });
                                             }
                                         }
@@ -1864,6 +1869,7 @@ async fn get_stock_quotes_with_client(
                     price,
                     change_percent: 0.0, // We don't store change percent in DB yet, could add it
                     currency: None,
+                    quote_type: None,
                 });
             }
         }
@@ -1922,6 +1928,7 @@ async fn get_stock_quotes_with_client_and_db(
                                                     price,
                                                     change_percent,
                                                     currency: item.meta.currency.clone(),
+                                                    quote_type: item.meta.instrument_type.clone(),
                                                 });
                                             }
                                         }
@@ -1988,6 +1995,7 @@ async fn get_stock_quotes_with_client_and_db(
                     price,
                     change_percent: 0.0, // We don't store change percent in DB yet, could add it
                     currency: None,
+                    quote_type: None,
                 });
             }
         }

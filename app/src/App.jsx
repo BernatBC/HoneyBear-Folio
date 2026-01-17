@@ -88,10 +88,14 @@ function App() {
 
       // Determine required exchange rates
       const ratesToFetch = new Set();
+      const quoteKeys = Object.keys(quoteMap);
       for (const [accountId, holdings] of Object.entries(accountHoldings)) {
         const targetCcy = accountCcyMap[Number(accountId)] || appCurrency;
         for (const ticker of Object.keys(holdings)) {
-          const q = quoteMap[ticker] || quoteMap[ticker.toUpperCase()];
+          const matchingTicker = quoteKeys.find(
+            (t) => t.toLowerCase() === ticker.toLowerCase(),
+          );
+          const q = quoteMap[matchingTicker];
           if (q && q.currency && q.currency !== targetCcy) {
             ratesToFetch.add(`${q.currency}${targetCcy}=X`);
           }
@@ -117,7 +121,12 @@ function App() {
 
         for (const [ticker, shares] of Object.entries(holdings)) {
           if (shares > 0.0001) {
-            const q = quoteMap[ticker] || quoteMap[ticker.toUpperCase()];
+            const tickers = Object.keys(quoteMap);
+            const matchingTicker = tickers.find(
+              (t) => t.toLowerCase() === ticker.toLowerCase(),
+            );
+            const q = quoteMap[matchingTicker];
+
             if (q) {
               let price = q.regularMarketPrice || 0;
               if (q.currency && q.currency !== targetCcy) {
