@@ -85,21 +85,21 @@ export default function SankeyDiagram({
       );
     };
 
-    relevantTransactions.forEach((t) => {
-      const acc = accountMap[t.account_id];
+    relevantTransactions.forEach((tx) => {
+      const acc = accountMap[tx.account_id];
       const accCurrency = acc?.currency || appCurrency;
       const rateToApp =
         accCurrency === appCurrency
           ? 1.0
-          : getPrice(`${accCurrency}${appCurrency}=X`, t.date) || 1.0;
-      const amount = t.amount * rateToApp;
+          : getPrice(`${accCurrency}${appCurrency}=X`, tx.date) || 1.0;
+      const amount = tx.amount * rateToApp;
 
       if (amount > 0) {
-        const cat = t.category || t("general.uncategorized");
+        const cat = tx.category || t("general.uncategorized");
         incomeCategories[cat] = (incomeCategories[cat] || 0) + amount;
         totalIncome += amount;
       } else if (amount < 0) {
-        const cat = t.category || t("general.uncategorized");
+        const cat = tx.category || t("general.uncategorized");
         const absAmount = Math.abs(amount);
 
         if (isInvestment(cat)) {
