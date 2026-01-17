@@ -20,7 +20,6 @@ import {
   EyeOff,
   PanelLeftClose,
 } from "lucide-react";
-import { getDisplayVersion, IS_RELEASE } from "../utils/version";
 import { computeNetWorth } from "../utils/networth";
 import { t } from "../i18n/i18n";
 import "../styles/Sidebar.css";
@@ -225,10 +224,6 @@ export default function Sidebar({
             <Settings className="w-4 h-4" />
             <span className="text-xs font-medium">{t("footer.settings")}</span>
           </button>
-        </div>
-        <div className="sidebar-version">
-          {IS_RELEASE ? `v${getDisplayVersion()}` : getDisplayVersion()} •
-          {t("footer.version_suffix")}
         </div>
       </div>
 
