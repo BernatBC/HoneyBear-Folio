@@ -26,6 +26,7 @@ import { formatDateForUI } from "../utils/format";
 import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../utils/version";
 
 import { useCustomRate } from "../hooks/useCustomRate";
+import CONTRIBUTORS from "../config/contributors";
 
 const GITHUB_REPO = "https://github.com/BernatBC/HoneyBear-Folio";
 const LICENSE_URL = `${GITHUB_REPO}/blob/main/LICENSE`;
@@ -577,13 +578,29 @@ export default function SettingsModal({ onClose }) {
                   {/* Contributors */}
                   <div className="about-section">
                     <h4 className="about-section-title">{t("about.contributors")}</h4>
-                    <div className="about-contributor">
-                      <div className="about-contributor-avatar">B</div>
-                      <div className="about-contributor-info">
-                        <span className="about-contributor-name">BernatBC</span>
-                        <span className="about-contributor-role">{t("about.lead_developer")}</span>
-                      </div>
-                    </div>
+                    {CONTRIBUTORS.map((c) => {
+                      const profileUrl = c.github || `https://github.com/${c.username}`;
+                      const avatarUrl = `https://avatars.githubusercontent.com/${c.username}?s=120&v=4`;
+                      return (
+                        <a
+                          key={c.username}
+                          href={profileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="about-contributor about-contributor-link"
+                        >
+                          <img
+                            src={avatarUrl}
+                            alt={`${c.username} avatar`}
+                            className="about-contributor-avatar"
+                          />
+                          <div className="about-contributor-info">
+                            <span className="about-contributor-name">{c.username}</span>
+                            <span className="about-contributor-role">{t(c.roleKey)}</span>
+                          </div>
+                        </a>
+                      );
+                    })}
                   </div>
 
                   <div className="about-divider" />
