@@ -176,6 +176,12 @@ function App() {
 
   const totalBalance = computeNetWorth(accounts, marketValues);
 
+  const totalCashBalance = accounts.reduce((sum, acc) => {
+    const balance = Number(acc.balance) || 0;
+    const rate = acc.exchange_rate || 1.0;
+    return sum + balance * rate;
+  }, 0);
+
   // Derive selectedAccount
   let selectedAccount = null;
   if (selectedAccountId === "dashboard") {
@@ -188,14 +194,16 @@ function App() {
     selectedAccount = {
       id: "all",
       name: "All Transactions",
-      balance: totalBalance,
+      balance: totalCashBalance,
+      totalValue: totalBalance,
     };
   } else {
     const acc = accounts.find((a) => a.id === selectedAccountId);
     if (acc) {
       selectedAccount = {
         ...acc,
-        balance:
+        balance: Number(acc.balance),
+        totalValue:
           marketValues[acc.id] !== undefined
             ? Number(acc.balance) + Number(marketValues[acc.id])
             : Number(acc.balance),

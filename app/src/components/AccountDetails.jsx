@@ -566,23 +566,65 @@ export default function AccountDetails({ account, onUpdate }) {
             </h1>
           )}
 
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Balance:
-            </span>
-            <span
-              className={`text-3xl font-bold tracking-tight ${
-                account.balance >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
-              }`}
-            >
-              {account.balance >= 0 ? "+" : ""}
-              {formatNumber(account.balance, {
-                style: "currency",
-                currency: account.currency,
-              })}
-            </span>
+          <div className="flex flex-col mt-2 gap-1">
+            {account.totalValue !== undefined &&
+            Math.abs(account.totalValue - account.balance) > 0.01 ? (
+              <>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Total Value:
+                  </span>
+                  <span
+                    className={`text-3xl font-bold tracking-tight ${
+                      account.totalValue >= 0
+                        ? "text-brand-600 dark:text-brand-400"
+                        : "text-rose-600 dark:text-rose-400"
+                    }`}
+                  >
+                    {formatNumber(account.totalValue, {
+                      style: "currency",
+                      currency: account.currency,
+                    })}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    Cash Balance:
+                  </span>
+                  <span
+                    className={`text-lg font-medium tracking-tight ${
+                      account.balance >= 0
+                        ? "text-emerald-600 dark:text-emerald-400 opacity-80"
+                        : "text-rose-600 dark:text-rose-400 opacity-80"
+                    }`}
+                  >
+                    {formatNumber(account.balance, {
+                      style: "currency",
+                      currency: account.currency,
+                    })}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Balance:
+                </span>
+                <span
+                  className={`text-3xl font-bold tracking-tight ${
+                    account.balance >= 0
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-rose-600 dark:text-rose-400"
+                  }`}
+                >
+                  {account.balance >= 0 ? "+" : ""}
+                  {formatNumber(account.balance, {
+                    style: "currency",
+                    currency: account.currency,
+                  })}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

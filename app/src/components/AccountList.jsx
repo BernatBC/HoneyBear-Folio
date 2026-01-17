@@ -13,17 +13,25 @@ export default function AccountList({
   return (
     <div className="space-y-1">
       {accounts.map((account) => {
-        const value =
+        const cashBalance = Number(account.balance);
+        const marketValue =
           marketValues && marketValues[account.id] !== undefined
-            ? Number(account.balance) + Number(marketValues[account.id])
-            : Number(account.balance);
+            ? Number(marketValues[account.id])
+            : 0;
+        const totalValue = cashBalance + marketValue;
+        const hasInvestments = Math.abs(marketValue) > 0.01;
 
-        const formattedValue = formatNumber(value, {
+        const formattedTotal = formatNumber(totalValue, {
           style: "currency",
           currency: account.currency || undefined,
         });
-        const finalFormattedValue =
-          formattedValue === "NaN" ? "" : formattedValue;
+        const formattedCash = formatNumber(cashBalance, {
+          style: "currency",
+          currency: account.currency || undefined,
+        });
+
+        const finalFormattedTotal =
+          formattedTotal === "NaN" ? "" : formattedTotal;
 
         return (
           <button
@@ -45,19 +53,26 @@ export default function AccountList({
               />
               <span className="font-medium truncate">{account.name}</span>
             </div>
-            <span
-              className={`font-medium shrink-0 ml-2 ${
-                finalFormattedValue && finalFormattedValue.length > 14
-                  ? "text-xs"
-                  : "text-sm"
-              } ${
+            <div
+              className={`flex flex-col items-end shrink-0 ml-2 ${
                 selectedId === account.id
                   ? "text-blue-100"
                   : "text-slate-500 group-hover:text-slate-300"
               }`}
             >
-              {finalFormattedValue}
-            </span>
+              <span
+                className={`font-medium ${
+                  finalFormattedTotal && finalFormattedTotal.length > 14
+                    ? "text-xs"
+                    : "text-sm"
+                }`}
+              >
+                {finalFormattedTotal}
+              </span>
+              {hasInvestments && (
+                <span className="text-[10px] opacity-80">{formattedCash}</span>
+              )}
+            </div>
           </button>
         );
       })}
