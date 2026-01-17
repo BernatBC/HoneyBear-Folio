@@ -195,5 +195,13 @@
   "about.lead_developer": "Lead Developer",
   "about.tester_and_icon_designer": "Tester & Icon Designer",
   "about.github": "GitHub Repository",
-  "about.issues": "Report Issues"
+  "about.issues": "Report Issues",
+  "sort.sort_by": "Sort By",
+  "sort.name_asc": "Name (A-Z)",
+  "sort.name_desc": "Name (Z-A)",
+  "sort.balance_asc": "Balance (Low to High)",
+  "sort.balance_desc": "Balance (High to Low)",
+  "sort.value_asc": "Value (Low to High)",
+  "sort.value_desc": "Value (High to Low)"
 }
+
