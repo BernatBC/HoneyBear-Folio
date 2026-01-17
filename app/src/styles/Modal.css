@@ -17,6 +17,8 @@
     z-index: 10002;
     /* Ensure modals don't scale with font-size setting */
     font-size: 16px;
+    /* Prevent flex stretching - height should fit content */
+    height: fit-content;
   }
 
   .modal-header {
