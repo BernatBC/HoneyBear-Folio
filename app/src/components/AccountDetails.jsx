@@ -19,6 +19,8 @@ import {
   ArrowRightLeft,
   User,
   Edit,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import {
   useFormatNumber,
@@ -104,6 +106,9 @@ export default function AccountDetails({ account, onUpdate }) {
   const [fee, setFee] = useState("");
   // Removed cashAccountId/Name/Suggestions as we are unified now
   const [isBuy, setIsBuy] = useState(true);
+  
+  // Sorting State
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
   async function fetchSuggestions() {
     try {
@@ -495,17 +500,66 @@ export default function AccountDetails({ account, onUpdate }) {
     }
   }
 
-  const filteredTransactions = transactions.filter((tx) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      tx.date.toLowerCase().includes(query) ||
-      tx.payee.toLowerCase().includes(query) ||
-      (tx.category && tx.category.toLowerCase().includes(query)) ||
-      (tx.notes && tx.notes.toLowerCase().includes(query)) ||
-      tx.amount.toString().includes(query)
-    );
-  });
+  const handleSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key) {
+      if (sortConfig.direction === "ascending") {
+        direction = "descending";
+      } else if (sortConfig.direction === "descending") {
+        direction = null;
+      }
+    }
+    setSortConfig({
+      key: direction ? key : null,
+      direction: direction ? direction : null,
+    });
+  };
+
+  const filteredTransactions = useMemo(() => {
+    let data = transactions.filter((tx) => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        tx.date.toLowerCase().includes(query) ||
+        tx.payee.toLowerCase().includes(query) ||
+        (tx.category && tx.category.toLowerCase().includes(query)) ||
+        (tx.notes && tx.notes.toLowerCase().includes(query)) ||
+        tx.amount.toString().includes(query)
+      );
+    });
+
+    if (sortConfig.key !== null) {
+      data.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Handle numeric values
+        if (
+          ["amount", "shares", "price_per_share", "fee"].includes(
+            sortConfig.key,
+          )
+        ) {
+          aValue = parseFloat(aValue || 0);
+          bValue = parseFloat(bValue || 0);
+        } else if (sortConfig.key === "date") {
+          aValue = new Date(aValue).getTime();
+          bValue = new Date(bValue).getTime();
+        } else {
+          aValue = (aValue || "").toString().toLowerCase();
+          bValue = (bValue || "").toString().toLowerCase();
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === "ascending" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "ascending" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [transactions, searchQuery, sortConfig]);
 
   const hasInvestment = useMemo(() => {
     return transactions.some(
@@ -515,6 +569,25 @@ export default function AccountDetails({ account, onUpdate }) {
 
   // When viewing the consolidated "All" view, allow adding to a selected account
   const effectiveAddTarget = account.id === "all" ? addTargetAccount : account;
+
+  const getSortIcon = (key) => {
+    const active = sortConfig.key === key;
+    const direction = active ? sortConfig.direction : null;
+
+    return (
+      <span
+        className={`inline-flex w-4 h-4 ${
+          !direction ? "invisible" : ""
+        }`}
+      >
+        {direction === "descending" ? (
+          <ArrowDown className="w-4 h-4" />
+        ) : (
+          <ArrowUp className="w-4 h-4" />
+        )}
+      </span>
+    );
+  };
 
   return (
     <div className="max-w-full pb-8 account-details-scaled-container">
@@ -1156,41 +1229,91 @@ export default function AccountDetails({ account, onUpdate }) {
           <table className="account-transactions-table min-w-full divide-y divide-slate-200 dark:divide-slate-700">
             <thead className="bg-white dark:bg-slate-800 rounded-t-2xl">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-32">
-                  Date
+                <th
+                  onClick={() => handleSort("date")}
+                  className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-32 cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Date {getSortIcon("date")}
+                  </div>
                 </th>
                 {account.id === "all" && (
-                  <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[10rem]">
-                    Account
+                  <th
+                    onClick={() => handleSort("account_name")}
+                    className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[10rem] cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Account {getSortIcon("account_name")}
+                    </div>
                   </th>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
-                  Payee
+                <th
+                  onClick={() => handleSort("payee")}
+                  className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Payee {getSortIcon("payee")}
+                  </div>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[10rem]">
-                  Category
+                <th
+                  onClick={() => handleSort("category")}
+                  className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[10rem] cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Category {getSortIcon("category")}
+                  </div>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
-                  {t("account.notes")}
+                <th
+                  onClick={() => handleSort("notes")}
+                  className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    {t("account.notes")} {getSortIcon("notes")}
+                  </div>
                 </th>
                 {hasInvestment && (
                   <>
-                    <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[5rem]">
-                      Ticker
+                    <th
+                      onClick={() => handleSort("ticker")}
+                      className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[5rem] cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center gap-1">
+                        Ticker {getSortIcon("ticker")}
+                      </div>
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36">
-                      Shares
+                    <th
+                      onClick={() => handleSort("shares")}
+                      className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36 cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Shares {getSortIcon("shares")}
+                      </div>
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36">
-                      Price
+                    <th
+                      onClick={() => handleSort("price_per_share")}
+                      className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36 cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Price {getSortIcon("price_per_share")}
+                      </div>
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-28">
-                      Fee
+                    <th
+                      onClick={() => handleSort("fee")}
+                      className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-28 cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Fee {getSortIcon("fee")}
+                      </div>
                     </th>
                   </>
                 )}
-                <th className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36">
-                  Amount
+                <th
+                  onClick={() => handleSort("amount")}
+                  className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36 cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <div className="flex items-center justify-end gap-1">
+                    Amount {getSortIcon("amount")}
+                  </div>
                 </th>
                 <th className="w-16"></th>
               </tr>
