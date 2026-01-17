@@ -43,8 +43,10 @@ jobs:
             ];
 
             const found = new Set();
+            // track parser-derived labels separately so we can give precedence to mapped labels
+            const ruleFound = new Set();
             for (const r of rules) {
-              if (r.regex.test(title) || r.regex.test(body)) found.add(r.name);
+              if (r.regex.test(title) || r.regex.test(body)) ruleFound.add(r.name);
             }
 
             // Also check for linked issues and copy/ map their labels to PR labels
@@ -75,6 +77,9 @@ jobs:
                 'skip-changelog': 'skip-changelog'
               };
 
+              // collect mapped labels separately so we can prefer them over parser matches
+              const mappedLabels = new Set();
+
               for (const issueNum of referenced) {
                 try {
                   const { data: labels } = await github.rest.issues.listLabelsOnIssue({
@@ -82,11 +87,22 @@ jobs:
                   });
                   for (const l of labels) {
                     const mapped = labelMap[l.name];
-                    if (mapped) found.add(mapped);
+                    if (mapped) {
+                      mappedLabels.add(mapped);
+                      found.add(mapped);
+                    }
                   }
                 } catch (e) {
                   console.log(`Unable to get labels for issue #${issueNum}: ${e.message}`);
                 }
+              }
+
+              // If any mapped labels exist, prefer them and skip parser-derived type labels (fix/feature/etc.).
+              // Parser is still used to detect platform labels like `tauri` and `frontend`.
+              if (mappedLabels.size === 0) {
+                for (const rf of ruleFound) found.add(rf);
+              } else {
+                console.log('Mapped labels found, skipping parser-derived type labels:', Array.from(mappedLabels).join(', '));
               }
             } catch (e) {
               console.log('Error while resolving linked issues:', e.message);
