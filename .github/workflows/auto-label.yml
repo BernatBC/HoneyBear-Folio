@@ -35,7 +35,7 @@ jobs:
             }
 
             const rules = [
-              { name: 'feature', regex: /\b(feat|feature|enhancement|\[feat\]|\[feature\]|^feat:)/i },
+              { name: 'feature', regex: /\b(feat|feature|enhancement|\[feat\]|\[feature\]|^feat:|resolves)/i },
               { name: 'fix', regex: /\b(fix|bug|bugfix|\[fix\]|^fix:)/i },
               { name: 'docs', regex: /\b(doc|docs|documentation|\[docs\]|^docs:)/i },
               { name: 'chore', regex: /\b(chore|ci|build|refactor|deps|dependency|\[chore\]|^chore:)/i },
