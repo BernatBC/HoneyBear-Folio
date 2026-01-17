@@ -12,6 +12,7 @@
     "fs:allow-write-file",
     "updater:default",
     "process:allow-restart",
+    "shell:allow-open",
     {
       "identifier": "fs:scope",
       "allow": ["**"]

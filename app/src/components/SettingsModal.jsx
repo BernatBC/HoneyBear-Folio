@@ -21,6 +21,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
+import { open } from "@tauri-apps/plugin-shell";
 import { t } from "../i18n/i18n";
 import { formatDateForUI } from "../utils/format";
 import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../utils/version";
@@ -115,6 +116,14 @@ export default function SettingsModal({ onClose }) {
     const el = e.currentTarget;
     el.removeAttribute("data-tooltip-visible");
     el.removeAttribute("data-tooltip-side");
+  }
+
+  async function openExternal(url) {
+    try {
+      await open(url);
+    } catch (e) {
+      console.error("Failed to open external URL:", e);
+    }
   }
 
   async function handleSelectDb() {
@@ -540,9 +549,11 @@ export default function SettingsModal({ onClose }) {
                       {IS_RELEASE && APP_VERSION ? (
                         <a
                           href={`${GITHUB_REPO}/releases/tag/v${APP_VERSION}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="about-version-link"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            openExternal(`${GITHUB_REPO}/releases/tag/v${APP_VERSION}`);
+                          }}
                         >
                           v{getDisplayVersion()}
                         </a>
@@ -564,9 +575,11 @@ export default function SettingsModal({ onClose }) {
                     <p className="about-license-text">{t("about.license_text")}</p>
                     <a
                       href={LICENSE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="about-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openExternal(LICENSE_URL);
+                      }}
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       {t("about.view_license")}
@@ -585,9 +598,11 @@ export default function SettingsModal({ onClose }) {
                         <a
                           key={c.username}
                           href={profileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="about-contributor about-contributor-link"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            openExternal(profileUrl);
+                          }}
                         >
                           <img
                             src={avatarUrl}
@@ -610,18 +625,22 @@ export default function SettingsModal({ onClose }) {
                     <div className="about-links">
                       <a
                         href={GITHUB_REPO}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="about-link"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openExternal(GITHUB_REPO);
+                        }}
                       >
                         <Github className="w-3.5 h-3.5" />
                         {t("about.github")}
                       </a>
                       <a
                         href={`${GITHUB_REPO}/issues`}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="about-link"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openExternal(`${GITHUB_REPO}/issues`);
+                        }}
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         {t("about.issues")}
