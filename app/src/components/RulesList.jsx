@@ -316,6 +316,7 @@ export default function RulesList() {
                     draggable={!isEditing}
                     onDragStart={(e) => handleDragStart(e, rule.id)}
                     onDragOver={(e) => handleDragOver(e, index)}
+                    onDrop={(e) => e.preventDefault()}
                     onDragEnd={handleDragEnd}
                   >
                     <td className="px-4 py-4 text-slate-400 dark:text-slate-600 cursor-move">

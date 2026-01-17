@@ -75,6 +75,7 @@ export default function AccountList({
             draggable={isDraggable}
             onDragStart={(e) => handleDragStart(e, account.id)}
             onDragOver={(e) => handleDragOver(e, index)}
+            onDrop={(e) => e.preventDefault()}
             onDragEnd={handleDragEnd}
             className={`${isDraggable ? "cursor-move" : ""} block w-full transition-all duration-200 ${isDragging ? "opacity-50" : ""}`}
             data-index={index}
