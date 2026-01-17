@@ -1160,14 +1160,14 @@ export default function AccountDetails({ account, onUpdate }) {
                   Date
                 </th>
                 {account.id === "all" && (
-                  <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-48">
+                  <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[10rem]">
                     Account
                   </th>
                 )}
                 <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
                   Payee
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-56">
+                <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[10rem]">
                   Category
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider">
@@ -1175,7 +1175,7 @@ export default function AccountDetails({ account, onUpdate }) {
                 </th>
                 {hasInvestment && (
                   <>
-                    <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-48">
+                    <th className="px-6 py-4 text-left text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider min-w-[5rem]">
                       Ticker
                     </th>
                     <th className="px-6 py-4 text-right text-xs font-bold !text-slate-700 dark:!text-slate-300 uppercase tracking-wider w-36">
