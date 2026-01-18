@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useFormatNumber } from "../utils/format";
 import { GripVertical } from "lucide-react";
 
@@ -14,37 +14,70 @@ export default function AccountList({
 }) {
   const formatNumber = useFormatNumber();
   const [draggingId, setDraggingId] = useState(null);
+  // Use ref to store dragging ID - more reliable than state on Windows WebView2
+  const draggingIdRef = useRef(null);
+  const lastReorder = useRef(0);
 
-  const handleDragStart = (e, accountId) => {
+  const handleDragStart = useCallback((e, accountId) => {
+    // Store in both state (for UI) and ref (for reliable access during drag)
     setDraggingId(accountId);
+    draggingIdRef.current = accountId;
+
+    // Set data transfer - required for drag to work
     e.dataTransfer.effectAllowed = "move";
-    // Set a transparent drag image or rely on default.
-    // Firefox needs data to be set.
-    e.dataTransfer.setData("text/plain", accountId);
-  };
+    e.dataTransfer.setData("text/plain", String(accountId));
+    e.dataTransfer.setData("application/x-account-id", String(accountId));
+  }, []);
 
-  const handleDragOver = (e, targetIndex) => {
+  const handleDragOver = useCallback((e) => {
     e.preventDefault();
+    e.stopPropagation();
+    // Setting dropEffect is critical for Windows to show correct cursor
     e.dataTransfer.dropEffect = "move";
+  }, []);
 
-    if (!draggingId || !onReorder) return;
+  const handleDragEnter = useCallback(
+    (e, targetIndex) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "move";
 
-    const dragIndex = accounts.findIndex((a) => a.id === draggingId);
-    if (dragIndex === -1 || dragIndex === targetIndex) return;
+      if (!onReorder) return;
 
-    const newItems = [...accounts];
-    const item = newItems[dragIndex];
-    newItems.splice(dragIndex, 1);
-    newItems.splice(targetIndex, 0, item);
-    onReorder(newItems);
-  };
+      // Use ref for reliable access on Windows
+      const currentDraggingId = draggingIdRef.current;
+      if (!currentDraggingId) return;
 
-  const handleDragEnd = () => {
+      // Throttle reorder operations using event timestamp (avoids impure Date.now call during render)
+      const now = e.timeStamp;
+      if (now - lastReorder.current < 50) return;
+
+      const dragIndex = accounts.findIndex((a) => a.id === currentDraggingId);
+      if (dragIndex === -1 || dragIndex === targetIndex) return;
+
+      lastReorder.current = now;
+
+      const newItems = [...accounts];
+      const item = newItems[dragIndex];
+      newItems.splice(dragIndex, 1);
+      newItems.splice(targetIndex, 0, item);
+      onReorder(newItems);
+    },
+    [accounts, onReorder],
+  );
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
     setDraggingId(null);
-  };
+    draggingIdRef.current = null;
+  }, []);
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" onDragOver={handleDragOver} onDrop={handleDrop}>
       {accounts.map((account, index) => {
         const cashBalance = Number(account.balance);
         const marketValue =
@@ -74,7 +107,9 @@ export default function AccountList({
             key={account.id}
             draggable={isDraggable}
             onDragStart={(e) => handleDragStart(e, account.id)}
-            onDragOver={(e) => handleDragOver(e, index)}
+            onDragOver={handleDragOver}
+            onDragEnter={(e) => handleDragEnter(e, index)}
+            onDrop={handleDrop}
             onDragEnd={handleDragEnd}
             className={`${isDraggable ? "cursor-move" : ""} block w-full transition-all duration-200 ${isDragging ? "opacity-50" : ""}`}
             data-index={index}

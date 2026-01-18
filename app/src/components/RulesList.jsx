@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   Plus,
@@ -116,21 +116,46 @@ export default function RulesList() {
     }
   }
 
-  // DnD Handlers
+  // DnD Handlers - Using refs for Windows WebView2 compatibility
+  const lastReorder = useRef(0);
+  // Use ref to store dragging ID - more reliable than state on Windows WebView2
+  const draggingIdRef = useRef(null);
+
   const handleDragStart = (e, id) => {
+    // Store in both state (for UI) and ref (for reliable access during drag)
     setDraggingId(id);
+    draggingIdRef.current = id;
+
+    // Set data transfer - required for drag to work
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.setData("text/plain", String(id));
+    e.dataTransfer.setData("application/x-rule-id", String(id));
   };
 
-  const handleDragOver = (e, targetIndex) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    // Setting dropEffect is critical for Windows to show correct cursor
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDragEnter = (e, targetIndex) => {
+    e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
 
-    if (!draggingId) return;
+    // Use ref for reliable access on Windows
+    const currentDraggingId = draggingIdRef.current;
+    if (!currentDraggingId) return;
 
-    const dragIndex = rules.findIndex((r) => r.id === draggingId);
+    // Throttle reorder operations using event timestamp (avoids impure Date.now call during render)
+    const now = e.timeStamp;
+    if (now - lastReorder.current < 50) return;
+
+    const dragIndex = rules.findIndex((r) => r.id === currentDraggingId);
     if (dragIndex === -1 || dragIndex === targetIndex) return;
+
+    lastReorder.current = now;
 
     const newItems = [...rules];
     const item = newItems[dragIndex];
@@ -147,8 +172,14 @@ export default function RulesList() {
     setRules(updatedList);
   };
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const handleDragEnd = async () => {
     setDraggingId(null);
+    draggingIdRef.current = null;
     // Persist new order
     try {
       await invoke("update_rules_order", { ruleIds: rules.map((r) => r.id) });
@@ -306,7 +337,11 @@ export default function RulesList() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            <tbody
+              className="divide-y divide-slate-200 dark:divide-slate-700"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
               {rules.map((rule, index) => {
                 const isDragging = draggingId === rule.id;
                 return (
@@ -315,8 +350,11 @@ export default function RulesList() {
                     className={`transition-colors group ${isDragging ? "opacity-30 bg-slate-100 dark:bg-slate-700" : "hover:bg-slate-50 dark:hover:bg-slate-700/30"}`}
                     draggable={!isEditing}
                     onDragStart={(e) => handleDragStart(e, rule.id)}
-                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragOver={handleDragOver}
+                    onDragEnter={(e) => handleDragEnter(e, index)}
+                    onDrop={handleDrop}
                     onDragEnd={handleDragEnd}
+                    data-index={index}
                   >
                     <td className="px-4 py-4 text-slate-400 dark:text-slate-600 cursor-move">
                       <GripVertical
