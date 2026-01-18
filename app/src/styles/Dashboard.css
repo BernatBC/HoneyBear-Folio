@@ -155,6 +155,7 @@
   /* Header and Form above transaction table also scale with font-size */
   .account-details-scaled-container .text-3xl,
   .dashboard-container .text-3xl,
+  .fire-calculator-container .text-3xl,
   .investment-dashboard-container .text-3xl,
   .rules-container .text-3xl,
   .dashboard-title,
@@ -164,6 +165,7 @@
 
   .account-details-scaled-container .text-2xl,
   .dashboard-container .text-2xl,
+  .fire-calculator-container .text-2xl,
   .investment-dashboard-container .text-2xl,
   .rules-container .text-2xl {
     font-size: calc(1.5rem * var(--hb-font-size)) !important;
@@ -171,6 +173,7 @@
 
   .account-details-scaled-container .text-xl,
   .dashboard-container .text-xl,
+  .fire-calculator-container .text-xl,
   .investment-dashboard-container .text-xl,
   .rules-container .text-xl {
     font-size: calc(1.25rem * var(--hb-font-size)) !important;
@@ -178,6 +181,8 @@
 
   .account-details-scaled-container .text-lg,
   .dashboard-container .text-lg,
+  .fire-calculator-container .text-lg,
+  .investment_dashboard-container .text-lg,
   .investment-dashboard-container .text-lg,
   .rules-container .text-lg,
   .chart-title {
@@ -186,6 +191,7 @@
 
   .account-details-scaled-container .text-base,
   .dashboard-container .text-base,
+  .fire-calculator-container .text-base,
   .investment-dashboard-container .text-base,
   .rules-container .text-base {
     font-size: calc(1rem * var(--hb-font-size)) !important;
@@ -193,6 +199,7 @@
 
   .account-details-scaled-container .text-sm,
   .dashboard-container .text-sm,
+  .fire-calculator-container .text-sm,
   .investment-dashboard-container .text-sm,
   .rules-container .text-sm,
   .chart-subtitle,
@@ -202,6 +209,7 @@
 
   .account-details-scaled-container .text-xs,
   .dashboard-container .text-xs,
+  .fire-calculator-container .text-xs,
   .investment-dashboard-container .text-xs,
   .rules-container .text-xs,
   .summary-card-title,
@@ -211,6 +219,7 @@
 
   .account-details-scaled-container .py-4,
   .dashboard-container .py-4,
+  .fire-calculator-container .py-4,
   .investment-dashboard-container .py-4,
   .rules-container .py-4 {
     padding-top: calc(1rem * var(--hb-font-size)) !important;
@@ -219,6 +228,7 @@
 
   .account-details-scaled-container .py-3,
   .dashboard-container .py-3,
+  .fire-calculator-container .py-3,
   .investment-dashboard-container .py-3,
   .rules-container .py-3 {
     padding-top: calc(0.75rem * var(--hb-font-size)) !important;
@@ -227,6 +237,7 @@
 
   .account-details-scaled-container .py-2,
   .dashboard-container .py-2,
+  .fire-calculator-container .py-2,
   .investment-dashboard-container .py-2,
   .rules-container .py-2 {
     padding-top: calc(0.5rem * var(--hb-font-size)) !important;
@@ -235,6 +246,7 @@
 
   .account-details-scaled-container .py-1\.5,
   .dashboard-container .py-1\.5,
+  .fire-calculator-container .py-1\.5,
   .investment-dashboard-container .py-1\.5,
   .rules-container .py-1\.5 {
     padding-top: calc(0.375rem * var(--hb-font-size)) !important;
@@ -243,6 +255,7 @@
 
   .account-details-scaled-container .p-1\.5,
   .dashboard-container .p-1\.5,
+  .fire-calculator-container .p-1\.5,
   .investment-dashboard-container .p-1\.5,
   .rules-container .p-1\.5,
   .time-range-selector {
@@ -251,6 +264,7 @@
 
   .account-details-scaled-container .p-1,
   .dashboard-container .p-1,
+  .fire-calculator-container .p-1,
   .investment-dashboard-container .p-1,
   .rules-container .p-1 {
     padding: calc(0.25rem * var(--hb-font-size)) !important;
@@ -258,6 +272,7 @@
 
   .account-details-scaled-container .px-6,
   .dashboard-container .px-6,
+  .fire-calculator-container .px-6,
   .investment-dashboard-container .px-6,
   .rules-container .px-6 {
     padding-left: calc(1.5rem * var(--hb-font-size)) !important;
@@ -266,6 +281,7 @@
 
   .account-details-scaled-container .p-6,
   .dashboard-container .p-6,
+  .fire-calculator-container .p-6,
   .investment-dashboard-container .p-6,
   .rules-container .p-6,
   .summary-card,
@@ -276,6 +292,7 @@
 
   .account-details-scaled-container .px-5,
   .dashboard-container .px-5,
+  .fire-calculator-container .px-5,
   .investment-dashboard-container .px-5,
   .rules-container .px-5 {
     padding-left: calc(1.25rem * var(--hb-font-size)) !important;
@@ -284,6 +301,7 @@
 
   .account-details-scaled-container .px-4,
   .dashboard-container .px-4,
+  .fire-calculator-container .px-4,
   .investment-dashboard-container .px-4,
   .rules-container .px-4 {
     padding-left: calc(1rem * var(--hb-font-size)) !important;
@@ -292,6 +310,7 @@
 
   .account-details-scaled-container .px-3,
   .dashboard-container .px-3,
+  .fire-calculator-container .px-3,
   .investment-dashboard-container .px-3,
   .rules-container .px-3 {
     padding-left: calc(0.75rem * var(--hb-font-size)) !important;
@@ -300,6 +319,7 @@
 
   .account-details-scaled-container .px-2,
   .dashboard-container .px-2,
+  .fire-calculator-container .px-2,
   .investment-dashboard-container .px-2,
   .rules-container .px-2 {
     padding-left: calc(0.5rem * var(--hb-font-size)) !important;
@@ -308,6 +328,7 @@
 
   .account-details-scaled-container .pr-10,
   .dashboard-container .pr-10,
+  .fire-calculator-container .pr-10,
   .investment-dashboard-container .pr-10,
   .rules-container .pr-10 {
     padding-right: calc(2.5rem * var(--hb-font-size)) !important;
@@ -315,6 +336,7 @@
 
   .account-details-scaled-container .p-3,
   .dashboard-container .p-3,
+  .fire-calculator-container .p-3,
   .investment-dashboard-container .p-3,
   .rules-container .p-3 {
     padding: calc(0.75rem * var(--hb-font-size)) !important;
@@ -322,6 +344,7 @@
 
   .account-details-scaled-container .p-2\.5,
   .dashboard-container .p-2\.5,
+  .fire-calculator-container .p-2\.5,
   .investment-dashboard-container .p-2\.5,
   .rules-container .p-2\.5 {
     padding: calc(0.625rem * var(--hb-font-size)) !important;
@@ -329,6 +352,7 @@
 
   .account-details-scaled-container .w-5,
   .dashboard-container .w-5,
+  .fire-calculator-container .w-5,
   .investment-dashboard-container .w-5,
   .rules-container .w-5 {
     width: calc(1.25rem * var(--hb-font-size)) !important;
@@ -337,6 +361,7 @@
 
   .account-details-scaled-container .w-4,
   .dashboard-container .w-4,
+  .fire-calculator-container .w-4,
   .investment-dashboard-container .w-4,
   .rules-container .w-4 {
     width: calc(1rem * var(--hb-font-size)) !important;
@@ -345,6 +370,7 @@
 
   .account-details-scaled-container .gap-4,
   .dashboard-container .gap-4,
+  .fire-calculator-container .gap-4,
   .investment-dashboard-container .gap-4,
   .rules-container .gap-4 {
     gap: calc(1rem * var(--hb-font-size)) !important;
@@ -352,6 +378,7 @@
 
   .account-details-scaled-container .gap-3,
   .dashboard-container .gap-3,
+  .fire-calculator-container .gap-3,
   .investment-dashboard-container .gap-3,
   .rules-container .gap-3 {
     gap: calc(0.75rem * var(--hb-font-size)) !important;
@@ -359,6 +386,7 @@
 
   .account-details-scaled-container .gap-2,
   .dashboard-container .gap-2,
+  .fire-calculator-container .gap-2,
   .investment-dashboard-container .gap-2,
   .rules-container .gap-2 {
     gap: calc(0.5rem * var(--hb-font-size)) !important;
@@ -366,6 +394,7 @@
 
   .account-details-scaled-container .pl-10,
   .dashboard-container .pl-10,
+  .fire-calculator-container .pl-10,
   .investment-dashboard-container .pl-10,
   .rules-container .pl-10 {
     padding-left: calc(2.5rem * var(--hb-font-size)) !important;
@@ -373,6 +402,7 @@
 
   .account-details-scaled-container .pl-9,
   .dashboard-container .pl-9,
+  .fire-calculator-container .pl-9,
   .investment-dashboard-container .pl-9,
   .rules-container .pl-9 {
     padding-left: calc(2.25rem * var(--hb-font-size)) !important;
@@ -380,18 +410,21 @@
 
   .account-details-scaled-container .left-3,
   .dashboard-container .left-3,
+  .fire-calculator-container .left-3,
   .investment-dashboard-container .left-3,
   .rules-container .left-3 {
     left: calc(0.75rem * var(--hb-font-size)) !important;
   }
 
   .dashboard-container,
+  .fire-calculator-container,
   .investment-dashboard-container,
   .rules-container {
     padding-bottom: calc(2rem * var(--hb-font-size)) !important;
   }
 
   .dashboard-container > * + *,
+  .fire-calculator-container > * + *,
   .investment-dashboard-container > * + *,
   .rules-container > * + * {
     margin-top: calc(2rem * var(--hb-font-size)) !important;
