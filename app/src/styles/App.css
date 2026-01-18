@@ -98,3 +98,23 @@
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
+
+@layer components {
+  /* Common Header Styles */
+  .hb-header-container {
+    @apply flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2;
+  }
+
+  /* Version with larger margin bottom for pages that need it */
+  .hb-header-container.mb-large {
+    @apply mb-8;
+  }
+
+  .hb-header-title {
+    @apply text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-3;
+  }
+
+  .hb-header-subtitle {
+    @apply text-slate-500 dark:text-slate-400 font-medium mt-1;
+  }
+}

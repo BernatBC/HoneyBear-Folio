@@ -159,6 +159,7 @@
   .investment-dashboard-container .text-3xl,
   .rules-container .text-3xl,
   .dashboard-title,
+  .hb-header-title,
   .summary-card-value {
     font-size: calc(1.875rem * var(--hb-font-size)) !important;
   }

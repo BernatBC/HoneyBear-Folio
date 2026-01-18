@@ -340,15 +340,12 @@ export default function FireCalculator() {
 
   return (
     <div className="fire-calculator-container h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
-      <header className="flex justify-between items-center">
+      <header className="hb-header-container">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3 tracking-tight">
-            <div className="bg-brand-100 dark:bg-brand-900/30 p-2 rounded-xl">
-              <Calculator className="w-8 h-8 text-brand-600 dark:text-brand-400" />
-            </div>
+          <h1 className="hb-header-title">
             FIRE Calculator
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium mt-1 ml-14">
+          <p className="hb-header-subtitle">
             Financial Independence, Retire Early
           </p>
         </div>

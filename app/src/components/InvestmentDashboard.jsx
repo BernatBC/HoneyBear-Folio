@@ -176,12 +176,12 @@ export default function InvestmentDashboard() {
 
   return (
     <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8 investment-dashboard-container">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="hb-header-container">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+          <h2 className="hb-header-title">
             Investment Dashboard
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
+          <p className="hb-header-subtitle">
             Track your portfolio performance
           </p>
         </div>
