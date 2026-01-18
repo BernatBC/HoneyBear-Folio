@@ -43,6 +43,13 @@ jobs:
             ];
 
             const found = new Set();
+
+            // Auto-skip changelog for Dependabot PRs
+            const author = (pr.user && pr.user.login) || '';
+            if (/^dependabot/i.test(author)) {
+              found.add('skip-changelog');
+            }
+
             // track parser-derived labels separately so we can give precedence to mapped labels
             const ruleFound = new Set();
             for (const r of rules) {
