@@ -331,7 +331,7 @@ function App() {
 
                   <main className="flex-1 min-w-0 px-4 py-4 md:py-8 overflow-y-auto bg-slate-50 dark:bg-slate-900 relative">
                     <div
-                      className={`absolute top-4 left-4 z-20 transition-all duration-300 ${
+                      className={`fixed top-4 left-4 z-50 transition-all duration-300 ${
                         !isSidebarOpen
                           ? "opacity-100 translate-x-0"
                           : "opacity-0 -translate-x-4 pointer-events-none"
