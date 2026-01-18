@@ -148,8 +148,8 @@ export default function RulesList() {
     const currentDraggingId = draggingIdRef.current;
     if (!currentDraggingId) return;
 
-    // Throttle reorder operations
-    const now = Date.now();
+    // Throttle reorder operations using event timestamp (avoids impure Date.now call during render)
+    const now = e.timeStamp;
     if (now - lastReorder.current < 50) return;
 
     const dragIndex = rules.findIndex((r) => r.id === currentDraggingId);
