@@ -339,7 +339,7 @@ export default function FireCalculator() {
     });
 
   return (
-    <div className="fire-calculator-container h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
+    <div className="page-container fire-calculator-container">
       <header className="hb-header-container">
         <div>
           <h1 className="hb-header-title">

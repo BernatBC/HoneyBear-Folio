@@ -1196,7 +1196,7 @@ export default function Dashboard({
   );
 
   return (
-    <div className="dashboard-container">
+    <div className="page-container dashboard-container">
       <div className="hb-header-container">
         <div>
           <h2 className="hb-header-title">{t("dashboard.title")}</h2>

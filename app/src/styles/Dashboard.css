@@ -2,8 +2,9 @@
 @import "./theme.css";
 
 @layer components {
-  .dashboard-container {
-    @apply h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8;
+  /* Common page container - use this for all page layouts to ensure consistent margins */
+  .page-container {
+    @apply h-full flex flex-col space-y-8 max-w-full mx-auto pb-8;
   }
 
   .dashboard-header {

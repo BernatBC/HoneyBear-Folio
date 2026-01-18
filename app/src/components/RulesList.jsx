@@ -206,7 +206,7 @@ export default function RulesList() {
     availableFields[0];
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-in fade-in duration-500 rules-container">
+    <div className="page-container rules-container animate-in fade-in duration-500">
       <div className="hb-header-container mb-large">
         <div>
           <h1 className="hb-header-title">

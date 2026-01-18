@@ -175,7 +175,7 @@ export default function InvestmentDashboard() {
   );
 
   return (
-    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8 investment-dashboard-container">
+    <div className="page-container investment-dashboard-container">
       <div className="hb-header-container">
         <div>
           <h2 className="hb-header-title">

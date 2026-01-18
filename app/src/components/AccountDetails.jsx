@@ -669,7 +669,7 @@ export default function AccountDetails({ account, onUpdate }) {
   };
 
   return (
-    <div className="max-w-full pb-8 account-details-scaled-container">
+    <div className="page-container account-details-scaled-container">
       {/* Header */}
       <header className="hb-header-container mb-large">
         <div>
