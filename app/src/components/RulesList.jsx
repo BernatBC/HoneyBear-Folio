@@ -122,16 +122,26 @@ export default function RulesList() {
   const handleDragStart = (e, id) => {
     setDraggingId(id);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", id);
-    // Setting an empty drag image can sometimes help with performance/visuals
-    // but default is usually fine.
+    // Store the rule ID in dataTransfer - required for Windows compatibility
+    // Windows loses React state during drag, so we must store ID in dataTransfer
+    e.dataTransfer.setData("text/plain", String(id));
+    // Set drag image to prevent Windows from using default that can interfere
+    if (e.target && e.dataTransfer.setDragImage) {
+      const row = e.target.closest("tr");
+      if (row) {
+        e.dataTransfer.setDragImage(row, 0, 0);
+      }
+    }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
 
-    if (!draggingId) return;
+    // On Windows, draggingId from React state can be lost - use current value
+    const currentDraggingId = draggingId;
+    if (!currentDraggingId) return;
 
     // Throttle state updates to prevent drag cancellation on Windows
     const now = Date.now();
@@ -141,7 +151,7 @@ export default function RulesList() {
     if (!row) return;
     const targetIndex = parseInt(row.dataset.index, 10);
 
-    const dragIndex = rules.findIndex((r) => r.id === draggingId);
+    const dragIndex = rules.findIndex((r) => r.id === currentDraggingId);
     if (dragIndex === -1 || dragIndex === targetIndex) return;
 
     lastReorder.current = now;
@@ -159,6 +169,16 @@ export default function RulesList() {
     }));
 
     setRules(updatedList);
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleDragEnd = async () => {
@@ -323,8 +343,8 @@ export default function RulesList() {
             <tbody
               className="divide-y divide-slate-200 dark:divide-slate-700"
               onDragOver={handleDragOver}
-              onDragEnter={(e) => e.preventDefault()}
-              onDrop={(e) => e.preventDefault()}
+              onDragEnter={handleDragEnter}
+              onDrop={handleDrop}
             >
               {rules.map((rule, index) => {
                 const isDragging = draggingId === rule.id;

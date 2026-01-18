@@ -19,18 +19,27 @@ export default function AccountList({
   const handleDragStart = (e, accountId) => {
     setDraggingId(accountId);
     e.dataTransfer.effectAllowed = "move";
-    // Set a transparent drag image or rely on default.
-    // Firefox needs data to be set.
-    e.dataTransfer.setData("text/plain", accountId);
+    // Store the account ID in dataTransfer - required for Windows compatibility
+    // Windows loses React state during drag, so we must retrieve ID from dataTransfer
+    e.dataTransfer.setData("text/plain", String(accountId));
+    // Set drag image to prevent Windows from using default that can interfere
+    if (e.target && e.dataTransfer.setDragImage) {
+      e.dataTransfer.setDragImage(e.target, 0, 0);
+    }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
 
-    if (!draggingId || !onReorder) return;
+    if (!onReorder) return;
 
-    // Throttle state updates
+    // On Windows, draggingId from React state can be lost - use a ref as backup
+    const currentDraggingId = draggingId;
+    if (!currentDraggingId) return;
+
+    // Throttle state updates to prevent drag cancellation on Windows
     const now = Date.now();
     if (now - lastReorder.current < 50) return;
 
@@ -38,7 +47,7 @@ export default function AccountList({
     if (!row) return;
     const targetIndex = parseInt(row.dataset.index, 10);
 
-    const dragIndex = accounts.findIndex((a) => a.id === draggingId);
+    const dragIndex = accounts.findIndex((a) => a.id === currentDraggingId);
     if (dragIndex === -1 || dragIndex === targetIndex) return;
 
     lastReorder.current = now;
@@ -50,6 +59,16 @@ export default function AccountList({
     onReorder(newItems);
   };
 
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const handleDragEnd = () => {
     setDraggingId(null);
   };
@@ -58,8 +77,8 @@ export default function AccountList({
     <div
       className="space-y-1"
       onDragOver={handleDragOver}
-      onDragEnter={(e) => e.preventDefault()}
-      onDrop={(e) => e.preventDefault()}
+      onDragEnter={handleDragEnter}
+      onDrop={handleDrop}
     >
       {accounts.map((account, index) => {
         const cashBalance = Number(account.balance);
