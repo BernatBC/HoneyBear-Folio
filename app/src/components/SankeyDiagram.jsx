@@ -282,7 +282,6 @@ export default function SankeyDiagram({
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    resizeDelay: 200,
     plugins: {
       legend: {
         display: false,
