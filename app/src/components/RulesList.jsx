@@ -116,40 +116,41 @@ export default function RulesList() {
     }
   }
 
-  // DnD Handlers
+  // DnD Handlers - Using refs for Windows WebView2 compatibility
   const lastReorder = useRef(0);
+  // Use ref to store dragging ID - more reliable than state on Windows WebView2
+  const draggingIdRef = useRef(null);
 
   const handleDragStart = (e, id) => {
+    // Store in both state (for UI) and ref (for reliable access during drag)
     setDraggingId(id);
+    draggingIdRef.current = id;
+    
+    // Set data transfer - required for drag to work
     e.dataTransfer.effectAllowed = "move";
-    // Store the rule ID in dataTransfer - required for Windows compatibility
-    // Windows loses React state during drag, so we must store ID in dataTransfer
     e.dataTransfer.setData("text/plain", String(id));
-    // Set drag image to prevent Windows from using default that can interfere
-    if (e.target && e.dataTransfer.setDragImage) {
-      const row = e.target.closest("tr");
-      if (row) {
-        e.dataTransfer.setDragImage(row, 0, 0);
-      }
-    }
+    e.dataTransfer.setData("application/x-rule-id", String(id));
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    // Setting dropEffect is critical for Windows to show correct cursor
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDragEnter = (e, targetIndex) => {
+    e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
 
-    // On Windows, draggingId from React state can be lost - use current value
-    const currentDraggingId = draggingId;
+    // Use ref for reliable access on Windows
+    const currentDraggingId = draggingIdRef.current;
     if (!currentDraggingId) return;
 
-    // Throttle state updates to prevent drag cancellation on Windows
+    // Throttle reorder operations
     const now = Date.now();
     if (now - lastReorder.current < 50) return;
-
-    const row = e.target.closest("tr[data-index]");
-    if (!row) return;
-    const targetIndex = parseInt(row.dataset.index, 10);
 
     const dragIndex = rules.findIndex((r) => r.id === currentDraggingId);
     if (dragIndex === -1 || dragIndex === targetIndex) return;
@@ -171,11 +172,6 @@ export default function RulesList() {
     setRules(updatedList);
   };
 
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -183,6 +179,7 @@ export default function RulesList() {
 
   const handleDragEnd = async () => {
     setDraggingId(null);
+    draggingIdRef.current = null;
     // Persist new order
     try {
       await invoke("update_rules_order", { ruleIds: rules.map((r) => r.id) });
@@ -343,7 +340,6 @@ export default function RulesList() {
             <tbody
               className="divide-y divide-slate-200 dark:divide-slate-700"
               onDragOver={handleDragOver}
-              onDragEnter={handleDragEnter}
               onDrop={handleDrop}
             >
               {rules.map((rule, index) => {
@@ -354,6 +350,9 @@ export default function RulesList() {
                     className={`transition-colors group ${isDragging ? "opacity-30 bg-slate-100 dark:bg-slate-700" : "hover:bg-slate-50 dark:hover:bg-slate-700/30"}`}
                     draggable={!isEditing}
                     onDragStart={(e) => handleDragStart(e, rule.id)}
+                    onDragOver={handleDragOver}
+                    onDragEnter={(e) => handleDragEnter(e, index)}
+                    onDrop={handleDrop}
                     onDragEnd={handleDragEnd}
                     data-index={index}
                   >

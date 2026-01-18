@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useFormatNumber } from "../utils/format";
 import { GripVertical } from "lucide-react";
 
@@ -14,38 +14,42 @@ export default function AccountList({
 }) {
   const formatNumber = useFormatNumber();
   const [draggingId, setDraggingId] = useState(null);
+  // Use ref to store dragging ID - more reliable than state on Windows WebView2
+  const draggingIdRef = useRef(null);
   const lastReorder = useRef(0);
 
-  const handleDragStart = (e, accountId) => {
+  const handleDragStart = useCallback((e, accountId) => {
+    // Store in both state (for UI) and ref (for reliable access during drag)
     setDraggingId(accountId);
+    draggingIdRef.current = accountId;
+    
+    // Set data transfer - required for drag to work
     e.dataTransfer.effectAllowed = "move";
-    // Store the account ID in dataTransfer - required for Windows compatibility
-    // Windows loses React state during drag, so we must retrieve ID from dataTransfer
     e.dataTransfer.setData("text/plain", String(accountId));
-    // Set drag image to prevent Windows from using default that can interfere
-    if (e.target && e.dataTransfer.setDragImage) {
-      e.dataTransfer.setDragImage(e.target, 0, 0);
-    }
-  };
+    e.dataTransfer.setData("application/x-account-id", String(accountId));
+  }, []);
 
-  const handleDragOver = (e) => {
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Setting dropEffect is critical for Windows to show correct cursor
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDragEnter = useCallback((e, targetIndex) => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
 
     if (!onReorder) return;
 
-    // On Windows, draggingId from React state can be lost - use a ref as backup
-    const currentDraggingId = draggingId;
+    // Use ref for reliable access on Windows
+    const currentDraggingId = draggingIdRef.current;
     if (!currentDraggingId) return;
 
-    // Throttle state updates to prevent drag cancellation on Windows
+    // Throttle reorder operations
     const now = Date.now();
     if (now - lastReorder.current < 50) return;
-
-    const row = e.target.closest("[data-index]");
-    if (!row) return;
-    const targetIndex = parseInt(row.dataset.index, 10);
 
     const dragIndex = accounts.findIndex((a) => a.id === currentDraggingId);
     if (dragIndex === -1 || dragIndex === targetIndex) return;
@@ -57,27 +61,22 @@ export default function AccountList({
     newItems.splice(dragIndex, 1);
     newItems.splice(targetIndex, 0, item);
     onReorder(newItems);
-  };
+  }, [accounts, onReorder]);
 
-  const handleDragEnter = (e) => {
+  const handleDrop = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-  };
+  }, []);
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     setDraggingId(null);
-  };
+    draggingIdRef.current = null;
+  }, []);
 
   return (
     <div
       className="space-y-1"
       onDragOver={handleDragOver}
-      onDragEnter={handleDragEnter}
       onDrop={handleDrop}
     >
       {accounts.map((account, index) => {
@@ -109,6 +108,9 @@ export default function AccountList({
             key={account.id}
             draggable={isDraggable}
             onDragStart={(e) => handleDragStart(e, account.id)}
+            onDragOver={handleDragOver}
+            onDragEnter={(e) => handleDragEnter(e, index)}
+            onDrop={handleDrop}
             onDragEnd={handleDragEnd}
             className={`${isDraggable ? "cursor-move" : ""} block w-full transition-all duration-200 ${isDragging ? "opacity-50" : ""}`}
             data-index={index}
