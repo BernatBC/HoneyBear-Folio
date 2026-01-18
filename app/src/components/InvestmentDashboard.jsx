@@ -178,12 +178,8 @@ export default function InvestmentDashboard() {
     <div className="page-container investment-dashboard-container">
       <div className="hb-header-container">
         <div>
-          <h2 className="hb-header-title">
-            Investment Dashboard
-          </h2>
-          <p className="hb-header-subtitle">
-            Track your portfolio performance
-          </p>
+          <h2 className="hb-header-title">Investment Dashboard</h2>
+          <p className="hb-header-subtitle">Track your portfolio performance</p>
         </div>
         <button
           onClick={fetchData}

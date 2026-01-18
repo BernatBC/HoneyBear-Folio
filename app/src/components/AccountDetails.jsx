@@ -713,9 +713,7 @@ export default function AccountDetails({ account, onUpdate }) {
               </div>
             </form>
           ) : (
-            <h1 className="hb-header-title">
-              {account.name}
-            </h1>
+            <h1 className="hb-header-title">{account.name}</h1>
           )}
 
           <div className="flex flex-col mt-2 gap-1">

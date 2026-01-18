@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Line } from "react-chartjs-2";
 import {
-  Calculator,
   TrendingUp,
   Banknote,
   Percent,
@@ -342,9 +341,7 @@ export default function FireCalculator() {
     <div className="page-container fire-calculator-container">
       <header className="hb-header-container">
         <div>
-          <h1 className="hb-header-title">
-            FIRE Calculator
-          </h1>
+          <h1 className="hb-header-title">FIRE Calculator</h1>
           <p className="hb-header-subtitle">
             Financial Independence, Retire Early
           </p>

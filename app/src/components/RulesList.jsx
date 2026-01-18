@@ -5,7 +5,6 @@ import {
   Trash2,
   Edit,
   Save,
-  BookOpenCheck,
   GripVertical,
 } from "lucide-react";
 import { useConfirm } from "../contexts/confirm";
@@ -209,12 +208,8 @@ export default function RulesList() {
     <div className="page-container rules-container animate-in fade-in duration-500">
       <div className="hb-header-container mb-large">
         <div>
-          <h1 className="hb-header-title">
-            {t("rules.title")}
-          </h1>
-          <p className="hb-header-subtitle">
-            {t("rules.subtitle")}
-          </p>
+          <h1 className="hb-header-title">{t("rules.title")}</h1>
+          <p className="hb-header-subtitle">{t("rules.subtitle")}</p>
         </div>
       </div>
 
