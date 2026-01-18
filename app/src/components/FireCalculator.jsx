@@ -487,7 +487,7 @@ export default function FireCalculator() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-blue-50 to-brand-50 dark:from-blue-900/20 dark:to-brand-900/20 p-6 rounded-2xl shadow-md border-2 border-blue-200 dark:border-blue-800 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+            <div className="bg-gradient-to-br from-blue-50 to-brand-50 dark:from-blue-900/20 dark:to-brand-900/20 p-6 rounded-2xl shadow-md border-2 border-blue-200 dark:border-blue-800 flex items-center justify-between transition-all duration-300">
               <div>
                 <p className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-1">
                   FIRE Number
@@ -501,7 +501,7 @@ export default function FireCalculator() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-6 rounded-2xl shadow-md border-2 border-emerald-200 dark:border-emerald-800 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-6 rounded-2xl shadow-md border-2 border-emerald-200 dark:border-emerald-800 flex items-center justify-between transition-all duration-300">
               <div>
                 <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">
                   Time to FIRE

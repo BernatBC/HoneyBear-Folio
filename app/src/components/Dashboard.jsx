@@ -1267,7 +1267,7 @@ export default function Dashboard({
 
       {/* Summary Cards */}
       <div className="summary-cards-grid">
-        <div className="summary-card group">
+        <div className="summary-card">
           <h3 className="summary-card-title">
             {t("dashboard.current_net_worth")}
           </h3>
@@ -1277,13 +1277,13 @@ export default function Dashboard({
             })}
           </p>
         </div>
-        <div className="summary-card group">
+        <div className="summary-card">
           <h3 className="summary-card-title">
             {t("dashboard.total_accounts")}
           </h3>
           <p className="summary-card-value">{accounts.length}</p>
         </div>
-        <div className="summary-card group">
+        <div className="summary-card">
           <h3 className="summary-card-title">
             {t("dashboard.total_transactions")}
           </h3>

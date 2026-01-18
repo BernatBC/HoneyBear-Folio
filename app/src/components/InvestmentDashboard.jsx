@@ -260,7 +260,7 @@ export default function InvestmentDashboard() {
         <>
           {/* Summary Card */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 dark:hover:border-brand-700 hover:-translate-y-1 group cursor-pointer">
+            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                 Total Portfolio Value
               </h3>
@@ -268,7 +268,7 @@ export default function InvestmentDashboard() {
                 {formatNumber(totalValue, { style: "currency" })}
               </p>
             </div>
-            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-emerald-200 dark:hover:border-emerald-800 hover:-translate-y-1 group cursor-pointer">
+            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                 Top Performer
               </h3>
@@ -290,7 +290,7 @@ export default function InvestmentDashboard() {
                 </span>
               </p>
             </div>
-            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300 hover:shadow-xl hover:border-brand-200 dark:hover:border-brand-700 hover:-translate-y-1 group cursor-pointer">
+            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                 Total Holdings
               </h3>
