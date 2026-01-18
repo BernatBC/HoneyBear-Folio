@@ -1,12 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import {
-  Plus,
-  Trash2,
-  Edit,
-  Save,
-  GripVertical,
-} from "lucide-react";
+import { Plus, Trash2, Edit, Save, GripVertical } from "lucide-react";
 import { useConfirm } from "../contexts/confirm";
 import { t } from "../i18n/i18n";
 import CustomSelect from "./CustomSelect";
