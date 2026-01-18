@@ -22,7 +22,7 @@ export default function AccountList({
     // Store in both state (for UI) and ref (for reliable access during drag)
     setDraggingId(accountId);
     draggingIdRef.current = accountId;
-    
+
     // Set data transfer - required for drag to work
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", String(accountId));
@@ -36,32 +36,35 @@ export default function AccountList({
     e.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleDragEnter = useCallback((e, targetIndex) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "move";
+  const handleDragEnter = useCallback(
+    (e, targetIndex) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "move";
 
-    if (!onReorder) return;
+      if (!onReorder) return;
 
-    // Use ref for reliable access on Windows
-    const currentDraggingId = draggingIdRef.current;
-    if (!currentDraggingId) return;
+      // Use ref for reliable access on Windows
+      const currentDraggingId = draggingIdRef.current;
+      if (!currentDraggingId) return;
 
-    // Throttle reorder operations
-    const now = Date.now();
-    if (now - lastReorder.current < 50) return;
+      // Throttle reorder operations
+      const now = Date.now();
+      if (now - lastReorder.current < 50) return;
 
-    const dragIndex = accounts.findIndex((a) => a.id === currentDraggingId);
-    if (dragIndex === -1 || dragIndex === targetIndex) return;
+      const dragIndex = accounts.findIndex((a) => a.id === currentDraggingId);
+      if (dragIndex === -1 || dragIndex === targetIndex) return;
 
-    lastReorder.current = now;
+      lastReorder.current = now;
 
-    const newItems = [...accounts];
-    const item = newItems[dragIndex];
-    newItems.splice(dragIndex, 1);
-    newItems.splice(targetIndex, 0, item);
-    onReorder(newItems);
-  }, [accounts, onReorder]);
+      const newItems = [...accounts];
+      const item = newItems[dragIndex];
+      newItems.splice(dragIndex, 1);
+      newItems.splice(targetIndex, 0, item);
+      onReorder(newItems);
+    },
+    [accounts, onReorder],
+  );
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
@@ -74,11 +77,7 @@ export default function AccountList({
   }, []);
 
   return (
-    <div
-      className="space-y-1"
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-    >
+    <div className="space-y-1" onDragOver={handleDragOver} onDrop={handleDrop}>
       {accounts.map((account, index) => {
         const cashBalance = Number(account.balance);
         const marketValue =

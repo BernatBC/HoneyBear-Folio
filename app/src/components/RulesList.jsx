@@ -125,7 +125,7 @@ export default function RulesList() {
     // Store in both state (for UI) and ref (for reliable access during drag)
     setDraggingId(id);
     draggingIdRef.current = id;
-    
+
     // Set data transfer - required for drag to work
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", String(id));
