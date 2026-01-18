@@ -339,7 +339,7 @@ export default function FireCalculator() {
     });
 
   return (
-    <div className="h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
+    <div className="fire-calculator-container h-full flex flex-col space-y-8 max-w-7xl mx-auto pb-8">
       <header className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3 tracking-tight">
