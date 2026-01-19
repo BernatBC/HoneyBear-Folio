@@ -9,6 +9,10 @@ const CONTRIBUTORS = [
     username: "albertboci",
     roleKey: "about.tester_and_icon_designer",
   },
+  {
+    username: "FumingPower3925",
+    roleKey: "about.contributor",
+  },
 ];
 
 export default CONTRIBUTORS;

@@ -13,7 +13,7 @@ Thanks for your interest in contributing.
 
 Prerequisites:
 
-- Node.js (recommended: Node 20+)
+- Bun v1.3.6+
 - Rust toolchain (stable)
 - Tauri system dependencies (WebView/build tools)
 
@@ -28,15 +28,15 @@ Run the app in dev mode:
 
 ```bash
 cd app
-npm install
-npm run tauri dev
+bun install
+bun run tauri dev
 ```
 
 Build a production bundle:
 
 ```bash
 cd app
-npm run tauri build
+bun run tauri build
 ```
 
 ## Project layout (quick map)
@@ -69,8 +69,8 @@ This app is a personal finance tool.
 
 Before requesting review:
 
-- The app starts in dev mode (`npm run tauri dev`).
-- Frontend builds (`npm run build`).
+- The app starts in dev mode (`bun run tauri dev`).
+- Frontend builds (`bun run build`).
 - Rust code formats (`cargo fmt`) and is clean under `cargo clippy` (when practical).
 - UI changes include screenshots.
 - Import/export changes include sample files and edge cases.

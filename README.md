@@ -48,7 +48,7 @@ Key paths:
 
 Prerequisites:
 
-- Node.js (for Vite/React)
+- Bun v1.3.6+ (JavaScript runtime and package manager)
 - Rust toolchain (stable)
 - Tauri dependencies for your OS (WebView, build tools)
 
@@ -63,25 +63,25 @@ Run in development mode:
 
 ```bash
 cd app
-npm install
-npm run tauri dev
+bun install
+bun run tauri dev
 ```
 
 Build a production bundle:
 
 ```bash
 cd app
-npm install
-npm run tauri build
+bun install
+bun run tauri build
 ```
 
 Useful scripts (from `app/package.json`):
 
-- `npm run dev`: start Vite dev server
-- `npm run build`: build frontend (Vite)
-- `npm run tauri dev`: run the Tauri desktop app in dev mode
-- `npm run tauri build`: create platform bundles/installers
-- `npm run version:sync`: sync version into Tauri config and Cargo manifest
+- `bun run dev`: start Vite dev server
+- `bun run build`: build frontend (Vite)
+- `bun run tauri dev`: run the Tauri desktop app in dev mode
+- `bun run tauri build`: create platform bundles/installers
+- `bun run version:sync`: sync version into Tauri config and Cargo manifest
 
 ## Data Storage
 

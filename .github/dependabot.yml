@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  # Maintain dependencies for npm
+  # Maintain dependencies for npm (Bun uses package.json, so npm ecosystem works)
   - package-ecosystem: "npm"
     directory: "/app"
     schedule:
