@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   autolabel:
+    if: ${{ github.event.pull_request.head.repo.fork == false }}
     runs-on: ubuntu-latest
     steps:
       - name: Add labels based on title and files
