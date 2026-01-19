@@ -78,7 +78,7 @@ jobs:
       run: cargo fmt
 
     - name: Commit changes
-      if: steps.changed.outputs.app == 'true'
+      if: steps.changed.outputs.app == 'true' && github.event.pull_request.head.repo.fork == false
       uses: stefanzweifel/git-auto-commit-action@v7
       with:
         commit_message: "style: apply automatic linting and formatting fixes"
