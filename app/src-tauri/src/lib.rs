@@ -2384,6 +2384,56 @@ fn get_system_theme() -> Result<String, String> {
         {
             return Ok("dark".to_string());
         }
+
+        // Flatpak / portal fallback: try reading settings through the portal (works in sandboxed environments)
+        // Uses `gdbus` to call org.freedesktop.portal.Settings.Read for org.gnome.desktop.interface keys.
+        if let Ok(o) = Command::new("gdbus")
+            .args([
+                "call",
+                "--session",
+                "--dest",
+                "org.freedesktop.portal.Desktop",
+                "--object-path",
+                "/org/freedesktop/portal/desktop",
+                "--method",
+                "org.freedesktop.portal.Settings.Read",
+                "org.gnome.desktop.interface",
+                "color-scheme",
+            ])
+            .output()
+        {
+            if o.status.success() {
+                let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
+                if s.contains("prefer-dark") || s.contains("dark") {
+                    return Ok("dark".to_string());
+                }
+            }
+        }
+
+        // Also try reading gtk-theme via the portal
+        if let Ok(o) = Command::new("gdbus")
+            .args([
+                "call",
+                "--session",
+                "--dest",
+                "org.freedesktop.portal.Desktop",
+                "--object-path",
+                "/org/freedesktop/portal/desktop",
+                "--method",
+                "org.freedesktop.portal.Settings.Read",
+                "org.gnome.desktop.interface",
+                "gtk-theme",
+            ])
+            .output()
+        {
+            if o.status.success() {
+                let s = String::from_utf8_lossy(&o.stdout).to_lowercase();
+                if s.contains("dark") {
+                    return Ok("dark".to_string());
+                }
+            }
+        }
+
         Ok("light".to_string())
     }
 
