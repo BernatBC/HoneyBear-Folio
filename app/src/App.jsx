@@ -415,6 +415,7 @@ function App() {
               </ErrorBoundary>
               <WelcomeWindow />
               <DevTools />
+              <div id="datepicker-portal" />
             </ConfirmDialogProvider>
           </ToastProvider>{" "}
         </PrivacyProvider>

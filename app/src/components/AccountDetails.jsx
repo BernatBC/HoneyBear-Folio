@@ -986,6 +986,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     calendarStartDay={firstDayOfWeek}
                     shouldCloseOnSelect={false}
                     required
+                    portalId="datepicker-portal"
                     className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
@@ -1174,6 +1175,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     calendarStartDay={firstDayOfWeek}
                     shouldCloseOnSelect={false}
                     required
+                    portalId="datepicker-portal"
                     className="w-full pl-10 pr-3 py-2.5 text-sm border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-600"
                   />
                 </div>
@@ -1449,6 +1451,7 @@ export default function AccountDetails({ account, onUpdate }) {
                             dateFormat={getDatePickerFormat(dateFormat)}
                             calendarStartDay={firstDayOfWeek}
                             shouldCloseOnSelect={false}
+                            portalId="datepicker-portal"
                             className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
                           />
                         </td>

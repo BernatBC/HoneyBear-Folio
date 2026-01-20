@@ -1239,6 +1239,7 @@ export default function Dashboard({
                   endDate={customEndDate}
                   maxDate={new Date()}
                   showPopperArrow={false}
+                  portalId="datepicker-portal"
                   dateFormat={getDatePickerFormat(dateFormat)}
                   calendarStartDay={firstDayOfWeek}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
@@ -1255,6 +1256,7 @@ export default function Dashboard({
                   minDate={customStartDate}
                   maxDate={new Date()}
                   showPopperArrow={false}
+                  portalId="datepicker-portal"
                   dateFormat={getDatePickerFormat(dateFormat)}
                   calendarStartDay={firstDayOfWeek}
                   className="w-24 bg-transparent text-xs font-medium focus:outline-none text-slate-700 dark:text-slate-200"
