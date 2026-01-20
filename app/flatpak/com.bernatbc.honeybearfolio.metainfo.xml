@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.bernatbc.honeybearfolio</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>GPL-3.0-or-later</project_license>
+  <project_license>AGPL-3.0-or-later</project_license>
   <name>HoneyBear-Folio</name>
   <summary>Cross-platform personal finance desktop app</summary>
   <description>
