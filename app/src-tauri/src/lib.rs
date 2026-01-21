@@ -1,6 +1,3 @@
-
-use tauri::AppHandle;
-
 mod models;
 mod db_init;
 mod accounts;
