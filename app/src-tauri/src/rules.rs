@@ -1,6 +1,7 @@
 use rusqlite::{params, Connection};
 use crate::models::Rule;
 use std::path::PathBuf;
+use tauri::AppHandle;
 
 pub fn get_rules_db(db_path: &PathBuf) -> Result<Vec<Rule>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -96,4 +97,64 @@ pub fn update_rules_order_db(db_path: &PathBuf, rule_ids: Vec<i32>) -> Result<()
     tx.commit().map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn get_rules(app_handle: AppHandle) -> Result<Vec<Rule>, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    get_rules_db(&db_path)
+}
+
+#[tauri::command]
+pub fn create_rule(
+    app_handle: AppHandle,
+    priority: i32,
+    match_field: String,
+    match_pattern: String,
+    action_field: String,
+    action_value: String,
+) -> Result<i32, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    create_rule_db(
+        &db_path,
+        priority,
+        match_field,
+        match_pattern,
+        action_field,
+        action_value,
+    )
+}
+
+#[tauri::command]
+pub fn update_rule(
+    app_handle: AppHandle,
+    id: i32,
+    priority: i32,
+    match_field: String,
+    match_pattern: String,
+    action_field: String,
+    action_value: String,
+) -> Result<(), String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    update_rule_db(
+        &db_path,
+        id,
+        priority,
+        match_field,
+        match_pattern,
+        action_field,
+        action_value,
+    )
+}
+
+#[tauri::command]
+pub fn delete_rule(app_handle: AppHandle, id: i32) -> Result<(), String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    delete_rule_db(&db_path, id)
+}
+
+#[tauri::command]
+pub fn update_rules_order(app_handle: AppHandle, rule_ids: Vec<i32>) -> Result<(), String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    update_rules_order_db(&db_path, rule_ids)
 }

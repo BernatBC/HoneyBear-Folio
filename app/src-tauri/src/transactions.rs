@@ -1,6 +1,7 @@
 use rusqlite::{params, Connection, OptionalExtension};
 use std::path::PathBuf;
 use crate::models::Transaction;
+use tauri::AppHandle;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -684,4 +685,70 @@ pub fn delete_transaction_db(db_path: &PathBuf, id: i32) -> Result<(), String> {
     tx.commit().map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn create_transaction(
+    app_handle: AppHandle,
+    args: CreateTransactionArgs,
+) -> Result<Transaction, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    create_transaction_db(&db_path, args)
+}
+
+#[tauri::command]
+pub fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transaction>, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    get_transactions_db(&db_path, account_id)
+}
+
+#[tauri::command]
+pub fn get_all_transactions(app_handle: AppHandle) -> Result<Vec<Transaction>, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    get_all_transactions_db(&db_path)
+}
+
+#[tauri::command]
+pub fn create_investment_transaction(
+    app_handle: AppHandle,
+    args: CreateInvestmentTransactionArgs,
+) -> Result<Transaction, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    create_investment_transaction_db(&db_path, args)
+}
+
+#[tauri::command]
+pub fn update_transaction(
+    app_handle: AppHandle,
+    args: UpdateTransactionArgs,
+) -> Result<Transaction, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    update_transaction_db(&db_path, args)
+}
+
+#[tauri::command]
+pub fn update_investment_transaction(
+    app_handle: AppHandle,
+    args: UpdateInvestmentTransactionArgs,
+) -> Result<Transaction, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    update_investment_transaction_db(&db_path, args)
+}
+
+#[tauri::command]
+pub fn delete_transaction(app_handle: AppHandle, id: i32) -> Result<(), String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    delete_transaction_db(&db_path, id)
+}
+
+#[tauri::command]
+pub fn get_payees(app_handle: AppHandle) -> Result<Vec<String>, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    get_payees_db(&db_path)
+}
+
+#[tauri::command]
+pub fn get_categories(app_handle: AppHandle) -> Result<Vec<String>, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    get_categories_db(&db_path)
 }

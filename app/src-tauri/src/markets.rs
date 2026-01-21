@@ -22,6 +22,7 @@ pub async fn search_ticker_with_client(
 }
 
 // Search helper that enriches results with currency info using get_stock_quotes
+#[tauri::command]
 pub async fn search_ticker(
     app_handle: tauri::AppHandle,
     query: String,
@@ -49,6 +50,7 @@ pub async fn search_ticker(
     Ok(quotes)
 }
 
+#[tauri::command]
 pub async fn get_stock_quotes(
     app_handle: tauri::AppHandle,
     tickers: Vec<String>,
@@ -416,6 +418,7 @@ pub async fn update_daily_stock_prices_with_client_and_base(
     Ok(())
 }
 
+#[tauri::command]
 pub async fn update_daily_stock_prices(
     app_handle: tauri::AppHandle,
     tickers: Vec<String>,
@@ -459,11 +462,13 @@ pub fn get_daily_stock_prices_from_path(
     Ok(prices)
 }
 
+#[tauri::command]
 pub fn get_daily_stock_prices(app_handle: tauri::AppHandle, ticker: String) -> Result<Vec<DailyPrice>, String> {
     let db_path = crate::db_init::get_db_path(&app_handle)?;
     get_daily_stock_prices_from_path(std::path::Path::new(&db_path), ticker)
 }
 
+#[tauri::command]
 pub async fn check_currency_availability(app_handle: tauri::AppHandle, currency: String) -> Result<bool, String> {
     if currency == "USD" {
         return Ok(true);

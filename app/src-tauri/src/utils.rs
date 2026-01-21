@@ -1,6 +1,7 @@
 use rusqlite::Connection;
 use std::collections::HashMap;
 use crate::models::Account;
+use tauri::AppHandle;
 
 pub fn get_custom_rates_map(db_path: &std::path::PathBuf) -> Result<HashMap<String, f64>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -129,6 +130,7 @@ pub fn get_custom_exchange_rate_db(db_path: &PathBuf, currency: String) -> Resul
 }
 
 // System theme detection moved here
+#[tauri::command]
 pub fn get_system_theme() -> Result<String, String> {
     // Return "dark" or "light" based on heuristics per-platform. Keep implementation small and robust.
     #[cfg(target_os = "linux")]
@@ -262,4 +264,23 @@ pub fn get_system_theme() -> Result<String, String> {
     {
         Ok("light".to_string())
     }
+}
+
+#[tauri::command]
+pub fn set_custom_exchange_rate(
+    app_handle: AppHandle,
+    currency: String,
+    rate: f64,
+) -> Result<(), String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    set_custom_exchange_rate_db(&db_path, currency, rate)
+}
+
+#[tauri::command]
+pub fn get_custom_exchange_rate(
+    app_handle: AppHandle,
+    currency: String,
+) -> Result<Option<f64>, String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    get_custom_exchange_rate_db(&db_path, currency)
 }

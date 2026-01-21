@@ -222,3 +222,38 @@ pub fn init_db(app_handle: &AppHandle) -> Result<(), String> {
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn set_db_path(app_handle: AppHandle, path: String) -> Result<(), String> {
+    let mut settings = read_settings(&app_handle)?;
+    settings.db_path = Some(path.clone());
+    write_settings(&app_handle, &settings)?;
+
+    // Ensure any parent dir exists and initialize DB at new path
+    let pb = PathBuf::from(path);
+    if let Some(parent) = pb.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+    }
+
+    init_db(&app_handle)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn reset_db_path(app_handle: AppHandle) -> Result<(), String> {
+    let mut settings = read_settings(&app_handle)?;
+    settings.db_path = None;
+    write_settings(&app_handle, &settings)?;
+
+    // Ensure default DB exists
+    init_db(&app_handle)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_db_path_command(app_handle: AppHandle) -> Result<String, String> {
+    let pb = get_db_path(&app_handle)?;
+    Ok(pb.to_string_lossy().to_string())
+}
