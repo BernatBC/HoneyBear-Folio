@@ -8,10 +8,12 @@ function TestComponent({ onShowToast }) {
   const { showToast } = useToast();
   return (
     <div>
-      <button onClick={() => {
-        const id = showToast("Test message");
-        onShowToast?.(id);
-      }}>
+      <button
+        onClick={() => {
+          const id = showToast("Test message");
+          onShowToast?.(id);
+        }}
+      >
         Info Toast
       </button>
       <button onClick={() => showToast("Success!", { type: "success" })}>
@@ -40,7 +42,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <div data-testid="child">Hello</div>
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     expect(screen.getByTestId("child")).toBeInTheDocument();
@@ -50,7 +52,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     expect(screen.getByText("Info Toast")).toBeInTheDocument();
@@ -60,7 +62,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     act(() => {
@@ -75,7 +77,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     act(() => {
@@ -90,7 +92,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     act(() => {
@@ -105,13 +107,13 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     act(() => {
       fireEvent.click(screen.getByText("Info Toast"));
     });
-    
+
     expect(screen.getByText("Test message")).toBeInTheDocument();
 
     // Fast-forward past the default 4000ms duration
@@ -126,13 +128,13 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     act(() => {
       fireEvent.click(screen.getByText("Persistent Toast"));
     });
-    
+
     expect(screen.getByText("No auto-dismiss")).toBeInTheDocument();
 
     // Fast-forward way past normal duration
@@ -148,13 +150,13 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     act(() => {
       fireEvent.click(screen.getByText("Info Toast"));
     });
-    
+
     expect(screen.getByText("Test message")).toBeInTheDocument();
 
     act(() => {
@@ -168,7 +170,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     act(() => {
@@ -186,8 +188,12 @@ describe("ToastProvider", () => {
     let toastId;
     render(
       <ToastProvider>
-        <TestComponent onShowToast={(id) => { toastId = id; }} />
-      </ToastProvider>
+        <TestComponent
+          onShowToast={(id) => {
+            toastId = id;
+          }}
+        />
+      </ToastProvider>,
     );
 
     act(() => {
@@ -202,7 +208,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
 
     const container = document.querySelector(".toast-container");

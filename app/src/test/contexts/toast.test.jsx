@@ -17,7 +17,7 @@ describe("ToastContext", () => {
     it("returns noop showToast when used outside provider", () => {
       // Should not throw
       render(<TestComponent />);
-      
+
       // Should render without crashing
       expect(screen.getByRole("button")).toBeInTheDocument();
     });
@@ -29,9 +29,9 @@ describe("ToastContext", () => {
         capturedShowToast = showToast;
         return null;
       }
-      
+
       render(<CaptureComponent />);
-      
+
       // Calling noop should not throw
       expect(() => capturedShowToast("message")).not.toThrow();
       expect(() => capturedShowToast()).not.toThrow();
@@ -49,7 +49,7 @@ describe("ToastContext", () => {
       render(
         <ToastContext.Provider value={contextValue}>
           <TestWithProvider />
-        </ToastContext.Provider>
+        </ToastContext.Provider>,
       );
 
       screen.getByRole("button").click();

@@ -31,14 +31,18 @@ describe("ChartNumberFormatSync", () => {
     render(<ChartNumberFormatSync />);
 
     expect(ChartJS.defaults.plugins.tooltip.callbacks.label).toBeDefined();
-    expect(typeof ChartJS.defaults.plugins.tooltip.callbacks.label).toBe("function");
+    expect(typeof ChartJS.defaults.plugins.tooltip.callbacks.label).toBe(
+      "function",
+    );
   });
 
   it("sets up linear scale tick callback on Chart.js defaults", () => {
     render(<ChartNumberFormatSync />);
 
     expect(ChartJS.defaults.scales.linear.ticks.callback).toBeDefined();
-    expect(typeof ChartJS.defaults.scales.linear.ticks.callback).toBe("function");
+    expect(typeof ChartJS.defaults.scales.linear.ticks.callback).toBe(
+      "function",
+    );
   });
 
   it("tooltip callback formats parsed.y value", () => {
@@ -52,7 +56,9 @@ describe("ChartNumberFormatSync", () => {
 
     const result = callback(ctx);
 
-    expect(mockFormatNumber).toHaveBeenCalledWith(1234.56, { style: "currency" });
+    expect(mockFormatNumber).toHaveBeenCalledWith(1234.56, {
+      style: "currency",
+    });
     expect(result).toContain("Revenue:");
   });
 

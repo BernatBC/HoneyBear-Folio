@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { NumberFormatContext, useNumberFormat } from "../../contexts/number-format";
+import {
+  NumberFormatContext,
+  useNumberFormat,
+} from "../../contexts/number-format";
 
 // Test component to consume context
 function TestComponent() {
@@ -18,12 +21,14 @@ describe("NumberFormatContext", () => {
   describe("useNumberFormat", () => {
     it("throws error when used outside NumberFormatProvider", () => {
       // Suppress console.error for expected error
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       expect(() => render(<TestComponent />)).toThrow(
-        "useNumberFormat must be used within NumberFormatProvider"
+        "useNumberFormat must be used within NumberFormatProvider",
       );
-      
+
       consoleSpy.mockRestore();
     });
 
@@ -38,7 +43,7 @@ describe("NumberFormatContext", () => {
       render(
         <NumberFormatContext.Provider value={contextValue}>
           <TestComponent />
-        </NumberFormatContext.Provider>
+        </NumberFormatContext.Provider>,
       );
 
       expect(screen.getByTestId("locale")).toHaveTextContent("en-US");
@@ -57,7 +62,7 @@ describe("NumberFormatContext", () => {
       render(
         <NumberFormatContext.Provider value={contextValue}>
           <TestComponent />
-        </NumberFormatContext.Provider>
+        </NumberFormatContext.Provider>,
       );
 
       expect(screen.getByTestId("locale")).toHaveTextContent("de-DE");

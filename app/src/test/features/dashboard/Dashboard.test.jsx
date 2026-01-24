@@ -33,12 +33,16 @@ vi.mock("chart.js", () => ({
 vi.mock("../../../utils/format", () => ({
   useFormatNumber: () => (val) => `fmt-${val}`,
   useFormatDate: () => (date) => "formatted-date",
-  getDatePickerFormat: () => "yyyy-MM-dd"
+  getDatePickerFormat: () => "yyyy-MM-dd",
 }));
 
 // Mock child components
-vi.mock("../../../features/dashboard/SankeyDiagram", () => ({ default: () => <div data-testid="sankey">Sankey Diagram</div> }));
-vi.mock("../../../components/ui/CustomSelect", () => ({ default: () => <select data-testid="select" /> }));
+vi.mock("../../../features/dashboard/SankeyDiagram", () => ({
+  default: () => <div data-testid="sankey">Sankey Diagram</div>,
+}));
+vi.mock("../../../components/ui/CustomSelect", () => ({
+  default: () => <select data-testid="select" />,
+}));
 
 describe("Dashboard", () => {
   beforeEach(() => {
@@ -48,19 +52,31 @@ describe("Dashboard", () => {
   it("fetches data and renders charts", async () => {
     // Mock data
     invoke.mockImplementation((cmd) => {
-      if (cmd === "get_all_transactions") return Promise.resolve([
-        { id: 1, date: "2023-01-01", amount: 100.0, payee: "Shop", category: "Food", account_id: 1, currency: "USD" }
-      ]);
-      if (cmd === "get_accounts") return Promise.resolve([
-        { id: 1, name: "Checking", balance: 1000, currency: "USD" }
-      ]);
+      if (cmd === "get_all_transactions")
+        return Promise.resolve([
+          {
+            id: 1,
+            date: "2023-01-01",
+            amount: 100.0,
+            payee: "Shop",
+            category: "Food",
+            account_id: 1,
+            currency: "USD",
+          },
+        ]);
+      if (cmd === "get_accounts")
+        return Promise.resolve([
+          { id: 1, name: "Checking", balance: 1000, currency: "USD" },
+        ]);
       return Promise.resolve(null);
     });
 
     render(
-      <NumberFormatContext.Provider value={{ dateFormat: "MM/dd/yyyy", firstDayOfWeek: 0, currency: "USD" }}>
+      <NumberFormatContext.Provider
+        value={{ dateFormat: "MM/dd/yyyy", firstDayOfWeek: 0, currency: "USD" }}
+      >
         <Dashboard />
-      </NumberFormatContext.Provider>
+      </NumberFormatContext.Provider>,
     );
 
     await waitFor(() => {
@@ -76,9 +92,11 @@ describe("Dashboard", () => {
     invoke.mockResolvedValue([]); // transactions
 
     render(
-      <NumberFormatContext.Provider value={{ dateFormat: "MM/dd/yyyy", firstDayOfWeek: 0, currency: "USD" }}>
+      <NumberFormatContext.Provider
+        value={{ dateFormat: "MM/dd/yyyy", firstDayOfWeek: 0, currency: "USD" }}
+      >
         <Dashboard accounts={propAccounts} />
-      </NumberFormatContext.Provider>
+      </NumberFormatContext.Provider>,
     );
 
     // Should fetch transactions but NOT accounts

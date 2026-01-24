@@ -17,7 +17,7 @@ describe("CustomSelect", () => {
         onChange={() => {}}
         options={options}
         placeholder="Select something"
-      />
+      />,
     );
     expect(screen.getByText("Select something")).toBeInTheDocument();
   });
@@ -29,7 +29,7 @@ describe("CustomSelect", () => {
         onChange={() => {}}
         options={options}
         placeholder="Select something"
-      />
+      />,
     );
     expect(screen.getByText("Option Two")).toBeInTheDocument();
   });
@@ -41,7 +41,7 @@ describe("CustomSelect", () => {
         onChange={() => {}}
         options={options}
         placeholder="Select something"
-      />
+      />,
     );
 
     const trigger = screen.getByText("Select something");
@@ -61,7 +61,7 @@ describe("CustomSelect", () => {
         onChange={handleChange}
         options={options}
         placeholder="Select something"
-      />
+      />,
     );
 
     const trigger = screen.getByText("Select something");
@@ -81,7 +81,7 @@ describe("CustomSelect", () => {
         onChange={() => {}}
         options={options}
         placeholder="Select something"
-      />
+      />,
     );
 
     const trigger = screen.getByText("Select something");
@@ -102,7 +102,7 @@ describe("CustomSelect", () => {
         onChange={() => {}}
         options={options}
         placeholder="Select something"
-      />
+      />,
     );
     expect(screen.getByText("Select something")).toBeInTheDocument();
   });

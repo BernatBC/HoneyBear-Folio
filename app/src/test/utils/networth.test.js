@@ -17,7 +17,7 @@ describe("computeNetWorth", () => {
 
   it("includes market values from the secondary map", () => {
     const accounts = [{ id: "1", balance: 100 }];
-    const marketValues = { "1": 50 };
+    const marketValues = { 1: 50 };
     // 100 + 50 = 150
     expect(computeNetWorth(accounts, marketValues)).toBe(150);
   });
@@ -33,7 +33,7 @@ describe("computeNetWorth", () => {
 
   it("applies exchange rate to both balance and market value", () => {
     const accounts = [{ id: "1", balance: 100, exchange_rate: 2 }];
-    const marketValues = { "1": 50 };
+    const marketValues = { 1: 50 };
     // (100 + 50) * 2 = 300
     expect(computeNetWorth(accounts, marketValues)).toBe(300);
   });
@@ -49,7 +49,7 @@ describe("computeNetWorth", () => {
 
   it("ignores invalid market values", () => {
     const accounts = [{ id: "1", balance: 100 }];
-    const marketValues = { "1": "invalid" };
+    const marketValues = { 1: "invalid" };
     expect(computeNetWorth(accounts, marketValues)).toBe(100);
   });
 });

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 
 // Mock dependencies BEFORE import
 vi.mock("react-chartjs-2", () => ({
-  Chart: () => <div data-testid="sankey-chart">Sankey Chart</div>
+  Chart: () => <div data-testid="sankey-chart">Sankey Chart</div>,
 }));
 
 vi.mock("chart.js", () => ({
@@ -11,24 +11,24 @@ vi.mock("chart.js", () => ({
   Tooltip: {},
   Legend: {},
   Title: {},
-  LinearScale: {}
+  LinearScale: {},
 }));
 
 vi.mock("chartjs-chart-sankey", () => ({
   SankeyController: {},
-  Flow: {}
+  Flow: {},
 }));
 
 vi.mock("../../../utils/format", () => ({
-  useFormatNumber: () => (val) => `${val}`
+  useFormatNumber: () => (val) => `${val}`,
 }));
 
 vi.mock("../../../i18n/i18n", () => ({
-  t: (k) => k
+  t: (k) => k,
 }));
 
 vi.mock("../../../hooks/useIsDark", () => ({
-  default: () => false
+  default: () => false,
 }));
 
 // Import component AFTER mocks

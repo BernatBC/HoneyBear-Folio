@@ -41,7 +41,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <div data-testid="child">Hello World</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByTestId("child")).toBeInTheDocument();
@@ -52,18 +52,20 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent message="Test error" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-    expect(screen.getByText("Check the console for details")).toBeInTheDocument();
+    expect(
+      screen.getByText("Check the console for details"),
+    ).toBeInTheDocument();
   });
 
   it("shows error details when expanded", () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent message="Detailed error message" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     // Click to expand details
@@ -77,7 +79,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent message="Copy test" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     fireEvent.click(screen.getByText("Show details"));
@@ -89,7 +91,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent message="Reload test" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     fireEvent.click(screen.getByText("Show details"));
@@ -106,7 +108,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent message="Clipboard test" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     fireEvent.click(screen.getByText("Show details"));
@@ -124,7 +126,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent message="Reload test" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     fireEvent.click(screen.getByText("Show details"));
@@ -139,22 +141,18 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent message="Console test" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(console.error).toHaveBeenCalledWith(
       "ErrorBoundary caught an error:",
       expect.any(Error),
-      expect.anything()
+      expect.anything(),
     );
   });
 
   it("renders null children without error", () => {
-    render(
-      <ErrorBoundary>
-        {null}
-      </ErrorBoundary>
-    );
+    render(<ErrorBoundary>{null}</ErrorBoundary>);
 
     // Should not throw, component should be in document
     expect(document.body).toBeInTheDocument();

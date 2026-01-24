@@ -11,9 +11,9 @@ vi.mock("../../../contexts/toast", () => ({
 }));
 
 vi.mock("../../../hooks/useCustomRate", () => ({
-  useCustomRate: () => ({ 
+  useCustomRate: () => ({
     checkAndPrompt: vi.fn().mockResolvedValue(true),
-    dialog: null 
+    dialog: null,
   }),
 }));
 
@@ -26,10 +26,14 @@ vi.mock("../../../i18n/i18n", () => ({
 }));
 
 vi.mock("../../../components/ui/Modal", () => ({
-  Modal: ({ children, onClose }) => <div data-testid="modal">
-    <button onClick={onClose} data-testid="modal-close">Close</button>
-    {children}
-  </div>,
+  Modal: ({ children, onClose }) => (
+    <div data-testid="modal">
+      <button onClick={onClose} data-testid="modal-close">
+        Close
+      </button>
+      {children}
+    </div>
+  ),
   ModalHeader: ({ title }) => <h1>{title}</h1>,
   ModalBody: ({ children }) => <div>{children}</div>,
   ModalFooter: ({ children }) => <div>{children}</div>,
@@ -38,98 +42,144 @@ vi.mock("../../../components/ui/Modal", () => ({
 // Mock CustomSelect
 vi.mock("../../../components/ui/CustomSelect", () => ({
   default: ({ value, onChange, options, placeholder }) => (
-    <select 
+    <select
       data-testid="currency-select"
-      value={value} 
+      value={value}
       onChange={(e) => onChange(e.target.value)}
     >
       <option value="">{placeholder}</option>
       {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
       ))}
     </select>
-  )
+  ),
 }));
 
 describe("AccountModal", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("renders correctly in create mode", () => {
+    render(
+      <AccountModal onClose={vi.fn()} onUpdate={vi.fn()} isEditing={false} />,
+    );
+
+    expect(screen.getByText("account.new_account")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("account.placeholder.name"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("account.placeholder.balance"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders correctly in edit mode with account data", () => {
+    const account = {
+      id: 123,
+      name: "Existing Account",
+      balance: 500.5,
+      currency: "USD",
+    };
+    render(
+      <AccountModal
+        onClose={vi.fn()}
+        onUpdate={vi.fn()}
+        isEditing={true}
+        account={account}
+      />,
+    );
+
+    expect(screen.getByText("account.edit_account")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Existing Account")).toBeInTheDocument();
+
+    // Note: Balance input is disabled in edit mode usually, let's verify if implementation does that.
+    // Assuming the component logic (AccountModal.jsx was read partly)
+  });
+
+  it("shows error toast when submitting empty name", () => {
+    render(<AccountModal onClose={vi.fn()} onUpdate={vi.fn()} />);
+
+    const form = screen
+      .getByPlaceholderText("account.placeholder.name")
+      .closest("form");
+    fireEvent.submit(form);
+
+    expect(mockShowToast).toHaveBeenCalledWith(
+      expect.stringContaining("account.error.empty_name"),
+      expect.objectContaining({ type: "warning" }),
+    );
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it("submits create_account command with correct data", async () => {
+    const onUpdate = vi.fn();
+    const onClose = vi.fn();
+    render(<AccountModal onClose={onClose} onUpdate={onUpdate} />);
+
+    // Fill form
+    fireEvent.change(screen.getByPlaceholderText("account.placeholder.name"), {
+      target: { value: "New Bank" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText("account.placeholder.balance"),
+      { target: { value: "1000" } },
+    );
+    fireEvent.change(screen.getByTestId("currency-select"), {
+      target: { value: "EUR" },
     });
 
-    it("renders correctly in create mode", () => {
-        render(<AccountModal onClose={vi.fn()} onUpdate={vi.fn()} isEditing={false} />);
-        
-        expect(screen.getByText("account.new_account")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("account.placeholder.name")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("account.placeholder.balance")).toBeInTheDocument();
+    const form = screen
+      .getByPlaceholderText("account.placeholder.name")
+      .closest("form");
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(invoke).toHaveBeenCalledWith("create_account", {
+        name: "New Bank",
+        balance: 1000,
+        currency: "EUR",
+      });
+      expect(mockShowToast).toHaveBeenCalledWith(
+        "account.created",
+        expect.anything(),
+      );
+      expect(onUpdate).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it("submits update_account command when editing", async () => {
+    const account = { id: 99, name: "Old Name", currency: "USD" };
+    const onUpdate = vi.fn();
+    render(
+      <AccountModal
+        onClose={vi.fn()}
+        onUpdate={onUpdate}
+        isEditing={true}
+        account={account}
+      />,
+    );
+
+    fireEvent.change(screen.getByDisplayValue("Old Name"), {
+      target: { value: "Updated Name" },
     });
 
-    it("renders correctly in edit mode with account data", () => {
-        const account = { id: 123, name: "Existing Account", balance: 500.50, currency: "USD" };
-        render(<AccountModal onClose={vi.fn()} onUpdate={vi.fn()} isEditing={true} account={account} />);
-        
-        expect(screen.getByText("account.edit_account")).toBeInTheDocument();
-        expect(screen.getByDisplayValue("Existing Account")).toBeInTheDocument();
-        
-        // Note: Balance input is disabled in edit mode usually, let's verify if implementation does that.
-        // Assuming the component logic (AccountModal.jsx was read partly)
+    const form = screen.getByDisplayValue("Updated Name").closest("form");
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(invoke).toHaveBeenCalledWith("update_account", {
+        id: 99,
+        name: "Updated Name",
+        currency: "USD",
+      });
+      expect(mockShowToast).toHaveBeenCalledWith(
+        "account.updated",
+        expect.anything(),
+      );
     });
-
-    it("shows error toast when submitting empty name", () => {
-        render(<AccountModal onClose={vi.fn()} onUpdate={vi.fn()} />);
-        
-        const form = screen.getByPlaceholderText("account.placeholder.name").closest("form");
-        fireEvent.submit(form);
-
-        expect(mockShowToast).toHaveBeenCalledWith(
-            expect.stringContaining("account.error.empty_name"), 
-            expect.objectContaining({ type: "warning" })
-        );
-        expect(invoke).not.toHaveBeenCalled();
-    });
-
-    it("submits create_account command with correct data", async () => {
-        const onUpdate = vi.fn();
-        const onClose = vi.fn();
-        render(<AccountModal onClose={onClose} onUpdate={onUpdate} />);
-        
-        // Fill form
-        fireEvent.change(screen.getByPlaceholderText("account.placeholder.name"), { target: { value: "New Bank" } });
-        fireEvent.change(screen.getByPlaceholderText("account.placeholder.balance"), { target: { value: "1000" } });
-        fireEvent.change(screen.getByTestId("currency-select"), { target: { value: "EUR" } });
-
-        const form = screen.getByPlaceholderText("account.placeholder.name").closest("form");
-        fireEvent.submit(form);
-
-        await waitFor(() => {
-            expect(invoke).toHaveBeenCalledWith("create_account", {
-                name: "New Bank",
-                balance: 1000,
-                currency: "EUR"
-            });
-            expect(mockShowToast).toHaveBeenCalledWith("account.created", expect.anything());
-            expect(onUpdate).toHaveBeenCalled();
-            expect(onClose).toHaveBeenCalled();
-        });
-    });
-
-    it("submits update_account command when editing", async () => {
-        const account = { id: 99, name: "Old Name", currency: "USD" };
-        const onUpdate = vi.fn();
-        render(<AccountModal onClose={vi.fn()} onUpdate={onUpdate} isEditing={true} account={account} />);
-        
-        fireEvent.change(screen.getByDisplayValue("Old Name"), { target: { value: "Updated Name" } });
-        
-        const form = screen.getByDisplayValue("Updated Name").closest("form");
-        fireEvent.submit(form);
-
-        await waitFor(() => {
-            expect(invoke).toHaveBeenCalledWith("update_account", {
-                id: 99,
-                name: "Updated Name",
-                currency: "USD"
-            });
-            expect(mockShowToast).toHaveBeenCalledWith("account.updated", expect.anything());
-        });
-    });
+  });
 });

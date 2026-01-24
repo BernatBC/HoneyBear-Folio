@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
-import { formatNumberWithLocale, parseNumberWithLocale } from "../../utils/format";
+import {
+  formatNumberWithLocale,
+  parseNumberWithLocale,
+} from "../../utils/format";
 import { CURRENCIES } from "../../utils/currencies";
 
 // Mock currencies for testing
@@ -64,7 +67,7 @@ describe("formatNumberWithLocale", () => {
     const result = formatNumberWithLocale(1000, "invalid-locale");
     // Depending on system implementation, usually falls back to system locale (likely en-US in test env)
     expect(result).not.toBe("");
-    expect(result).toContain("1"); 
+    expect(result).toContain("1");
   });
 });
 

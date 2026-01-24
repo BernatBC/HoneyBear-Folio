@@ -31,10 +31,9 @@ describe("DevTools", () => {
 
     render(<DevTools />);
 
-    expect(mockShowToast).toHaveBeenCalledWith(
-      "Dev: Forced Success Toast",
-      { type: "success" }
-    );
+    expect(mockShowToast).toHaveBeenCalledWith("Dev: Forced Success Toast", {
+      type: "success",
+    });
   });
 
   it("shows error toast when FORCE_FAILURE_TOAST is enabled", () => {
@@ -42,10 +41,9 @@ describe("DevTools", () => {
 
     render(<DevTools />);
 
-    expect(mockShowToast).toHaveBeenCalledWith(
-      "Dev: Forced Failure Toast",
-      { type: "error" }
-    );
+    expect(mockShowToast).toHaveBeenCalledWith("Dev: Forced Failure Toast", {
+      type: "error",
+    });
   });
 
   it("shows both toasts when both settings are enabled", () => {
@@ -55,14 +53,12 @@ describe("DevTools", () => {
     render(<DevTools />);
 
     expect(mockShowToast).toHaveBeenCalledTimes(2);
-    expect(mockShowToast).toHaveBeenCalledWith(
-      "Dev: Forced Success Toast",
-      { type: "success" }
-    );
-    expect(mockShowToast).toHaveBeenCalledWith(
-      "Dev: Forced Failure Toast",
-      { type: "error" }
-    );
+    expect(mockShowToast).toHaveBeenCalledWith("Dev: Forced Success Toast", {
+      type: "success",
+    });
+    expect(mockShowToast).toHaveBeenCalledWith("Dev: Forced Failure Toast", {
+      type: "error",
+    });
   });
 
   it("does not show any toast when settings are disabled", () => {

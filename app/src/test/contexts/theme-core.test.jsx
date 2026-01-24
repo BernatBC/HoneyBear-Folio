@@ -17,12 +17,14 @@ describe("ThemeContext", () => {
   describe("useTheme", () => {
     it("throws error when used outside ThemeProvider", () => {
       // Suppress console.error for expected error
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       expect(() => render(<TestComponent />)).toThrow(
-        "useTheme must be used within a ThemeProvider"
+        "useTheme must be used within a ThemeProvider",
       );
-      
+
       consoleSpy.mockRestore();
     });
 
@@ -33,7 +35,7 @@ describe("ThemeContext", () => {
       render(
         <ThemeContext.Provider value={contextValue}>
           <TestComponent />
-        </ThemeContext.Provider>
+        </ThemeContext.Provider>,
       );
 
       expect(screen.getByTestId("theme")).toHaveTextContent("light");
@@ -46,7 +48,7 @@ describe("ThemeContext", () => {
       render(
         <ThemeContext.Provider value={contextValue}>
           <TestComponent />
-        </ThemeContext.Provider>
+        </ThemeContext.Provider>,
       );
 
       screen.getByRole("button").click();
@@ -59,7 +61,7 @@ describe("ThemeContext", () => {
       render(
         <ThemeContext.Provider value={contextValue}>
           <TestComponent />
-        </ThemeContext.Provider>
+        </ThemeContext.Provider>,
       );
 
       expect(screen.getByTestId("theme")).toHaveTextContent("dark");
@@ -71,7 +73,7 @@ describe("ThemeContext", () => {
       render(
         <ThemeContext.Provider value={contextValue}>
           <TestComponent />
-        </ThemeContext.Provider>
+        </ThemeContext.Provider>,
       );
 
       expect(screen.getByTestId("theme")).toHaveTextContent("system");

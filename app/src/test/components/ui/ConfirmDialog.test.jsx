@@ -20,7 +20,7 @@ describe("ConfirmDialogProvider", () => {
     render(
       <ConfirmDialogProvider>
         <TestComponent onResult={onResult} />
-      </ConfirmDialogProvider>
+      </ConfirmDialogProvider>,
     );
 
     fireEvent.click(screen.getByText("Trigger Confirm"));
@@ -33,17 +33,17 @@ describe("ConfirmDialogProvider", () => {
     render(
       <ConfirmDialogProvider>
         <TestComponent onResult={onResult} />
-      </ConfirmDialogProvider>
+      </ConfirmDialogProvider>,
     );
 
     fireEvent.click(screen.getByText("Trigger Confirm"));
-    
+
     // Default OK label is "Confirm", but it might depend on localization
     // The code defaults to t("confirm.ok") but defaults are processed.
     // Let's look for a button that is NOT the cancel button.
-    // Or just look for the class "modal-action-button" logic? 
+    // Or just look for the class "modal-action-button" logic?
     // Easier: find button with "Confirm" or checking the code defaults
-    
+
     const confirmBtn = await screen.findByRole("button", { name: "OK" });
     fireEvent.click(confirmBtn);
 
@@ -55,7 +55,7 @@ describe("ConfirmDialogProvider", () => {
     render(
       <ConfirmDialogProvider>
         <TestComponent onResult={onResult} />
-      </ConfirmDialogProvider>
+      </ConfirmDialogProvider>,
     );
 
     fireEvent.click(screen.getByText("Trigger Confirm"));

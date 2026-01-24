@@ -31,7 +31,7 @@ describe("Investment Utils", () => {
     {
       date: "2023-04-01",
       ticker: "AAPL",
-      shares: -2, 
+      shares: -2,
       price_per_share: 170, // Selling price doesn't affect cost basis logic directly in simple average cost usually, but let's test result
     },
   ];

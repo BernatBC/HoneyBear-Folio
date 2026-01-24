@@ -29,9 +29,18 @@ vi.mock("../../../hooks/useCustomRate", () => ({
 
 // Mock react-datepicker
 vi.mock("react-datepicker", () => {
-    return {
-        default: (props) => <input onChange={e => props.onChange(new Date(e.target.value))} value={props.selected ? props.selected.toISOString().substring(0, 10) : ""} role="textbox" aria-label="Date" />
-    }
+  return {
+    default: (props) => (
+      <input
+        onChange={(e) => props.onChange(new Date(e.target.value))}
+        value={
+          props.selected ? props.selected.toISOString().substring(0, 10) : ""
+        }
+        role="textbox"
+        aria-label="Date"
+      />
+    ),
+  };
 });
 
 describe("AccountDetails", () => {
@@ -45,19 +54,25 @@ describe("AccountDetails", () => {
 
   const mockFormatNumber = vi.fn((val) => `fmt(${val})`);
   const mockParseNumber = vi.fn((str) => Number(str));
-  const mockFormatDate = vi.fn((d) => (d ? new Date(d).toISOString().split('T')[0] : ""));
+  const mockFormatDate = vi.fn((d) =>
+    d ? new Date(d).toISOString().split("T")[0] : "",
+  );
   const mockConfirm = vi.fn();
   const mockInvoke = vi.mocked(invoke);
 
   beforeEach(() => {
     vi.resetAllMocks();
 
-    vi.mocked(formatInteractions.useFormatNumber).mockReturnValue(mockFormatNumber);
-    vi.mocked(formatInteractions.useParseNumber).mockReturnValue(mockParseNumber);
+    vi.mocked(formatInteractions.useFormatNumber).mockReturnValue(
+      mockFormatNumber,
+    );
+    vi.mocked(formatInteractions.useParseNumber).mockReturnValue(
+      mockParseNumber,
+    );
     vi.mocked(formatInteractions.useFormatDate).mockReturnValue(mockFormatDate);
-    
+
     vi.mocked(confirmHook.useConfirm).mockReturnValue(mockConfirm);
-    
+
     vi.mocked(numberFormatContext.useNumberFormat).mockReturnValue({
       dateFormat: "yyyy-MM-dd",
       firstDayOfWeek: 1,
@@ -65,8 +80,8 @@ describe("AccountDetails", () => {
     });
 
     vi.mocked(customRateHook.useCustomRate).mockReturnValue({
-        checkAndPrompt: vi.fn().mockResolvedValue(true),
-        dialog: null,
+      checkAndPrompt: vi.fn().mockResolvedValue(true),
+      dialog: null,
     });
 
     // Default API mocks
@@ -83,21 +98,21 @@ describe("AccountDetails", () => {
             cleared: true,
           },
           {
-             id: "tx2",
-             date: "2023-01-02",
-             payee: "Salary",
-             category: "Income",
-             amount: 2000.0,
-             notes: "Monthly",
-             cleared: true,
-          }
+            id: "tx2",
+            date: "2023-01-02",
+            payee: "Salary",
+            category: "Income",
+            amount: 2000.0,
+            notes: "Monthly",
+            cleared: true,
+          },
         ]);
       }
       if (cmd === "get_payees") return Promise.resolve([]);
       if (cmd === "get_categories") return Promise.resolve([]);
       if (cmd === "get_accounts") return Promise.resolve([]); // for transfer targets
       if (cmd === "get_rules") return Promise.resolve([]);
-      
+
       return Promise.resolve([]); // Default to empty array to avoid null pointer exceptions if we miss something
     });
   });
@@ -118,16 +133,16 @@ describe("AccountDetails", () => {
   });
 
   it("calculates totals correctly from transactions", async () => {
-     render(<AccountDetails account={account} onUpdate={vi.fn()} />);
-     
-     // -50 and 2000 -> we expect formatting to be called significantly
-     // The component might calculate totals if they are not provided by backend? 
-     // AccountDetails usually computes balance? No, balance comes from prop.
-     // But it might show "Selected transactions total" or similar.
-     
-     // Let's just verifying rendering for now.
-     await screen.findByText("Grocery Store");
+    render(<AccountDetails account={account} onUpdate={vi.fn()} />);
+
+    // -50 and 2000 -> we expect formatting to be called significantly
+    // The component might calculate totals if they are not provided by backend?
+    // AccountDetails usually computes balance? No, balance comes from prop.
+    // But it might show "Selected transactions total" or similar.
+
+    // Let's just verifying rendering for now.
+    await screen.findByText("Grocery Store");
   });
-  
+
   // More interactive tests can be added: Adding a transaction, Deleting, etc.
 });

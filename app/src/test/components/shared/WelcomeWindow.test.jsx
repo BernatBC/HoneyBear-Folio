@@ -7,9 +7,10 @@ vi.mock("../../../i18n/i18n", () => ({
   t: (key) => {
     const translations = {
       "Welcome to HoneyBear Folio": "Welcome to HoneyBear Folio",
-      "Let's set up your preferences to get started.": "Let's set up your preferences to get started.",
-      "Theme": "Theme",
-      "Currency": "Currency",
+      "Let's set up your preferences to get started.":
+        "Let's set up your preferences to get started.",
+      Theme: "Theme",
+      Currency: "Currency",
       "settings.theme.light": "Light",
       "settings.theme.dark": "Dark",
       "settings.theme.system": "System",
@@ -76,7 +77,9 @@ describe("WelcomeWindow", () => {
     render(<WelcomeWindow />);
 
     expect(screen.getByText("Welcome to HoneyBear Folio")).toBeInTheDocument();
-    expect(screen.getByText("Let's set up your preferences to get started.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Let's set up your preferences to get started."),
+    ).toBeInTheDocument();
   });
 
   it("does not render when first run is completed", () => {
@@ -84,7 +87,9 @@ describe("WelcomeWindow", () => {
 
     render(<WelcomeWindow />);
 
-    expect(screen.queryByText("Welcome to HoneyBear Folio")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Welcome to HoneyBear Folio"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders when FORCE_WELCOME_SCREEN is enabled", () => {
@@ -114,6 +119,8 @@ describe("WelcomeWindow", () => {
     fireEvent.click(screen.getByText("Get Started"));
 
     expect(localStorage.getItem("hb_first_run_completed")).toBe("true");
-    expect(screen.queryByText("Welcome to HoneyBear Folio")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Welcome to HoneyBear Folio"),
+    ).not.toBeInTheDocument();
   });
 });

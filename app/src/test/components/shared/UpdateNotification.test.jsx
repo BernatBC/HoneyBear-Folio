@@ -130,7 +130,7 @@ describe("UpdateNotification", () => {
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith(
         "Failed to check for updates:",
-        expect.any(Error)
+        expect.any(Error),
       );
     });
 

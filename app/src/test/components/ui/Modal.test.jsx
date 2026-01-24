@@ -7,7 +7,7 @@ describe("Modal Component", () => {
     render(
       <Modal onClose={vi.fn()}>
         <div data-testid="modal-content">Hello Modal</div>
-      </Modal>
+      </Modal>,
     );
 
     expect(screen.getByTestId("modal-content")).toBeInTheDocument();
@@ -19,7 +19,7 @@ describe("Modal Component", () => {
     render(
       <Modal onClose={handleClose}>
         <div>Content</div>
-      </Modal>
+      </Modal>,
     );
 
     fireEvent.keyDown(document, { key: "Escape" });
@@ -30,17 +30,17 @@ describe("Modal Component", () => {
     render(
       <Modal onClose={vi.fn()} size="xl">
         <div>Content</div>
-      </Modal>
+      </Modal>,
     );
     const modalContainer = screen.getByRole("dialog");
     expect(modalContainer).toHaveClass("max-w-xl");
   });
 
   it("locks body scroll when open", () => {
-     render(
+    render(
       <Modal onClose={vi.fn()}>
         <div>Content</div>
-      </Modal>
+      </Modal>,
     );
     expect(document.body.style.overflow).toBe("hidden");
   });

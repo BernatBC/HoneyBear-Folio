@@ -26,17 +26,19 @@ vi.mock("lucide-react", () => ({
 // Mock CustomSelect
 vi.mock("../../../components/ui/CustomSelect", () => ({
   default: ({ value, onChange, options, placeholder }) => (
-    <select 
+    <select
       data-testid="select"
-      value={value} 
+      value={value}
       onChange={(e) => onChange(e.target.value)}
     >
       <option value="">{placeholder}</option>
       {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
       ))}
     </select>
-  )
+  ),
 }));
 
 describe("RulesList", () => {
@@ -46,10 +48,24 @@ describe("RulesList", () => {
 
   it("fetches and renders rules on mount", async () => {
     const mockRules = [
-      { id: 1, priority: 1, match_field: "payee", match_pattern: "Uber", action_field: "category", action_value: "Transport" },
-      { id: 2, priority: 2, match_field: "description", match_pattern: "Salary", action_field: "category", action_value: "Income" }
+      {
+        id: 1,
+        priority: 1,
+        match_field: "payee",
+        match_pattern: "Uber",
+        action_field: "category",
+        action_value: "Transport",
+      },
+      {
+        id: 2,
+        priority: 2,
+        match_field: "description",
+        match_pattern: "Salary",
+        action_field: "category",
+        action_value: "Income",
+      },
     ];
-    
+
     invoke.mockResolvedValueOnce(mockRules);
 
     render(<RulesList />);
@@ -64,15 +80,15 @@ describe("RulesList", () => {
 
   it("handles rule creation", async () => {
     invoke.mockResolvedValue([]); // Initial fetch
-    
+
     render(<RulesList />);
 
     await waitFor(() => expect(invoke).toHaveBeenCalledWith("get_rules"));
-    
+
     // Fill new rule form
     const patternInput = screen.getByPlaceholderText("e.g. Starbucks");
     fireEvent.change(patternInput, { target: { value: "Netflix" } });
-    
+
     const valueInput = screen.getByPlaceholderText("e.g. Coffee");
     fireEvent.change(valueInput, { target: { value: "Entertainment" } });
 
@@ -81,23 +97,35 @@ describe("RulesList", () => {
     fireEvent.click(addButton);
 
     await waitFor(() => {
-      expect(invoke).toHaveBeenCalledWith("create_rule", expect.objectContaining({
-        matchPattern: "Netflix",
-        actionValue: "Entertainment"
-      }));
+      expect(invoke).toHaveBeenCalledWith(
+        "create_rule",
+        expect.objectContaining({
+          matchPattern: "Netflix",
+          actionValue: "Entertainment",
+        }),
+      );
     });
   });
 
   it("handles rule deletion with confirmation", async () => {
     const mockRules = [
-      { id: 10, priority: 1, match_field: "payee", match_pattern: "Test Rule", action_field: "category", action_value: "Test" }
+      {
+        id: 10,
+        priority: 1,
+        match_field: "payee",
+        match_pattern: "Test Rule",
+        action_field: "category",
+        action_value: "Test",
+      },
     ];
     invoke.mockResolvedValue(mockRules);
     mockConfirm.mockResolvedValue(true);
 
     render(<RulesList />);
 
-    await waitFor(() => expect(screen.getByText(/"Test Rule"/)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/"Test Rule"/)).toBeInTheDocument(),
+    );
 
     // Find delete button
     const deleteBtn = screen.getByText("Delete").closest("button");

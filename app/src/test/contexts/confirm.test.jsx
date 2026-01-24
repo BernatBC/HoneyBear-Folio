@@ -17,7 +17,7 @@ describe("ConfirmContext", () => {
     it("returns fallback function when used outside provider", () => {
       const onResult = vi.fn();
       render(<TestComponent onResult={onResult} />);
-      
+
       // Should render without crashing
       expect(screen.getByRole("button")).toBeInTheDocument();
     });
@@ -25,9 +25,9 @@ describe("ConfirmContext", () => {
     it("fallback function resolves to false", async () => {
       const onResult = vi.fn();
       render(<TestComponent onResult={onResult} />);
-      
+
       screen.getByRole("button").click();
-      
+
       await waitFor(() => {
         expect(onResult).toHaveBeenCalledWith(false);
       });
@@ -41,7 +41,7 @@ describe("ConfirmContext", () => {
       render(
         <ConfirmContext.Provider value={contextValue}>
           <TestComponent onResult={onResult} />
-        </ConfirmContext.Provider>
+        </ConfirmContext.Provider>,
       );
 
       screen.getByRole("button").click();

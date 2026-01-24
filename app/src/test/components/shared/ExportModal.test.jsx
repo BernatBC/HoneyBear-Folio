@@ -136,7 +136,7 @@ describe("ExportModal", () => {
       expect(mockSave).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: [{ name: "JSON", extensions: ["json"] }],
-        })
+        }),
       );
     });
   });
