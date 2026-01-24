@@ -1,37 +1,42 @@
 use rusqlite::Connection;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+use tauri::{AppHandle, Manager};
 
-// Test-only helpers to allow testing settings and init_db logic without an AppHandle
+use crate::models::AppSettings;
 
-pub(crate) fn settings_file_path_for_dir(dir: &Path) -> PathBuf {
-    dir.join("settings.json")
+pub fn settings_file_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    let app_dir = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?;
+    if !app_dir.exists() {
+        fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
+    }
+    Ok(app_dir.join("settings.json"))
 }
 
-pub(crate) fn write_settings_to_dir(
-    dir: &Path,
-    settings: &super::AppSettings,
-) -> Result<(), String> {
-    let settings_path = settings_file_path_for_dir(dir);
+pub fn read_settings(app_handle: &AppHandle) -> Result<AppSettings, String> {
+    let settings_path = settings_file_path(app_handle)?;
+    if settings_path.exists() {
+        let contents = fs::read_to_string(&settings_path).map_err(|e| e.to_string())?;
+        let s: AppSettings = serde_json::from_str(&contents).map_err(|e| e.to_string())?;
+        Ok(s)
+    } else {
+        Ok(AppSettings::default())
+    }
+}
+
+pub fn write_settings(app_handle: &AppHandle, settings: &AppSettings) -> Result<(), String> {
+    let settings_path = settings_file_path(app_handle)?;
     let json = serde_json::to_string_pretty(settings).map_err(|e| e.to_string())?;
     fs::write(&settings_path, json).map_err(|e| e.to_string())?;
     Ok(())
 }
 
-pub(crate) fn read_settings_from_dir(dir: &Path) -> Result<super::AppSettings, String> {
-    let settings_path = settings_file_path_for_dir(dir);
-    if settings_path.exists() {
-        let contents = fs::read_to_string(&settings_path).map_err(|e| e.to_string())?;
-        let s: super::AppSettings = serde_json::from_str(&contents).map_err(|e| e.to_string())?;
-        Ok(s)
-    } else {
-        Ok(super::AppSettings::default())
-    }
-}
-
-pub(crate) fn get_db_path_for_dir(dir: &Path) -> Result<PathBuf, String> {
+pub fn get_db_path(app_handle: &AppHandle) -> Result<PathBuf, String> {
     // If the user has configured an override, use it
-    if let Ok(settings) = read_settings_from_dir(dir) {
+    if let Ok(settings) = read_settings(app_handle) {
         if let Some(ref p) = settings.db_path {
             let pb = PathBuf::from(p);
             // Ensure parent dir exists
@@ -44,22 +49,18 @@ pub(crate) fn get_db_path_for_dir(dir: &Path) -> Result<PathBuf, String> {
         }
     }
 
-    // Default path
-    let app_dir = dir;
+    let app_dir = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?;
     if !app_dir.exists() {
-        fs::create_dir_all(app_dir).map_err(|e| e.to_string())?;
+        fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
     }
     Ok(app_dir.join("honeybear.db"))
 }
 
-pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
-    // Ensure parent dir exists
-    if let Some(parent) = db_path.parent() {
-        if !parent.exists() {
-            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-        }
-    }
-
+pub fn init_db(app_handle: &AppHandle) -> Result<(), String> {
+    let db_path = get_db_path(app_handle)?;
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     conn.execute(
@@ -86,37 +87,28 @@ pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
             shares REAL,
             price_per_share REAL,
             fee REAL,
-            currency TEXT,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
         )",
         [],
     )
     .map_err(|e| e.to_string())?;
 
-    // Ensure we have columns added for migrations so tests using older DBs still work
+    // Ensure we have a column to link transfer pairs so updates/deletes can keep both sides in sync
     {
         let mut stmt = conn
             .prepare("PRAGMA table_info(transactions)")
             .map_err(|e| e.to_string())?;
         let mut has_linked = false;
-        let mut has_currency = false;
         let col_iter = stmt
             .query_map([], |row| row.get::<_, String>(1))
             .map_err(|e| e.to_string())?;
         for name in col_iter.flatten() {
             if name == "linked_tx_id" {
                 has_linked = true;
-            }
-            if name == "currency" {
-                has_currency = true;
-            }
-            if has_linked && has_currency {
                 break;
             }
         }
-
         if !has_linked {
-            // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
             match conn.execute(
                 "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
                 [],
@@ -130,9 +122,24 @@ pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
                 }
             }
         }
+    }
 
+    // Ensure we have a column for currency (multi-currency support)
+    {
+        let mut stmt = conn
+            .prepare("PRAGMA table_info(transactions)")
+            .map_err(|e| e.to_string())?;
+        let mut has_currency = false;
+        let col_iter = stmt
+            .query_map([], |row| row.get::<_, String>(1))
+            .map_err(|e| e.to_string())?;
+        for name in col_iter.flatten() {
+            if name == "currency" {
+                has_currency = true;
+                break;
+            }
+        }
         if !has_currency {
-            // Safe to ALTER TABLE to add the nullable column. Concurrent runs may attempt this simultaneously; ignore duplicate-column errors.
             match conn.execute("ALTER TABLE transactions ADD COLUMN currency TEXT", []) {
                 Ok(_) => {}
                 Err(e) => {
@@ -183,7 +190,6 @@ pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
     )
     .map_err(|e| e.to_string())?;
 
-    // Ensure daily_stock_prices exists for tests that exercise daily valuations
     conn.execute(
         "CREATE TABLE IF NOT EXISTS daily_stock_prices (
             ticker TEXT NOT NULL,
@@ -195,44 +201,62 @@ pub(crate) fn init_db_at_path(db_path: &Path) -> Result<(), String> {
     )
     .map_err(|e| e.to_string())?;
 
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS rules (
+            id INTEGER PRIMARY KEY,
+            priority INTEGER NOT NULL DEFAULT 0,
+            match_field TEXT NOT NULL,
+            match_pattern TEXT NOT NULL,
+            action_field TEXT NOT NULL,
+            action_value TEXT NOT NULL
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS custom_exchange_rates (
+            currency TEXT PRIMARY KEY,
+            rate REAL NOT NULL
+        )",
+        [],
+    )
+    .map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
-pub(crate) fn create_account_in_dir(
-    dir: &Path,
-    name: String,
-    balance: f64,
-) -> Result<super::Account, String> {
-    let db_path = get_db_path_for_dir(dir)?;
-    init_db_at_path(&db_path)?;
-    super::create_account_db(&db_path, name, balance, None)
+#[tauri::command]
+pub fn set_db_path(app_handle: AppHandle, path: String) -> Result<(), String> {
+    let mut settings = read_settings(&app_handle)?;
+    settings.db_path = Some(path.clone());
+    write_settings(&app_handle, &settings)?;
+
+    // Ensure any parent dir exists and initialize DB at new path
+    let pb = PathBuf::from(path);
+    if let Some(parent) = pb.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+    }
+
+    init_db(&app_handle)?;
+    Ok(())
 }
 
-pub(crate) fn create_transaction_in_dir(
-    dir: &Path,
-    account_id: i32,
-    date: String,
-    payee: String,
-    notes: Option<String>,
-    category: Option<String>,
-    amount: f64,
-) -> Result<super::Transaction, String> {
-    let db_path = get_db_path_for_dir(dir)?;
-    init_db_at_path(&db_path)?;
-    super::create_transaction_db(
-        &db_path,
-        super::CreateTransactionArgs {
-            account_id,
-            date,
-            payee,
-            notes,
-            category,
-            amount,
-            ticker: None,
-            shares: None,
-            price_per_share: None,
-            fee: None,
-            currency: None,
-        },
-    )
+#[tauri::command]
+pub fn reset_db_path(app_handle: AppHandle) -> Result<(), String> {
+    let mut settings = read_settings(&app_handle)?;
+    settings.db_path = None;
+    write_settings(&app_handle, &settings)?;
+
+    // Ensure default DB exists
+    init_db(&app_handle)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_db_path_command(app_handle: AppHandle) -> Result<String, String> {
+    let pb = get_db_path(&app_handle)?;
+    Ok(pb.to_string_lossy().to_string())
 }
