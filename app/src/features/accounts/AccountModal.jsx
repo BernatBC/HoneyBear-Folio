@@ -3,7 +3,12 @@ import { useState } from "react";
 import { Check, Wallet, Globe } from "lucide-react";
 import "../../styles/Modal.css";
 import { invoke } from "@tauri-apps/api/core";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "../../components/ui/Modal";
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "../../components/ui/Modal";
 import { t } from "../../i18n/i18n"; // Assuming translation hook/function exists
 import { CURRENCIES } from "../../utils/currencies";
 import CustomSelect from "../../components/ui/CustomSelect";

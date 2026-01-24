@@ -23,7 +23,11 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { open } from "@tauri-apps/plugin-shell";
 import { t } from "../../i18n/i18n";
 import { formatDateForUI } from "../../utils/format";
-import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../../utils/version";
+import {
+  getDisplayVersion,
+  IS_RELEASE,
+  APP_VERSION,
+} from "../../utils/version";
 
 import { useCustomRate } from "../../hooks/useCustomRate";
 import CONTRIBUTORS from "../../config/contributors";
