@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import ErrorBoundary from "../../../components/layout/ErrorBoundary";
 
 // Mock i18n
@@ -17,14 +17,6 @@ vi.mock("../../../i18n/i18n", () => ({
 // Component that throws an error
 function ThrowingComponent({ message }) {
   throw new Error(message);
-}
-
-// Component that can conditionally throw
-function ConditionalThrow({ shouldThrow, children }) {
-  if (shouldThrow) {
-    throw new Error("Conditional error");
-  }
-  return <div>{children}</div>;
 }
 
 describe("ErrorBoundary", () => {

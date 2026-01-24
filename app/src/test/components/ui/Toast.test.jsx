@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import PropTypes from "prop-types";
 import { ToastProvider } from "../../../components/ui/Toast";
 import { useToast } from "../../../contexts/toast";
 
@@ -28,6 +29,7 @@ function TestComponent({ onShowToast }) {
     </div>
   );
 }
+TestComponent.propTypes = { onShowToast: PropTypes.func };
 
 describe("ToastProvider", () => {
   beforeEach(() => {

@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
+import PropTypes from "prop-types";
 import { ConfirmContext, useConfirm } from "../../contexts/confirm";
 
 // Test component to consume context
@@ -11,6 +12,7 @@ function TestComponent({ onResult }) {
   };
   return <button onClick={handleClick}>Confirm</button>;
 }
+TestComponent.propTypes = { onResult: PropTypes.func };
 
 describe("ConfirmContext", () => {
   describe("useConfirm", () => {

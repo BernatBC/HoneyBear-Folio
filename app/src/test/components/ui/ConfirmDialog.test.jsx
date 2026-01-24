@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import PropTypes from "prop-types";
 import { ConfirmDialogProvider } from "../../../components/ui/ConfirmDialog";
 import { useConfirm } from "../../../contexts/confirm";
 
@@ -13,6 +14,7 @@ const TestComponent = ({ onResult }) => {
 
   return <button onClick={handleAction}>Trigger Confirm</button>;
 };
+TestComponent.propTypes = { onResult: PropTypes.func };
 
 describe("ConfirmDialogProvider", () => {
   it("shows dialog when confirm is called", async () => {

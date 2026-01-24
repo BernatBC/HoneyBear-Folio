@@ -16,7 +16,7 @@ vi.mock("../../../utils/investments", () => ({
   buildHoldingsFromTransactions: (txs) => ({
     currentHoldings: txs.length > 0 ? [{ ticker: "AAPL", qty: 10 }] : [],
   }),
-  mergeHoldingsWithQuotes: (holdings, quotes) =>
+  mergeHoldingsWithQuotes: (holdings, _quotes) =>
     holdings.map((h) => ({
       ...h,
       currentValue: 1500, // 10 * 150

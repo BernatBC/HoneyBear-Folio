@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useCustomRate } from "../../hooks/useCustomRate";
 import { invoke } from "@tauri-apps/api/core";
@@ -52,7 +52,7 @@ describe("useCustomRate", () => {
     const { result } = renderHook(() => useCustomRate());
 
     // This returns a promise that resolves when user acts on dialog
-    const promise = result.current.checkAndPrompt("GBP");
+    result.current.checkAndPrompt("GBP");
 
     // We can't easily wait for a promise that's waiting for state update.
     // But we can check side effects?

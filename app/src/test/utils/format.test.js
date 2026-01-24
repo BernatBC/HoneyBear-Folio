@@ -3,7 +3,6 @@ import {
   formatNumberWithLocale,
   parseNumberWithLocale,
 } from "../../utils/format";
-import { CURRENCIES } from "../../utils/currencies";
 
 // Mock currencies for testing
 vi.mock("../../utils/currencies", () => ({

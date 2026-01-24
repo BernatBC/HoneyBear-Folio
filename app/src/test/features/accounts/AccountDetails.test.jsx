@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import AccountDetails from "../../../features/accounts/AccountDetails";
 import { invoke } from "@tauri-apps/api/core";
 import * as formatInteractions from "../../../utils/format";
@@ -85,7 +85,7 @@ describe("AccountDetails", () => {
     });
 
     // Default API mocks
-    mockInvoke.mockImplementation((cmd, args) => {
+    mockInvoke.mockImplementation((cmd, _args) => {
       if (cmd === "get_transactions") {
         return Promise.resolve([
           {

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import PropTypes from "prop-types";
 import AccountModal from "../../../features/accounts/AccountModal";
 import { invoke } from "@tauri-apps/api/core";
 
@@ -25,19 +26,28 @@ vi.mock("../../../i18n/i18n", () => ({
   t: (key) => key,
 }));
 
-vi.mock("../../../components/ui/Modal", () => ({
-  Modal: ({ children, onClose }) => (
+vi.mock("../../../components/ui/Modal", () => {
+  const Modal = ({ children, onClose }) => (
     <div data-testid="modal">
       <button onClick={onClose} data-testid="modal-close">
         Close
       </button>
       {children}
     </div>
-  ),
-  ModalHeader: ({ title }) => <h1>{title}</h1>,
-  ModalBody: ({ children }) => <div>{children}</div>,
-  ModalFooter: ({ children }) => <div>{children}</div>,
-}));
+  );
+  Modal.propTypes = { children: PropTypes.node, onClose: PropTypes.func };
+
+  const ModalHeader = ({ title }) => <h1>{title}</h1>;
+  ModalHeader.propTypes = { title: PropTypes.node };
+
+  const ModalBody = ({ children }) => <div>{children}</div>;
+  ModalBody.propTypes = { children: PropTypes.node };
+
+  const ModalFooter = ({ children }) => <div>{children}</div>;
+  ModalFooter.propTypes = { children: PropTypes.node };
+
+  return { Modal, ModalHeader, ModalBody, ModalFooter };
+});
 
 // Mock CustomSelect
 vi.mock("../../../components/ui/CustomSelect", () => ({
@@ -56,6 +66,31 @@ vi.mock("../../../components/ui/CustomSelect", () => ({
     </select>
   ),
 }));
+
+// Mock CustomSelect
+vi.mock("../../../components/ui/CustomSelect", () => {
+  const CustomSelect = ({ value, onChange, options, placeholder }) => (
+    <select
+      data-testid="currency-select"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="">{placeholder}</option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+  CustomSelect.propTypes = {
+    value: PropTypes.string,
+    onChange: PropTypes.func,
+    options: PropTypes.array,
+    placeholder: PropTypes.string,
+  };
+  return { default: CustomSelect };
+});
 
 describe("AccountModal", () => {
   beforeEach(() => {

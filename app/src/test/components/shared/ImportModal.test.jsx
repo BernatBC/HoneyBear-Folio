@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import PropTypes from "prop-types";
 import ImportModal from "../../../components/shared/ImportModal";
 
 // Mock Tauri/Event
@@ -16,14 +17,27 @@ vi.mock("../../../contexts/toast", () => ({
 vi.mock("../../../i18n/i18n", () => ({ t: (k) => k }));
 
 // Mock children
-vi.mock("../../../components/ui/Modal", () => ({
-  Modal: ({ children }) => <div data-testid="modal">{children}</div>,
-  ModalHeader: ({ title }) => <div data-testid="modal-header">{title}</div>,
-  ModalBody: ({ children }) => <div data-testid="modal-body">{children}</div>,
-  ModalFooter: ({ children }) => (
+vi.mock("../../../components/ui/Modal", () => {
+  const Modal = ({ children }) => <div data-testid="modal">{children}</div>;
+  Modal.propTypes = { children: PropTypes.node };
+
+  const ModalHeader = ({ title }) => (
+    <div data-testid="modal-header">{title}</div>
+  );
+  ModalHeader.propTypes = { title: PropTypes.node };
+
+  const ModalBody = ({ children }) => (
+    <div data-testid="modal-body">{children}</div>
+  );
+  ModalBody.propTypes = { children: PropTypes.node };
+
+  const ModalFooter = ({ children }) => (
     <div data-testid="modal-footer">{children}</div>
-  ),
-}));
+  );
+  ModalFooter.propTypes = { children: PropTypes.node };
+
+  return { Modal, ModalHeader, ModalBody, ModalFooter };
+});
 
 describe("ImportModal", () => {
   beforeEach(() => {

@@ -32,7 +32,7 @@ vi.mock("chart.js", () => ({
 // Mock format utils
 vi.mock("../../../utils/format", () => ({
   useFormatNumber: () => (val) => `fmt-${val}`,
-  useFormatDate: () => (date) => "formatted-date",
+  useFormatDate: () => (_date) => "formatted-date",
   getDatePickerFormat: () => "yyyy-MM-dd",
 }));
 

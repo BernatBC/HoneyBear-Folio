@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { ToastContext, useToast } from "../../contexts/toast";
@@ -23,18 +24,21 @@ describe("ToastContext", () => {
     });
 
     it("noop showToast does not throw when called", () => {
-      let capturedShowToast;
+      const capturedShowToastRef = { current: null };
       function CaptureComponent() {
         const { showToast } = useToast();
-        capturedShowToast = showToast;
+        // assign to ref property inside effect (no mutation during render)
+        React.useEffect(() => {
+          capturedShowToastRef.current = showToast;
+        }, [showToast]);
         return null;
       }
 
       render(<CaptureComponent />);
 
       // Calling noop should not throw
-      expect(() => capturedShowToast("message")).not.toThrow();
-      expect(() => capturedShowToast()).not.toThrow();
+      expect(() => capturedShowToastRef.current("message")).not.toThrow();
+      expect(() => capturedShowToastRef.current()).not.toThrow();
     });
 
     it("returns context value when used inside provider", () => {

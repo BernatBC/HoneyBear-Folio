@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, createEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import AccountList from "../../../features/accounts/AccountList";
 import { NumberFormatContext } from "../../../contexts/number-format";

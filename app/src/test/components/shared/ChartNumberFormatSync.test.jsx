@@ -4,7 +4,7 @@ import ChartNumberFormatSync from "../../../components/shared/ChartNumberFormatS
 import ChartJS from "chart.js/auto";
 
 // Mock format utility
-const mockFormatNumber = vi.fn((value, options) => `$${value.toFixed(2)}`);
+const mockFormatNumber = vi.fn((value, _options) => `$${value.toFixed(2)}`);
 vi.mock("../../../utils/format", () => ({
   useFormatNumber: () => mockFormatNumber,
 }));
@@ -54,12 +54,12 @@ describe("ChartNumberFormatSync", () => {
       parsed: { y: 1234.56 },
     };
 
-    const result = callback(ctx);
+    const _result = callback(ctx);
 
     expect(mockFormatNumber).toHaveBeenCalledWith(1234.56, {
       style: "currency",
     });
-    expect(result).toContain("Revenue:");
+    expect(_result).toContain("Revenue:");
   });
 
   it("tooltip callback handles doughnut chart raw values", () => {
@@ -72,7 +72,7 @@ describe("ChartNumberFormatSync", () => {
       raw: 500,
     };
 
-    const result = callback(ctx);
+    callback(ctx);
 
     expect(mockFormatNumber).toHaveBeenCalledWith(500, { style: "currency" });
   });
@@ -87,16 +87,16 @@ describe("ChartNumberFormatSync", () => {
       raw: "not a number",
     };
 
-    const result = callback(ctx);
+    const _result = callback(ctx);
 
-    expect(result).toBe("Test: ");
+    expect(_result).toBe("Test: ");
   });
 
   it("tick callback formats numeric values", () => {
     render(<ChartNumberFormatSync />);
 
     const callback = ChartJS.defaults.scales.linear.ticks.callback;
-    const result = callback(1000);
+    callback(1000);
 
     expect(mockFormatNumber).toHaveBeenCalledWith(1000, { style: "currency" });
   });
