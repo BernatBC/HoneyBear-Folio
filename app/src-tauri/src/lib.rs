@@ -1,10 +1,5 @@
-mod models;
-mod db_init;
-mod accounts;
-mod transactions;
-mod rules;
-mod markets;
-mod utils;
+mod core;
+pub use crate::core::{models, db_init, accounts, transactions, rules, markets, utils};
 
 pub use crate::models::{
     Account,
@@ -76,10 +71,7 @@ pub use crate::markets::{
 
 // Test-only helpers
 #[cfg(test)]
-mod test_helpers;
-
-#[cfg(test)]
-pub(crate) use test_helpers::{
+pub(crate) use crate::tests::test_helpers::{
     create_account_in_dir, create_transaction_in_dir, get_db_path_for_dir, init_db_at_path,
     read_settings_from_dir, write_settings_to_dir,
 };

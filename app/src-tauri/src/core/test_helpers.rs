@@ -10,7 +10,7 @@ pub(crate) fn settings_file_path_for_dir(dir: &Path) -> PathBuf {
 
 pub(crate) fn write_settings_to_dir(
     dir: &Path,
-    settings: &super::AppSettings,
+    settings: &crate::AppSettings,
 ) -> Result<(), String> {
     let settings_path = settings_file_path_for_dir(dir);
     let json = serde_json::to_string_pretty(settings).map_err(|e| e.to_string())?;
@@ -18,14 +18,14 @@ pub(crate) fn write_settings_to_dir(
     Ok(())
 }
 
-pub(crate) fn read_settings_from_dir(dir: &Path) -> Result<super::AppSettings, String> {
+pub(crate) fn read_settings_from_dir(dir: &Path) -> Result<crate::AppSettings, String> {
     let settings_path = settings_file_path_for_dir(dir);
     if settings_path.exists() {
         let contents = fs::read_to_string(&settings_path).map_err(|e| e.to_string())?;
-        let s: super::AppSettings = serde_json::from_str(&contents).map_err(|e| e.to_string())?;
+        let s: crate::AppSettings = serde_json::from_str(&contents).map_err(|e| e.to_string())?;
         Ok(s)
     } else {
-        Ok(super::AppSettings::default())
+        Ok(crate::AppSettings::default())
     }
 }
 
@@ -202,10 +202,10 @@ pub(crate) fn create_account_in_dir(
     dir: &Path,
     name: String,
     balance: f64,
-) -> Result<super::Account, String> {
+) -> Result<crate::Account, String> {
     let db_path = get_db_path_for_dir(dir)?;
     init_db_at_path(&db_path)?;
-    super::create_account_db(&db_path, name, balance, None)
+    crate::create_account_db(&db_path, name, balance, None)
 }
 
 pub(crate) fn create_transaction_in_dir(
@@ -216,12 +216,12 @@ pub(crate) fn create_transaction_in_dir(
     notes: Option<String>,
     category: Option<String>,
     amount: f64,
-) -> Result<super::Transaction, String> {
+) -> Result<crate::Transaction, String> {
     let db_path = get_db_path_for_dir(dir)?;
     init_db_at_path(&db_path)?;
-    super::create_transaction_db(
+    crate::create_transaction_db(
         &db_path,
-        super::CreateTransactionArgs {
+        crate::CreateTransactionArgs {
             account_id,
             date,
             payee,
