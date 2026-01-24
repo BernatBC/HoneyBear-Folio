@@ -1,5 +1,5 @@
-use rusqlite::{params, Connection};
 use crate::models::Rule;
+use rusqlite::{params, Connection};
 use std::path::PathBuf;
 use tauri::AppHandle;
 

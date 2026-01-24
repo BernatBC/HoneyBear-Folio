@@ -1,6 +1,6 @@
-use crate::models::{YahooChartResponse, YahooQuote, YahooSearchQuote, DailyPrice};
-use rusqlite::{params, Connection, OptionalExtension};
+use crate::models::{DailyPrice, YahooChartResponse, YahooQuote, YahooSearchQuote};
 use chrono::{NaiveDate, TimeZone, Utc};
+use rusqlite::{params, Connection, OptionalExtension};
 
 pub async fn search_ticker_with_client(
     client: reqwest::Client,
@@ -16,7 +16,8 @@ pub async fn search_ticker_with_client(
         .map_err(|e| e.to_string())?;
 
     let text = res.text().await.map_err(|e| e.to_string())?;
-    let response: crate::models::YahooSearchResponse = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+    let response: crate::models::YahooSearchResponse =
+        serde_json::from_str(&text).map_err(|e| e.to_string())?;
 
     Ok(response.quotes)
 }
@@ -28,7 +29,12 @@ pub async fn search_ticker(
     query: String,
 ) -> Result<Vec<YahooSearchQuote>, String> {
     // 1. Get initial search results
-    let mut quotes = search_ticker_with_client(reqwest::Client::new(), "https://query1.finance.yahoo.com".to_string(), query).await?;
+    let mut quotes = search_ticker_with_client(
+        reqwest::Client::new(),
+        "https://query1.finance.yahoo.com".to_string(),
+        query,
+    )
+    .await?;
 
     if quotes.is_empty() {
         return Ok(quotes);
@@ -167,7 +173,8 @@ pub async fn get_stock_quotes_with_client(
         .collect();
 
     if !missing_tickers.is_empty() {
-        let conn = Connection::open(crate::db_init::get_db_path(&app_handle)?).map_err(|e| e.to_string())?;
+        let conn = Connection::open(crate::db_init::get_db_path(&app_handle)?)
+            .map_err(|e| e.to_string())?;
         let mut stmt = conn
             .prepare("SELECT ticker, price FROM stock_prices WHERE ticker = ?1 COLLATE NOCASE")
             .map_err(|e| e.to_string())?;
@@ -376,7 +383,8 @@ pub async fn update_daily_stock_prices_with_client_and_base(
         }
 
         let text = res.text().await.map_err(|e| e.to_string())?;
-        let json: crate::models::YahooChartResponse = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+        let json: crate::models::YahooChartResponse =
+            serde_json::from_str(&text).map_err(|e| e.to_string())?;
 
         // 3. Insert into DB
         if let Some(result) = json.chart.result {
@@ -463,13 +471,19 @@ pub fn get_daily_stock_prices_from_path(
 }
 
 #[tauri::command]
-pub fn get_daily_stock_prices(app_handle: tauri::AppHandle, ticker: String) -> Result<Vec<DailyPrice>, String> {
+pub fn get_daily_stock_prices(
+    app_handle: tauri::AppHandle,
+    ticker: String,
+) -> Result<Vec<DailyPrice>, String> {
     let db_path = crate::db_init::get_db_path(&app_handle)?;
     get_daily_stock_prices_from_path(std::path::Path::new(&db_path), ticker)
 }
 
 #[tauri::command]
-pub async fn check_currency_availability(app_handle: tauri::AppHandle, currency: String) -> Result<bool, String> {
+pub async fn check_currency_availability(
+    app_handle: tauri::AppHandle,
+    currency: String,
+) -> Result<bool, String> {
     if currency == "USD" {
         return Ok(true);
     }

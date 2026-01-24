@@ -1,6 +1,6 @@
+use crate::models::Transaction;
 use rusqlite::{params, Connection, OptionalExtension};
 use std::path::PathBuf;
-use crate::models::Transaction;
 use tauri::AppHandle;
 
 #[derive(serde::Deserialize)]
@@ -697,7 +697,10 @@ pub fn create_transaction(
 }
 
 #[tauri::command]
-pub fn get_transactions(app_handle: AppHandle, account_id: i32) -> Result<Vec<Transaction>, String> {
+pub fn get_transactions(
+    app_handle: AppHandle,
+    account_id: i32,
+) -> Result<Vec<Transaction>, String> {
     let db_path = crate::db_init::get_db_path(&app_handle)?;
     get_transactions_db(&db_path, account_id)
 }

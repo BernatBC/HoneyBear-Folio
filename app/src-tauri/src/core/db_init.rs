@@ -109,7 +109,10 @@ pub fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             }
         }
         if !has_linked {
-            match conn.execute("ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER", []) {
+            match conn.execute(
+                "ALTER TABLE transactions ADD COLUMN linked_tx_id INTEGER",
+                [],
+            ) {
                 Ok(_) => {}
                 Err(e) => {
                     let s = e.to_string();

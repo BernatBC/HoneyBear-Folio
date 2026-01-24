@@ -1,8 +1,8 @@
-use rusqlite::{params, Connection, OptionalExtension};
-use std::path::PathBuf;
 use crate::models::{Account, AccountsSummary};
-use tauri::AppHandle;
+use rusqlite::{params, Connection, OptionalExtension};
 use std::collections::{HashMap, HashSet};
+use std::path::PathBuf;
+use tauri::AppHandle;
 
 pub fn create_account_db(
     db_path: &PathBuf,
@@ -96,8 +96,11 @@ pub fn rename_account_db(db_path: &PathBuf, id: i32, new_name: String) -> Result
         }
     }
 
-    conn.execute("UPDATE accounts SET name = ?1 WHERE id = ?2", params![new_trim, id])
-        .map_err(|e| e.to_string())?;
+    conn.execute(
+        "UPDATE accounts SET name = ?1 WHERE id = ?2",
+        params![new_trim, id],
+    )
+    .map_err(|e| e.to_string())?;
 
     let mut stmt = conn
         .prepare("SELECT id, name, balance, currency FROM accounts WHERE id = ?1")
@@ -393,6 +396,12 @@ pub async fn get_accounts(
         }
     }
 
-    let accounts = crate::utils::calculate_account_balances(accounts, raw_data, &target, &rates, &custom_rates);
+    let accounts = crate::utils::calculate_account_balances(
+        accounts,
+        raw_data,
+        &target,
+        &rates,
+        &custom_rates,
+    );
     Ok(accounts)
 }

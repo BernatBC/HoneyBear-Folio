@@ -1,6 +1,6 @@
+use crate::models::Account;
 use rusqlite::Connection;
 use std::collections::HashMap;
-use crate::models::Account;
 use tauri::AppHandle;
 
 pub fn get_custom_rates_map(db_path: &std::path::PathBuf) -> Result<HashMap<String, f64>, String> {
@@ -10,7 +10,9 @@ pub fn get_custom_rates_map(db_path: &std::path::PathBuf) -> Result<HashMap<Stri
         .prepare("SELECT currency, rate FROM custom_exchange_rates")
         .map_err(|e| e.to_string())?;
     let rows = stmt
-        .query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, f64>(1)?)))
+        .query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, f64>(1)?))
+        })
         .map_err(|e| e.to_string())?;
 
     for r in rows {
@@ -102,7 +104,11 @@ pub fn calculate_account_balances(
 use rusqlite::params;
 use std::path::PathBuf;
 
-pub fn set_custom_exchange_rate_db(db_path: &PathBuf, currency: String, rate: f64) -> Result<(), String> {
+pub fn set_custom_exchange_rate_db(
+    db_path: &PathBuf,
+    currency: String,
+    rate: f64,
+) -> Result<(), String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
     conn.execute(
         "INSERT OR REPLACE INTO custom_exchange_rates (currency, rate) VALUES (?1, ?2)",
@@ -113,7 +119,10 @@ pub fn set_custom_exchange_rate_db(db_path: &PathBuf, currency: String, rate: f6
     Ok(())
 }
 
-pub fn get_custom_exchange_rate_db(db_path: &PathBuf, currency: String) -> Result<Option<f64>, String> {
+pub fn get_custom_exchange_rate_db(
+    db_path: &PathBuf,
+    currency: String,
+) -> Result<Option<f64>, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
     let mut stmt = conn
