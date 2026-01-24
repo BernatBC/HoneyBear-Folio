@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useState, useEffect, useRef } from "react";
-import { useFormatNumber, useParseNumber } from "../utils/format";
+import { useFormatNumber, useParseNumber } from "../../utils/format";
 
 export default function NumberInput({
   value,

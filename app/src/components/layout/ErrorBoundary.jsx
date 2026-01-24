@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { t } from "../i18n/i18n";
+import { t } from "../../i18n/i18n";
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {

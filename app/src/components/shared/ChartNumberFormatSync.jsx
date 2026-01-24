@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import ChartJS from "chart.js/auto";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber } from "../../utils/format";
 
 export default function ChartNumberFormatSync() {
   const formatNumber = useFormatNumber();

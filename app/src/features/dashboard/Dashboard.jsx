@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../styles/datepicker.css";
+import "../../styles/datepicker.css";
 import { Calendar } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -18,17 +18,17 @@ import {
   BarElement,
 } from "chart.js";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
-import "../styles/Dashboard.css";
+import "../../styles/Dashboard.css";
 import PropTypes from "prop-types";
-import { computeNetWorth } from "../utils/networth";
+import { computeNetWorth } from "../../utils/networth";
 import {
   useFormatNumber,
   useFormatDate,
   getDatePickerFormat,
-} from "../utils/format";
-import { buildHoldingsFromTransactions } from "../utils/investments";
-import { useNumberFormat } from "../contexts/number-format";
-import { t } from "../i18n/i18n";
+} from "../../utils/format";
+import { buildHoldingsFromTransactions } from "../../utils/investments";
+import { useNumberFormat } from "../../contexts/number-format";
+import { t } from "../../i18n/i18n";
 
 ChartJS.register(
   CategoryScale,
@@ -44,7 +44,7 @@ ChartJS.register(
 );
 
 // useIsDark moved to a shared hook at src/hooks/useIsDark.js
-import useIsDark from "../hooks/useIsDark";
+import useIsDark from "../../hooks/useIsDark";
 import SankeyDiagram from "./SankeyDiagram";
 
 export default function Dashboard({

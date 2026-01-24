@@ -1,10 +1,10 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import ImportModal from "./ImportModal";
-import ExportModal from "./ExportModal";
-import SettingsModal from "./SettingsModal";
-import AccountModal from "./AccountModal";
-import AccountList from "./AccountList";
+import ImportModal from "../shared/ImportModal";
+import ExportModal from "../shared/ExportModal";
+import SettingsModal from "../shared/SettingsModal";
+import AccountModal from "../../features/accounts/AccountModal";
+import AccountList from "../../features/accounts/AccountList";
 import {
   Plus,
   CreditCard,
@@ -22,11 +22,11 @@ import {
   ArrowUpDown,
   BookOpenCheck,
 } from "lucide-react";
-import { computeNetWorth } from "../utils/networth";
-import { t } from "../i18n/i18n";
-import "../styles/Sidebar.css";
-import { useFormatNumber } from "../utils/format";
-import { usePrivacy } from "../contexts/privacy";
+import { computeNetWorth } from "../../utils/networth";
+import { t } from "../../i18n/i18n";
+import "../../styles/Sidebar.css";
+import { useFormatNumber } from "../../utils/format";
+import { usePrivacy } from "../../contexts/privacy";
 
 export default function Sidebar({
   accounts,

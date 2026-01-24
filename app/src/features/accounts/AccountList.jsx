@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useState, useRef, useCallback } from "react";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber } from "../../utils/format";
 import { GripVertical } from "lucide-react";
 
 export default function AccountList({

@@ -8,26 +8,26 @@ import {
   ExternalLink,
   Github,
 } from "lucide-react";
-import "../styles/Modal.css";
-import "../styles/SettingsModal.css";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
-import { useNumberFormat } from "../contexts/number-format";
-import { useTheme } from "../contexts/theme-core";
-import { formatNumberWithLocale } from "../utils/format";
-import { CURRENCIES } from "../utils/currencies";
-import CustomSelect from "./CustomSelect";
-import ErrorBoundary from "./ErrorBoundary";
+import "../../styles/Modal.css";
+import "../../styles/SettingsModal.css";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "../ui/Modal";
+import { useNumberFormat } from "../../contexts/number-format";
+import { useTheme } from "../../contexts/theme-core";
+import { formatNumberWithLocale } from "../../utils/format";
+import { CURRENCIES } from "../../utils/currencies";
+import CustomSelect from "../ui/CustomSelect";
+import ErrorBoundary from "../layout/ErrorBoundary";
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { open } from "@tauri-apps/plugin-shell";
-import { t } from "../i18n/i18n";
-import { formatDateForUI } from "../utils/format";
-import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../utils/version";
+import { t } from "../../i18n/i18n";
+import { formatDateForUI } from "../../utils/format";
+import { getDisplayVersion, IS_RELEASE, APP_VERSION } from "../../utils/version";
 
-import { useCustomRate } from "../hooks/useCustomRate";
-import CONTRIBUTORS from "../config/contributors";
-import THIRD_PARTY_LICENSES from "../config/licenses";
+import { useCustomRate } from "../../hooks/useCustomRate";
+import CONTRIBUTORS from "../../config/contributors";
+import THIRD_PARTY_LICENSES from "../../config/licenses";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 const GITHUB_REPO = "https://github.com/BernatBC/HoneyBear-Folio";

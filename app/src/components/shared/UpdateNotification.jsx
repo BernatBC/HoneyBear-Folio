@@ -4,9 +4,9 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { createPortal } from "react-dom";
 import { Download, RefreshCw, ChevronDown, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import "../styles/Modal.css";
-import { t } from "../i18n/i18n";
-import { getDevSetting } from "../config/dev-settings";
+import "../../styles/Modal.css";
+import { t } from "../../i18n/i18n";
+import { getDevSetting } from "../../config/dev-settings";
 
 export default function UpdateNotification() {
   const [updateAvailable, setUpdateAvailable] = useState(false);

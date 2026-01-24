@@ -4,13 +4,13 @@ import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
 import { Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "../ui/Modal";
 import * as XLSX from "xlsx";
-import { t } from "../i18n/i18n";
-import "../styles/Modal.css";
-import "../styles/ExportModal.css";
-import { formatNumberForExport } from "../utils/format";
-import { useToast } from "../contexts/toast";
+import { t } from "../../i18n/i18n";
+import "../../styles/Modal.css";
+import "../../styles/ExportModal.css";
+import { formatNumberForExport } from "../../utils/format";
+import { useToast } from "../../contexts/toast";
 
 export default function ExportModal({ onClose }) {
   const [format, setFormat] = useState("json");

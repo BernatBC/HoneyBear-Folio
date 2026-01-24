@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Plus, Trash2, Edit, Save, GripVertical } from "lucide-react";
-import { useConfirm } from "../contexts/confirm";
-import { t } from "../i18n/i18n";
-import CustomSelect from "./CustomSelect";
-import NumberInput from "./NumberInput";
-import "../styles/Dashboard.css"; // Reuse dashboard styles for cards
+import { useConfirm } from "../../contexts/confirm";
+import { t } from "../../i18n/i18n";
+import CustomSelect from "../../components/ui/CustomSelect";
+import NumberInput from "../../components/ui/NumberInput";
+import "../../styles/Dashboard.css"; // Reuse dashboard styles for cards
 
 export default function RulesList() {
   const [rules, setRules] = useState([]);

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useToast } from "../contexts/toast";
-import { getDevSetting } from "../config/dev-settings";
+import { useToast } from "../../contexts/toast";
+import { getDevSetting } from "../../config/dev-settings";
 
 export default function DevTools() {
   const { showToast } = useToast();
