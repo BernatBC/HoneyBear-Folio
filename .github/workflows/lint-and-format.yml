@@ -68,7 +68,7 @@ jobs:
 
     - name: Rust Cache
       if: steps.changed.outputs.rust == 'true'
-      uses: Swatinem/rust-cache@v2
+      uses: swatinem/rust-cache@v2
       with:
         workspaces: app/src-tauri
 
