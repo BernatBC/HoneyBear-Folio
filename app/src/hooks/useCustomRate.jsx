@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import CustomRateDialog from "../components/CustomRateDialog";
+import CustomRateDialog from "../components/shared/CustomRateDialog";
 
 export function useCustomRate() {
   const [dialogState, setDialogState] = useState({

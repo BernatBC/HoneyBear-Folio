@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useTheme } from "../contexts/theme-core";
-import { useNumberFormat } from "../contexts/number-format";
-import { CURRENCIES } from "../utils/currencies";
-import CustomSelect from "./CustomSelect";
-import { t } from "../i18n/i18n";
-import { formatDateForUI } from "../utils/format";
+import { useTheme } from "../../contexts/theme-core";
+import { useNumberFormat } from "../../contexts/number-format";
+import { CURRENCIES } from "../../utils/currencies";
+import CustomSelect from "../ui/CustomSelect";
+import { t } from "../../i18n/i18n";
+import { formatDateForUI } from "../../utils/format";
 import { Check } from "lucide-react";
-import "../styles/Modal.css";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
-import { getDevSetting } from "../config/dev-settings";
+import "../../styles/Modal.css";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "../ui/Modal";
+import { getDevSetting } from "../../config/dev-settings";
 
 export default function WelcomeWindow() {
   const [isVisible, setIsVisible] = useState(() => {

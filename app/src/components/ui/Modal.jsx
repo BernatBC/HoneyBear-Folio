@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import PropTypes from "prop-types";
-import "../styles/Modal.css";
+import "../../styles/Modal.css";
 
 export function Modal({ children, onClose, size = "md", className = "" }) {
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { Info, CheckCircle, AlertCircle, X } from "lucide-react";
-import "../styles/Toast.css";
-import { ToastContext } from "../contexts/toast";
+import "../../styles/Toast.css";
+import { ToastContext } from "../../contexts/toast";
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);

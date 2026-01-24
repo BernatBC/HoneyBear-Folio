@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../styles/datepicker.css";
+import "../../styles/datepicker.css";
 import { createPortal } from "react-dom";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -27,14 +27,14 @@ import {
   useParseNumber,
   useFormatDate,
   getDatePickerFormat,
-} from "../utils/format";
-import { useNumberFormat } from "../contexts/number-format";
-import { useConfirm } from "../contexts/confirm";
-import NumberInput from "./NumberInput";
-import CustomSelect from "./CustomSelect";
-import { t } from "../i18n/i18n";
-import { CURRENCIES } from "../utils/currencies";
-import { useCustomRate } from "../hooks/useCustomRate";
+} from "../../utils/format";
+import { useNumberFormat } from "../../contexts/number-format";
+import { useConfirm } from "../../contexts/confirm";
+import NumberInput from "../../components/ui/NumberInput";
+import CustomSelect from "../../components/ui/CustomSelect";
+import { t } from "../../i18n/i18n";
+import { CURRENCIES } from "../../utils/currencies";
+import { useCustomRate } from "../../hooks/useCustomRate";
 
 export default function AccountDetails({ account, onUpdate }) {
   const [transactions, setTransactions] = useState([]);

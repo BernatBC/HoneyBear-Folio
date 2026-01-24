@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
-import { t } from "../i18n/i18n";
+import { t } from "../../i18n/i18n";
 
 export default function CustomSelect({
   value,

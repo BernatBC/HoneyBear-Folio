@@ -9,16 +9,16 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import "../styles/Modal.css";
-import "../styles/SettingsModal.css";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
-import "../styles/SettingsModal.css";
-import CustomSelect from "./CustomSelect";
+import "../../styles/Modal.css";
+import "../../styles/SettingsModal.css";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "../ui/Modal";
+import "../../styles/SettingsModal.css";
+import CustomSelect from "../ui/CustomSelect";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { parseNumberWithLocale } from "../utils/format";
-import { t } from "../i18n/i18n";
-import { useToast } from "../contexts/toast";
+import { parseNumberWithLocale } from "../../utils/format";
+import { t } from "../../i18n/i18n";
+import { useToast } from "../../contexts/toast";
 
 // Get MIME type based on file extension
 const getMimeType = (fileName) => {

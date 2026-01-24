@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
-import { ConfirmContext } from "../contexts/confirm";
-import { t } from "../i18n/i18n";
-import "../styles/Modal.css";
+import { ConfirmContext } from "../../contexts/confirm";
+import { t } from "../../i18n/i18n";
+import "../../styles/Modal.css";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 
 export function ConfirmDialogProvider({ children }) {

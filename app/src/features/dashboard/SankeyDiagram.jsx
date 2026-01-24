@@ -9,9 +9,9 @@ import {
 import { SankeyController, Flow } from "chartjs-chart-sankey";
 import { Chart } from "react-chartjs-2";
 import PropTypes from "prop-types";
-import { useFormatNumber } from "../utils/format";
-import { t } from "../i18n/i18n";
-import useIsDark from "../hooks/useIsDark";
+import { useFormatNumber } from "../../utils/format";
+import { t } from "../../i18n/i18n";
+import useIsDark from "../../hooks/useIsDark";
 
 // Register the controller and elements
 ChartJS.register(SankeyController, Flow, Tooltip, Legend, Title, LinearScale);

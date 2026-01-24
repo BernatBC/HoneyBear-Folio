@@ -2,19 +2,19 @@ import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import { RefreshCw } from "lucide-react";
-import { useFormatNumber } from "../utils/format";
+import { useFormatNumber } from "../../utils/format";
 import {
   buildHoldingsFromTransactions,
   mergeHoldingsWithQuotes,
-} from "../utils/investments";
+} from "../../utils/investments";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-import { t } from "../i18n/i18n";
+import { t } from "../../i18n/i18n";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 // useIsDark moved to a shared hook at src/hooks/useIsDark.js
-import useIsDark from "../hooks/useIsDark";
+import useIsDark from "../../hooks/useIsDark";
 
 export default function InvestmentDashboard() {
   const [holdings, setHoldings] = useState([]);

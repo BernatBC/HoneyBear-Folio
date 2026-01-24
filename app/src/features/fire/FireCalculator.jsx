@@ -8,16 +8,16 @@ import {
   Calendar,
   RotateCw,
 } from "lucide-react";
-import { useFormatNumber } from "../utils/format";
-import useIsDark from "../hooks/useIsDark";
-import { t } from "../i18n/i18n";
+import { useFormatNumber } from "../../utils/format";
+import useIsDark from "../../hooks/useIsDark";
+import { t } from "../../i18n/i18n";
 import {
   buildHoldingsFromTransactions,
   mergeHoldingsWithQuotes,
   computePortfolioTotals,
   computeNetWorthMarketValues,
-} from "../utils/investments";
-import NumberInput from "./NumberInput";
+} from "../../utils/investments";
+import NumberInput from "../../components/ui/NumberInput";
 import {
   Chart as ChartJS,
   CategoryScale,

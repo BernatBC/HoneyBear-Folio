@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import "../styles/Modal.css";
-import { t } from "../i18n/i18n";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
+import "../../styles/Modal.css";
+import { t } from "../../i18n/i18n";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "../ui/Modal";
 
 export default function CustomRateDialog({
   isOpen,
