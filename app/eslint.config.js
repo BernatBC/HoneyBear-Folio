@@ -9,6 +9,16 @@ import eslintConfigPrettier from "eslint-config-prettier";
 export default [
   { ignores: ["dist", "src-tauri/target"] },
   {
+    files: ["src/test/**/*.{js,jsx}"],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.jest },
+    },
+    rules: {
+      // In tests we don't enforce prop-types and jest/node globals are available
+      "react/prop-types": "off",
+    },
+  },
+  {
     files: ["**/*.{js,jsx}"],
     languageOptions: {
       ecmaVersion: 2020,

@@ -11,6 +11,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
     "version:sync": "node -e \"const fs=require('fs');const pkg=require('./package.json');const tauri=JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json','utf8'));tauri.version=pkg.version;fs.writeFileSync('src-tauri/tauri.conf.json',JSON.stringify(tauri,null,2));const cargo=fs.readFileSync('src-tauri/Cargo.toml','utf8');fs.writeFileSync('src-tauri/Cargo.toml',cargo.replace(/^version\\s*=\\s*\\\"[^\\\"]+\\\"/m,'version = \\\"'+pkg.version+'\\\"'));console.log('Version synced to',pkg.version)\"",
@@ -53,6 +55,9 @@
     "@eslint/js": "^9.39.2",
     "@tailwindcss/postcss": "^4.1.18",
     "@tauri-apps/cli": "^2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.2",
@@ -62,9 +67,11 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^17.0.0",
+    "jsdom": "^27.4.0",
     "postcss": "^8.5.6",
     "prettier": "^3.8.0",
     "tailwindcss": "^4.1.18",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
   }
 }

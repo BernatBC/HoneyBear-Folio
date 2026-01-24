@@ -34,7 +34,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+        uses: swatinem/rust-cache@v2
         with:
           workspaces: app/src-tauri
 
