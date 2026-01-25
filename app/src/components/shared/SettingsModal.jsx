@@ -35,7 +35,7 @@ import CONTRIBUTORS from "../../config/contributors";
 import THIRD_PARTY_LICENSES from "../../config/licenses";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const GITHUB_REPO = "https://github.com/BernatBC/HoneyBear-Folio";
+const GITHUB_REPO = "https://github.com/HoneyBearFolio/HoneyBear-Folio";
 const LICENSE_URL = `${GITHUB_REPO}/blob/main/LICENSE`;
 
 export default function SettingsModal({ onClose }) {
@@ -582,7 +582,7 @@ export default function SettingsModal({ onClose }) {
                   <h4 className="about-section-title">
                     {t("about.copyright")}
                   </h4>
-                  <p className="about-section-content">© 2025 BernatBC</p>
+                  <p className="about-section-content">© 2026 HoneyBearFolio</p>
                 </div>
 
                 {/* License */}

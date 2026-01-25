@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "homepage": "https://github.com/BernatBC/HoneyBear-Folio",
+  "homepage": "https://github.com/HoneyBearFolio/HoneyBear-Folio",
   "license": "AGPL-3.0-or-later",
-  "author": "BernatBC",
+  "author": "HoneyBearFolio",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
