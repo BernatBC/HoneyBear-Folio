@@ -184,6 +184,7 @@
   "custom_rate.message": "Yahoo Finance does not support {currency}. Please enter the exchange rate in USD (Price of 1 {currency} in USD).",
   "settings.about": "About",
   "about.version": "Version",
+  "about.commit": "Commit",
   "about.copyright": "Copyright",
   "about.license": "License",
   "about.third_party": "Third-Party Software",
