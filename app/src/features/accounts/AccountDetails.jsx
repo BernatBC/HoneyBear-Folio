@@ -822,7 +822,7 @@ export default function AccountDetails({ account, onUpdate }) {
                     }
                     setIsAdding(true);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition-colors"
+                  className="btn-primary px-3 sm:px-5 py-3 rounded-xl font-semibold text-sm shadow-sm"
                 >
                   <Plus className="w-5 h-5" />
                   <span className="hidden sm:inline">

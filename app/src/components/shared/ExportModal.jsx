@@ -250,7 +250,7 @@ export default function ExportModal({ onClose }) {
       <ModalFooter>
         <button
           onClick={onClose}
-          className="modal-cancel-button"
+          className="btn-secondary"
           disabled={exporting}
         >
           {t("export.cancel")}
@@ -258,7 +258,7 @@ export default function ExportModal({ onClose }) {
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="modal-export-button"
+          className="btn-primary"
         >
           <span className="text-white">
             {exporting

@@ -2,31 +2,7 @@
 @import "./theme.css";
 
 @layer components {
-  /* .modal-overlay moved to ./Modal.css */
-
-  .modal-container {
-    @apply bg-white dark:bg-slate-900 w-full max-w-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 max-h-[90vh] overflow-y-auto flex flex-col;
-  }
-
-  .modal-header {
-    @apply flex justify-between items-center mb-6;
-  }
-
-  .modal-title {
-    @apply text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2;
-  }
-
-  .modal-close-button {
-    @apply text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white;
-  }
-
-  .modal-body {
-    @apply space-y-4;
-  }
-
-  .modal-label {
-    @apply block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2;
-  }
+  /* ExportModal specific styles - common modal styles are in Modal.css */
 
   .format-grid {
     @apply grid grid-cols-3 gap-3;
@@ -42,17 +18,5 @@
 
   .format-button-inactive {
     @apply bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700;
-  }
-
-  .modal-footer {
-    @apply mt-6 flex justify-end gap-3;
-  }
-
-  .modal-cancel-button {
-    @apply px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors;
-  }
-
-  .modal-export-button {
-    @apply bg-brand-600 hover:bg-brand-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2;
   }
 }

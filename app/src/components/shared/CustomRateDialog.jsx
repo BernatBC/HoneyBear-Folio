@@ -48,7 +48,7 @@ export default function CustomRateDialog({
             ref={inputRef}
             type="number"
             step="any"
-            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-500 transition-all outline-none"
+            className="form-input"
             placeholder="0.0"
             value={rate}
             onChange={(e) => setRate(e.target.value)}
@@ -58,18 +58,10 @@ export default function CustomRateDialog({
         </form>
       </ModalBody>
       <ModalFooter className="mt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="modal-cancel-button"
-        >
+        <button type="button" onClick={onCancel} className="btn-secondary">
           {t("confirm.cancel")}
         </button>
-        <button
-          type="submit"
-          form="custom-rate-form"
-          className="modal-action-button bg-blue-600 hover:bg-blue-700 text-white"
-        >
+        <button type="submit" form="custom-rate-form" className="btn-primary">
           {t("confirm.save")}
         </button>
       </ModalFooter>
