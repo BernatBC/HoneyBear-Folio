@@ -58,18 +58,10 @@ export default function CustomRateDialog({
         </form>
       </ModalBody>
       <ModalFooter className="mt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn-secondary"
-        >
+        <button type="button" onClick={onCancel} className="btn-secondary">
           {t("confirm.cancel")}
         </button>
-        <button
-          type="submit"
-          form="custom-rate-form"
-          className="btn-primary"
-        >
+        <button type="submit" form="custom-rate-form" className="btn-primary">
           {t("confirm.save")}
         </button>
       </ModalFooter>

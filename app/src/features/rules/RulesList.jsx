@@ -302,10 +302,7 @@ export default function RulesList() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="btn-primary h-10"
-          >
+          <button type="submit" className="btn-primary h-10">
             {isEditing ? <Save size={18} /> : <Plus size={18} />}
             {isEditing ? "Update" : "Add"}
           </button>

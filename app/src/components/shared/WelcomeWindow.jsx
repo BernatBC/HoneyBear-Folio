@@ -68,9 +68,7 @@ export default function WelcomeWindow() {
 
         {/* Theme Selection */}
         <div className="mb-6">
-          <label className="modal-label">
-            {t("Theme")}
-          </label>
+          <label className="modal-label">{t("Theme")}</label>
           <CustomSelect
             value={theme}
             onChange={setTheme}
@@ -85,9 +83,7 @@ export default function WelcomeWindow() {
 
         {/* Currency Selection */}
         <div className="mb-6">
-          <label className="modal-label">
-            {t("Currency")}
-          </label>
+          <label className="modal-label">{t("Currency")}</label>
           <CustomSelect
             value={currency}
             onChange={setCurrency}
@@ -101,9 +97,7 @@ export default function WelcomeWindow() {
 
         {/* Locale Selection */}
         <div className="mb-6">
-          <label className="modal-label">
-            {t("Number Format")}
-          </label>
+          <label className="modal-label">{t("Number Format")}</label>
           <CustomSelect
             value={locale}
             onChange={setLocale}
@@ -119,9 +113,7 @@ export default function WelcomeWindow() {
         </div>
         {/* Date Format Selection */}
         <div className="mb-6">
-          <label className="modal-label">
-            {t("Date Format")}
-          </label>
+          <label className="modal-label">{t("Date Format")}</label>
           <CustomSelect
             value={dateFormat}
             onChange={setDateFormat}
@@ -131,9 +123,7 @@ export default function WelcomeWindow() {
         </div>
         {/* First Day of Week Selection */}
         <div className="mb-6">
-          <label className="modal-label">
-            {t("First Day of Week")}
-          </label>
+          <label className="modal-label">{t("First Day of Week")}</label>
           <CustomSelect
             value={firstDayOfWeek}
             onChange={(v) => setFirstDayOfWeek(Number(v))}
@@ -151,10 +141,7 @@ export default function WelcomeWindow() {
         </div>
       </ModalBody>
       <ModalFooter>
-        <button
-          onClick={handleComplete}
-          className="btn-primary"
-        >
+        <button onClick={handleComplete} className="btn-primary">
           <Check size={18} />
           {t("Get Started")}
         </button>

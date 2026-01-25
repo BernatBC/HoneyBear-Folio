@@ -92,10 +92,7 @@ function ConfirmDialog({
             {cancelLabel}
           </button>
         )}
-        <button
-          onClick={onConfirm}
-          className={getButtonClass()}
-        >
+        <button onClick={onConfirm} className={getButtonClass()}>
           {okLabel}
         </button>
       </ModalFooter>

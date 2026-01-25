@@ -165,11 +165,7 @@ export default function AccountModal({
         <button type="button" onClick={onClose} className="btn-secondary">
           {t("account.cancel")}
         </button>
-        <button
-          type="submit"
-          form="account-form"
-          className="btn-primary"
-        >
+        <button type="submit" form="account-form" className="btn-primary">
           <Check className="w-4 h-4 text-white" />
           <span className="text-white">
             {isEditing
