@@ -48,7 +48,7 @@ jobs:
           # Update Flatpak metainfo version and date
           node -e '
             const fs = require("fs");
-            const path = "flatpak/com.bernatbc.honeybearfolio.metainfo.xml";
+            const path = "flatpak/com.honeybearfolio.honeybearfolio.metainfo.xml";
             if (fs.existsSync(path)) {
               let content = fs.readFileSync(path, "utf8");
               const version = process.argv[1];

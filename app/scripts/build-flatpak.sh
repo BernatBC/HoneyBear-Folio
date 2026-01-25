@@ -30,7 +30,7 @@ if [ ! -f "$CHECK_PATH" ]; then
 fi
 
 # Create a temporary manifest with the correct path
-cp app/flatpak/com.bernatbc.honeybearfolio.yml app/flatpak/flatpak-build.yml
+cp app/flatpak/com.honeybearfolio.honeybearfolio.yml app/flatpak/flatpak-build.yml
 # Escape slashes for sed
 ESCAPED_PATH=$(echo "$BINARY_REL_PATH" | sed 's/\//\\\//g')
 sed -i "s/path: ..\/src-tauri\/target\/release\/HoneyBear-Folio/path: $ESCAPED_PATH/g" app/flatpak/flatpak-build.yml
@@ -47,6 +47,6 @@ if [ -n "$TARGET_TRIPLE" ]; then
     OUTPUT_NAME="honeybear-folio-${TARGET_TRIPLE}"
 fi
 
-flatpak build-bundle repo ${OUTPUT_NAME}.flatpak com.bernatbc.honeybearfolio
+flatpak build-bundle repo ${OUTPUT_NAME}.flatpak com.honeybearfolio.honeybearfolio
 
 echo "Flatpak built: ${OUTPUT_NAME}.flatpak"
