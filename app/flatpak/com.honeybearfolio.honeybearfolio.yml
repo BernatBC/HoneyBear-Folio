@@ -1,4 +1,4 @@
-app-id: com.bernatbc.honeybearfolio
+app-id: com.honeybearfolio.honeybearfolio
 runtime: org.gnome.Platform
 runtime-version: "49"
 sdk: org.gnome.Sdk
@@ -14,10 +14,10 @@ modules:
     buildsystem: simple
     build-commands:
       - install -D HoneyBear-Folio /app/bin/honeybear-folio
-      - install -D 128x128.png /app/share/icons/hicolor/128x128/apps/com.bernatbc.honeybearfolio.png
-      - install -D 32x32.png /app/share/icons/hicolor/32x32/apps/com.bernatbc.honeybearfolio.png
-      - install -D com.bernatbc.honeybearfolio.desktop /app/share/applications/com.bernatbc.honeybearfolio.desktop
-      - install -D com.bernatbc.honeybearfolio.metainfo.xml /app/share/metainfo/com.bernatbc.honeybearfolio.metainfo.xml
+      - install -D 128x128.png /app/share/icons/hicolor/128x128/apps/com.honeybearfolio.honeybearfolio.png
+      - install -D 32x32.png /app/share/icons/hicolor/32x32/apps/com.honeybearfolio.honeybearfolio.png
+      - install -D com.honeybearfolio.honeybearfolio.desktop /app/share/applications/com.honeybearfolio.honeybearfolio.desktop
+      - install -D com.honeybearfolio.honeybearfolio.metainfo.xml /app/share/metainfo/com.honeybearfolio.honeybearfolio.metainfo.xml
     sources:
       - type: file
         path: ../src-tauri/target/release/HoneyBear-Folio
@@ -26,6 +26,6 @@ modules:
       - type: file
         path: ../src-tauri/icons/32x32.png
       - type: file
-        path: com.bernatbc.honeybearfolio.desktop
+        path: com.honeybearfolio.honeybearfolio.desktop
       - type: file
-        path: com.bernatbc.honeybearfolio.metainfo.xml
+        path: com.honeybearfolio.honeybearfolio.metainfo.xml

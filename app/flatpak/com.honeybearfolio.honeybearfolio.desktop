@@ -3,5 +3,5 @@ Type=Application
 Name=HoneyBear-Folio
 Comment=Cross-platform personal finance desktop app.
 Exec=honeybear-folio
-Icon=com.bernatbc.honeybearfolio
+Icon=com.honeybearfolio.honeybearfolio
 Categories=Finance;Office;
