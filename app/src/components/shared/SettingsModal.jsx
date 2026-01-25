@@ -27,6 +27,7 @@ import {
   getDisplayVersion,
   IS_RELEASE,
   APP_VERSION,
+  APP_COMMIT,
 } from "../../utils/version";
 
 import { useCustomRate } from "../../hooks/useCustomRate";
@@ -555,6 +556,25 @@ export default function SettingsModal({ onClose }) {
                       <span>{getDisplayVersion()}</span>
                     )}
                   </div>
+                  {APP_COMMIT && (
+                    <div
+                      className="about-version-badge"
+                      style={{ marginTop: "0.25rem" }}
+                    >
+                      <span>{t("about.commit")}:</span>
+                      <a
+                        href={`${GITHUB_REPO}/commit/${APP_COMMIT}`}
+                        className="about-version-link"
+                        style={{ fontFamily: "monospace" }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openExternal(`${GITHUB_REPO}/commit/${APP_COMMIT}`);
+                        }}
+                      >
+                        {APP_COMMIT.substring(0, 7)}
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {/* Copyright */}
