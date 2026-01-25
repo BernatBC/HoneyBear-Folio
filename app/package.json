@@ -3,7 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "homepage": "https://github.com/HoneyBearFolio/HoneyBear-Folio",
+  "homepage": "https://honeybearfolio.github.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HoneyBearFolio/HoneyBear-Folio"
+  },
   "license": "AGPL-3.0-or-later",
   "author": "HoneyBearFolio",
   "scripts": {

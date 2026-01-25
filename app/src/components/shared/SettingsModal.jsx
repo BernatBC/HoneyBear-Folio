@@ -36,6 +36,7 @@ import THIRD_PARTY_LICENSES from "../../config/licenses";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 const GITHUB_REPO = "https://github.com/HoneyBearFolio/HoneyBear-Folio";
+const WEBSITE_URL = "https://honeybearfolio.github.io";
 const LICENSE_URL = `${GITHUB_REPO}/blob/main/LICENSE`;
 
 export default function SettingsModal({ onClose }) {
@@ -699,6 +700,17 @@ export default function SettingsModal({ onClose }) {
                 {/* Links */}
                 <div className="about-section">
                   <div className="about-links">
+                    <a
+                      href={WEBSITE_URL}
+                      className="about-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openExternal(WEBSITE_URL);
+                      }}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      {t("about.website")}
+                    </a>
                     <a
                       href={GITHUB_REPO}
                       className="about-link"

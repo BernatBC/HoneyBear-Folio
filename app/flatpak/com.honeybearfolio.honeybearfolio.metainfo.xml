@@ -11,7 +11,8 @@
     </p>
   </description>
   <launchable type="desktop-id">com.honeybearfolio.honeybearfolio.desktop</launchable>
-  <url type="homepage">https://github.com/HoneyBearFolio/HoneyBear-Folio</url>
+  <url type="homepage">https://honeybearfolio.github.io</url>
+  <url type="repository">https://github.com/HoneyBearFolio/HoneyBear-Folio</url>
   <developer_name>HoneyBearFolio</developer_name>
   <content_rating type="oars-1.1" />
   <releases>
