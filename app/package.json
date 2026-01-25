@@ -27,7 +27,7 @@
     "@tauri-apps/plugin-updater": "^2.9.0",
     "chart.js": "^4.5.1",
     "chartjs-chart-sankey": "^0.14.0",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "papaparse": "^5.5.3",
     "prop-types": "^15.8.1",
     "react": "^19.1.0",
