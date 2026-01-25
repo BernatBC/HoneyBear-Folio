@@ -68,7 +68,7 @@ export default function WelcomeWindow() {
 
         {/* Theme Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="modal-label">
             {t("Theme")}
           </label>
           <CustomSelect
@@ -85,7 +85,7 @@ export default function WelcomeWindow() {
 
         {/* Currency Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="modal-label">
             {t("Currency")}
           </label>
           <CustomSelect
@@ -101,7 +101,7 @@ export default function WelcomeWindow() {
 
         {/* Locale Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="modal-label">
             {t("Number Format")}
           </label>
           <CustomSelect
@@ -119,7 +119,7 @@ export default function WelcomeWindow() {
         </div>
         {/* Date Format Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="modal-label">
             {t("Date Format")}
           </label>
           <CustomSelect
@@ -131,7 +131,7 @@ export default function WelcomeWindow() {
         </div>
         {/* First Day of Week Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="modal-label">
             {t("First Day of Week")}
           </label>
           <CustomSelect
@@ -153,7 +153,7 @@ export default function WelcomeWindow() {
       <ModalFooter>
         <button
           onClick={handleComplete}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
+          className="btn-primary"
         >
           <Check size={18} />
           {t("Get Started")}

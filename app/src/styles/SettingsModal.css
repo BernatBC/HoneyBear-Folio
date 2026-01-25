@@ -2,7 +2,7 @@
 @import "./theme.css";
 
 @layer components {
-  /* .modal-overlay moved to ./Modal.css */
+  /* SettingsModal specific styles - common modal styles are in Modal.css */
 
   /* Ensure settings modal width cannot be overridden by other modal styles.
      Keep the modal at a fixed height so switching tabs doesn't resize the window. */
@@ -60,23 +60,12 @@
     @apply text-slate-900 dark:text-white font-semibold bg-slate-50 dark:bg-slate-800;
   }
 
-  .modal-header {
-    @apply flex justify-between items-center mb-6;
-  }
-
-  .modal-title {
-    @apply text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2;
-  }
-
-  .modal-close-button {
-    @apply text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white;
-  }
-
   .settings-content {
     @apply flex gap-4 flex-1 overflow-y-auto min-h-0;
   }
 
-  .modal-body {
+  /* Override modal-body for settings modal */
+  .settings-modal-container .modal-body {
     @apply space-y-4 flex-1 overflow-y-auto min-h-0 pb-6;
   }
 
@@ -88,28 +77,7 @@
     @apply text-lg font-semibold text-slate-700 dark:text-slate-200;
   }
 
-  .modal-select {
-    @apply w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    color-scheme: light dark;
-  }
 
-  /* Style native option dropdowns so they match the theme (dark/light) */
-  .modal-select option {
-    @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100;
-    background-color: #ffffff;
-    color: #0f172a;
-    /* slate-900 */
-  }
-
-  .dark .modal-select option,
-  :root.dark .modal-select option {
-    background-color: #0f172a;
-    /* slate-900 */
-    color: #ffffff;
-  }
 
   /* Fallback: target generic selects used elsewhere */
   select {
@@ -121,8 +89,8 @@
     color-scheme: dark;
   }
 
-  /* Footer and reset button styles */
-  .modal-footer {
+  /* Footer and reset button styles - override modal-footer for settings */
+  .settings-modal-container .modal-footer {
     @apply mt-4 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-start z-10;
   }
 

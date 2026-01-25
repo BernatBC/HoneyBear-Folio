@@ -12,7 +12,6 @@ import {
 import "../../styles/Modal.css";
 import "../../styles/SettingsModal.css";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "../ui/Modal";
-import "../../styles/SettingsModal.css";
 import CustomSelect from "../ui/CustomSelect";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -967,7 +966,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
         <ModalFooter className="mt-0 pt-4 border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="btn-secondary"
             disabled={importing}
           >
             {t("export.cancel")}
@@ -977,7 +976,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
             <button
               onClick={() => setStep(1)}
               disabled={!file}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="btn-primary"
             >
               <span className="text-white">{t("import.next") || "Next"}</span>
             </button>
@@ -986,7 +985,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
               <button
                 onClick={() => setStep(0)}
                 disabled={importing}
-                className="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="btn-secondary"
               >
                 {t("import.back") || "Back"}
               </button>
@@ -999,7 +998,7 @@ export default function ImportModal({ onClose, onImportComplete }) {
                     !(file && file.name && file.name.endsWith(".json"))) ||
                   importing
                 }
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="btn-primary"
               >
                 <span className="text-white">
                   {importing ? t("import.importing") : t("import.start_import")}

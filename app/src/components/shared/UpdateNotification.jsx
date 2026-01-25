@@ -228,7 +228,7 @@ export default function UpdateNotification() {
             <>
               <button
                 onClick={handleClose}
-                className="px-3 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                className="btn-secondary"
                 disabled={downloading}
               >
                 {t("update.later")}
@@ -236,7 +236,7 @@ export default function UpdateNotification() {
               <button
                 onClick={handleUpdate}
                 disabled={downloading}
-                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary px-3 py-1.5"
               >
                 {downloading ? (
                   <>

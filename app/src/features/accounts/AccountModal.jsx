@@ -109,7 +109,7 @@ export default function AccountModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("account.placeholder.name")}
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-500 transition-all outline-none"
+                className="form-input"
                 autoFocus
               />
             </div>
@@ -127,7 +127,7 @@ export default function AccountModal({
                     value={balanceStr}
                     onChange={(e) => setBalanceStr(e.target.value)}
                     placeholder={t("account.placeholder.balance")}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-500 transition-all outline-none"
+                    className="form-input"
                   />
                 </div>
               </div>
@@ -162,13 +162,13 @@ export default function AccountModal({
       </ModalBody>
 
       <ModalFooter>
-        <button type="button" onClick={onClose} className="modal-cancel-button">
+        <button type="button" onClick={onClose} className="btn-secondary">
           {t("account.cancel")}
         </button>
         <button
           type="submit"
           form="account-form"
-          className="modal-action-button"
+          className="btn-primary"
         >
           <Check className="w-4 h-4 text-white" />
           <span className="text-white">

@@ -72,11 +72,11 @@ function ConfirmDialog({
   const getButtonClass = () => {
     switch (kind) {
       case "warning":
-        return "bg-amber-600 hover:bg-amber-700 text-white";
+        return "btn-warning";
       case "error":
-        return "bg-red-600 hover:bg-red-700 text-white";
+        return "btn-danger";
       default:
-        return "bg-blue-600 hover:bg-blue-700 text-white";
+        return "btn-primary";
     }
   };
 
@@ -88,13 +88,13 @@ function ConfirmDialog({
       </ModalBody>
       <ModalFooter>
         {showCancel && (
-          <button onClick={onCancel} className="modal-cancel-button">
+          <button onClick={onCancel} className="btn-secondary">
             {cancelLabel}
           </button>
         )}
         <button
           onClick={onConfirm}
-          className={`modal-action-button ${getButtonClass()}`}
+          className={getButtonClass()}
         >
           {okLabel}
         </button>

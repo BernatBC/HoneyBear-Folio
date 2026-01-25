@@ -251,7 +251,7 @@ export default function RulesList() {
                 type="text"
                 required
                 placeholder="e.g. Starbucks"
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                className="form-input"
                 value={formState.match_pattern}
                 onChange={(e) =>
                   setFormState({ ...formState, match_pattern: e.target.value })
@@ -284,7 +284,7 @@ export default function RulesList() {
                   onChange={(val) =>
                     setFormState({ ...formState, action_value: val })
                   }
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                  className="form-input"
                   placeholder="0.00"
                 />
               ) : (
@@ -292,7 +292,7 @@ export default function RulesList() {
                   type="text"
                   required
                   placeholder="e.g. Coffee"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none dark:text-white"
+                  className="form-input"
                   value={formState.action_value}
                   onChange={(e) =>
                     setFormState({ ...formState, action_value: e.target.value })
@@ -304,7 +304,7 @@ export default function RulesList() {
 
           <button
             type="submit"
-            className="h-10 px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2 whitespace-nowrap shadow-sm hover:shadow"
+            className="btn-primary h-10"
           >
             {isEditing ? <Save size={18} /> : <Plus size={18} />}
             {isEditing ? "Update" : "Add"}
