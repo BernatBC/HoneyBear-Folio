@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { invoke } from "@tauri-apps/api/core";
 import { RefreshCw } from "lucide-react";
 import { useFormatNumber } from "../../utils/format";
+import MaskedNumber from "../../components/ui/MaskedNumber";
 import {
   buildHoldingsFromTransactions,
   mergeHoldingsWithQuotes,
@@ -137,6 +138,7 @@ export default function InvestmentDashboard() {
                 prefix +
                 formatNumber(Number(value) || 0, {
                   style: "currency",
+                  ignorePrivacy: true,
                 })
               );
             },
@@ -261,7 +263,10 @@ export default function InvestmentDashboard() {
                 Total Portfolio Value
               </h3>
               <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                {formatNumber(totalValue, { style: "currency" })}
+                <MaskedNumber
+                  value={totalValue}
+                  options={{ style: "currency" }}
+                />
               </p>
             </div>
             <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col justify-center transition-all duration-300">
@@ -276,12 +281,17 @@ export default function InvestmentDashboard() {
                 }
                 <span className="text-sm font-medium ml-2 text-slate-500 dark:text-slate-400">
                   (
-                  {formatNumber(
-                    holdings.reduce((prev, current) =>
-                      prev.roi > current.roi ? prev : current,
-                    ).roi,
-                    { minimumFractionDigits: 2, maximumFractionDigits: 2 },
-                  )}
+                  <MaskedNumber
+                    value={
+                      holdings.reduce((prev, current) =>
+                        prev.roi > current.roi ? prev : current,
+                      ).roi
+                    }
+                    options={{
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }}
+                  />
                   %)
                 </span>
               </p>
@@ -375,32 +385,44 @@ export default function InvestmentDashboard() {
                           {h.ticker}
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
-                          {formatNumber(h.shares, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}{" "}
+                          <MaskedNumber
+                            value={h.shares}
+                            options={{
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }}
+                          />{" "}
                           shares @{" "}
-                          {formatNumber(h.price, {
-                            style: "currency",
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                          <MaskedNumber
+                            value={h.price}
+                            options={{
+                              style: "currency",
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }}
+                          />
                         </div>
                       </td>
                       <td className="p-4 text-right">
                         <div className="font-semibold text-slate-700 dark:text-slate-300">
-                          {formatNumber(h.currentValue, {
-                            style: "currency",
-                            maximumFractionDigits: 0,
-                          })}
+                          <MaskedNumber
+                            value={h.currentValue}
+                            options={{
+                              style: "currency",
+                              maximumFractionDigits: 0,
+                            }}
+                          />
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
                           Cost:{" "}
-                          {formatNumber(h.costBasis, {
-                            style: "currency",
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })}
+                          <MaskedNumber
+                            value={h.costBasis}
+                            options={{
+                              style: "currency",
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }}
+                          />
                         </div>
                       </td>
                       <td className="p-4 text-right">
@@ -412,10 +434,13 @@ export default function InvestmentDashboard() {
                           }`}
                         >
                           {h.roi > 0 ? "+" : ""}
-                          {formatNumber(h.roi, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                          <MaskedNumber
+                            value={h.roi}
+                            options={{
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }}
+                          />
                           %
                         </span>
                       </td>
@@ -517,10 +542,13 @@ function TreeMapNode({ items, x, y, w, h, totalValue, isDark }) {
           {item.ticker}
         </span>
         <span className="hidden sm:inline" style={{ color: textColor }}>
-          {formatNumber(item.roi, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-          })}
+          <MaskedNumber
+            value={item.roi}
+            options={{
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }}
+          />
           %
         </span>
       </div>

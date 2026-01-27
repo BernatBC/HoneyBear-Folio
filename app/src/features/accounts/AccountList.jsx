@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useState, useRef, useCallback } from "react";
 import { useFormatNumber } from "../../utils/format";
+import MaskedNumber from "../../components/ui/MaskedNumber";
 import { GripVertical } from "lucide-react";
 
 export default function AccountList({
@@ -92,11 +93,6 @@ export default function AccountList({
           currency: account.currency || undefined,
         });
 
-        const formattedCash = formatNumber(cashBalance, {
-          style: "currency",
-          currency: account.currency || undefined,
-        });
-
         const finalFormattedTotal =
           formattedTotal === "NaN" ? "" : formattedTotal;
 
@@ -151,11 +147,23 @@ export default function AccountList({
                       : "text-sm"
                   }`}
                 >
-                  {finalFormattedTotal}
+                  <MaskedNumber
+                    value={totalValue}
+                    options={{
+                      style: "currency",
+                      currency: account.currency || undefined,
+                    }}
+                  />
                 </span>
                 {hasInvestments && (
                   <span className="text-[10px] opacity-80">
-                    {formattedCash}
+                    <MaskedNumber
+                      value={cashBalance}
+                      options={{
+                        style: "currency",
+                        currency: account.currency || undefined,
+                      }}
+                    />
                   </span>
                 )}
               </div>

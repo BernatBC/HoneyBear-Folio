@@ -9,6 +9,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { useFormatNumber } from "../../utils/format";
+import MaskedNumber from "../../components/ui/MaskedNumber";
 import useIsDark from "../../hooks/useIsDark";
 import { t } from "../../i18n/i18n";
 import {
@@ -330,12 +331,6 @@ export default function FireCalculator() {
   ]);
 
   const formatNumber = useFormatNumber();
-  const formatCurrency = (val) =>
-    formatNumber(val, {
-      style: "currency",
-      maximumFractionDigits: 0,
-      minimumFractionDigits: 0,
-    });
 
   return (
     <div className="page-container fire-calculator-container">
@@ -487,7 +482,14 @@ export default function FireCalculator() {
                   FIRE Number
                 </p>
                 <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">
-                  {formatCurrency(fireNumber)}
+                  <MaskedNumber
+                    value={fireNumber}
+                    options={{
+                      style: "currency",
+                      maximumFractionDigits: 0,
+                      minimumFractionDigits: 0,
+                    }}
+                  />
                 </p>
               </div>
               <div className="bg-blue-500 dark:bg-blue-600 p-4 rounded-2xl shadow-lg">
@@ -500,6 +502,7 @@ export default function FireCalculator() {
                 <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">
                   Time to FIRE
                 </p>
+                <MaskedNumber value={yearsToFire} />
                 {neverReached ? (
                   <p className="text-xl font-medium text-emerald-900 dark:text-emerald-100">
                     {t("fire.never_retire")}
@@ -562,6 +565,7 @@ export default function FireCalculator() {
                           ) {
                             label += formatNumber(Number(value), {
                               style: "currency",
+                              ignorePrivacy: true,
                             });
                           }
 
