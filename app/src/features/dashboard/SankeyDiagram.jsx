@@ -305,7 +305,10 @@ export default function SankeyDiagram({
         callbacks: {
           label: function (context) {
             const item = context.raw;
-            return `${item.from} -> ${item.to}: ${formatNumber(item.flow, { style: "currency" })}`;
+            const labels = context.chart.data.datasets[0].labels;
+            const fromLabel = labels[item.from] || item.from;
+            const toLabel = labels[item.to] || item.to;
+            return `${fromLabel} -> ${toLabel}: ${formatNumber(item.flow, { style: "currency", ignorePrivacy: true })}`;
           },
         },
       },

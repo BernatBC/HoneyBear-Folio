@@ -32,6 +32,7 @@ import { useNumberFormat } from "../../contexts/number-format";
 import { useConfirm } from "../../contexts/confirm";
 import NumberInput from "../../components/ui/NumberInput";
 import CustomSelect from "../../components/ui/CustomSelect";
+import MaskedNumber from "../../components/ui/MaskedNumber";
 import { t } from "../../i18n/i18n";
 import { CURRENCIES } from "../../utils/currencies";
 import { useCustomRate } from "../../hooks/useCustomRate";
@@ -731,10 +732,13 @@ export default function AccountDetails({ account, onUpdate }) {
                         : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
-                    {formatNumber(account.totalValue, {
-                      style: "currency",
-                      currency: account.currency,
-                    })}
+                    <MaskedNumber
+                      value={account.totalValue}
+                      options={{
+                        style: "currency",
+                        currency: account.currency,
+                      }}
+                    />
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
@@ -748,10 +752,13 @@ export default function AccountDetails({ account, onUpdate }) {
                         : "text-rose-600 dark:text-rose-400 opacity-80"
                     }`}
                   >
-                    {formatNumber(account.balance, {
-                      style: "currency",
-                      currency: account.currency,
-                    })}
+                    <MaskedNumber
+                      value={account.balance}
+                      options={{
+                        style: "currency",
+                        currency: account.currency,
+                      }}
+                    />
                   </span>
                 </div>
               </>
@@ -768,10 +775,13 @@ export default function AccountDetails({ account, onUpdate }) {
                   }`}
                 >
                   {account.balance >= 0 ? "+" : ""}
-                  {formatNumber(account.balance, {
-                    style: "currency",
-                    currency: account.currency,
-                  })}
+                  <MaskedNumber
+                    value={account.balance}
+                    options={{
+                      style: "currency",
+                      currency: account.currency,
+                    }}
+                  />
                 </span>
               </div>
             )}
@@ -1657,13 +1667,16 @@ export default function AccountDetails({ account, onUpdate }) {
                                   return (
                                     <span className="flex items-center gap-1 justify-end">
                                       {sign}
-                                      {formatNumber(totalNum, {
-                                        style: "currency",
-                                        currency:
-                                          editForm.currency || appCurrency,
-                                        maximumFractionDigits: 2,
-                                        minimumFractionDigits: 2,
-                                      })}
+                                      <MaskedNumber
+                                        value={totalNum}
+                                        options={{
+                                          style: "currency",
+                                          currency:
+                                            editForm.currency || appCurrency,
+                                          maximumFractionDigits: 2,
+                                          minimumFractionDigits: 2,
+                                        }}
+                                      />
                                     </span>
                                   );
                                 })()}
@@ -1887,11 +1900,14 @@ export default function AccountDetails({ account, onUpdate }) {
                               {typeof tx.shares !== "undefined" &&
                               tx.shares !== null ? (
                                 <span>
-                                  {formatNumber(Math.abs(tx.shares), {
-                                    maximumFractionDigits: 6,
-                                    minimumFractionDigits: 0,
-                                    useGrouping: false,
-                                  })}
+                                  <MaskedNumber
+                                    value={Math.abs(tx.shares)}
+                                    options={{
+                                      maximumFractionDigits: 6,
+                                      minimumFractionDigits: 0,
+                                      useGrouping: false,
+                                    }}
+                                  />
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1907,12 +1923,15 @@ export default function AccountDetails({ account, onUpdate }) {
                               {typeof tx.price_per_share !== "undefined" &&
                               tx.price_per_share !== null ? (
                                 <span>
-                                  {formatNumber(tx.price_per_share, {
-                                    style: "currency",
-                                    currency: tx.currency || appCurrency,
-                                    maximumFractionDigits: 2,
-                                    minimumFractionDigits: 2,
-                                  })}
+                                  <MaskedNumber
+                                    value={tx.price_per_share}
+                                    options={{
+                                      style: "currency",
+                                      currency: tx.currency || appCurrency,
+                                      maximumFractionDigits: 2,
+                                      minimumFractionDigits: 2,
+                                    }}
+                                  />
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1928,12 +1947,15 @@ export default function AccountDetails({ account, onUpdate }) {
                               {typeof tx.fee !== "undefined" &&
                               tx.fee !== null ? (
                                 <span>
-                                  {formatNumber(tx.fee, {
-                                    style: "currency",
-                                    currency: tx.currency || appCurrency,
-                                    maximumFractionDigits: 2,
-                                    minimumFractionDigits: 2,
-                                  })}
+                                  <MaskedNumber
+                                    value={tx.fee}
+                                    options={{
+                                      style: "currency",
+                                      currency: tx.currency || appCurrency,
+                                      maximumFractionDigits: 2,
+                                      minimumFractionDigits: 2,
+                                    }}
+                                  />
                                 </span>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-500">
@@ -1949,10 +1971,13 @@ export default function AccountDetails({ account, onUpdate }) {
                           onClick={() => startEditing(tx)}
                         >
                           {tx.amount >= 0 ? "+" : ""}
-                          {formatNumber(Math.abs(tx.amount), {
-                            style: "currency",
-                            currency: tx.currency || appCurrency,
-                          })}
+                          <MaskedNumber
+                            value={Math.abs(tx.amount)}
+                            options={{
+                              style: "currency",
+                              currency: tx.currency || appCurrency,
+                            }}
+                          />
                         </td>
                         <td className="px-2 py-4 whitespace-nowrap text-right text-sm font-medium relative action-menu-container">
                           <button

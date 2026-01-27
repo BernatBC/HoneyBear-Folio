@@ -28,6 +28,7 @@ import {
 } from "../../utils/format";
 import { buildHoldingsFromTransactions } from "../../utils/investments";
 import { useNumberFormat } from "../../contexts/number-format";
+import MaskedNumber from "../../components/ui/MaskedNumber";
 import { t } from "../../i18n/i18n";
 
 ChartJS.register(
@@ -882,7 +883,10 @@ export default function Dashboard({
                 label += ": ";
               }
               if (value !== null && value !== undefined) {
-                label += formatNumber(value, { style: "currency" });
+                label += formatNumber(value, {
+                  style: "currency",
+                  ignorePrivacy: true,
+                });
               }
               return label;
             },
@@ -961,7 +965,10 @@ export default function Dashboard({
 
               let label = context.label || "";
               if (label) label += ": ";
-              label += formatNumber(Number(value) || 0, { style: "currency" });
+              label += formatNumber(Number(value) || 0, {
+                style: "currency",
+                ignorePrivacy: true,
+              });
               return label;
             },
             labelColor: function (context) {
@@ -1033,6 +1040,21 @@ export default function Dashboard({
             family: "Inter",
             size: 12,
           },
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || "";
+              if (label) {
+                label += ": ";
+              }
+              if (context.parsed.y !== null) {
+                label += formatNumber(context.parsed.y, {
+                  style: "currency",
+                  ignorePrivacy: true,
+                });
+              }
+              return label;
+            },
+          },
         },
       },
       scales: {
@@ -1060,6 +1082,7 @@ export default function Dashboard({
               if (Number.isNaN(num)) return value;
               return formatNumber(num, {
                 style: "currency",
+                ignorePrivacy: true,
               });
             },
           },
@@ -1128,15 +1151,18 @@ export default function Dashboard({
                     label += formatNumber(nativeVal, {
                       style: "currency",
                       currency: context.dataset.accountCurrency,
+                      ignorePrivacy: true,
                     });
                   } else {
                     label += formatNumber(context.parsed.y, {
                       style: "currency",
+                      ignorePrivacy: true,
                     });
                   }
                 } else {
                   label += formatNumber(context.parsed.y, {
                     style: "currency",
+                    ignorePrivacy: true,
                   });
                 }
               }
@@ -1170,6 +1196,7 @@ export default function Dashboard({
               if (Number.isNaN(num)) return value;
               return formatNumber(num, {
                 style: "currency",
+                ignorePrivacy: true,
               });
             },
           },
@@ -1274,9 +1301,10 @@ export default function Dashboard({
             {t("dashboard.current_net_worth")}
           </h3>
           <p className="summary-card-value">
-            {formatNumber(computeNetWorth(accounts, marketValues), {
-              style: "currency",
-            })}
+            <MaskedNumber
+              value={computeNetWorth(accounts, marketValues)}
+              options={{ style: "currency" }}
+            />
           </p>
         </div>
         <div className="summary-card">
@@ -1341,15 +1369,17 @@ export default function Dashboard({
                       />
                       <span className="account-name">{acc.name}</span>
                       <span className="account-balance ml-2 text-slate-500 dark:text-slate-400">
-                        {formatNumber(
-                          marketValues && marketValues[acc.id] !== undefined
-                            ? (acc.balance || 0) + marketValues[acc.id]
-                            : acc.balance || 0,
-                          {
+                        <MaskedNumber
+                          value={
+                            marketValues && marketValues[acc.id] !== undefined
+                              ? (acc.balance || 0) + marketValues[acc.id]
+                              : acc.balance || 0
+                          }
+                          options={{
                             style: "currency",
                             currency: acc.currency || appCurrency,
-                          },
-                        )}
+                          }}
+                        />
                       </span>
                     </label>
                   );

@@ -27,6 +27,7 @@ import { t } from "../../i18n/i18n";
 import "../../styles/Sidebar.css";
 import { useFormatNumber } from "../../utils/format";
 import { usePrivacy } from "../../contexts/privacy";
+import MaskedNumber from "../ui/MaskedNumber";
 
 export default function Sidebar({
   accounts,
@@ -197,7 +198,10 @@ export default function Sidebar({
                   : "text-2xl"
             }`}
           >
-            {formattedTotalBalance}
+            <MaskedNumber
+              value={totalBalance}
+              options={{ style: "currency" }}
+            />
           </div>
         </div>
       </div>
