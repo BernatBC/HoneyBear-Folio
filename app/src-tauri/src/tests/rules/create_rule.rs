@@ -13,6 +13,9 @@ fn test_create_and_get_rules() {
         "Starbucks".to_string(),
         "category".to_string(),
         "Coffee".to_string(),
+        "and".to_string(),
+        vec![],
+        vec![],
     )
     .expect("failed to create rule");
 

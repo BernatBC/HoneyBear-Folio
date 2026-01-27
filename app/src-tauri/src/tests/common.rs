@@ -58,7 +58,10 @@ pub fn setup_db() -> (tempfile::TempDir, PathBuf) {
             match_field TEXT NOT NULL,
             match_pattern TEXT NOT NULL,
             action_field TEXT NOT NULL,
-            action_value TEXT NOT NULL
+            action_value TEXT NOT NULL,
+            logic TEXT NOT NULL DEFAULT 'and',
+            conditions TEXT NOT NULL DEFAULT '[]',
+            actions TEXT NOT NULL DEFAULT '[]'
         )",
         [],
     )

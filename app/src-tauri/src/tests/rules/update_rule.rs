@@ -12,6 +12,9 @@ fn test_update_rule() {
         "Starbucks".to_string(),
         "category".to_string(),
         "Coffee".to_string(),
+        "and".to_string(),
+        vec![],
+        vec![],
     )
     .unwrap();
 
@@ -23,6 +26,9 @@ fn test_update_rule() {
         "My Note".to_string(),
         "amount".to_string(),
         "50.00".to_string(),
+        "and".to_string(),
+        vec![],
+        vec![],
     )
     .expect("failed to update rule");
 

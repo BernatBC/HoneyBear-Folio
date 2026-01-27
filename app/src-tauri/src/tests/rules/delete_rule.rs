@@ -12,6 +12,9 @@ fn test_delete_rule() {
         "Delete Me".to_string(),
         "category".to_string(),
         "N/A".to_string(),
+        "and".to_string(),
+        vec![],
+        vec![],
     )
     .unwrap();
 

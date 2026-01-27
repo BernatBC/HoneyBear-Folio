@@ -14,6 +14,9 @@ fn test_reorder_rules() {
         "p".to_string(),
         "a".to_string(),
         "v".to_string(),
+        "and".to_string(),
+        vec![],
+        vec![],
     )
     .unwrap();
     let id2 = create_rule_db(
@@ -23,6 +26,9 @@ fn test_reorder_rules() {
         "p".to_string(),
         "a".to_string(),
         "v".to_string(),
+        "and".to_string(),
+        vec![],
+        vec![],
     )
     .unwrap();
     let id3 = create_rule_db(
@@ -32,6 +38,9 @@ fn test_reorder_rules() {
         "p".to_string(),
         "a".to_string(),
         "v".to_string(),
+        "and".to_string(),
+        vec![],
+        vec![],
     )
     .unwrap();
 
