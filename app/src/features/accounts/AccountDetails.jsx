@@ -1611,36 +1611,34 @@ export default function AccountDetails({ account, onUpdate }) {
 
                             <td className="px-6 py-3">
                               <div className="relative">
-                                <input
-                                  type="text"
-                                  inputMode="decimal"
-                                  step="any"
-                                  className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
-                                  value={editForm.price_per_share || ""}
-                                  onChange={(e) =>
+                                <NumberInput
+                                  value={editForm.price_per_share}
+                                  onChange={(num) =>
                                     setEditForm({
                                       ...editForm,
-                                      price_per_share: e.target.value,
+                                      price_per_share: num,
                                     })
                                   }
+                                  className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  maximumFractionDigits={8}
+                                  useGrouping={false}
                                 />
                               </div>
                             </td>
 
                             <td className="px-6 py-3">
                               <div className="relative">
-                                <input
-                                  type="text"
-                                  inputMode="decimal"
-                                  step="0.01"
-                                  className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
-                                  value={editForm.fee || ""}
-                                  onChange={(e) =>
+                                <NumberInput
+                                  value={editForm.fee}
+                                  onChange={(num) =>
                                     setEditForm({
                                       ...editForm,
-                                      fee: e.target.value,
+                                      fee: num,
                                     })
                                   }
+                                  className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
+                                  maximumFractionDigits={2}
+                                  minimumFractionDigits={2}
                                 />
                               </div>
                             </td>
@@ -1773,22 +1771,21 @@ export default function AccountDetails({ account, onUpdate }) {
                             )}
 
                             <td className="px-6 py-3">
-                              <input
-                                type="text"
-                                inputMode="decimal"
-                                step="0.01"
+                              <NumberInput
+                                value={editForm.amount}
+                                onChange={(num) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    amount: num,
+                                  })
+                                }
                                 placeholder={formatNumber(0, {
                                   maximumFractionDigits: 2,
                                   minimumFractionDigits: 2,
                                 })}
                                 className="w-full p-2 text-sm border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-right"
-                                value={editForm.amount}
-                                onChange={(e) =>
-                                  setEditForm({
-                                    ...editForm,
-                                    amount: e.target.value,
-                                  })
-                                }
+                                maximumFractionDigits={2}
+                                minimumFractionDigits={2}
                               />
                             </td>
                             <td className="px-6 py-3 text-center">
