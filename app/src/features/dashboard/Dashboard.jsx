@@ -28,7 +28,6 @@ import {
 } from "../../utils/format";
 import { buildHoldingsFromTransactions } from "../../utils/investments";
 import { useNumberFormat } from "../../contexts/number-format";
-import { usePrivacy } from "../../contexts/privacy";
 import MaskedNumber from "../../components/ui/MaskedNumber";
 import { t } from "../../i18n/i18n";
 
@@ -64,7 +63,6 @@ export default function Dashboard({
   const [customEndDate, setCustomEndDate] = useState(new Date());
 
   const isDark = useIsDark();
-  const { isPrivacyMode } = usePrivacy();
 
   const formatNumber = useFormatNumber();
   const formatDate = useFormatDate();
