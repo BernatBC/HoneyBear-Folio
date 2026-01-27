@@ -509,7 +509,8 @@ export default function FireCalculator() {
               <div>
                 <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">
                   Time to FIRE
-                </p><MaskedNumber value={yearsToFire} />
+                </p>
+                <MaskedNumber value={yearsToFire} />
                 {neverReached ? (
                   <p className="text-xl font-medium text-emerald-900 dark:text-emerald-100">
                     {t("fire.never_retire")}
@@ -572,7 +573,7 @@ export default function FireCalculator() {
                           ) {
                             label += formatNumber(Number(value), {
                               style: "currency",
-                              ignorePrivacy: true
+                              ignorePrivacy: true,
                             });
                           }
 

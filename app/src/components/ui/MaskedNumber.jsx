@@ -3,7 +3,12 @@ import PropTypes from "prop-types";
 import { useFormatNumber } from "../../utils/format";
 import { usePrivacy } from "../../contexts/privacy";
 
-export default function MaskedNumber({ value, options = {}, className, ...props }) {
+export default function MaskedNumber({
+  value,
+  options = {},
+  className,
+  ...props
+}) {
   const formatNumber = useFormatNumber();
   const { isPrivacyMode } = usePrivacy();
   const [isHovered, setIsHovered] = useState(false);
