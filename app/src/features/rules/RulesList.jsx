@@ -333,160 +333,162 @@ export default function RulesList() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Conditions Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                {t("rules.conditions")}
-              </h3>
-              {formState.conditions.length > 1 && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500">{t("rules.logic")}:</span>
-                  <CustomSelect
-                    value={formState.logic}
-                    onChange={(val) => setFormState((prev) => ({ ...prev, logic: val }))}
-                    options={logicOptions}
-                    className="w-24"
-                  />
-                  <span className="text-xs text-slate-500">
-                    ({formState.logic === "and" ? t("rules.all_conditions") : t("rules.any_condition")})
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {formState.conditions.map((condition, index) => (
-              <div
-                key={index}
-                className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
-              >
-                <span className="text-xs font-semibold text-slate-500 uppercase w-8">{t("rules.if")}</span>
-                
-                <CustomSelect
-                  value={condition.field}
-                  onChange={(val) => updateCondition(index, { field: val, operator: "equals", value: "" })}
-                  options={availableFields}
-                  className="w-32"
-                />
-
-                <CustomSelect
-                  value={condition.operator}
-                  onChange={(val) => updateCondition(index, { operator: val })}
-                  options={getOperatorsForField(condition.field)}
-                  className="w-40"
-                />
-
-                {!isValuelessOperator(condition.operator) && (
-                  getFieldType(condition.field) === "number" ? (
-                    <NumberInput
-                      value={condition.value}
-                      onChange={(val) => updateCondition(index, { value: val })}
-                      className="form-input w-32"
-                      placeholder="0.00"
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      placeholder="Value"
-                      className="form-input w-40"
-                      value={condition.value}
-                      onChange={(e) => updateCondition(index, { value: e.target.value })}
-                    />
-                  )
-                )}
-
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Conditions Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                  {t("rules.conditions")}
+                </h3>
                 {formState.conditions.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeCondition(index)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                    title={t("rules.remove_condition")}
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-
-                {index < formState.conditions.length - 1 && (
-                  <span className="ml-auto text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase">
-                    {formState.logic === "and" ? t("rules.logic.and") : t("rules.logic.or")}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500">{t("rules.logic")}:</span>
+                    <CustomSelect
+                      value={formState.logic}
+                      onChange={(val) => setFormState((prev) => ({ ...prev, logic: val }))}
+                      options={logicOptions}
+                      className="w-24"
+                    />
+                    <span className="text-xs text-slate-500">
+                      ({formState.logic === "and" ? t("rules.all_conditions") : t("rules.any_condition")})
+                    </span>
+                  </div>
                 )}
               </div>
-            ))}
 
-            <button
-              type="button"
-              onClick={addCondition}
-              className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-            >
-              <Plus size={16} />
-              {t("rules.add_condition")}
-            </button>
-          </div>
-
-          {/* Actions Section */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-              {t("rules.actions")}
-            </h3>
-
-            {formState.actions.map((action, index) => {
-              const fieldType = getFieldType(action.field);
-              return (
+              {formState.conditions.map((condition, index) => (
                 <div
                   key={index}
                   className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
                 >
-                  <span className="text-xs font-semibold text-slate-500 uppercase w-8">{t("rules.then_set")}</span>
-
+                  <span className="text-xs font-semibold text-slate-500 uppercase w-8">{t("rules.if")}</span>
+                  
                   <CustomSelect
-                    value={action.field}
-                    onChange={(val) => updateAction(index, { field: val, value: "" })}
+                    value={condition.field}
+                    onChange={(val) => updateCondition(index, { field: val, operator: "equals", value: "" })}
                     options={availableFields}
                     className="w-32"
                   />
 
-                  <span className="text-xs font-semibold text-slate-500 uppercase">{t("rules.to")}</span>
+                  <CustomSelect
+                    value={condition.operator}
+                    onChange={(val) => updateCondition(index, { operator: val })}
+                    options={getOperatorsForField(condition.field)}
+                    className="w-40"
+                  />
 
-                  {fieldType === "number" ? (
-                    <NumberInput
-                      value={action.value}
-                      onChange={(val) => updateAction(index, { value: val })}
-                      className="form-input w-40"
-                      placeholder="0.00"
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      placeholder="Value"
-                      className="form-input w-40"
-                      value={action.value}
-                      onChange={(e) => updateAction(index, { value: e.target.value })}
-                    />
+                  {!isValuelessOperator(condition.operator) && (
+                    getFieldType(condition.field) === "number" ? (
+                      <NumberInput
+                        value={condition.value}
+                        onChange={(val) => updateCondition(index, { value: val })}
+                        className="form-input w-32"
+                        placeholder="0.00"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="Value"
+                        className="form-input w-40"
+                        value={condition.value}
+                        onChange={(e) => updateCondition(index, { value: e.target.value })}
+                      />
+                    )
                   )}
 
-                  {formState.actions.length > 1 && (
+                  {formState.conditions.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeAction(index)}
+                      onClick={() => removeCondition(index)}
                       className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                      title={t("rules.remove_action")}
+                      title={t("rules.remove_condition")}
                     >
                       <X size={16} />
                     </button>
                   )}
-                </div>
-              );
-            })}
 
-            <button
-              type="button"
-              onClick={addAction}
-              className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-            >
-              <Plus size={16} />
-              {t("rules.add_action")}
-            </button>
+                  {index < formState.conditions.length - 1 && (
+                    <span className="ml-auto text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase">
+                      {formState.logic === "and" ? t("rules.logic.and") : t("rules.logic.or")}
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addCondition}
+                className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+              >
+                <Plus size={16} />
+                {t("rules.add_condition")}
+              </button>
+            </div>
+
+            {/* Actions Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                {t("rules.actions")}
+              </h3>
+
+              {formState.actions.map((action, index) => {
+                const fieldType = getFieldType(action.field);
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
+                  >
+                    <span className="text-xs font-semibold text-slate-500 uppercase w-8">{t("rules.then_set")}</span>
+
+                    <CustomSelect
+                      value={action.field}
+                      onChange={(val) => updateAction(index, { field: val, value: "" })}
+                      options={availableFields}
+                      className="w-32"
+                    />
+
+                    <span className="text-xs font-semibold text-slate-500 uppercase">{t("rules.to")}</span>
+
+                    {fieldType === "number" ? (
+                      <NumberInput
+                        value={action.value}
+                        onChange={(val) => updateAction(index, { value: val })}
+                        className="form-input w-40"
+                        placeholder="0.00"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="Value"
+                        className="form-input w-40"
+                        value={action.value}
+                        onChange={(e) => updateAction(index, { value: e.target.value })}
+                      />
+                    )}
+
+                    {formState.actions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeAction(index)}
+                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        title={t("rules.remove_action")}
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={addAction}
+                className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+              >
+                <Plus size={16} />
+                {t("rules.add_action")}
+              </button>
+            </div>
           </div>
 
           {/* Submit Button */}

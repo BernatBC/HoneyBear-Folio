@@ -10,6 +10,7 @@ export default function CustomSelect({
   options,
   placeholder,
   fullWidth = true,
+  className = "",
 }) {
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(-1);
@@ -186,7 +187,7 @@ export default function CustomSelect({
   };
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className={`relative ${className}`}>
       <button
         type="button"
         aria-haspopup="listbox"
