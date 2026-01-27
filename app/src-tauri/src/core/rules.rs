@@ -14,10 +14,11 @@ pub fn get_rules_db(db_path: &PathBuf) -> Result<Vec<Rule>, String> {
         .query_map([], |row| {
             let conditions_json: String = row.get(7)?;
             let actions_json: String = row.get(8)?;
-            
-            let conditions: Vec<RuleCondition> = serde_json::from_str(&conditions_json).unwrap_or_default();
+
+            let conditions: Vec<RuleCondition> =
+                serde_json::from_str(&conditions_json).unwrap_or_default();
             let actions: Vec<RuleAction> = serde_json::from_str(&actions_json).unwrap_or_default();
-            
+
             Ok(Rule {
                 id: row.get(0)?,
                 priority: row.get(1)?,
@@ -51,7 +52,7 @@ pub fn create_rule_db(
     actions: Vec<RuleAction>,
 ) -> Result<i32, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
-    
+
     let conditions_json = serde_json::to_string(&conditions).map_err(|e| e.to_string())?;
     let actions_json = serde_json::to_string(&actions).map_err(|e| e.to_string())?;
 
@@ -78,7 +79,7 @@ pub fn update_rule_db(
     actions: Vec<RuleAction>,
 ) -> Result<(), String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
-    
+
     let conditions_json = serde_json::to_string(&conditions).map_err(|e| e.to_string())?;
     let actions_json = serde_json::to_string(&actions).map_err(|e| e.to_string())?;
 

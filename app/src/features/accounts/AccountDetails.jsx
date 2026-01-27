@@ -170,21 +170,45 @@ export default function AccountDetails({ account, onUpdate }) {
         case "not_equals":
           return strFieldValue !== strCondValue;
         case "contains":
-          return strFieldValue.toLowerCase().includes(strCondValue.toLowerCase());
+          return strFieldValue
+            .toLowerCase()
+            .includes(strCondValue.toLowerCase());
         case "not_contains":
-          return !strFieldValue.toLowerCase().includes(strCondValue.toLowerCase());
+          return !strFieldValue
+            .toLowerCase()
+            .includes(strCondValue.toLowerCase());
         case "starts_with":
-          return strFieldValue.toLowerCase().startsWith(strCondValue.toLowerCase());
+          return strFieldValue
+            .toLowerCase()
+            .startsWith(strCondValue.toLowerCase());
         case "ends_with":
-          return strFieldValue.toLowerCase().endsWith(strCondValue.toLowerCase());
+          return strFieldValue
+            .toLowerCase()
+            .endsWith(strCondValue.toLowerCase());
         case "greater_than":
-          return !isNaN(numFieldValue) && !isNaN(numCondValue) && numFieldValue > numCondValue;
+          return (
+            !isNaN(numFieldValue) &&
+            !isNaN(numCondValue) &&
+            numFieldValue > numCondValue
+          );
         case "less_than":
-          return !isNaN(numFieldValue) && !isNaN(numCondValue) && numFieldValue < numCondValue;
+          return (
+            !isNaN(numFieldValue) &&
+            !isNaN(numCondValue) &&
+            numFieldValue < numCondValue
+          );
         case "is_empty":
-          return strFieldValue === "" || fieldValue === null || fieldValue === undefined;
+          return (
+            strFieldValue === "" ||
+            fieldValue === null ||
+            fieldValue === undefined
+          );
         case "is_not_empty":
-          return strFieldValue !== "" && fieldValue !== null && fieldValue !== undefined;
+          return (
+            strFieldValue !== "" &&
+            fieldValue !== null &&
+            fieldValue !== undefined
+          );
         default:
           return strFieldValue === strCondValue;
       }
@@ -196,9 +220,13 @@ export default function AccountDetails({ account, onUpdate }) {
       if (rule.conditions && rule.conditions.length > 0) {
         const logic = rule.logic || "and";
         if (logic === "and") {
-          return rule.conditions.every((cond) => evaluateCondition(cond, values));
+          return rule.conditions.every((cond) =>
+            evaluateCondition(cond, values),
+          );
         } else {
-          return rule.conditions.some((cond) => evaluateCondition(cond, values));
+          return rule.conditions.some((cond) =>
+            evaluateCondition(cond, values),
+          );
         }
       }
       // Legacy format: single match_field/match_pattern (exact match)

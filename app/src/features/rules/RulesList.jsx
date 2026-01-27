@@ -7,7 +7,12 @@ import CustomSelect from "../../components/ui/CustomSelect";
 import NumberInput from "../../components/ui/NumberInput";
 import "../../styles/Dashboard.css";
 
-const DEFAULT_CONDITION = { field: "payee", operator: "equals", value: "", negated: false };
+const DEFAULT_CONDITION = {
+  field: "payee",
+  operator: "equals",
+  value: "",
+  negated: false,
+};
 const DEFAULT_ACTION = { field: "category", value: "" };
 
 export default function RulesList() {
@@ -61,13 +66,22 @@ export default function RulesList() {
 
   function handleEdit(rule) {
     // Convert legacy rule format to new format if needed
-    const conditions = rule.conditions?.length > 0 
-      ? rule.conditions 
-      : [{ field: rule.match_field, operator: "equals", value: rule.match_pattern, negated: false }];
-    
-    const actions = rule.actions?.length > 0 
-      ? rule.actions 
-      : [{ field: rule.action_field, value: rule.action_value }];
+    const conditions =
+      rule.conditions?.length > 0
+        ? rule.conditions
+        : [
+            {
+              field: rule.match_field,
+              operator: "equals",
+              value: rule.match_pattern,
+              negated: false,
+            },
+          ];
+
+    const actions =
+      rule.actions?.length > 0
+        ? rule.actions
+        : [{ field: rule.action_field, value: rule.action_value }];
 
     setFormState({
       id: rule.id,
@@ -98,7 +112,7 @@ export default function RulesList() {
       // For backward compatibility, use first condition/action for legacy fields
       const firstCondition = formState.conditions[0] || DEFAULT_CONDITION;
       const firstAction = formState.actions[0] || DEFAULT_ACTION;
-      
+
       const payload = {
         matchField: firstCondition.field,
         matchPattern: firstCondition.value,
@@ -106,7 +120,10 @@ export default function RulesList() {
         actionValue: String(firstAction.value),
         logic: formState.logic,
         conditions: formState.conditions,
-        actions: formState.actions.map(a => ({ ...a, value: String(a.value) })),
+        actions: formState.actions.map((a) => ({
+          ...a,
+          value: String(a.value),
+        })),
       };
 
       if (formState.id) {
@@ -141,7 +158,9 @@ export default function RulesList() {
   function updateCondition(index, updates) {
     setFormState((prev) => ({
       ...prev,
-      conditions: prev.conditions.map((c, i) => (i === index ? { ...c, ...updates } : c)),
+      conditions: prev.conditions.map((c, i) =>
+        i === index ? { ...c, ...updates } : c,
+      ),
     }));
   }
 
@@ -164,7 +183,9 @@ export default function RulesList() {
   function updateAction(index, updates) {
     setFormState((prev) => ({
       ...prev,
-      actions: prev.actions.map((a, i) => (i === index ? { ...a, ...updates } : a)),
+      actions: prev.actions.map((a, i) =>
+        i === index ? { ...a, ...updates } : a,
+      ),
     }));
   }
 
@@ -294,7 +315,8 @@ export default function RulesList() {
   // Format condition for display
   function formatCondition(condition) {
     const fieldLabel = t(`rules.field.${condition.field}`) || condition.field;
-    const operatorLabel = t(`rules.operator.${condition.operator}`) || condition.operator;
+    const operatorLabel =
+      t(`rules.operator.${condition.operator}`) || condition.operator;
     if (isValuelessOperator(condition.operator)) {
       return `${fieldLabel} ${operatorLabel}`;
     }
@@ -342,15 +364,23 @@ export default function RulesList() {
                 </h3>
                 {formState.conditions.length > 1 && (
                   <div className="flex items-center gap-2 whitespace-nowrap">
-                    <span className="text-xs text-slate-500 leading-5">{t("rules.logic")}:</span>
+                    <span className="text-xs text-slate-500 leading-5">
+                      {t("rules.logic")}:
+                    </span>
                     <CustomSelect
                       value={formState.logic}
-                      onChange={(val) => setFormState((prev) => ({ ...prev, logic: val }))}
+                      onChange={(val) =>
+                        setFormState((prev) => ({ ...prev, logic: val }))
+                      }
                       options={logicOptions}
                       className="w-24 h-9"
                     />
                     <span className="text-xs text-slate-500">
-                      ({formState.logic === "and" ? t("rules.all_conditions") : t("rules.any_condition")})
+                      (
+                      {formState.logic === "and"
+                        ? t("rules.all_conditions")
+                        : t("rules.any_condition")}
+                      )
                     </span>
                   </div>
                 )}
@@ -361,27 +391,39 @@ export default function RulesList() {
                   key={index}
                   className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
                 >
-                  <span className="text-xs font-semibold text-slate-500 uppercase w-8">{t("rules.if")}</span>
-                  
+                  <span className="text-xs font-semibold text-slate-500 uppercase w-8">
+                    {t("rules.if")}
+                  </span>
+
                   <CustomSelect
                     value={condition.field}
-                    onChange={(val) => updateCondition(index, { field: val, operator: "equals", value: "" })}
+                    onChange={(val) =>
+                      updateCondition(index, {
+                        field: val,
+                        operator: "equals",
+                        value: "",
+                      })
+                    }
                     options={availableFields}
                     className="w-32"
                   />
 
                   <CustomSelect
                     value={condition.operator}
-                    onChange={(val) => updateCondition(index, { operator: val })}
+                    onChange={(val) =>
+                      updateCondition(index, { operator: val })
+                    }
                     options={getOperatorsForField(condition.field)}
                     className="w-40"
                   />
 
-                  {!isValuelessOperator(condition.operator) && (
-                    getFieldType(condition.field) === "number" ? (
+                  {!isValuelessOperator(condition.operator) &&
+                    (getFieldType(condition.field) === "number" ? (
                       <NumberInput
                         value={condition.value}
-                        onChange={(val) => updateCondition(index, { value: val })}
+                        onChange={(val) =>
+                          updateCondition(index, { value: val })
+                        }
                         className="form-input w-32"
                         placeholder="0.00"
                       />
@@ -391,10 +433,11 @@ export default function RulesList() {
                         placeholder="Value"
                         className="form-input w-40"
                         value={condition.value}
-                        onChange={(e) => updateCondition(index, { value: e.target.value })}
+                        onChange={(e) =>
+                          updateCondition(index, { value: e.target.value })
+                        }
                       />
-                    )
-                  )}
+                    ))}
 
                   {formState.conditions.length > 1 && (
                     <button
@@ -409,7 +452,9 @@ export default function RulesList() {
 
                   {index < formState.conditions.length - 1 && (
                     <span className="ml-auto text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase">
-                      {formState.logic === "and" ? t("rules.logic.and") : t("rules.logic.or")}
+                      {formState.logic === "and"
+                        ? t("rules.logic.and")
+                        : t("rules.logic.or")}
                     </span>
                   )}
                 </div>
@@ -440,16 +485,22 @@ export default function RulesList() {
                     key={index}
                     className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
                   >
-                    <span className="text-xs font-semibold text-slate-500 uppercase w-8">{t("rules.then_set")}</span>
+                    <span className="text-xs font-semibold text-slate-500 uppercase w-8">
+                      {t("rules.then_set")}
+                    </span>
 
                     <CustomSelect
                       value={action.field}
-                      onChange={(val) => updateAction(index, { field: val, value: "" })}
+                      onChange={(val) =>
+                        updateAction(index, { field: val, value: "" })
+                      }
                       options={availableFields}
                       className="w-32"
                     />
 
-                    <span className="text-xs font-semibold text-slate-500 uppercase">{t("rules.to")}</span>
+                    <span className="text-xs font-semibold text-slate-500 uppercase">
+                      {t("rules.to")}
+                    </span>
 
                     {fieldType === "number" ? (
                       <NumberInput
@@ -464,7 +515,9 @@ export default function RulesList() {
                         placeholder="Value"
                         className="form-input w-40"
                         value={action.value}
-                        onChange={(e) => updateAction(index, { value: e.target.value })}
+                        onChange={(e) =>
+                          updateAction(index, { value: e.target.value })
+                        }
                       />
                     )}
 
@@ -523,12 +576,20 @@ export default function RulesList() {
               {rules.map((rule, index) => {
                 const isDragging = draggingId === rule.id;
                 // Handle both legacy and new format
-                const conditions = rule.conditions?.length > 0 
-                  ? rule.conditions 
-                  : [{ field: rule.match_field, operator: "equals", value: rule.match_pattern }];
-                const actions = rule.actions?.length > 0 
-                  ? rule.actions 
-                  : [{ field: rule.action_field, value: rule.action_value }];
+                const conditions =
+                  rule.conditions?.length > 0
+                    ? rule.conditions
+                    : [
+                        {
+                          field: rule.match_field,
+                          operator: "equals",
+                          value: rule.match_pattern,
+                        },
+                      ];
+                const actions =
+                  rule.actions?.length > 0
+                    ? rule.actions
+                    : [{ field: rule.action_field, value: rule.action_value }];
                 const logic = rule.logic || "and";
 
                 return (
@@ -552,13 +613,18 @@ export default function RulesList() {
                     <td className="px-6 py-4 text-slate-800 dark:text-slate-200">
                       <div className="flex flex-wrap gap-1">
                         {conditions.map((cond, i) => (
-                          <span key={i} className="inline-flex items-center gap-1">
+                          <span
+                            key={i}
+                            className="inline-flex items-center gap-1"
+                          >
                             <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs">
                               {formatCondition(cond)}
                             </span>
                             {i < conditions.length - 1 && (
                               <span className="text-xs font-semibold text-slate-500">
-                                {logic === "and" ? t("rules.logic.and") : t("rules.logic.or")}
+                                {logic === "and"
+                                  ? t("rules.logic.and")
+                                  : t("rules.logic.or")}
                               </span>
                             )}
                           </span>
