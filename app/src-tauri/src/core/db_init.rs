@@ -208,11 +208,19 @@ pub fn init_db(app_handle: &AppHandle) -> Result<(), String> {
             match_field TEXT NOT NULL,
             match_pattern TEXT NOT NULL,
             action_field TEXT NOT NULL,
-            action_value TEXT NOT NULL
+            action_value TEXT NOT NULL,
+            logic TEXT NOT NULL DEFAULT 'and',
+            conditions TEXT NOT NULL DEFAULT '[]',
+            actions TEXT NOT NULL DEFAULT '[]'
         )",
         [],
     )
     .map_err(|e| e.to_string())?;
+
+    // Migration: Add new columns to existing rules table if they don't exist
+    let _ = conn.execute("ALTER TABLE rules ADD COLUMN logic TEXT NOT NULL DEFAULT 'and'", []);
+    let _ = conn.execute("ALTER TABLE rules ADD COLUMN conditions TEXT NOT NULL DEFAULT '[]'", []);
+    let _ = conn.execute("ALTER TABLE rules ADD COLUMN actions TEXT NOT NULL DEFAULT '[]'", []);
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS custom_exchange_rates (
