@@ -284,10 +284,12 @@ CustomSelect.propTypes = {
   ).isRequired,
   placeholder: PropTypes.node,
   fullWidth: PropTypes.bool,
+  className: PropTypes.string,
 };
 
 CustomSelect.defaultProps = {
   value: undefined,
   placeholder: "",
   fullWidth: true,
+  className: "",
 };
