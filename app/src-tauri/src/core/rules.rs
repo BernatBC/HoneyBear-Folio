@@ -144,25 +144,36 @@ pub fn get_rules_db(db_path: &PathBuf) -> Result<Vec<Rule>, String> {
     Ok(rules)
 }
 
-pub fn create_rule_db(
-    db_path: &PathBuf,
-    priority: i32,
-    match_field: String,
-    match_pattern: String,
-    action_field: String,
-    action_value: String,
-    logic: String,
-    conditions: Vec<RuleCondition>,
-    actions: Vec<RuleAction>,
-) -> Result<i32, String> {
+#[derive(Clone, serde::Serialize, serde::Deserialize, Debug)]
+pub struct CreateRuleDbParams {
+    pub priority: i32,
+    pub match_field: String,
+    pub match_pattern: String,
+    pub action_field: String,
+    pub action_value: String,
+    pub logic: String,
+    pub conditions: Vec<RuleCondition>,
+    pub actions: Vec<RuleAction>,
+}
+
+pub fn create_rule_db(db_path: &PathBuf, params: CreateRuleDbParams) -> Result<i32, String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    let conditions_json = serde_json::to_string(&conditions).map_err(|e| e.to_string())?;
-    let actions_json = serde_json::to_string(&actions).map_err(|e| e.to_string())?;
+    let conditions_json = serde_json::to_string(&params.conditions).map_err(|e| e.to_string())?;
+    let actions_json = serde_json::to_string(&params.actions).map_err(|e| e.to_string())?;
 
     conn.execute(
         "INSERT INTO rules (priority, match_field, match_pattern, action_field, action_value, logic, conditions, actions) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-        params![priority, match_field, match_pattern, action_field, action_value, logic, conditions_json, actions_json],
+        params![
+            params.priority,
+            params.match_field,
+            params.match_pattern,
+            params.action_field,
+            params.action_value,
+            params.logic,
+            conditions_json,
+            actions_json
+        ],
     )
     .map_err(|e| e.to_string())?;
 
@@ -170,26 +181,38 @@ pub fn create_rule_db(
     Ok(id)
 }
 
-pub fn update_rule_db(
-    db_path: &PathBuf,
-    id: i32,
-    priority: i32,
-    match_field: String,
-    match_pattern: String,
-    action_field: String,
-    action_value: String,
-    logic: String,
-    conditions: Vec<RuleCondition>,
-    actions: Vec<RuleAction>,
-) -> Result<(), String> {
+#[derive(Clone, serde::Serialize, serde::Deserialize, Debug)]
+pub struct UpdateRuleDbParams {
+    pub id: i32,
+    pub priority: i32,
+    pub match_field: String,
+    pub match_pattern: String,
+    pub action_field: String,
+    pub action_value: String,
+    pub logic: String,
+    pub conditions: Vec<RuleCondition>,
+    pub actions: Vec<RuleAction>,
+}
+
+pub fn update_rule_db(db_path: &PathBuf, params: UpdateRuleDbParams) -> Result<(), String> {
     let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
-    let conditions_json = serde_json::to_string(&conditions).map_err(|e| e.to_string())?;
-    let actions_json = serde_json::to_string(&actions).map_err(|e| e.to_string())?;
+    let conditions_json = serde_json::to_string(&params.conditions).map_err(|e| e.to_string())?;
+    let actions_json = serde_json::to_string(&params.actions).map_err(|e| e.to_string())?;
 
     conn.execute(
         "UPDATE rules SET priority = ?1, match_field = ?2, match_pattern = ?3, action_field = ?4, action_value = ?5, logic = ?6, conditions = ?7, actions = ?8 WHERE id = ?9",
-        params![priority, match_field, match_pattern, action_field, action_value, logic, conditions_json, actions_json, id],
+        params![
+            params.priority,
+            params.match_field,
+            params.match_pattern,
+            params.action_field,
+            params.action_value,
+            params.logic,
+            conditions_json,
+            actions_json,
+            params.id
+        ],
     )
     .map_err(|e| e.to_string())?;
 
@@ -231,58 +254,62 @@ pub fn get_rules(app_handle: AppHandle) -> Result<Vec<Rule>, String> {
     get_rules_db(&db_path)
 }
 
-#[tauri::command]
-pub fn create_rule(
-    app_handle: AppHandle,
-    priority: i32,
-    match_field: String,
-    match_pattern: String,
-    action_field: String,
-    action_value: String,
-    logic: Option<String>,
-    conditions: Option<Vec<RuleCondition>>,
-    actions: Option<Vec<RuleAction>>,
-) -> Result<i32, String> {
-    let db_path = crate::db_init::get_db_path(&app_handle)?;
-    create_rule_db(
-        &db_path,
-        priority,
-        match_field,
-        match_pattern,
-        action_field,
-        action_value,
-        logic.unwrap_or_else(|| "and".to_string()),
-        conditions.unwrap_or_default(),
-        actions.unwrap_or_default(),
-    )
+#[derive(serde::Deserialize)]
+pub struct CreateRuleArgs {
+    pub priority: i32,
+    pub match_field: String,
+    pub match_pattern: String,
+    pub action_field: String,
+    pub action_value: String,
+    pub logic: Option<String>,
+    pub conditions: Option<Vec<RuleCondition>>,
+    pub actions: Option<Vec<RuleAction>>,
 }
 
 #[tauri::command]
-pub fn update_rule(
-    app_handle: AppHandle,
-    id: i32,
-    priority: i32,
-    match_field: String,
-    match_pattern: String,
-    action_field: String,
-    action_value: String,
-    logic: Option<String>,
-    conditions: Option<Vec<RuleCondition>>,
-    actions: Option<Vec<RuleAction>>,
-) -> Result<(), String> {
+pub fn create_rule(app_handle: AppHandle, args: CreateRuleArgs) -> Result<i32, String> {
     let db_path = crate::db_init::get_db_path(&app_handle)?;
-    update_rule_db(
-        &db_path,
-        id,
-        priority,
-        match_field,
-        match_pattern,
-        action_field,
-        action_value,
-        logic.unwrap_or_else(|| "and".to_string()),
-        conditions.unwrap_or_default(),
-        actions.unwrap_or_default(),
-    )
+    let params = CreateRuleDbParams {
+        priority: args.priority,
+        match_field: args.match_field,
+        match_pattern: args.match_pattern,
+        action_field: args.action_field,
+        action_value: args.action_value,
+        logic: args.logic.unwrap_or_else(|| "and".to_string()),
+        conditions: args.conditions.unwrap_or_default(),
+        actions: args.actions.unwrap_or_default(),
+    };
+    create_rule_db(&db_path, params)
+}
+
+#[derive(serde::Deserialize)]
+pub struct UpdateRuleArgs {
+    pub id: i32,
+    pub priority: i32,
+    pub match_field: String,
+    pub match_pattern: String,
+    pub action_field: String,
+    pub action_value: String,
+    pub logic: Option<String>,
+    pub conditions: Option<Vec<RuleCondition>>,
+    pub actions: Option<Vec<RuleAction>>,
+}
+
+#[tauri::command]
+pub fn update_rule(app_handle: AppHandle, args: UpdateRuleArgs) -> Result<(), String> {
+    let db_path = crate::db_init::get_db_path(&app_handle)?;
+    let params = UpdateRuleDbParams {
+        id: args.id,
+        priority: args.priority,
+        match_field: args.match_field,
+        match_pattern: args.match_pattern,
+        action_field: args.action_field,
+        action_value: args.action_value,
+        logic: args.logic.unwrap_or_else(|| "and".to_string()),
+        conditions: args.conditions.unwrap_or_default(),
+        actions: args.actions.unwrap_or_default(),
+    };
+    update_rule_db(&db_path, params)
 }
 
 #[tauri::command]

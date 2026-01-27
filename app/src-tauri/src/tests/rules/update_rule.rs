@@ -7,28 +7,32 @@ fn test_update_rule() {
 
     let id = create_rule_db(
         &db_path,
-        10,
-        "payee".to_string(),
-        "Starbucks".to_string(),
-        "category".to_string(),
-        "Coffee".to_string(),
-        "and".to_string(),
-        vec![],
-        vec![],
+        crate::core::rules::CreateRuleDbParams {
+            priority: 10,
+            match_field: "payee".to_string(),
+            match_pattern: "Starbucks".to_string(),
+            action_field: "category".to_string(),
+            action_value: "Coffee".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![],
+            actions: vec![],
+        },
     )
     .unwrap();
 
     update_rule_db(
         &db_path,
-        id,
-        20,
-        "notes".to_string(),
-        "My Note".to_string(),
-        "amount".to_string(),
-        "50.00".to_string(),
-        "and".to_string(),
-        vec![],
-        vec![],
+        crate::core::rules::UpdateRuleDbParams {
+            id,
+            priority: 20,
+            match_field: "notes".to_string(),
+            match_pattern: "My Note".to_string(),
+            action_field: "amount".to_string(),
+            action_value: "50.00".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![],
+            actions: vec![],
+        },
     )
     .expect("failed to update rule");
 

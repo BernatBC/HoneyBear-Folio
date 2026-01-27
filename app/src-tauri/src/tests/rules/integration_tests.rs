@@ -32,11 +32,16 @@ fn test_rule_application_during_transaction_creation() {
     ];
     create_rule_db(
         &db_path,
-        10,
-        "".to_string(), "".to_string(), "".to_string(), "".to_string(),
-        "and".to_string(),
-        conditions,
-        actions,
+        crate::core::rules::CreateRuleDbParams {
+            priority: 10,
+            match_field: "".to_string(),
+            match_pattern: "".to_string(),
+            action_field: "".to_string(),
+            action_value: "".to_string(),
+            logic: "and".to_string(),
+            conditions,
+            actions,
+        },
     ).unwrap();
 
     // 3. Create a transaction that matches the rule
@@ -74,21 +79,31 @@ fn test_rule_precedence_in_db() {
     // Rule 1: Lower priority (10)
     create_rule_db(
         &db_path,
-        10,
-        "".to_string(), "".to_string(), "".to_string(), "".to_string(),
-        "and".to_string(),
-        vec![RuleCondition { field: "payee".to_string(), operator: "contains".to_string(), value: "Shop".to_string(), negated: false }],
-        vec![RuleAction { field: "category".to_string(), value: "Shopping".to_string() }],
+        crate::core::rules::CreateRuleDbParams {
+            priority: 10,
+            match_field: "".to_string(),
+            match_pattern: "".to_string(),
+            action_field: "".to_string(),
+            action_value: "".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![RuleCondition { field: "payee".to_string(), operator: "contains".to_string(), value: "Shop".to_string(), negated: false }],
+            actions: vec![RuleAction { field: "category".to_string(), value: "Shopping".to_string() }],
+        },
     ).unwrap();
 
     // Rule 2: Higher priority (20)
     create_rule_db(
         &db_path,
-        20,
-        "".to_string(), "".to_string(), "".to_string(), "".to_string(),
-        "and".to_string(),
-        vec![RuleCondition { field: "payee".to_string(), operator: "contains".to_string(), value: "Shop".to_string(), negated: false }],
-        vec![RuleAction { field: "category".to_string(), value: "Supermarket".to_string() }],
+        crate::core::rules::CreateRuleDbParams {
+            priority: 20,
+            match_field: "".to_string(),
+            match_pattern: "".to_string(),
+            action_field: "".to_string(),
+            action_value: "".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![RuleCondition { field: "payee".to_string(), operator: "contains".to_string(), value: "Shop".to_string(), negated: false }],
+            actions: vec![RuleAction { field: "category".to_string(), value: "Supermarket".to_string() }],
+        },
     ).unwrap();
 
     // 3. Create transaction

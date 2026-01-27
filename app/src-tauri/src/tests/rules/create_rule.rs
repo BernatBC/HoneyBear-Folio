@@ -8,14 +8,16 @@ fn test_create_and_get_rules() {
     // Create a rule
     let id = create_rule_db(
         &db_path,
-        10,
-        "payee".to_string(),
-        "Starbucks".to_string(),
-        "category".to_string(),
-        "Coffee".to_string(),
-        "and".to_string(),
-        vec![],
-        vec![],
+        crate::core::rules::CreateRuleDbParams {
+            priority: 10,
+            match_field: "payee".to_string(),
+            match_pattern: "Starbucks".to_string(),
+            action_field: "category".to_string(),
+            action_value: "Coffee".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![],
+            actions: vec![],
+        },
     )
     .expect("failed to create rule");
 
@@ -68,14 +70,16 @@ fn test_create_complex_rule() {
 
     let id = create_rule_db(
         &db_path,
-        20,
-        "".to_string(), // Legacy fields can be empty
-        "".to_string(),
-        "".to_string(),
-        "".to_string(),
-        "and".to_string(),
-        conditions,
-        actions,
+        crate::core::rules::CreateRuleDbParams {
+            priority: 20,
+            match_field: "".to_string(), // Legacy fields can be empty
+            match_pattern: "".to_string(),
+            action_field: "".to_string(),
+            action_value: "".to_string(),
+            logic: "and".to_string(),
+            conditions,
+            actions,
+        },
     )
     .expect("failed to create complex rule");
 
