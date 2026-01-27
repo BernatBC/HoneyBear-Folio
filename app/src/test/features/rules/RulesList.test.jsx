@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import RulesList from "../../../features/rules/RulesList";
 import { invoke } from "@tauri-apps/api/core";
@@ -86,14 +86,19 @@ describe("RulesList", () => {
     await waitFor(() => expect(invoke).toHaveBeenCalledWith("get_rules"));
 
     // Fill new rule form
-    const patternInput = screen.getByPlaceholderText("e.g. Starbucks");
+    const conditionGroup = screen.getAllByText("rules.if")[0].closest("div");
+    const patternInput = within(conditionGroup).getByPlaceholderText("Value");
     fireEvent.change(patternInput, { target: { value: "Netflix" } });
 
-    const valueInput = screen.getByPlaceholderText("e.g. Coffee");
+    const actionGroup = screen.getAllByText("rules.then_set")[0].closest("div");
+    const valueInput = within(actionGroup).getByPlaceholderText("Value");
     fireEvent.change(valueInput, { target: { value: "Entertainment" } });
 
-    // Find submit/add button
-    const addButton = screen.getByText("Add").closest("button");
+    // Find submit/add button (disambiguate from other 'add' buttons)
+    const addButton = screen
+      .getAllByRole("button", { name: /rules.add/ })
+      .find((b) => b.getAttribute("type") === "submit");
+    expect(addButton).toBeTruthy();
     fireEvent.click(addButton);
 
     await waitFor(() => {
