@@ -9,29 +9,44 @@ fn test_reorder_rules() {
     // Initial priorities don't matter much as we will override them
     let id1 = create_rule_db(
         &db_path,
-        0,
-        "f".to_string(),
-        "p".to_string(),
-        "a".to_string(),
-        "v".to_string(),
+        crate::core::rules::CreateRuleDbParams {
+            priority: 0,
+            match_field: "f".to_string(),
+            match_pattern: "p".to_string(),
+            action_field: "a".to_string(),
+            action_value: "v".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![],
+            actions: vec![],
+        },
     )
     .unwrap();
     let id2 = create_rule_db(
         &db_path,
-        0,
-        "f".to_string(),
-        "p".to_string(),
-        "a".to_string(),
-        "v".to_string(),
+        crate::core::rules::CreateRuleDbParams {
+            priority: 0,
+            match_field: "f".to_string(),
+            match_pattern: "p".to_string(),
+            action_field: "a".to_string(),
+            action_value: "v".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![],
+            actions: vec![],
+        },
     )
     .unwrap();
     let id3 = create_rule_db(
         &db_path,
-        0,
-        "f".to_string(),
-        "p".to_string(),
-        "a".to_string(),
-        "v".to_string(),
+        crate::core::rules::CreateRuleDbParams {
+            priority: 0,
+            match_field: "f".to_string(),
+            match_pattern: "p".to_string(),
+            action_field: "a".to_string(),
+            action_value: "v".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![],
+            actions: vec![],
+        },
     )
     .unwrap();
 

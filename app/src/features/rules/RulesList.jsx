@@ -1,23 +1,29 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Plus, Trash2, Edit, Save, GripVertical } from "lucide-react";
+import { Plus, Trash2, Edit, Save, GripVertical, X } from "lucide-react";
 import { useConfirm } from "../../contexts/confirm";
 import { t } from "../../i18n/i18n";
 import CustomSelect from "../../components/ui/CustomSelect";
 import NumberInput from "../../components/ui/NumberInput";
-import "../../styles/Dashboard.css"; // Reuse dashboard styles for cards
+import "../../styles/Dashboard.css";
+
+const DEFAULT_CONDITION = {
+  field: "payee",
+  operator: "equals",
+  value: "",
+  negated: false,
+};
+const DEFAULT_ACTION = { field: "category", value: "" };
 
 export default function RulesList() {
   const [rules, setRules] = useState([]);
-  // Form State
   const [isEditing, setIsEditing] = useState(false);
   const [formState, setFormState] = useState({
     id: null,
     priority: 0,
-    match_field: "payee",
-    match_pattern: "",
-    action_field: "category",
-    action_value: "",
+    logic: "and",
+    conditions: [{ ...DEFAULT_CONDITION }],
+    actions: [{ ...DEFAULT_ACTION }],
   });
   const [draggingId, setDraggingId] = useState(null);
 
@@ -51,16 +57,39 @@ export default function RulesList() {
     setFormState({
       id: null,
       priority: 0,
-      match_field: "payee",
-      match_pattern: "",
-      action_field: "category",
-      action_value: "",
+      logic: "and",
+      conditions: [{ ...DEFAULT_CONDITION }],
+      actions: [{ ...DEFAULT_ACTION }],
     });
     setIsEditing(false);
   }
 
   function handleEdit(rule) {
-    setFormState({ ...rule });
+    // Convert legacy rule format to new format if needed
+    const conditions =
+      rule.conditions?.length > 0
+        ? rule.conditions
+        : [
+            {
+              field: rule.match_field,
+              operator: "equals",
+              value: rule.match_pattern,
+              negated: false,
+            },
+          ];
+
+    const actions =
+      rule.actions?.length > 0
+        ? rule.actions
+        : [{ field: rule.action_field, value: rule.action_value }];
+
+    setFormState({
+      id: rule.id,
+      priority: rule.priority,
+      logic: rule.logic || "and",
+      conditions,
+      actions,
+    });
     setIsEditing(true);
   }
 
@@ -68,12 +97,11 @@ export default function RulesList() {
     if (await confirm(t("rules.delete_confirm"), { kind: "warning" })) {
       try {
         await invoke("delete_rule", { id });
-        // Optimistic update
         setRules((current) => current.filter((r) => r.id !== id));
         if (formState.id === id) resetForm();
       } catch (e) {
         console.error("Failed to delete rule:", e);
-        fetchRules(); // Revert on failure
+        fetchRules();
       }
     }
   }
@@ -81,11 +109,21 @@ export default function RulesList() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
+      // For backward compatibility, use first condition/action for legacy fields
+      const firstCondition = formState.conditions[0] || DEFAULT_CONDITION;
+      const firstAction = formState.actions[0] || DEFAULT_ACTION;
+
       const payload = {
-        matchField: formState.match_field,
-        matchPattern: formState.match_pattern,
-        actionField: formState.action_field,
-        actionValue: String(formState.action_value), // Ensure string for DB
+        matchField: firstCondition.field,
+        matchPattern: firstCondition.value,
+        actionField: firstAction.field,
+        actionValue: String(firstAction.value),
+        logic: formState.logic,
+        conditions: formState.conditions,
+        actions: formState.actions.map((a) => ({
+          ...a,
+          value: String(a.value),
+        })),
       };
 
       if (formState.id) {
@@ -109,17 +147,63 @@ export default function RulesList() {
     }
   }
 
-  // DnD Handlers - Using refs for Windows WebView2 compatibility
+  // Condition management
+  function addCondition() {
+    setFormState((prev) => ({
+      ...prev,
+      conditions: [...prev.conditions, { ...DEFAULT_CONDITION }],
+    }));
+  }
+
+  function updateCondition(index, updates) {
+    setFormState((prev) => ({
+      ...prev,
+      conditions: prev.conditions.map((c, i) =>
+        i === index ? { ...c, ...updates } : c,
+      ),
+    }));
+  }
+
+  function removeCondition(index) {
+    if (formState.conditions.length <= 1) return;
+    setFormState((prev) => ({
+      ...prev,
+      conditions: prev.conditions.filter((_, i) => i !== index),
+    }));
+  }
+
+  // Action management
+  function addAction() {
+    setFormState((prev) => ({
+      ...prev,
+      actions: [...prev.actions, { ...DEFAULT_ACTION }],
+    }));
+  }
+
+  function updateAction(index, updates) {
+    setFormState((prev) => ({
+      ...prev,
+      actions: prev.actions.map((a, i) =>
+        i === index ? { ...a, ...updates } : a,
+      ),
+    }));
+  }
+
+  function removeAction(index) {
+    if (formState.actions.length <= 1) return;
+    setFormState((prev) => ({
+      ...prev,
+      actions: prev.actions.filter((_, i) => i !== index),
+    }));
+  }
+
+  // DnD Handlers
   const lastReorder = useRef(0);
-  // Use ref to store dragging ID - more reliable than state on Windows WebView2
   const draggingIdRef = useRef(null);
 
   const handleDragStart = (e, id) => {
-    // Store in both state (for UI) and ref (for reliable access during drag)
     setDraggingId(id);
     draggingIdRef.current = id;
-
-    // Set data transfer - required for drag to work
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", String(id));
     e.dataTransfer.setData("application/x-rule-id", String(id));
@@ -128,7 +212,6 @@ export default function RulesList() {
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Setting dropEffect is critical for Windows to show correct cursor
     e.dataTransfer.dropEffect = "move";
   };
 
@@ -137,11 +220,9 @@ export default function RulesList() {
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
 
-    // Use ref for reliable access on Windows
     const currentDraggingId = draggingIdRef.current;
     if (!currentDraggingId) return;
 
-    // Throttle reorder operations using event timestamp (avoids impure Date.now call during render)
     const now = e.timeStamp;
     if (now - lastReorder.current < 50) return;
 
@@ -155,11 +236,10 @@ export default function RulesList() {
     newItems.splice(dragIndex, 1);
     newItems.splice(targetIndex, 0, item);
 
-    // Update priorities locally
     const total = newItems.length;
     const updatedList = newItems.map((rule, idx) => ({
       ...rule,
-      priority: total - idx, // Re-assign priorities based on new visual order
+      priority: total - idx,
     }));
 
     setRules(updatedList);
@@ -173,7 +253,6 @@ export default function RulesList() {
   const handleDragEnd = async () => {
     setDraggingId(null);
     draggingIdRef.current = null;
-    // Persist new order
     try {
       await invoke("update_rules_order", { ruleIds: rules.map((r) => r.id) });
     } catch (err) {
@@ -194,9 +273,61 @@ export default function RulesList() {
     { value: "fee", label: t("rules.field.fee"), type: "number" },
   ];
 
-  const currentActionField =
-    availableFields.find((f) => f.value === formState.action_field) ||
-    availableFields[0];
+  const textOperators = [
+    { value: "equals", label: t("rules.operator.equals") },
+    { value: "not_equals", label: t("rules.operator.not_equals") },
+    { value: "contains", label: t("rules.operator.contains") },
+    { value: "not_contains", label: t("rules.operator.not_contains") },
+    { value: "starts_with", label: t("rules.operator.starts_with") },
+    { value: "ends_with", label: t("rules.operator.ends_with") },
+    { value: "is_empty", label: t("rules.operator.is_empty") },
+    { value: "is_not_empty", label: t("rules.operator.is_not_empty") },
+  ];
+
+  const numberOperators = [
+    { value: "equals", label: t("rules.operator.equals") },
+    { value: "not_equals", label: t("rules.operator.not_equals") },
+    { value: "greater_than", label: t("rules.operator.greater_than") },
+    { value: "less_than", label: t("rules.operator.less_than") },
+    { value: "is_empty", label: t("rules.operator.is_empty") },
+    { value: "is_not_empty", label: t("rules.operator.is_not_empty") },
+  ];
+
+  const logicOptions = [
+    { value: "and", label: t("rules.logic.and") },
+    { value: "or", label: t("rules.logic.or") },
+  ];
+
+  function getOperatorsForField(fieldValue) {
+    const field = availableFields.find((f) => f.value === fieldValue);
+    return field?.type === "number" ? numberOperators : textOperators;
+  }
+
+  function getFieldType(fieldValue) {
+    const field = availableFields.find((f) => f.value === fieldValue);
+    return field?.type || "text";
+  }
+
+  function isValuelessOperator(operator) {
+    return operator === "is_empty" || operator === "is_not_empty";
+  }
+
+  // Format condition for display
+  function formatCondition(condition) {
+    const fieldLabel = t(`rules.field.${condition.field}`) || condition.field;
+    const operatorLabel =
+      t(`rules.operator.${condition.operator}`) || condition.operator;
+    if (isValuelessOperator(condition.operator)) {
+      return `${fieldLabel} ${operatorLabel}`;
+    }
+    return `${fieldLabel} ${operatorLabel} "${condition.value}"`;
+  }
+
+  // Format action for display
+  function formatAction(action) {
+    const fieldLabel = t(`rules.field.${action.field}`) || action.field;
+    return `${fieldLabel} = "${action.value}"`;
+  }
 
   return (
     <div className="page-container rules-container animate-in fade-in duration-500">
@@ -207,118 +338,233 @@ export default function RulesList() {
         </div>
       </div>
 
-      {/* Inline Form */}
+      {/* Form Card */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-            {isEditing ? "Edit Rule" : t("rules.add")}
+            {isEditing ? t("rules.edit") : t("rules.add")}
           </h2>
           {isEditing && (
             <button
               onClick={resetForm}
               className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
             >
-              Cancel Edit
+              {t("rules.cancel_edit")}
             </button>
           )}
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col md:flex-row items-end gap-4"
-        >
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
-            {/* IF */}
-            <div className="flex flex-col">
-              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                {t("rules.if")}
-              </label>
-              <CustomSelect
-                value={formState.match_field}
-                onChange={(val) =>
-                  setFormState({ ...formState, match_field: val })
-                }
-                options={availableFields}
-              />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Conditions Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 min-h-[40px]">
+                <h3 className="text-sm leading-6 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                  {t("rules.conditions")}
+                </h3>
+                {formState.conditions.length > 1 && (
+                  <div className="flex items-center gap-2 whitespace-nowrap">
+                    <span className="text-xs text-slate-500 leading-5">
+                      {t("rules.logic")}:
+                    </span>
+                    <CustomSelect
+                      value={formState.logic}
+                      onChange={(val) =>
+                        setFormState((prev) => ({ ...prev, logic: val }))
+                      }
+                      options={logicOptions}
+                      className="w-24 h-9"
+                    />
+                    <span className="text-xs text-slate-500">
+                      (
+                      {formState.logic === "and"
+                        ? t("rules.all_conditions")
+                        : t("rules.any_condition")}
+                      )
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {formState.conditions.map((condition, index) => (
+                <div
+                  key={index}
+                  className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
+                >
+                  <span className="text-xs font-semibold text-slate-500 uppercase w-8">
+                    {t("rules.if")}
+                  </span>
+
+                  <CustomSelect
+                    value={condition.field}
+                    onChange={(val) =>
+                      updateCondition(index, {
+                        field: val,
+                        operator: "equals",
+                        value: "",
+                      })
+                    }
+                    options={availableFields}
+                    className="w-32"
+                  />
+
+                  <CustomSelect
+                    value={condition.operator}
+                    onChange={(val) =>
+                      updateCondition(index, { operator: val })
+                    }
+                    options={getOperatorsForField(condition.field)}
+                    className="w-40"
+                  />
+
+                  {!isValuelessOperator(condition.operator) &&
+                    (getFieldType(condition.field) === "number" ? (
+                      <NumberInput
+                        value={condition.value}
+                        onChange={(val) =>
+                          updateCondition(index, { value: val })
+                        }
+                        className="form-input w-32"
+                        placeholder="0.00"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="Value"
+                        className="form-input w-40"
+                        value={condition.value}
+                        onChange={(e) =>
+                          updateCondition(index, { value: e.target.value })
+                        }
+                      />
+                    ))}
+
+                  {formState.conditions.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeCondition(index)}
+                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                      title={t("rules.remove_condition")}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+
+                  {index < formState.conditions.length - 1 && (
+                    <span className="ml-auto text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase">
+                      {formState.logic === "and"
+                        ? t("rules.logic.and")
+                        : t("rules.logic.or")}
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addCondition}
+                className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+              >
+                <Plus size={16} />
+                {t("rules.add_condition")}
+              </button>
             </div>
 
-            {/* EQUALS */}
-            <div className="flex flex-col">
-              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                {t("rules.equals")}
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Starbucks"
-                className="form-input"
-                value={formState.match_pattern}
-                onChange={(e) =>
-                  setFormState({ ...formState, match_pattern: e.target.value })
-                }
-              />
-            </div>
+            {/* Actions Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 min-h-[40px]">
+                <h3 className="text-sm leading-6 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                  {t("rules.actions")}
+                </h3>
+              </div>
 
-            {/* THEN SET */}
-            <div className="flex flex-col">
-              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                {t("rules.then_set")}
-              </label>
-              <CustomSelect
-                value={formState.action_field}
-                onChange={(val) =>
-                  setFormState({ ...formState, action_field: val })
-                }
-                options={availableFields}
-              />
-            </div>
+              {formState.actions.map((action, index) => {
+                const fieldType = getFieldType(action.field);
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
+                  >
+                    <span className="text-xs font-semibold text-slate-500 uppercase w-8">
+                      {t("rules.then_set")}
+                    </span>
 
-            {/* TO */}
-            <div className="flex flex-col">
-              <label className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                {t("rules.to")}
-              </label>
-              {currentActionField.type === "number" ? (
-                <NumberInput
-                  value={formState.action_value}
-                  onChange={(val) =>
-                    setFormState({ ...formState, action_value: val })
-                  }
-                  className="form-input"
-                  placeholder="0.00"
-                />
-              ) : (
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Coffee"
-                  className="form-input"
-                  value={formState.action_value}
-                  onChange={(e) =>
-                    setFormState({ ...formState, action_value: e.target.value })
-                  }
-                />
-              )}
+                    <CustomSelect
+                      value={action.field}
+                      onChange={(val) =>
+                        updateAction(index, { field: val, value: "" })
+                      }
+                      options={availableFields}
+                      className="w-32"
+                    />
+
+                    <span className="text-xs font-semibold text-slate-500 uppercase">
+                      {t("rules.to")}
+                    </span>
+
+                    {fieldType === "number" ? (
+                      <NumberInput
+                        value={action.value}
+                        onChange={(val) => updateAction(index, { value: val })}
+                        className="form-input w-40"
+                        placeholder="0.00"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="Value"
+                        className="form-input w-40"
+                        value={action.value}
+                        onChange={(e) =>
+                          updateAction(index, { value: e.target.value })
+                        }
+                      />
+                    )}
+
+                    {formState.actions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeAction(index)}
+                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        title={t("rules.remove_action")}
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={addAction}
+                className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+              >
+                <Plus size={16} />
+                {t("rules.add_action")}
+              </button>
             </div>
           </div>
 
-          <button type="submit" className="btn-primary h-10">
-            {isEditing ? <Save size={18} /> : <Plus size={18} />}
-            {isEditing ? "Update" : "Add"}
-          </button>
+          {/* Submit Button */}
+          <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-700">
+            <button type="submit" className="btn-primary">
+              {isEditing ? <Save size={18} /> : <Plus size={18} />}
+              {isEditing ? t("rules.update") : t("rules.add")}
+            </button>
+          </div>
         </form>
       </div>
 
+      {/* Rules Table */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-medium">
               <tr>
                 <th className="w-10 px-4 py-4"></th>
-                <th className="px-6 py-4">{t("rules.if")}</th>
-                <th className="px-6 py-4">{t("rules.equals")}</th>
-                <th className="px-6 py-4">{t("rules.then_set")}</th>
-                <th className="px-6 py-4">{t("rules.to")}</th>
+                <th className="px-6 py-4">{t("rules.conditions")}</th>
+                <th className="px-6 py-4">{t("rules.actions")}</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -329,6 +575,23 @@ export default function RulesList() {
             >
               {rules.map((rule, index) => {
                 const isDragging = draggingId === rule.id;
+                // Handle both legacy and new format
+                const conditions =
+                  rule.conditions?.length > 0
+                    ? rule.conditions
+                    : [
+                        {
+                          field: rule.match_field,
+                          operator: "equals",
+                          value: rule.match_pattern,
+                        },
+                      ];
+                const actions =
+                  rule.actions?.length > 0
+                    ? rule.actions
+                    : [{ field: rule.action_field, value: rule.action_value }];
+                const logic = rule.logic || "and";
+
                 return (
                   <tr
                     key={rule.id}
@@ -347,18 +610,38 @@ export default function RulesList() {
                         className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"
                       />
                     </td>
-                    <td className="px-6 py-4 capitalize text-slate-800 dark:text-slate-200">
-                      {t(`rules.field.${rule.match_field}`) || rule.match_field}
+                    <td className="px-6 py-4 text-slate-800 dark:text-slate-200">
+                      <div className="flex flex-wrap gap-1">
+                        {conditions.map((cond, i) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center gap-1"
+                          >
+                            <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs">
+                              {formatCondition(cond)}
+                            </span>
+                            {i < conditions.length - 1 && (
+                              <span className="text-xs font-semibold text-slate-500">
+                                {logic === "and"
+                                  ? t("rules.logic.and")
+                                  : t("rules.logic.or")}
+                              </span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-800 dark:text-slate-200 font-medium">
-                      &quot;{rule.match_pattern}&quot;
-                    </td>
-                    <td className="px-6 py-4 capitalize text-slate-800 dark:text-slate-200">
-                      {t(`rules.field.${rule.action_field}`) ||
-                        rule.action_field}
-                    </td>
-                    <td className="px-6 py-4 text-slate-800 dark:text-slate-200 font-medium">
-                      &quot;{rule.action_value}&quot;
+                    <td className="px-6 py-4 text-slate-800 dark:text-slate-200">
+                      <div className="flex flex-wrap gap-1">
+                        {actions.map((action, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs"
+                          >
+                            {formatAction(action)}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -382,10 +665,10 @@ export default function RulesList() {
               {rules.length === 0 && (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="4"
                     className="px-6 py-12 text-center text-slate-400"
                   >
-                    No rules defined yet. Use the form above to create one.
+                    {t("rules.empty")}
                   </td>
                 </tr>
               )}

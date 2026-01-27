@@ -99,14 +99,39 @@ pub struct Transaction {
     pub currency: Option<String>,
 }
 
+/// A single condition within a rule
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct RuleCondition {
+    pub field: String,
+    pub operator: String, // equals, contains, starts_with, ends_with, greater_than, less_than
+    pub value: String,
+    #[serde(default)]
+    pub negated: bool, // NOT operator
+}
+
+/// A single action within a rule
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct RuleAction {
+    pub field: String,
+    pub value: String,
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Rule {
     pub id: i32,
     pub priority: i32,
+    // Legacy fields (kept for backward compatibility during migration)
     pub match_field: String,
     pub match_pattern: String,
     pub action_field: String,
     pub action_value: String,
+    // New fields for compound conditions and multiple actions
+    #[serde(default)]
+    pub logic: String, // "and" or "or" - how conditions are combined
+    #[serde(default)]
+    pub conditions: Vec<RuleCondition>,
+    #[serde(default)]
+    pub actions: Vec<RuleAction>,
 }
 
 #[derive(Debug)]

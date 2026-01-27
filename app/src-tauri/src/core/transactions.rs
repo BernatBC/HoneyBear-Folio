@@ -25,13 +25,35 @@ pub fn create_transaction_db(
 ) -> Result<Transaction, String> {
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
+    // Apply rules before starting transaction
+    let rules = crate::rules::get_rules_db(db_path).unwrap_or_default();
+    let mut temp_tx = Transaction {
+        id: 0,
+        account_id: args.account_id,
+        date: args.date.clone(),
+        payee: args.payee.clone(),
+        notes: args.notes.clone(),
+        category: args.category.clone(),
+        amount: args.amount,
+        ticker: args.ticker.clone(),
+        shares: args.shares,
+        price_per_share: args.price_per_share,
+        fee: args.fee,
+        currency: args.currency.clone(),
+    };
+    crate::rules::apply_rules_to_transaction(&mut temp_tx, &rules);
+
+    let final_payee = temp_tx.payee;
+    let final_notes = temp_tx.notes;
+    let final_category_from_rules = temp_tx.category;
+
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
     // Check if payee matches another account for Transfer detection
     let target_account_info: Option<i32> = tx
         .query_row(
             "SELECT id FROM accounts WHERE name = ?1 AND id != ?2",
-            params![args.payee, args.account_id],
+            params![final_payee, args.account_id],
             |row| row.get(0),
         )
         .optional()
@@ -40,12 +62,12 @@ pub fn create_transaction_db(
     let final_category = if target_account_info.is_some() {
         Some("Transfer".to_string())
     } else {
-        args.category.clone()
+        final_category_from_rules
     };
 
     tx.execute(
         "INSERT INTO transactions (account_id, date, payee, notes, category, amount, ticker, shares, price_per_share, fee, currency) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
-        params![args.account_id, args.date, args.payee, args.notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee, args.currency],
+        params![args.account_id, args.date, final_payee, final_notes, final_category, args.amount, args.ticker, args.shares, args.price_per_share, args.fee, args.currency],
     ).map_err(|e| e.to_string())?;
 
     let id = tx.last_insert_rowid() as i32;
@@ -99,8 +121,8 @@ pub fn create_transaction_db(
         id,
         account_id: args.account_id,
         date: args.date,
-        payee: args.payee,
-        notes: args.notes,
+        payee: final_payee,
+        notes: final_notes,
         category: final_category,
         amount: args.amount,
         ticker: args.ticker,
@@ -238,13 +260,45 @@ pub fn create_investment_transaction_db(
 
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
 
+    // Apply rules
+    let rules = crate::rules::get_rules_db(db_path).unwrap_or_default();
+    let is_buy_local = is_buy; // avoid move issues
+    let mut temp_tx = Transaction {
+        id: 0,
+        account_id,
+        date: date.clone(),
+        payee: if is_buy_local {
+            "Buy".to_string()
+        } else {
+            "Sell".to_string()
+        },
+        notes: Some(format!(
+            "{} {} shares of {}",
+            if is_buy_local { "Bought" } else { "Sold" },
+            shares,
+            ticker
+        )),
+        category: Some("Investment".to_string()),
+        amount: if is_buy_local {
+            -(shares * price_per_share + fee)
+        } else {
+            shares * price_per_share - fee
+        },
+        ticker: Some(ticker.clone()),
+        shares: Some(if is_buy_local { shares } else { -shares }),
+        price_per_share: Some(price_per_share),
+        fee: Some(fee),
+        currency: currency.clone(),
+    };
+    crate::rules::apply_rules_to_transaction(&mut temp_tx, &rules);
+
+    let final_payee = temp_tx.payee;
+    let final_notes = temp_tx.notes;
+    let final_category = temp_tx.category;
+
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
     let total_price = shares * price_per_share;
-
-    // Investment Transaction Amount on the unified account
-    // Buy: Money leaves account -> -(Total + Fee)
-    // Sell: Money enters account -> (Total - Fee)
     let amount = if is_buy {
         -(total_price + fee)
     } else {
@@ -258,9 +312,9 @@ pub fn create_investment_transaction_db(
         params![
             account_id,
             date,
-            if is_buy { "Buy" } else { "Sell" }, // Payee as Buy/Sell
-            format!("{} {} shares of {}", if is_buy { "Bought" } else { "Sold" }, shares, ticker),
-            "Investment",
+            final_payee,
+            final_notes,
+            final_category,
             amount,
             ticker,
             investment_shares,
@@ -284,18 +338,9 @@ pub fn create_investment_transaction_db(
         id,
         account_id,
         date,
-        payee: if is_buy {
-            "Buy".to_string()
-        } else {
-            "Sell".to_string()
-        },
-        notes: Some(format!(
-            "{} {} shares of {}",
-            if is_buy { "Bought" } else { "Sold" },
-            shares,
-            ticker
-        )),
-        category: Some("Investment".to_string()),
+        payee: final_payee,
+        notes: final_notes,
+        category: final_category,
         amount,
         ticker: Some(ticker),
         shares: Some(investment_shares),

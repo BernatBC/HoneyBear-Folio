@@ -7,11 +7,16 @@ fn test_delete_rule() {
 
     let id = create_rule_db(
         &db_path,
-        10,
-        "payee".to_string(),
-        "Delete Me".to_string(),
-        "category".to_string(),
-        "N/A".to_string(),
+        crate::core::rules::CreateRuleDbParams {
+            priority: 10,
+            match_field: "payee".to_string(),
+            match_pattern: "Delete Me".to_string(),
+            action_field: "category".to_string(),
+            action_value: "N/A".to_string(),
+            logic: "and".to_string(),
+            conditions: vec![],
+            actions: vec![],
+        },
     )
     .unwrap();
 
