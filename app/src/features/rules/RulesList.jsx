@@ -336,18 +336,18 @@ export default function RulesList() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Conditions Section */}
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+              <div className="flex items-center gap-4 min-h-[40px]">
+                <h3 className="text-sm leading-6 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
                   {t("rules.conditions")}
                 </h3>
                 {formState.conditions.length > 1 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">{t("rules.logic")}:</span>
+                  <div className="flex items-center gap-2 whitespace-nowrap">
+                    <span className="text-xs text-slate-500 leading-5">{t("rules.logic")}:</span>
                     <CustomSelect
                       value={formState.logic}
                       onChange={(val) => setFormState((prev) => ({ ...prev, logic: val }))}
                       options={logicOptions}
-                      className="w-24"
+                      className="w-24 h-9"
                     />
                     <span className="text-xs text-slate-500">
                       ({formState.logic === "and" ? t("rules.all_conditions") : t("rules.any_condition")})
@@ -427,9 +427,11 @@ export default function RulesList() {
 
             {/* Actions Section */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                {t("rules.actions")}
-              </h3>
+              <div className="flex items-center gap-4 min-h-[40px]">
+                <h3 className="text-sm leading-6 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                  {t("rules.actions")}
+                </h3>
+              </div>
 
               {formState.actions.map((action, index) => {
                 const fieldType = getFieldType(action.field);
