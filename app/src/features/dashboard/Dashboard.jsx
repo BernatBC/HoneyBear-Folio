@@ -1103,7 +1103,7 @@ export default function Dashboard({
         },
       },
     };
-  }, [formatNumber, isDark, isPrivacyMode]);
+  }, [formatNumber, isDark]);
 
   const options = useMemo(
     () => ({

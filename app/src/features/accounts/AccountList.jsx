@@ -93,11 +93,6 @@ export default function AccountList({
           currency: account.currency || undefined,
         });
 
-        const formattedCash = formatNumber(cashBalance, {
-          style: "currency",
-          currency: account.currency || undefined,
-        });
-
         const finalFormattedTotal =
           formattedTotal === "NaN" ? "" : formattedTotal;
 

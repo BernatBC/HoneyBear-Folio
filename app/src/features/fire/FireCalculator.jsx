@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { useFormatNumber } from "../../utils/format";
 import MaskedNumber from "../../components/ui/MaskedNumber";
-import { usePrivacy } from "../../contexts/privacy";
 import useIsDark from "../../hooks/useIsDark";
 import { t } from "../../i18n/i18n";
 import {
@@ -74,7 +73,6 @@ export default function FireCalculator() {
   );
   const [loading, setLoading] = useState(!savedState);
   const isDark = useIsDark();
-  const { isPrivacyMode } = usePrivacy();
 
   // Track which fields the user has manually edited during the session so
   // computed backend updates don't overwrite them while the app is open. We
@@ -333,12 +331,6 @@ export default function FireCalculator() {
   ]);
 
   const formatNumber = useFormatNumber();
-  const formatCurrency = (val) =>
-    formatNumber(val, {
-      style: "currency",
-      maximumFractionDigits: 0,
-      minimumFractionDigits: 0,
-    });
 
   return (
     <div className="page-container fire-calculator-container">
