@@ -21,7 +21,7 @@ fn create_base_transaction() -> Transaction {
 #[test]
 fn test_rule_matching_and_logic() {
     let mut tx = create_base_transaction();
-    
+
     let rule = Rule {
         id: 1,
         priority: 10,
@@ -44,12 +44,10 @@ fn test_rule_matching_and_logic() {
                 negated: false,
             },
         ],
-        actions: vec![
-            RuleAction {
-                field: "category".to_string(),
-                value: "Food & Drink".to_string(),
-            },
-        ],
+        actions: vec![RuleAction {
+            field: "category".to_string(),
+            value: "Food & Drink".to_string(),
+        }],
     };
 
     apply_rules_to_transaction(&mut tx, &[rule]);
@@ -59,7 +57,7 @@ fn test_rule_matching_and_logic() {
 #[test]
 fn test_rule_matching_or_logic() {
     let mut tx = create_base_transaction(); // payee: Starbucks Coffee, amount: -5.50
-    
+
     let rule = Rule {
         id: 1,
         priority: 10,
@@ -82,12 +80,10 @@ fn test_rule_matching_or_logic() {
                 negated: false,
             },
         ],
-        actions: vec![
-            RuleAction {
-                field: "category".to_string(),
-                value: "Matched".to_string(),
-            },
-        ],
+        actions: vec![RuleAction {
+            field: "category".to_string(),
+            value: "Matched".to_string(),
+        }],
     };
 
     apply_rules_to_transaction(&mut tx, &[rule]);
@@ -97,7 +93,7 @@ fn test_rule_matching_or_logic() {
 #[test]
 fn test_rule_negated_condition() {
     let mut tx = create_base_transaction(); // payee: Starbucks Coffee
-    
+
     let rule = Rule {
         id: 1,
         priority: 10,
@@ -106,20 +102,16 @@ fn test_rule_negated_condition() {
         action_field: "".to_string(),
         action_value: "".to_string(),
         logic: "and".to_string(),
-        conditions: vec![
-            RuleCondition {
-                field: "payee".to_string(),
-                operator: "contains".to_string(),
-                value: "McDonalds".to_string(),
-                negated: true, // NOT McDonalds
-            },
-        ],
-        actions: vec![
-            RuleAction {
-                field: "category".to_string(),
-                value: "Not Fast Food".to_string(),
-            },
-        ],
+        conditions: vec![RuleCondition {
+            field: "payee".to_string(),
+            operator: "contains".to_string(),
+            value: "McDonalds".to_string(),
+            negated: true, // NOT McDonalds
+        }],
+        actions: vec![RuleAction {
+            field: "category".to_string(),
+            value: "Not Fast Food".to_string(),
+        }],
     };
 
     apply_rules_to_transaction(&mut tx, &[rule]);
@@ -129,7 +121,7 @@ fn test_rule_negated_condition() {
 #[test]
 fn test_multiple_actions() {
     let mut tx = create_base_transaction();
-    
+
     let rule = Rule {
         id: 1,
         priority: 10,
@@ -138,14 +130,12 @@ fn test_multiple_actions() {
         action_field: "".to_string(),
         action_value: "".to_string(),
         logic: "and".to_string(),
-        conditions: vec![
-            RuleCondition {
-                field: "payee".to_string(),
-                operator: "contains".to_string(),
-                value: "Starbucks".to_string(),
-                negated: false,
-            },
-        ],
+        conditions: vec![RuleCondition {
+            field: "payee".to_string(),
+            operator: "contains".to_string(),
+            value: "Starbucks".to_string(),
+            negated: false,
+        }],
         actions: vec![
             RuleAction {
                 field: "category".to_string(),
@@ -171,7 +161,7 @@ fn test_multiple_actions() {
 #[test]
 fn test_legacy_fallback() {
     let mut tx = create_base_transaction();
-    
+
     let rule = Rule {
         id: 1,
         priority: 10,
@@ -191,7 +181,7 @@ fn test_legacy_fallback() {
 #[test]
 fn test_priority_order() {
     let mut tx = create_base_transaction();
-    
+
     let rules = vec![
         Rule {
             id: 1,
@@ -225,15 +215,26 @@ fn test_priority_order() {
 #[test]
 fn test_operators() {
     let mut tx = create_base_transaction(); // payee: Starbucks Coffee, amount: -5.50
-    
+
     // Test greater_than (e.g. amount > -10)
     let rule_gt = Rule {
-        id: 1, priority: 10, match_field: "".to_string(), match_pattern: "".to_string(),
-        action_field: "".to_string(), action_value: "".to_string(), logic: "and".to_string(),
+        id: 1,
+        priority: 10,
+        match_field: "".to_string(),
+        match_pattern: "".to_string(),
+        action_field: "".to_string(),
+        action_value: "".to_string(),
+        logic: "and".to_string(),
         conditions: vec![RuleCondition {
-            field: "amount".to_string(), operator: "greater_than".to_string(), value: "-10".to_string(), negated: false,
+            field: "amount".to_string(),
+            operator: "greater_than".to_string(),
+            value: "-10".to_string(),
+            negated: false,
         }],
-        actions: vec![RuleAction { field: "category".to_string(), value: "Large enough".to_string() }],
+        actions: vec![RuleAction {
+            field: "category".to_string(),
+            value: "Large enough".to_string(),
+        }],
     };
     apply_rules_to_transaction(&mut tx, &[rule_gt]);
     assert_eq!(tx.category, Some("Large enough".to_string()));
@@ -241,12 +242,23 @@ fn test_operators() {
     // Test starts_with
     tx.category = None;
     let rule_sw = Rule {
-        id: 2, priority: 10, match_field: "".to_string(), match_pattern: "".to_string(),
-        action_field: "".to_string(), action_value: "".to_string(), logic: "and".to_string(),
+        id: 2,
+        priority: 10,
+        match_field: "".to_string(),
+        match_pattern: "".to_string(),
+        action_field: "".to_string(),
+        action_value: "".to_string(),
+        logic: "and".to_string(),
         conditions: vec![RuleCondition {
-            field: "payee".to_string(), operator: "starts_with".to_string(), value: "Star".to_string(), negated: false,
+            field: "payee".to_string(),
+            operator: "starts_with".to_string(),
+            value: "Star".to_string(),
+            negated: false,
         }],
-        actions: vec![RuleAction { field: "category".to_string(), value: "Starts with Star".to_string() }],
+        actions: vec![RuleAction {
+            field: "category".to_string(),
+            value: "Starts with Star".to_string(),
+        }],
     };
     apply_rules_to_transaction(&mut tx, &[rule_sw]);
     assert_eq!(tx.category, Some("Starts with Star".to_string()));
@@ -254,12 +266,23 @@ fn test_operators() {
     // Test ends_with
     tx.category = None;
     let rule_ew = Rule {
-        id: 3, priority: 10, match_field: "".to_string(), match_pattern: "".to_string(),
-        action_field: "".to_string(), action_value: "".to_string(), logic: "and".to_string(),
+        id: 3,
+        priority: 10,
+        match_field: "".to_string(),
+        match_pattern: "".to_string(),
+        action_field: "".to_string(),
+        action_value: "".to_string(),
+        logic: "and".to_string(),
         conditions: vec![RuleCondition {
-            field: "payee".to_string(), operator: "ends_with".to_string(), value: "Coffee".to_string(), negated: false,
+            field: "payee".to_string(),
+            operator: "ends_with".to_string(),
+            value: "Coffee".to_string(),
+            negated: false,
         }],
-        actions: vec![RuleAction { field: "category".to_string(), value: "Ends with Coffee".to_string() }],
+        actions: vec![RuleAction {
+            field: "category".to_string(),
+            value: "Ends with Coffee".to_string(),
+        }],
     };
     apply_rules_to_transaction(&mut tx, &[rule_ew]);
     assert_eq!(tx.category, Some("Ends with Coffee".to_string()));

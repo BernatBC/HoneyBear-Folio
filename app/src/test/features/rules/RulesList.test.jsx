@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import RulesList from "../../../features/rules/RulesList";
 import { invoke } from "@tauri-apps/api/core";
@@ -155,33 +161,56 @@ describe("RulesList", () => {
 
   it("reorders rules via drag and calls update_rules_order", async () => {
     const mockRules = [
-      { id: 1, priority: 2, match_field: "A", match_pattern: "a", action_field: "category", action_value: "c" },
-      { id: 2, priority: 1, match_field: "B", match_pattern: "b", action_field: "category", action_value: "d" },
+      {
+        id: 1,
+        priority: 2,
+        match_field: "A",
+        match_pattern: "a",
+        action_field: "category",
+        action_value: "c",
+      },
+      {
+        id: 2,
+        priority: 1,
+        match_field: "B",
+        match_pattern: "b",
+        action_field: "category",
+        action_value: "d",
+      },
     ];
     invoke.mockResolvedValueOnce(mockRules); // initial fetch
     render(<RulesList />);
 
     await waitFor(() => expect(screen.getByText(/"a"/)).toBeInTheDocument());
 
-    const rows = screen.getAllByRole('row');
-    const firstRow = rows.find((r) => r.getAttribute('data-index') === '0');
-    const secondRow = rows.find((r) => r.getAttribute('data-index') === '1');
+    const rows = screen.getAllByRole("row");
+    const firstRow = rows.find((r) => r.getAttribute("data-index") === "0");
+    const secondRow = rows.find((r) => r.getAttribute("data-index") === "1");
 
     // create a basic DataTransfer mock
     const dataTransfer = {
       data: {},
-      setData(key, value) { this.data[key] = value; },
-      getData(key) { return this.data[key]; },
-      effectAllowed: 'move',
+      setData(key, value) {
+        this.data[key] = value;
+      },
+      getData(key) {
+        return this.data[key];
+      },
+      effectAllowed: "move",
     };
 
     // drag the first row to position 1
     fireEvent.dragStart(firstRow, { dataTransfer });
-    fireEvent.dragEnter(secondRow, { dataTransfer, timeStamp: Date.now() + 100 });
+    fireEvent.dragEnter(secondRow, {
+      dataTransfer,
+      timeStamp: Date.now() + 100,
+    });
     fireEvent.dragEnd(firstRow, { dataTransfer });
 
     await waitFor(() => {
-      expect(invoke).toHaveBeenCalledWith("update_rules_order", { ruleIds: [2, 1] });
+      expect(invoke).toHaveBeenCalledWith("update_rules_order", {
+        ruleIds: [2, 1],
+      });
     });
   });
 
@@ -198,7 +227,9 @@ describe("RulesList", () => {
 
     render(<RulesList />);
 
-    await waitFor(() => expect(screen.getByText(/"Old Payee"/)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/"Old Payee"/)).toBeInTheDocument(),
+    );
 
     // Click edit and assert form populated
     const editBtn = screen.getByText("Edit").closest("button");
@@ -222,7 +253,11 @@ describe("RulesList", () => {
     await waitFor(() => {
       expect(invoke).toHaveBeenCalledWith(
         "update_rule",
-        expect.objectContaining({ id: 11, matchPattern: "New Payee", actionValue: "NewCat" }),
+        expect.objectContaining({
+          id: 11,
+          matchPattern: "New Payee",
+          actionValue: "NewCat",
+        }),
       );
     });
   });
@@ -267,7 +302,11 @@ describe("RulesList", () => {
     await waitFor(() => {
       expect(invoke).toHaveBeenCalledWith(
         "create_rule",
-        expect.objectContaining({ logic: "or", conditions: expect.any(Array), actions: expect.any(Array) }),
+        expect.objectContaining({
+          logic: "or",
+          conditions: expect.any(Array),
+          actions: expect.any(Array),
+        }),
       );
       const payload = invoke.mock.calls.find((c) => c[0] === "create_rule")[1];
       expect(payload.conditions.length).toBe(2);
@@ -283,9 +322,9 @@ describe("RulesList", () => {
     fireEvent.click(addAction);
     expect(screen.getAllByText("rules.then_set").length).toBe(2);
 
-    const removeActionBtn = within(screen.getAllByText("rules.then_set")[1].closest("div")).getByTitle(
-      "rules.remove_action",
-    );
+    const removeActionBtn = within(
+      screen.getAllByText("rules.then_set")[1].closest("div"),
+    ).getByTitle("rules.remove_action");
     fireEvent.click(removeActionBtn);
     expect(screen.getAllByText("rules.then_set").length).toBe(1);
   });
@@ -321,7 +360,10 @@ describe("RulesList", () => {
     await waitFor(() => {
       expect(invoke).toHaveBeenCalledWith(
         "create_rule",
-        expect.objectContaining({ matchPattern: 123.45, actions: expect.any(Array) }),
+        expect.objectContaining({
+          matchPattern: 123.45,
+          actions: expect.any(Array),
+        }),
       );
       // action values are stringified by the component
       const payload = invoke.mock.calls.find((c) => c[0] === "create_rule")[1];
@@ -358,14 +400,30 @@ describe("RulesList", () => {
 
   it("reorders rules via drag and calls update_rules_order with new order", async () => {
     const mockRules = [
-      { id: 1, priority: 2, match_field: "payee", match_pattern: "First", action_field: "category", action_value: "A" },
-      { id: 2, priority: 1, match_field: "payee", match_pattern: "Second", action_field: "category", action_value: "B" },
+      {
+        id: 1,
+        priority: 2,
+        match_field: "payee",
+        match_pattern: "First",
+        action_field: "category",
+        action_value: "A",
+      },
+      {
+        id: 2,
+        priority: 1,
+        match_field: "payee",
+        match_pattern: "Second",
+        action_field: "category",
+        action_value: "B",
+      },
     ];
     invoke.mockResolvedValueOnce(mockRules);
 
     render(<RulesList />);
 
-    await waitFor(() => expect(screen.getByText(/"First"/)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/"First"/)).toBeInTheDocument(),
+    );
 
     const row1 = screen.getByText(/"First"/).closest("tr");
     const row2 = screen.getByText(/"Second"/).closest("tr");
@@ -373,8 +431,12 @@ describe("RulesList", () => {
     // minimal DataTransfer stub
     const dt = {
       data: {},
-      setData(k, v) { this.data[k] = v; },
-      getData(k) { return this.data[k]; },
+      setData(k, v) {
+        this.data[k] = v;
+      },
+      getData(k) {
+        return this.data[k];
+      },
       dropEffect: "",
       effectAllowed: "move",
     };
@@ -385,7 +447,9 @@ describe("RulesList", () => {
     fireEvent.dragEnd(row1, { dataTransfer: dt });
 
     await waitFor(() => {
-      expect(invoke).toHaveBeenCalledWith("update_rules_order", { ruleIds: [2, 1] });
+      expect(invoke).toHaveBeenCalledWith("update_rules_order", {
+        ruleIds: [2, 1],
+      });
     });
   });
 });

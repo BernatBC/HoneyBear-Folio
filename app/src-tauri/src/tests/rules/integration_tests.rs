@@ -1,6 +1,6 @@
+use crate::models::{RuleAction, RuleCondition};
 use crate::tests::common::setup_db;
 use crate::{create_rule_db, create_transaction_db, CreateTransactionArgs};
-use crate::models::{RuleAction, RuleCondition};
 
 #[test]
 fn test_rule_application_during_transaction_creation() {
@@ -8,18 +8,26 @@ fn test_rule_application_during_transaction_creation() {
 
     // 1. Setup an account
     let conn = rusqlite::Connection::open(&db_path).unwrap();
-    conn.execute("INSERT INTO accounts (name, balance, currency) VALUES ('Test Account', 1000.0, 'USD')", []).unwrap();
-    let account_id: i32 = conn.query_row("SELECT id FROM accounts WHERE name = 'Test Account'", [], |row| row.get(0)).unwrap();
+    conn.execute(
+        "INSERT INTO accounts (name, balance, currency) VALUES ('Test Account', 1000.0, 'USD')",
+        [],
+    )
+    .unwrap();
+    let account_id: i32 = conn
+        .query_row(
+            "SELECT id FROM accounts WHERE name = 'Test Account'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
 
     // 2. Create a rule
-    let conditions = vec![
-        RuleCondition {
-            field: "payee".to_string(),
-            operator: "contains".to_string(),
-            value: "Starbucks".to_string(),
-            negated: false,
-        },
-    ];
+    let conditions = vec![RuleCondition {
+        field: "payee".to_string(),
+        operator: "contains".to_string(),
+        value: "Starbucks".to_string(),
+        negated: false,
+    }];
     let actions = vec![
         RuleAction {
             field: "category".to_string(),
@@ -42,7 +50,8 @@ fn test_rule_application_during_transaction_creation() {
             conditions,
             actions,
         },
-    ).unwrap();
+    )
+    .unwrap();
 
     // 3. Create a transaction that matches the rule
     let args = CreateTransactionArgs {
@@ -72,8 +81,18 @@ fn test_rule_precedence_in_db() {
 
     // 1. Setup account
     let conn = rusqlite::Connection::open(&db_path).unwrap();
-    conn.execute("INSERT INTO accounts (name, balance, currency) VALUES ('Test Account', 1000.0, 'USD')", []).unwrap();
-    let account_id: i32 = conn.query_row("SELECT id FROM accounts WHERE name = 'Test Account'", [], |row| row.get(0)).unwrap();
+    conn.execute(
+        "INSERT INTO accounts (name, balance, currency) VALUES ('Test Account', 1000.0, 'USD')",
+        [],
+    )
+    .unwrap();
+    let account_id: i32 = conn
+        .query_row(
+            "SELECT id FROM accounts WHERE name = 'Test Account'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
 
     // 2. Create two rules, one with higher priority
     // Rule 1: Lower priority (10)
@@ -86,10 +105,19 @@ fn test_rule_precedence_in_db() {
             action_field: "".to_string(),
             action_value: "".to_string(),
             logic: "and".to_string(),
-            conditions: vec![RuleCondition { field: "payee".to_string(), operator: "contains".to_string(), value: "Shop".to_string(), negated: false }],
-            actions: vec![RuleAction { field: "category".to_string(), value: "Shopping".to_string() }],
+            conditions: vec![RuleCondition {
+                field: "payee".to_string(),
+                operator: "contains".to_string(),
+                value: "Shop".to_string(),
+                negated: false,
+            }],
+            actions: vec![RuleAction {
+                field: "category".to_string(),
+                value: "Shopping".to_string(),
+            }],
         },
-    ).unwrap();
+    )
+    .unwrap();
 
     // Rule 2: Higher priority (20)
     create_rule_db(
@@ -101,10 +129,19 @@ fn test_rule_precedence_in_db() {
             action_field: "".to_string(),
             action_value: "".to_string(),
             logic: "and".to_string(),
-            conditions: vec![RuleCondition { field: "payee".to_string(), operator: "contains".to_string(), value: "Shop".to_string(), negated: false }],
-            actions: vec![RuleAction { field: "category".to_string(), value: "Supermarket".to_string() }],
+            conditions: vec![RuleCondition {
+                field: "payee".to_string(),
+                operator: "contains".to_string(),
+                value: "Shop".to_string(),
+                negated: false,
+            }],
+            actions: vec![RuleAction {
+                field: "category".to_string(),
+                value: "Supermarket".to_string(),
+            }],
         },
-    ).unwrap();
+    )
+    .unwrap();
 
     // 3. Create transaction
     let args = CreateTransactionArgs {

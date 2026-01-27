@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use tauri::AppHandle;
 
 /// Evaluates all rules against a transaction and applies the actions of matching rules.
-/// Rules are applied in reverse order of the slice (assuming input is priority DESC, 
+/// Rules are applied in reverse order of the slice (assuming input is priority DESC,
 /// we apply lowest priority first so highest priority wins).
 pub fn apply_rules_to_transaction(transaction: &mut Transaction, rules: &[Rule]) {
     for rule in rules.iter().rev() {
