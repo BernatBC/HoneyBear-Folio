@@ -536,7 +536,7 @@ function TreeMapNode({ items, x, y, w, h, totalValue, isDark }) {
           overflow: "hidden",
         }}
         className="flex flex-col items-center justify-center p-1 text-xs text-center transition-all hover:opacity-90 hover:z-10 hover:scale-[1.02] cursor-pointer"
-        title={`${item.ticker}: ${formatNumber(item.currentValue, { style: "currency", ignorePrivacy: true })} (${formatNumber(item.roi, { minimumFractionDigits: 2, maximumFractionDigits: 2, ignorePrivacy: true })}%)`}
+        title={`${item.ticker}: ${formatNumber(item.currentValue, { style: "currency" })} (${formatNumber(item.roi, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%)`}
       >
         <span className="font-bold" style={{ color: textColor }}>
           {item.ticker}

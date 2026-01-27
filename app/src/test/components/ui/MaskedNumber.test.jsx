@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import MaskedNumber from "../../../components/ui/MaskedNumber";
 import { usePrivacy } from "../../../contexts/privacy";
@@ -43,7 +43,7 @@ describe("MaskedNumber", () => {
     }
   });
 
-  it("renders a masked number with tooltip when privacy mode is on", () => {
+  it("reveals value on hover when privacy mode is on", () => {
     usePrivacy.mockReturnValue({ isPrivacyMode: true });
     
     // When privacy is on, formatNumber is called twice. 
@@ -64,8 +64,16 @@ describe("MaskedNumber", () => {
 
     const el = screen.getByText("****");
     expect(el).toBeInTheDocument();
-    expect(el).toHaveAttribute("title", "$1,234.56");
+    expect(el).not.toHaveAttribute("title"); // Should not have tooltip
     expect(el).toHaveClass("cursor-help");
+
+    // Simulate hover
+    fireEvent.mouseEnter(el);
+    expect(el).toHaveTextContent("$1,234.56");
+
+    // Simulate mouse leave
+    fireEvent.mouseLeave(el);
+    expect(el).toHaveTextContent("****");
   });
 
   it("passes className and other props to the span", () => {
@@ -104,6 +112,8 @@ describe("MaskedNumber", () => {
     expect(el).toHaveClass("text-blue-500");
     expect(el).toHaveClass("cursor-help");
     expect(el).toHaveTextContent("***");
-    expect(el).toHaveAttribute("title", "123");
+    
+    fireEvent.mouseEnter(el);
+    expect(el).toHaveTextContent("123");
   });
 });

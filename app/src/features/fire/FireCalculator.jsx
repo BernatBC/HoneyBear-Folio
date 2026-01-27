@@ -9,6 +9,8 @@ import {
   RotateCw,
 } from "lucide-react";
 import { useFormatNumber } from "../../utils/format";
+import MaskedNumber from "../../components/ui/MaskedNumber";
+import { usePrivacy } from "../../contexts/privacy";
 import useIsDark from "../../hooks/useIsDark";
 import { t } from "../../i18n/i18n";
 import {
@@ -72,6 +74,7 @@ export default function FireCalculator() {
   );
   const [loading, setLoading] = useState(!savedState);
   const isDark = useIsDark();
+  const { isPrivacyMode } = usePrivacy();
 
   // Track which fields the user has manually edited during the session so
   // computed backend updates don't overwrite them while the app is open. We
@@ -487,7 +490,14 @@ export default function FireCalculator() {
                   FIRE Number
                 </p>
                 <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">
-                  {formatCurrency(fireNumber)}
+                  <MaskedNumber
+                    value={fireNumber}
+                    options={{
+                      style: "currency",
+                      maximumFractionDigits: 0,
+                      minimumFractionDigits: 0,
+                    }}
+                  />
                 </p>
               </div>
               <div className="bg-blue-500 dark:bg-blue-600 p-4 rounded-2xl shadow-lg">
@@ -499,7 +509,7 @@ export default function FireCalculator() {
               <div>
                 <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">
                   Time to FIRE
-                </p>
+                </p><MaskedNumber value={yearsToFire} />
                 {neverReached ? (
                   <p className="text-xl font-medium text-emerald-900 dark:text-emerald-100">
                     {t("fire.never_retire")}
@@ -562,6 +572,7 @@ export default function FireCalculator() {
                           ) {
                             label += formatNumber(Number(value), {
                               style: "currency",
+                              ignorePrivacy: true
                             });
                           }
 
