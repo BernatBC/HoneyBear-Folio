@@ -48,6 +48,9 @@
     "homepage": "https://honeybearfolio.github.io",
     "category": "Finance",
     "linux": {
+      "appimage": {
+        "bundleMediaFramework": true
+      },
       "deb": {
         "depends": [
           "libwebkit2gtk-4.1-0",
@@ -55,7 +58,10 @@
           "librsvg2-2",
           "libgtk-3-0",
           "patchelf"
-        ]
+        ],
+        "files": {
+          "/usr/share/metainfo/com.honeybearfolio.honeybearfolio.metainfo.xml": "../flatpak/com.honeybearfolio.honeybearfolio.metainfo.xml"
+        }
       },
       "rpm": {
         "depends": [
@@ -64,7 +70,10 @@
           "librsvg2",
           "gtk3",
           "patchelf"
-        ]
+        ],
+        "files": {
+          "/usr/share/metainfo/com.honeybearfolio.honeybearfolio.metainfo.xml": "../flatpak/com.honeybearfolio.honeybearfolio.metainfo.xml"
+        }
       }
     }
   }

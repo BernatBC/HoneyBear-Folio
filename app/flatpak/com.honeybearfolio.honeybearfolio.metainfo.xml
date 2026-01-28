@@ -15,6 +15,20 @@
   <url type="repository">https://github.com/HoneyBearFolio/HoneyBear-Folio</url>
   <developer_name>HoneyBearFolio</developer_name>
   <content_rating type="oars-1.1" />
+  <screenshots>
+    <screenshot type="default">
+      <caption>Account overview with transaction history</caption>
+      <image type="source">https://raw.githubusercontent.com/HoneyBearFolio/HoneyBear-Folio/main/img/hbf_acount_1.JPG</image>
+    </screenshot>
+    <screenshot>
+      <caption>Dashboard with financial charts and summary</caption>
+      <image type="source">https://raw.githubusercontent.com/HoneyBearFolio/HoneyBear-Folio/main/img/hbf_dashboard_1.JPG</image>
+    </screenshot>
+    <screenshot>
+      <caption>Investment portfolio tracking</caption>
+      <image type="source">https://raw.githubusercontent.com/HoneyBearFolio/HoneyBear-Folio/main/img/hbf_investments_1.JPG</image>
+    </screenshot>
+  </screenshots>
   <releases>
     <release version="0.1.0" date="2026-01-03" />
   </releases>
