@@ -32,7 +32,7 @@ vi.mock("../../../hooks/useIsDark", () => ({
 }));
 
 vi.mock("../../../i18n/i18n", () => ({
-  t: (key) => {
+  t: (key, params) => {
     const map = {
       "fire.current_net_worth": "Current Net Worth",
       "fire.annual_expenses": "Annual Expenses",
@@ -40,8 +40,34 @@ vi.mock("../../../i18n/i18n", () => ({
       "fire.withdrawal_rate": "Safe Withdrawal Rate",
       "fire.annual_savings": "Annual Savings",
       "fire.fire_number": "FIRE Number",
+      "fire.time_to_fire": "Time to FIRE",
       "fire.years_to_fire": "Years to FIRE",
       "fire.age_at_fire": "Age at FIRE",
+      "fire.parameters": "Parameters",
+      "fire.reset": "Reset",
+      "fire.reset_tooltip": "Reset to defaults",
+      "fire.inflation": "Inflation Rate",
+      "fire.age_timeline": "Age & Timeline",
+      "fire.current_age": "Current Age",
+      "fire.target_retirement_age": "Target Retirement Age",
+      "fire.retirement_duration": "Retirement Duration",
+      "fire.years": "years",
+      "fire.show_advanced": "Show advanced parameters",
+      "fire.hide_advanced": "Hide advanced parameters",
+      "fire.advanced_description": "Monte Carlo simulation parameters",
+      "fire.return_volatility": "Return Volatility (Std Dev)",
+      "fire.volatility_hint": "Typical: 15-20% for stocks",
+      "fire.simulation_count": "Simulation Count",
+      "fire.simulation_count_hint": "100-10,000 simulations",
+      "fire.retirement_age": "Retirement Age",
+      "fire.age_value": `Age ${params?.age || ""}`,
+      "fire.success_rate": "Success Rate",
+      "fire.monte_carlo": "Monte Carlo",
+      "fire.projection": "Projection",
+      "fire.projection_subtitle": "Path to financial independence",
+      "fire.simulations_run": `${params?.count || ""} simulations`,
+      "fire.chart_legend_explanation": "Chart explanation",
+      "fire.never_retire": "Unlikely to reach FIRE",
     };
     return map[key] || key;
   },
@@ -59,6 +85,30 @@ vi.mock("../../../utils/investments", () => ({
   mergeHoldingsWithQuotes: () => [],
   computePortfolioTotals: () => ({ totalValue: 50000 }), // Default mocked net worth from portfolio
   computeNetWorthMarketValues: () => [],
+}));
+
+vi.mock("../../../utils/fire", () => ({
+  runMonteCarloSimulation: () => ({
+    successRate: 85,
+    percentiles: {
+      p10: Array(51).fill(100000),
+      p25: Array(51).fill(200000),
+      p50: Array(51).fill(500000),
+      p75: Array(51).fill(800000),
+      p90: Array(51).fill(1200000),
+    },
+    yearsToRetirement: 25,
+    totalYears: 55,
+    simulationCount: 1000,
+  }),
+  calculateDeterministicProjection: ({ annualExpenses, withdrawalRate }) => ({
+    fireNumber: annualExpenses / (withdrawalRate / 100),
+    yearsToFire: 15,
+    projectionData: Array(51)
+      .fill(0)
+      .map((_, i) => 50000 + i * 30000),
+    neverReached: false,
+  }),
 }));
 
 const renderWithContext = (ui) => {
