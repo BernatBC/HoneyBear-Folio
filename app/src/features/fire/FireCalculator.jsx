@@ -707,9 +707,7 @@ export default function FireCalculator() {
                     <NumberInput
                       value={currentAge}
                       onChange={(num) => {
-                        setCurrentAge(
-                          Number.isNaN(num) ? 0 : Math.round(num),
-                        );
+                        setCurrentAge(Number.isNaN(num) ? 0 : Math.round(num));
                         userModified.current.currentAge = true;
                       }}
                       className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600"

@@ -168,7 +168,8 @@ export function calculateDeterministicProjection({
   // The FIRE number should support expenses that grow with inflation
   // Compute the *real* withdrawal rate using the Fisher equation:
   // real_rate = (1 + nominal_rate) / (1 + inflation_rate) - 1
-  const realWithdrawalRateDecimal = (1 + withdrawalRate / 100) / (1 + inflation / 100) - 1;
+  const realWithdrawalRateDecimal =
+    (1 + withdrawalRate / 100) / (1 + inflation / 100) - 1;
 
   // If the real withdrawal rate is zero or negative, the FIRE number is effectively unreachable
   // (would require an infinite portfolio to sustainably withdraw today's expenses).
